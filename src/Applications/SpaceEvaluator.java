@@ -18,11 +18,12 @@ public class SpaceEvaluator implements Runnable {
 //    volatile boolean execute;
     ItemMovementsApp callerApp;
     static ExecutorService pool;
-    static int nThreads = 10;
+    static int nThreads = 3;
     static CompletionService<Boolean> completionService;
     Vector<CallableGroup> linkCallables;
     Vector<CallableItemGroup> itemCallables;
     private int eachCallableLen = 5;  // this many number of smaller tasks combined as one Callable task
+
 
     private SpaceEvaluator(ItemMovementsApp callerApp, boolean fresh) {
         super();
@@ -43,42 +44,90 @@ public class SpaceEvaluator implements Runnable {
         theEvaluator.fresh = fresh;
 //        theEvaluator.execute = true;
         theEvaluator.prepareLinkCallables();
-        theEvaluator.prepareItemCallables();
+//        theEvaluator.prepareItemCallables();
         return theEvaluator;
     }
+
+    CyclicBarrier startOneRound;
+    CyclicBarrier forcesReady;
+    CyclicBarrier roundComplete;
 
     private void prepareLinkCallables() {
         linkCallables.clear();
         int count = 0;
-        CallableGroup group = new CallableGroup();
+        int id = 0;
+        CallableGroup group = new CallableGroup(id++);
         boolean bFirstTime = true;
-//        boolean yetToSave = false;
         for (int l = 0 ; l < callerApp.nItemLinks(); l++) {
             if (count > eachCallableLen) {
                 if (!bFirstTime)
                     linkCallables.add(group);
-                group = new CallableGroup();
+                group = new CallableGroup(id++);
                 count = 0;
             }
             group.add(callerApp.getLinkEvalOnce(l));
             bFirstTime = false;
             count++;
         }
-//        if (yetToSave)
-            linkCallables.add(group);
+        linkCallables.add(group);
+        taskCount = linkCallables.size();
+        startOneRound = new CyclicBarrier(taskCount + 1);
+        forcesReady = new CyclicBarrier(taskCount + 1); // one for the 'this' thread
+        for (CallableGroup gr: linkCallables)
+            gr.setBarriers(startOneRound, forcesReady);
+        submitLinkTasks();
     }
+
+    public void resetStartBarrier() {
+        startOneRound.reset();
+    }
+
+    public void resetForceBarrier() {
+        forcesReady.reset();
+    }
+
+    public int awaitForceComplete()  {
+        int retVal;
+        try {
+            retVal = forcesReady.await();
+        } catch (InterruptedException e) {
+            ItemMovementsApp.log.error("In awaitForceComplete: " + e.getMessage());
+            retVal = -2;
+        } catch (BrokenBarrierException e) {
+            ItemMovementsApp.log.error("In awaitForceComplete: " + e.getMessage());
+            retVal = -1;
+        }
+        return retVal;
+    }
+
+
+    public int awaitStartBarrier()  {
+        int retVal;
+        try {
+            retVal = startOneRound.await();
+        } catch (InterruptedException e) {
+            ItemMovementsApp.log.error("In awaitStartBarrier in SpaceEvaluator: " + e.getMessage());
+            retVal = -2;
+        } catch (BrokenBarrierException e) {
+            ItemMovementsApp.log.error("In awaitStartBarrier in SpaceEvaluator: " + e.getMessage());
+            retVal = -1;
+        }
+        return retVal;
+    }
+
 
     private void prepareItemCallables() {
         itemCallables.clear();
         int count = 0;
-        CallableItemGroup group = new CallableItemGroup();
+        int id = 100;
+        CallableItemGroup group = new CallableItemGroup(id++);
         boolean bFirstTime = true;
 //        boolean yetToSave = false;
         for (int l = 0 ; l < callerApp.nItems(); l++) {
             if (count > eachCallableLen) {
                 if (!bFirstTime)
                     itemCallables.add(group);
-                group = new CallableItemGroup();
+                group = new CallableItemGroup(id++);
                 count = 0;
             }
             group.add(callerApp.getItemEvalOnce(l));
@@ -87,6 +136,13 @@ public class SpaceEvaluator implements Runnable {
         }
 //        if (yetToSave)
             itemCallables.add(group);
+    }
+
+    public void stopTasks() {
+        for (CallableGroup group: linkCallables)
+            group.stop();
+        for (CallableGroup group:itemCallables)
+            group.stop();
     }
 
     public static boolean closePool() {
@@ -121,6 +177,7 @@ public class SpaceEvaluator implements Runnable {
     public void submitLinkTasks() {
         for (CallableGroup  group: linkCallables)
             submit(group);
+
     }
 
     public void submitItemTasks(double deltaT, double nowT) {
@@ -144,8 +201,8 @@ public class SpaceEvaluator implements Runnable {
 
     public void run() {
         callerApp.debug("SpaceEvaluator started");
-//        callerApp.doCalculation(fresh);
-        callerApp.doCalculationFast(fresh);
+        callerApp.doCalculation(fresh);
+//        callerApp.doCalculationFast(fresh);
     }
 
     public void start() {
@@ -154,4 +211,3 @@ public class SpaceEvaluator implements Runnable {
         t.start ();
     }
 }
-

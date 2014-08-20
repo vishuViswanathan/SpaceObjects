@@ -4,7 +4,6 @@ import GeneralElements.Display.MotionDisplay;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.*;
-import GeneralElements.localActions.AreaV2Friction;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
 import display.InputControl;
@@ -34,7 +33,6 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.sql.*;
 import java.util.Calendar;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Created by M Viswanathan on 23 May 2014
@@ -472,7 +470,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         runIt = true;
         long lastStepNano = System.nanoTime();
         long nowStepNano, diffStepNano;
-        double count = 0;
         while (runIt && nowT < endT) {
             if (continueIt) {
                 try {
@@ -591,13 +588,14 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         lastTnano = nowTnano;
                     }
                 } catch (Exception e) {
-                    showError("Aborting in 'doCalculation(pool') at nowT = " + nowT + " due to :" + e.getMessage());
+                    showError("Aborting in 'doCalculationFast()' at nowT = " + nowT + " due to :" + e.getMessage());
                     runIt = false;
                 }
             }
         }
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
         orbitDisplay.resultsReady();
+        evaluator.stopTasks();
         enableButtons(true);
     }
 
@@ -987,7 +985,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 }
                 String fileName = fileDlg.getDirectory() + bareFile;
                 debug("Save Data file name :" + fileName);
-                File f = new File(fileName);
                 boolean goAhead = true;
                 if (goAhead) {
                     try {
@@ -1191,8 +1188,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     void debug(String msg) {
         log.debug(msg);
     }
-
-    int thCount = 0;
 
     public static void main(String[] args) {
         final ItemMovementsApp orbit = new ItemMovementsApp(true);

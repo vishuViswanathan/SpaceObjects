@@ -6,10 +6,8 @@ import Applications.SpaceEvaluator;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.link.Influence;
 import GeneralElements.link.ItemLink;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import display.InputControl;
 import display.MultiPairColPanel;
-import display.NumberTextField;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 import mvmath.DoubleMaxMin;
@@ -22,9 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.Vector;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Created by M Viswanathan on 23 May 2014
@@ -428,14 +423,24 @@ public class ItemSpace {
 
     void evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         initForces();
-        for (ItemLink inf: allItemLinks)
-            inf.evalForce();
+////        for (ItemLink inf: allItemLinks)
+////            inf.evalForce();
 //        evaluator.submitLinkTasks();
 //        if (evaluator.isComplete())
 //            updatePosAndVel(deltaT, nowT);
-        evaluator.submitItemTasks(deltaT, nowT);
-        evaluator.isComplete();
+////        evaluator.submitItemTasks(deltaT, nowT);
+////        evaluator.isComplete();
 
+        evaluator.resetForceBarrier();
+//        evaluator.startItemLinkGroups();
+//        System.out.println("ItemSpace before awaitStartBarrier");
+        evaluator.awaitStartBarrier(); // this should start the force calculations
+        evaluator.resetStartBarrier();
+//        System.out.println("ItemSpace before awaitForceComplete");
+        evaluator.awaitForceComplete();
+//        System.out.println("ItemSpace After awaitForceComplete");
+//        evaluator.resetStartBarrier();
+        updatePosAndVel(deltaT, nowT);
     }
 
     public void updateLinkDisplay() {

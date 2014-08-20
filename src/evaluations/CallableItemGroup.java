@@ -7,6 +7,10 @@ public class CallableItemGroup extends CallableGroup {
     double deltaT;
     double nowT;
 
+    public CallableItemGroup(int id) {
+        super(id);
+    }
+
     public void setTimes(double deltaT, double nowT) {
         this.deltaT = deltaT;
         this.nowT = nowT;
