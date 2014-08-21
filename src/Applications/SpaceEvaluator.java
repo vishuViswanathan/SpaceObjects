@@ -43,7 +43,7 @@ public class SpaceEvaluator implements Runnable {
             }
         theEvaluator.fresh = fresh;
 //        theEvaluator.execute = true;
-        theEvaluator.prepareLinkCallables();
+//        theEvaluator.prepareLinkCallables();
 //        theEvaluator.prepareItemCallables();
         return theEvaluator;
     }

@@ -639,9 +639,6 @@ public class Item implements InputControl, EvalOnce {
         isLightSrc = ena;
     }
 
-//
-
-
     //    =========================== calculations ======================
     public ItemStat getStatus() {
         return status;
@@ -673,8 +670,6 @@ public class Item implements InputControl, EvalOnce {
             e.printStackTrace();
         }
     }
-
-
 
     void  updatePosAndVel(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
