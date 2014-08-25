@@ -1,6 +1,7 @@
 package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import SpaceElements.time.DateAndJDN;
 import com.sun.j3d.utils.behaviors.mouse.MouseBehavior;
@@ -58,7 +59,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         jbInit();
     }
 
-    JPanel localViewP;
+    JPanel localViewPanel;
     SimpleUniverse univ;
 
 //    public void clearAll() {
@@ -81,11 +82,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         setJMenuBar(menuBar());
         setLayout(new BorderLayout());
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
-        Canvas3D canvas = new Canvas3D(config);
-        add(canvas, BorderLayout.CENTER);
-        localViewP = new FramedPanel(new BorderLayout());
-        localViewP.setPreferredSize(new Dimension(700, 700));
-        add(localViewP, BorderLayout.EAST);
+        mainCanvas = new Canvas3D(config);
+        add(mainCanvas, BorderLayout.CENTER);
+        localViewPanel = new FramedPanel(new BorderLayout());
+        localViewPanel.setPreferredSize(new Dimension(700, 700));
+        add(localViewPanel, BorderLayout.EAST);
         //----
         DoubleMaxMin xMaxMin = space.xMaxMin();
         DoubleMaxMin yMaxMin = space.yMaxMin();
@@ -103,16 +104,17 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         vTg.setTransform(t3);
         vTg.getTransform(defVPFtransform);
         addMouseAction(vTg);
-        Viewer viewer = new Viewer( canvas );
+        Viewer viewer = new Viewer( mainCanvas );
         viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
         if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
             viewer.getView().setFrontClipDistance(0.00001);
         univ = new SimpleUniverse(vPf, viewer );
-        addMouseAction(vPf, canvas);  //.getViewPlatformTransform());
+        addMouseAction(vPf, mainCanvas);  //.getViewPlatformTransform());
         BranchGroup scene;
         scene = createSceneGraph();
+        addLocalViewingPlatform(tgMain);
         univ.addBranchGraph(scene);
-        setPick(canvas, scene);
+        setPick(mainCanvas, scene);
     }
 
     OrbitBehavior vpOrbitBehavior;
@@ -434,6 +436,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return brGrpMain;
     }
 
+    Canvas3D mainCanvas;
+
     PickCanvas pickCanvas;
 
     void setPick(Canvas3D canvas, BranchGroup scene) {
@@ -520,35 +524,44 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     void showPlanet(ItemSphere p) {
-        p.planet.showLocalView(localViewP);
+//        p.planet.showLocalView(localViewPanel);
     }
 
     void showPlanet(ItemSphere p, int atX, int atY) {
-        p.planet.showLocalView(vPf, atX, atY, localViewP);
+//        p.planet.showLocalView(vPf, atX, atY, localViewPanel);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        pickCanvas.setShapeLocation(e);
-        PickResult result = pickCanvas.pickClosest();
-        Point3d pt = new Point3d();
-        if (result != null)   {
-            result.getClosestIntersection(pt);
-            boolean done = false;
-            Object  s = result.getNode(PickResult.SHAPE3D);
-            if (s != null)  {
-                if (s instanceof PathShape) {
-                    showPlanet(((PathShape)s).planet);
-                    debug("Selected via Path " + ((PathShape)s).planet.planet.name);
-                    done = true;
-                }
-            }
-            if (!done) {
-                Primitive p = (Primitive)result.getNode(PickResult.PRIMITIVE);
-                if (p != null) {
-                    if (p instanceof ItemSphere) {
-                        showPlanet((ItemSphere)p, e.getX(), e.getY());
-                        debug("Selected " + ((ItemSphere)p).planet.name);
+        if (e.getSource() == localViewCanvas) {
+            localVpOrbitBehavior.setEnable(true);
+            vpOrbitBehavior.setEnable(false);
+        }
+        else {
+            localVpOrbitBehavior.setEnable(false);
+            vpOrbitBehavior.setEnable(true);
+            pickCanvas.setShapeLocation(e);
+            PickResult result = pickCanvas.pickClosest();
+            Point3d pt = new Point3d();
+            if (result != null) {
+                result.getClosestIntersection(pt);
+                boolean done = false;
+//                Object s = result.getNode(PickResult.SHAPE3D);
+//                if (s != null) {
+//                    if (s instanceof PathShape) {
+//                        showPlanet(((PathShape) s).planet);
+//                        debug("Selected via Path " + ((PathShape) s).planet.planet.name);
+//                        done = true;
+//                    }
+//                }
+                if (!done) {
+                    Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
+                    if (p != null) {
+                        if (p instanceof ItemSphere) {
+                            showLocalView(((ItemSphere) p).planet, e.getX(), e.getY());
+//                                    showPlanet((ItemSphere) p, e.getX(), e.getY());
+                            debug("Selected " + ((ItemSphere) p).planet.name);
+                        }
                     }
                 }
             }
@@ -557,9 +570,16 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     @Override
     public void mousePressed(MouseEvent e) {
-        int butt = e.getButton();
-        if (butt == MouseEvent.BUTTON1) {
-            noteMouseSelObject(e);
+        if (e.getSource() == localViewCanvas) {
+            localVpOrbitBehavior.setEnable(true);
+            vpOrbitBehavior.setEnable(false);
+        }
+        else {
+            localVpOrbitBehavior.setEnable(false);
+            vpOrbitBehavior.setEnable(true);
+            int butt = e.getButton();
+            if (butt == MouseEvent.BUTTON1)
+                noteMouseSelObject(e);
         }
     }
 
@@ -571,6 +591,15 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     @Override
     public void mouseEntered(MouseEvent e) {
         //To change body of implemented methods use File | Settings | File Templates.
+//        Object src = e.getSource();
+//        if (src == localViewCanvas) {
+//            localVpOrbitBehavior.setEnable(true);
+//            vpOrbitBehavior.setEnable(false);
+//        }
+//        else if (src == mainCanvas) {
+//            localVpOrbitBehavior.setEnable(false);
+//            vpOrbitBehavior.setEnable(true);
+//        }
     }
 
     @Override
@@ -589,16 +618,143 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        int movement = e.getUnitsToScroll();
-        double factor = (movement > 0) ? 1.2: 1/1.2;
-        pickCanvas.setShapeLocation(e);
-        PickResult result = pickCanvas.pickClosest();
-        if (result != null)   {
+        if (e.getSource() == localViewCanvas) {
+            int movement = e.getUnitsToScroll();
+            double factor = (movement > 0) ? 1.1: 1/1.1;
+            Transform3D vpTr = new Transform3D();
+            localVp.getViewPlatformTransform().getTransform(vpTr);
+            Vector3d trans = new Vector3d();
+            vpTr.get(trans);
+            trans.scale(factor);
+            vpTr.setTranslation(trans);
+            localVp.getViewPlatformTransform().setTransform(vpTr);
+            updateViewDistanceUI(factor);
+        }
+        else {
+            int movement = e.getUnitsToScroll();
+            double factor = (movement > 0) ? 1.2 : 1 / 1.2;
+            pickCanvas.setShapeLocation(e);
+            PickResult result = pickCanvas.pickClosest();
+            if (result != null) {
 //            debug("pick result = "+ result);
-            PickIntersection pInter = result.getIntersection(0);
-            zoom(factor, pInter.getPointCoordinatesVW());
+                PickIntersection pInter = result.getIntersection(0);
+                zoom(factor, pInter.getPointCoordinatesVW());
+            }
         }
     }
+
+
+//    Transferred from ItemGraphics ========================
+    Canvas3D localViewCanvas;
+    ViewingPlatform localVp;
+    NumberLabel nlViewDistance;
+    JPanel jpViewDistance;
+    JLabel jlItemName;
+    double viewPosFromPlanet;
+    OrbitBehavior localVpOrbitBehavior;
+
+    public void addLocalViewingPlatform(TransformGroup trGrp) {
+        // create a Viewer and attach to its canvas
+        // a Canvas3D can only be attached to a single Viewer
+        GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
+        localViewCanvas = new Canvas3D(config);
+        localViewCanvas.addMouseWheelListener(this);
+        localViewCanvas.addMouseListener(this);
+        Viewer viewer = new Viewer(localViewCanvas);
+        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
+            viewer.getView().setBackClipDistance(10000);
+            viewer.getView().setFrontClipDistance(0.00001);
+        }
+        else {
+            viewer.getView().setBackClipDistance(1e22); //100 * viewPosFromPlanet);
+            viewer.getView().setFrontClipDistance(0.00001);
+
+        }
+
+        // create a ViewingPlatform with 1 TransformGroups above the ViewPlatform
+        localVp = new ViewingPlatform();
+        localVp.setNominalViewingTransform();
+        Transform3D t3 = new Transform3D();
+        viewer.setViewingPlatform(localVp);
+
+        BoundingSphere bounds =
+                new BoundingSphere(new Point3d(), 1e22);
+        // with left button pressed
+        localVpOrbitBehavior = new OrbitBehavior(localViewCanvas, OrbitBehavior.REVERSE_ROTATE);
+        localVpOrbitBehavior.setSchedulingBounds(bounds);
+        localVp.setViewPlatformBehavior(localVpOrbitBehavior);
+
+        localVpOrbitBehavior.setRotationCenter(new Point3d(0, 0, 0));  //-viewPosFromPlanet));
+        nlViewDistance = new NumberLabel(0, 150, "#,###");
+        jpViewDistance = new JPanel();
+        jpViewDistance.add(new JLabel("View Distance (km):"));
+        jpViewDistance.add(nlViewDistance);
+        jlItemName = new JLabel("Selected Item");
+        localViewPanel.add(jlItemName, BorderLayout.NORTH);
+        localViewPanel.add(localViewCanvas, BorderLayout.CENTER);
+        localViewPanel.add(jpViewDistance, BorderLayout.SOUTH);
+        localViewPanel.updateUI();
+    }
+
+    void updateViewDistanceUI(double factor) {
+        viewPosFromPlanet *= factor;
+        nlViewDistance.setData(viewPosFromPlanet / 1000);
+    }
+
+    Item lastItemWithLocalPlatform = null;
+    boolean bPlatformWasAttached = false;
+
+    private void attachPlatformToItem(Item item) {
+        if (bPlatformWasAttached)
+            lastItemWithLocalPlatform.detachPlatform();
+        item.attachPlatform(localVp);
+        lastItemWithLocalPlatform = item;
+        bPlatformWasAttached = true;
+    }
+
+
+    public void showLocalView(Item item, int atX, int atY) {
+        jlItemName.setText(item.name);
+        attachPlatformToItem(item);
+        viewPosFromPlanet = 4 * item.dia;
+        Transform3D mainVTr = new Transform3D();
+        vPf.getViewPlatformTransform().getTransform(mainVTr);
+
+        Point3d eyePosINViewPlate= new Point3d();
+        Viewer[] viewers = vPf.getViewers();
+        Canvas3D canvas = viewers[0].getCanvas3D();
+        canvas.getCenterEyeInImagePlate(eyePosINViewPlate);
+        double midX = eyePosINViewPlate.x;
+        double midY = eyePosINViewPlate.y;
+
+        Point3d planetPosOnPlate = new Point3d();
+        canvas.getPixelLocationInImagePlate(atX, atY, planetPosOnPlate);
+
+        double angleY = Math.atan2((midX - planetPosOnPlate.x), eyePosINViewPlate.z);
+        double angleX = Math.atan2((midY - planetPosOnPlate.y), eyePosINViewPlate.z);
+        Transform3D rotX = new Transform3D();
+        rotX.rotX(-angleX);
+        Transform3D rotY = new Transform3D();
+        rotY.rotY(angleY);
+        mainVTr.mul(rotY);
+        mainVTr.mul(rotX);
+
+        Vector3d eye = new Vector3d();
+        mainVTr.get(eye);
+
+        Vector3d diff = new Vector3d(eye);
+        diff.sub(item.status.pos);
+        double planetFromEye = diff.length();
+        double factor = viewPosFromPlanet / planetFromEye;
+        diff.scale(factor);
+        Transform3D localVpt = new Transform3D(mainVTr);
+        localVpt.setTranslation(diff);
+        localVp.getViewPlatformTransform().setTransform(localVpt);
+        updateViewDistanceUI(1.0);
+    }
+
+
+//  ===============================      Transferred from ItemGraphics
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
     DecimalFormat nowTfmt = new DecimalFormat("#,###.000000");

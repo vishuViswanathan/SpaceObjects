@@ -46,116 +46,11 @@ public class ItemGraphic {
         this.item = item;
     }
 
-    public void addLocalViewingPlatform() {
-        // create a Viewer and attach to its canvas
-        // a Canvas3D can only be attached to a single Viewer
-        GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
-        localVewCanvas = new Canvas3D(config);
-        localVewCanvas.addMouseWheelListener(new WheelListener());
-        viewPosFromPlanet = 4 * item.dia * viewScale;
-
-        Viewer viewer = new Viewer(localVewCanvas);
-        viewer.getView().setBackClipDistance(1e22); //100 * viewPosFromPlanet);
-        viewer.getView().setFrontClipDistance(0.00001);
-
-        // create a ViewingPlatform with 1 TransformGroups above the ViewPlatform
-        localVp = new ViewingPlatform();
-        localVp.setNominalViewingTransform();
-        Transform3D t3 = new Transform3D();
-        viewer.setViewingPlatform(localVp);
-
-        BoundingSphere bounds =
-                new BoundingSphere(new Point3d(), 1e22);
-        // with left button pressed
-        vpOrbitBehavior = new OrbitBehavior(localVewCanvas, OrbitBehavior.REVERSE_ROTATE);
-        vpOrbitBehavior.setSchedulingBounds(bounds);
-        localVp.setViewPlatformBehavior(vpOrbitBehavior);
-
-        vpOrbitBehavior.setRotationCenter(new Point3d(0, 0, 0));  //-viewPosFromPlanet));
-        localVp.getViewPlatformTransform().getTransform(t3);
-        t3.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
-        localVp.getViewPlatformTransform().setTransform(t3);
-
-        positionTrGrp.addChild(localVp);
-        nlViewDistance = new NumberLabel(0, 150, "#,###");
-        jpViewDistance = new JPanel();
-        jpViewDistance.add(new JLabel("View Distance (km):"));
-        jpViewDistance.add(nlViewDistance);
-        updateViewDistanceUI(1.0);
-    }
-
-    void updateViewDistanceUI(double factor) {
-        viewPosFromPlanet *= factor;
-        nlViewDistance.setData(viewPosFromPlanet / 1000);
-
-//        Transform3D vpTr = new Transform3D();
-//        localVp.getViewPlatformTransform().getTransform(vpTr);
-//        Vector3d trans = new Vector3d();
-//        vpTr.get(trans);
-//        trans.scale(factor);
-//        vpTr.setTranslation(trans);
-//        localVp.getViewPlatformTransform().setTransform(vpTr);
-
-    }
-
-    public void showLocalView(JPanel jp) {
-        putItOnPanel(jp);
-    }
-
-    public void showLocalView(ViewingPlatform mainView, int atX, int atY, JPanel jp) {
-        viewPosFromPlanet = 4 * item.dia * viewScale;
-        Transform3D mainVTr = new Transform3D();
-        mainView.getViewPlatformTransform().getTransform(mainVTr);
-
-        Point3d eyePosINViewPlate= new Point3d();
-        Viewer[] viewers = mainView.getViewers();
-        Canvas3D canvas = viewers[0].getCanvas3D();
-        canvas.getCenterEyeInImagePlate(eyePosINViewPlate);
-        double midX = eyePosINViewPlate.x;
-        double midY = eyePosINViewPlate.y;
-
-        Point3d planetPosOnPlate = new Point3d();
-        canvas.getPixelLocationInImagePlate(atX, atY, planetPosOnPlate);
-
-        double angleY = Math.atan2((midX - planetPosOnPlate.x), eyePosINViewPlate.z);
-        double angleX = Math.atan2((midY - planetPosOnPlate.y), eyePosINViewPlate.z);
-        Transform3D rotX = new Transform3D();
-        rotX.rotX(-angleX);
-        Transform3D rotY = new Transform3D();
-        rotY.rotY(angleY);
-        mainVTr.mul(rotY);
-        mainVTr.mul(rotX);
-
-        Vector3d eye = new Vector3d();
-        mainVTr.get(eye);
-
-        Vector3d diff = new Vector3d(eye);
-        diff.sub(item.status.pos);
-        double planetFromEye = diff.length();
-        double factor = viewPosFromPlanet / planetFromEye;
-        diff.scale(factor);
-        Transform3D localVpt = new Transform3D(mainVTr);
-        localVpt.setTranslation(diff);
-        localVp.getViewPlatformTransform().setTransform(localVpt);
-        updateViewDistanceUI(1.0);
-        putItOnPanel(jp);
-    }
-
-    void putItOnPanel(JPanel jp) {
-        jp.removeAll();
-        jp.add(new JLabel(item.name), BorderLayout.NORTH);
-        jp.add(localVewCanvas, BorderLayout.CENTER);
-        jp.add(jpViewDistance, BorderLayout.SOUTH);
-        jp.updateUI();
-
-    }
-
      public void addObjectAndOrbit(Group grp, RenderingAttributes orbitAtrib) throws Exception{
         createSphereAndOrbitPath(orbitAtrib);
         for (PathShape os: orbitShapes)
             grp.addChild(os);
         grp.addChild(positionTrGrp);
-        addLocalViewingPlatform();
     }
 
 
@@ -167,8 +62,25 @@ public class ItemGraphic {
         viewScale = scale;
     }
 
+    public void attachPlatform(ViewingPlatform platform) {
+        attachedPlaform = platform;
+        positionTrGrp.addChild(attachedPlaform);
+        bPlatformAttached = true;
+    }
+
+    ViewingPlatform attachedPlaform;
+    boolean bPlatformAttached = false;
+
+    public void detachPlatform() {
+        if (bPlatformAttached)
+            positionTrGrp.removeChild(attachedPlaform);
+        bPlatformAttached = false;
+    }
+
     private void createSphereAndOrbitPath(RenderingAttributes orbitAtrib) throws Exception {
         positionTrGrp = new TransformGroup();
+        positionTrGrp.setCapability(Group.ALLOW_CHILDREN_WRITE);
+        positionTrGrp.setCapability(Group.ALLOW_CHILDREN_EXTEND);
         trgAxis  = new TransformGroup();
         tgPlanet = new TransformGroup();
         tgPlanet.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
@@ -264,22 +176,6 @@ public class ItemGraphic {
             rotZ.rotZ(spinIncrement);
             rotTr.mul(rotZ);
             trgRotation.setTransform(rotTr);
-        }
-    }
-
-    class WheelListener implements MouseWheelListener {
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-            int movement = e.getUnitsToScroll();
-            double factor = (movement > 0) ? 1.1: 1/1.1;
-            Transform3D vpTr = new Transform3D();
-            localVp.getViewPlatformTransform().getTransform(vpTr);
-            Vector3d trans = new Vector3d();
-            vpTr.get(trans);
-            trans.scale(factor);
-            vpTr.setTranslation(trans);
-            localVp.getViewPlatformTransform().setTransform(vpTr);
-            updateViewDistanceUI(factor);
         }
     }
 

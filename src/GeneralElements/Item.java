@@ -38,7 +38,7 @@ import java.util.Vector;
  */
 public class Item implements InputControl, EvalOnce {
     Window parentW;
-    Vector <ItemLink> links;
+    Vector<ItemLink> links;
     ItemSpace space;
     public ItemStat status;
     boolean bFixedLocation = false;
@@ -72,13 +72,14 @@ public class Item implements InputControl, EvalOnce {
 
     public double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
+
     public Item(Window parent) {
         this.parentW = parent;
         links = new Vector<ItemLink>();
         localActions = new Vector<LocalAction>();
     }
 
-    public Item (String name, double mass, double dia, Color color, Window parent)  {
+    public Item(String name, double mass, double dia, Color color, Window parent) {
         this(parent);
         this.name = name;
         this.mass = mass;
@@ -129,9 +130,9 @@ public class Item implements InputControl, EvalOnce {
     public JPanel dataPanel(int objNum) {
         JPanel outerPan = new JPanel(new BorderLayout());
         MultiPairColPanel jp = new MultiPairColPanel("Data of Item " + objNum);
-        tfName = new JTextField(name, 8);
+        tfName = new JTextField(name, 10);
         jp.addItemPair("Object Name", tfName);
-        ntMass = new NumberTextField(this, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg") ;
+        ntMass = new NumberTextField(this, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
         jp.addItemPair(ntMass);
         ntDia = new NumberTextField(this, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
         jp.addItemPair(ntDia);
@@ -156,7 +157,7 @@ public class Item implements InputControl, EvalOnce {
         jp.addItemPair("Position in m", jpPos);
         jp.addItemPair("", rbFixedPos);
         JPanel jpVel = new JPanel(new BorderLayout());
-        velTuplePan = new TuplePanel(this, status.velocity, 8, -1e20, 1e20,"##0.#####E00", "Velocity im m/s" );
+        velTuplePan = new TuplePanel(this, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
         jpVel.add(velTuplePan, BorderLayout.CENTER);
         jp.addItemPair("Velocity in m/s", jpVel);
         rbFixedAccOn.setSelected(bFixedForceOn);
@@ -169,8 +170,8 @@ public class Item implements InputControl, EvalOnce {
         jp.addItemPair("", rbFixedAccOn);
         outerPan.add(jp, BorderLayout.WEST);
 //        JPanel jpFixedAcc = new JPanel(new BorderLayout());
-        fixedAccVectPan = new TuplePanel(this, dirOfFixedGravityAcc, 8, -100, 100,"##0.#####E00", "Direction of Acc Vector");
-        ntFixedAcc = new NumberTextField(this, fixedAcc, 8, false, 0, 2000,"##0.#####E00", "Fixed Acc in m/s2");
+        fixedAccVectPan = new TuplePanel(this, dirOfFixedGravityAcc, 8, -100, 100, "##0.#####E00", "Direction of Acc Vector");
+        ntFixedAcc = new NumberTextField(this, fixedAcc, 8, false, 0, 2000, "##0.#####E00", "Fixed Acc in m/s2");
         checkFixedAcc();
         jp.addItemPair(ntFixedAcc);
         jp.addItemPair("Direction of Acc", fixedAccVectPan);
@@ -217,6 +218,7 @@ public class Item implements InputControl, EvalOnce {
         TuplePanel relPosPan, relVelPan;
         InputControl inpC;
         JComboBox<Object> othersCB;
+
         RelativeDlg(InputControl inpC) {
             this.inpC = inpC;
             dbInit();
@@ -228,10 +230,10 @@ public class Item implements InputControl, EvalOnce {
             MultiPairColPanel jp = new MultiPairColPanel("Relative Data of SpaceObject");
             othersCB = new JComboBox<Object>(space.getAllItems().toArray());
             jp.addItemPair(new JLabel("Relative to "), othersCB);
-            relPosPan = new TuplePanel(inpC, tupRelPos, 8, -1e20, 1e20,"##0.#####E00", "Relative position in m");
+            relPosPan = new TuplePanel(inpC, tupRelPos, 8, -1e20, 1e20, "##0.#####E00", "Relative position in m");
             jp.addItemPair("position in m", relPosPan);
             if (!bFixedLocation) {
-                relVelPan = new TuplePanel(inpC, tupRelVel, 8, -1e20, 1e20,"##0.#####E00", "Relative Velocity in m");
+                relVelPan = new TuplePanel(inpC, tupRelVel, 8, -1e20, 1e20, "##0.#####E00", "Relative Velocity in m");
                 jp.addItemPair("Velocity in m/s", relVelPan);
             }
             ActionListener li = new ActionListener() {
@@ -241,7 +243,7 @@ public class Item implements InputControl, EvalOnce {
                         takeValuesFromUI();
                         closeThisWindow();
 
-                    } else  {
+                    } else {
                         closeThisWindow();
                     }
                 }
@@ -288,15 +290,14 @@ public class Item implements InputControl, EvalOnce {
         if (bFixedForceOn) {
             Tuple3d accTuple = fixedAccVectPan.getTuple3d();
             if (accTuple != null)
-               dirOfFixedGravityAcc.set(accTuple);
+                dirOfFixedGravityAcc.set(accTuple);
             double vecLen = dirOfFixedGravityAcc.length();
             if (vecLen > 0) {
                 fixedAcc = ntFixedAcc.getData();
-                dirOfFixedGravityAcc.scale(1/vecLen);
+                dirOfFixedGravityAcc.scale(1 / vecLen);
                 forceOfFixedGravity = new Vector3d(dirOfFixedGravityAcc);
                 forceOfFixedGravity.scale(mass * fixedAcc);
-            }
-            else {
+            } else {
                 bFixedForceOn = false;
                 ItemMovementsApp.log.error("Acc Vector Length is < 0 [" + vecLen);
             }
@@ -334,7 +335,7 @@ public class Item implements InputControl, EvalOnce {
         links.add(itemLink);
     }
 
-    public boolean removeInfluence(ItemLink itemLink){
+    public boolean removeInfluence(ItemLink itemLink) {
         return links.remove(itemLink);
     }
 
@@ -346,7 +347,7 @@ public class Item implements InputControl, EvalOnce {
         this.space = space;
     }
 
-     public void initPosEtc(Point3d pos, Vector3d velocity) {
+    public void initPosEtc(Point3d pos, Vector3d velocity) {
         status.initPos(pos, velocity);
         nextReport = reportInterval;
     }
@@ -611,7 +612,7 @@ public class Item implements InputControl, EvalOnce {
 
     WeakReference<ItemGraphic> itemGraphic;
 
-    public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception{
+    public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
         ItemGraphic itemG = new ItemGraphic(this);
         itemG.addObjectAndOrbit(grp, orbitAtrib);
         itemGraphic = null;
@@ -619,21 +620,29 @@ public class Item implements InputControl, EvalOnce {
         return itemG;
     }
 
+    public void attachPlatform(ViewingPlatform platform) {
+        itemGraphic.get().attachPlatform(platform);
+    }
+
+    public void detachPlatform() {
+        itemGraphic.get().detachPlatform();
+    }
+
     public void showLocalView(ViewingPlatform mainView, int atX, int atY, JPanel jp) {
-        itemGraphic.get().showLocalView(mainView, atX, atY, jp);
+//        itemGraphic.get().showLocalView(mainView, atX, atY, jp);
     }
 
     public void showLocalView(JPanel jp) {
-        itemGraphic.get().showLocalView(jp);
+//        itemGraphic.get().showLocalView(jp);
     }
 
-    public void setScale (double scale) {
+    public void setScale(double scale) {
         itemGraphic.get().setScale(scale);
     }
 
-    public void updateOrbitAndPos() throws Exception{
+    public void updateOrbitAndPos() throws Exception {
         itemGraphic.get().updateOrbitAndPos(getSpinIncrement());
-     }
+    }
 
     public void enableLightSrc(boolean ena) {
         isLightSrc = ena;
@@ -649,7 +658,7 @@ public class Item implements InputControl, EvalOnce {
             force.set(forceOfFixedGravity);
         else
             force.set(0, 0, 0);
-        for (LocalAction action:localActions)
+        for (LocalAction action : localActions)
             force.add(action.getForce());
     }
 
@@ -659,10 +668,11 @@ public class Item implements InputControl, EvalOnce {
 
     // dummy not used
     @Override
-    public void evalOnce() {}
+    public void evalOnce() {
+    }
 
     @Override
-    public void evalOnce(double deltaT, double nowT){
+    public void evalOnce(double deltaT, double nowT) {
         try {
             updatePosAndVel(deltaT, nowT);
         } catch (Exception e) {
@@ -671,7 +681,7 @@ public class Item implements InputControl, EvalOnce {
         }
     }
 
-    void  updatePosAndVel(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
+    void updatePosAndVel(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
             Vector3d thisAcc = new Vector3d(force);
             thisAcc.scale((1.0 / mass));
@@ -695,7 +705,7 @@ public class Item implements InputControl, EvalOnce {
         }
     }
 
-    void  updatePosAndVelOLD(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
+    void updatePosAndVelOLD(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
             Vector3d thisAcc = new Vector3d(force);
             thisAcc.scale((1.0 / mass));
@@ -756,19 +766,19 @@ public class Item implements InputControl, EvalOnce {
     }
 
 
-/*
-    double fixedAcc = 9.81; // fixed acceleration value
-    Vector3d forceOfFixedGravity;
-    JRadioButton rbFixedAccOn;
-    double xMax, yMax, zMax;
-    double xMin, yMin, zMin;
-    Vector3d force = new Vector3d();
-    AxisAngle4d spinAxis; // absolute
-    double spinPeriod; // in hours
-    public Color color;
-    public String imageName;
+    /*
+        double fixedAcc = 9.81; // fixed acceleration value
+        Vector3d forceOfFixedGravity;
+        JRadioButton rbFixedAccOn;
+        double xMax, yMax, zMax;
+        double xMin, yMin, zMin;
+        Vector3d force = new Vector3d();
+        AxisAngle4d spinAxis; // absolute
+        double spinPeriod; // in hours
+        public Color color;
+        public String imageName;
 
- */
+     */
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("mass", mass)).append(XMLmv.putTag("dia", dia));
@@ -777,13 +787,13 @@ public class Item implements InputControl, EvalOnce {
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
         if (bFixedForceOn) {
 
-        xmlStr.append(XMLmv.putTag("dirOfFixedGravityAcc", dirOfFixedGravityAcc.dataInCSV())).
-                append(XMLmv.putTag("fixedAcc", fixedAcc));
-    }
+            xmlStr.append(XMLmv.putTag("dirOfFixedGravityAcc", dirOfFixedGravityAcc.dataInCSV())).
+                    append(XMLmv.putTag("fixedAcc", fixedAcc));
+        }
         return xmlStr;
     }
 
-    public boolean takeFromXMl(String xmlStr) throws NumberFormatException{
+    public boolean takeFromXMl(String xmlStr) throws NumberFormatException {
         boolean retVal = true;
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "name", 0);
