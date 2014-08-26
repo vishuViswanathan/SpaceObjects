@@ -546,14 +546,14 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             if (result != null) {
                 result.getClosestIntersection(pt);
                 boolean done = false;
-//                Object s = result.getNode(PickResult.SHAPE3D);
-//                if (s != null) {
-//                    if (s instanceof PathShape) {
-//                        showPlanet(((PathShape) s).planet);
-//                        debug("Selected via Path " + ((PathShape) s).planet.planet.name);
-//                        done = true;
-//                    }
-//                }
+                Object s = result.getNode(PickResult.SHAPE3D);
+                if (s != null) {
+                    if (s instanceof PathShape) {
+                        showLocalView(((PathShape) s).planet.planet);
+                        debug("Selected via Path " + ((PathShape) s).planet.planet.name);
+                        done = true;
+                    }
+                }
                 if (!done) {
                     Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
                     if (p != null) {
@@ -643,7 +643,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         }
     }
 
-
 //    Transferred from ItemGraphics ========================
     Canvas3D localViewCanvas;
     ViewingPlatform localVp;
@@ -712,6 +711,18 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         bPlatformWasAttached = true;
     }
 
+    public void showLocalView(Item item) {
+        jlItemName.setText(item.name);
+        attachPlatformToItem(item);
+        viewPosFromPlanet = 4 * item.dia;
+        localVp.setNominalViewingTransform();
+        Transform3D defaultTr = new Transform3D();
+        localVp.getViewPlatformTransform().getTransform(defaultTr);
+        defaultTr.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
+        localVp.getViewPlatformTransform().setTransform(defaultTr);
+
+        updateViewDistanceUI(1.0);
+    }
 
     public void showLocalView(Item item, int atX, int atY) {
         jlItemName.setText(item.name);
@@ -752,7 +763,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         localVp.getViewPlatformTransform().setTransform(localVpt);
         updateViewDistanceUI(1.0);
     }
-
 
 //  ===============================      Transferred from ItemGraphics
 
