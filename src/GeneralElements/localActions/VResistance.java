@@ -15,14 +15,13 @@ public class VResistance extends LocalAction {
 
 
     public VResistance(Item item, double factor) {
-        super(item);
+        super(Type.FLUIDRESISTANCE, item);
         this.factor = factor;
-        type = Type.FLUIDRESISTANCE;
         evalAreas();
     }
 
     public VResistance(Item item, String xmlStr) throws Exception {
-        super(item);
+        super(Type.FLUIDRESISTANCE, item);
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "factor", 0);
         try {

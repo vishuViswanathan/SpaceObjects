@@ -4,6 +4,7 @@ import GeneralElements.Display.MotionDisplay;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.*;
+import GeneralElements.localActions.FixedAcceleration;
 import GeneralElements.localActions.V2Resistance;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
@@ -274,7 +275,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             space.addItem(itBall);
             y = - Math.sqrt(Math.pow(len, 2) - Math.pow(x, 2));
             itBall.initPosEtc(new Point3d(x, y, z), new Vector3d(0, 0, 0));
-            itBall.setbFixedForceOn(true);
+//            itBall.setbFixedForceOn(true);
+            itBall.addLocalAction(new FixedAcceleration(itBall, new Vector3d(0, -1, 0), 9.81));
             itBall.addLocalAction(new V2Resistance(itBall, 10));
 
             link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k) , space);

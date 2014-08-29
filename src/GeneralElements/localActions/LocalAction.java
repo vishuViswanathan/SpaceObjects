@@ -13,7 +13,8 @@ public class LocalAction {
     static public enum Type {
         FLUIDFRICTION("FluidFriction"),
         FLUIDRESISTANCE("FluidResistance"),
-        ITEMELASTICITY("ItemElasticity");
+        ITEMELASTICITY("ItemElasticity"),
+        FIXEDACCELERATION("FixedAccel");
 
         private final String actionName;
 
@@ -45,7 +46,8 @@ public class LocalAction {
     }
     Item item;
     Type type;
-    public LocalAction(Item item) {
+    public LocalAction(Type type, Item item) {
+        this.type = type;
         this.item = item;
     }
 

@@ -1,5 +1,6 @@
 package mvUtils;
 
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 /**
@@ -18,6 +19,10 @@ public class Vector3dMV extends Vector3d {
     public Vector3dMV(String strCSV) throws NumberFormatException {
         super();
         set(strCSV);
+    }
+
+    public Vector3dMV(Tuple3d tuple) {
+        super(tuple);
     }
 
     public void set(String strCSV) throws NumberFormatException {
