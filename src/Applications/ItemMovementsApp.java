@@ -20,6 +20,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import schemes.*;
 
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
@@ -124,7 +125,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         duration = 200000;
                         calculationStep = 2; // s
                         refreshInterval = 100 * calculationStep;
-                        if (getPlanetsFromDB()) {
+                        DefaultScheme  scheme = new PlanetsAndMoons();
+                        if (scheme.getScheme(mainF, space)) {
+                            dateAndJDN = new DateAndJDN(scheme.startJDN());
+//                        if (getPlanetsFromDB()) {
 //                            space.setGravityLinks();
 //                            space.enableGlobalGravity(true);
                             proceedToItemList(false);
@@ -135,10 +139,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     case DAILY:
                         duration = 200;
                         calculationStep = 0.000002;
-                        refreshInterval = 10000 * calculationStep;
+                        refreshInterval = 20000 * calculationStep;
                         space.enableGlobalGravity(false);
-//                        if (getTestData()) {
-                        if (getMultiPendulum())  {
+                        if ((new BungeeJumping()).getScheme(mainF, space)) {
+//                        if ((new ChainWithBall()).getScheme(mainF, space)) {
+//                        if (getMultiPendulum())  {
+//                            if ((new MultiPendulum()).getScheme(mainF, space))  {
 //                            log.info(space.getOneItem(0).dataInXML());
 //                            log.info(space.getOneItem(1).dataInXML());
 //                           space.setGravityLinks();
@@ -184,179 +190,110 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         mainF.setVisible(true);
     }
 
-    BufferedOutputStream[] inputSummaryFiles;
-    String[] inputJDNs;
+//    BufferedOutputStream[] inputSummaryFiles;
+//    String[] inputJDNs;
 
-    boolean addToInputFiles(String objName, String[] splitStr){
-        boolean allOk = true;
-        if (createInputSummary && splitStr.length == 33) {
-            if (inputJDNs == null) {
-                inputJDNs = new String[3];
-                inputSummaryFiles = new BufferedOutputStream[3];
-                for (int j = 0; j < 3; j++) {
-                    inputJDNs[j] = splitStr[j * 11].trim();
-                    String filePath = "results\\refVectorsAt" + inputJDNs[j] + ".csv";
-                    try {
-                        inputSummaryFiles[j] = new BufferedOutputStream(new FileOutputStream(filePath));
-                        String header = "JDN " + inputJDNs[j] + " Vector data from Horizons\n" +
-                                "Position Vector in AU - x, y, z\n" +
-                                "Velocity Vector in AU/day - Vx, vY, vZ\n\n";
-                        try {
-                            inputSummaryFiles[j].write(header.getBytes());
-                        } catch (IOException e) {
-                            showError("Ünable to write Header to file " + filePath + "\n" + e.getMessage());
-                            allOk = false;
-                            break;
-                        }
+//    boolean addToInputFiles(String objName, String[] splitStr){
+//        boolean allOk = true;
+//        if (createInputSummary && splitStr.length == 33) {
+//            if (inputJDNs == null) {
+//                inputJDNs = new String[3];
+//                inputSummaryFiles = new BufferedOutputStream[3];
+//                for (int j = 0; j < 3; j++) {
+//                    inputJDNs[j] = splitStr[j * 11].trim();
+//                    String filePath = "results\\refVectorsAt" + inputJDNs[j] + ".csv";
+//                    try {
+//                        inputSummaryFiles[j] = new BufferedOutputStream(new FileOutputStream(filePath));
+//                        String header = "JDN " + inputJDNs[j] + " Vector data from Horizons\n" +
+//                                "Position Vector in AU - x, y, z\n" +
+//                                "Velocity Vector in AU/day - Vx, vY, vZ\n\n";
+//                        try {
+//                            inputSummaryFiles[j].write(header.getBytes());
+//                        } catch (IOException e) {
+//                            showError("Ünable to write Header to file " + filePath + "\n" + e.getMessage());
+//                            allOk = false;
+//                            break;
+//                        }
+//
+//                    } catch (FileNotFoundException e) {
+//                        showError("Ünable to create file "+ filePath + "\n" + e.getMessage());
+//                        allOk = false;
+//                        break;
+//                    }
+//                }
+//            }
+//            if (allOk) {
+//                try {
+//                    BufferedOutputStream oS;
+//                    for (int j = 0; j < 3; j++) {
+//                        if (splitStr[j * 11].trim().equals(inputJDNs[j])) {
+//                            oS = inputSummaryFiles[j];
+//                            oS.write((objName + "\n").getBytes());
+//                            oS.write(("Position , " + splitStr[j * 11 + 2] + ", " +
+//                                    splitStr[j * 11 + 3] + ", " + splitStr[j * 11 + 4] + "\n").getBytes());
+//                            oS.write(("Velocity , " + splitStr[j * 11 + 5] + ", " +
+//                                    splitStr[j * 11 + 6] + ", " + splitStr[j * 11 + 7] + "\n").getBytes());
+//                        }
+//                    }
+//                } catch (IOException e) {
+//                    showError("Ünable to Write Vectors for "+ objName + "to reference Summary file\n" + e.getMessage());
+//                    allOk = false;
+//                }
+//            }
+//        }
+//        return allOk;
+//    }
 
-                    } catch (FileNotFoundException e) {
-                        showError("Ünable to create file "+ filePath + "\n" + e.getMessage());
-                        allOk = false;
-                        break;
-                    }
-                }
-            }
-            if (allOk) {
-                try {
-                    BufferedOutputStream oS;
-                    for (int j = 0; j < 3; j++) {
-                        if (splitStr[j * 11].trim().equals(inputJDNs[j])) {
-                            oS = inputSummaryFiles[j];
-                            oS.write((objName + "\n").getBytes());
-                            oS.write(("Position , " + splitStr[j * 11 + 2] + ", " +
-                                    splitStr[j * 11 + 3] + ", " + splitStr[j * 11 + 4] + "\n").getBytes());
-                            oS.write(("Velocity , " + splitStr[j * 11 + 5] + ", " +
-                                    splitStr[j * 11 + 6] + ", " + splitStr[j * 11 + 7] + "\n").getBytes());
-                        }
-                    }
-                } catch (IOException e) {
-                    showError("Ünable to Write Vectors for "+ objName + "to reference Summary file\n" + e.getMessage());
-                    allOk = false;
-                }
-            }
-        }
-        return allOk;
-    }
+//    void closeInputFiles() {
+//        if (createInputSummary && (inputSummaryFiles != null)) {
+//            try {
+//                for (BufferedOutputStream s:inputSummaryFiles) {
+//                    s.close();
+//                }
+//            } catch (IOException e) {
+//                showError("Some Problem in closing Input Reference Summary Files");
+//            }
+//        }
+//        inputSummaryFiles = null;
+//        inputJDNs = null;
+//    }
 
-    void closeInputFiles() {
-        if (createInputSummary && (inputSummaryFiles != null)) {
-            try {
-                for (BufferedOutputStream s:inputSummaryFiles) {
-                    s.close();
-                }
-            } catch (IOException e) {
-                showError("Some Problem in closing Input Reference Summary Files");
-            }
-        }
-        inputSummaryFiles = null;
-        inputJDNs = null;
-    }
-
-    boolean getMultiPendulum() {
-        Item itHook, itBall;
-        ItemLink link;
-        double z = 0, y;
-        double x = -0.2;
-        double zStep = 0.2;
-        double len = 0.5;
-        double lenStep = 0.05;
-
-        double k = 10000;
-        int nPendulums = 15;
-        double mass1 = 0.1;
-        double mass2 = 1;
-        for (int i = 0; i < nPendulums; i++) {
-            itHook =  new Item("Support" + i, mass1, 0.01, Color.blue, mainF);
-            space.addItem(itHook);
-            itHook.initPosEtc(new Point3d(0, 0, z), new Vector3d(0, 0, 0));
-            itHook.setbFixedLocation(true);
-
-            itBall =  new Item("Ball" + i, mass2, 0.05, Color.yellow, mainF);
-            space.addItem(itBall);
-            y = - Math.sqrt(Math.pow(len, 2) - Math.pow(x, 2));
-            itBall.initPosEtc(new Point3d(x, y, z), new Vector3d(0, 0, 0));
-//            itBall.setbFixedForceOn(true);
-            itBall.addLocalAction(new FixedAcceleration(itBall, new Vector3d(0, -1, 0), 9.81));
-            itBall.addLocalAction(new V2Resistance(itBall, 10));
-
-            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k) , space);
-            space.addItemLink(link);
-
-            len += lenStep;
-            z -= zStep;
-        }
-        return true;
-    }
-
-    boolean getTestData() {
-        Item it;
-        Item lastItem = null;
-        int  lastPos = 0;
-        ItemLink link;
-        double pitch = 1;
-        double k = 100;
-        int nChain = 10;
-        double mass1 = 1;
-        double mass2 = 5;
-        for (int i = 0; i < nChain; i++) {
-            it =  new Item("I" + i, mass1, 0.1, Color.yellow, mainF);
-            space.addItem(it);
-            it.initPosEtc(new Point3d(0, -i * pitch, 0), new Vector3d(0, 0, 0));
-            if (i > 0) {
-                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
-                space.addItemLink(link);
-                it.setbFixedForceOn(true);
-            }
-            else
-                it.setbFixedLocation(true);
-            lastPos = i;
-            lastItem = it;
-        }
-        it =  new Item("Ball", mass2, 0.5, Color.WHITE, mainF);
-        space.addItem(it);
-        it.initPosEtc(new Point3d(0, -(lastPos + 1) * pitch, 0), new Vector3d(2, 0, 0));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
-        it.setbFixedForceOn(true);
-        space.addItemLink(link);
-        return true;
-    }
-
-    boolean getPlanetsFromDB() {
-        Color[] colors = {Color.blue, Color.cyan, Color.white, Color.gray, Color.green, Color.BLUE,
-                Color.CYAN, Color.GRAY, Color.GREEN, Color.yellow, Color.darkGray};
-        int nowColor = 0;
-        int nColors = colors.length;
-        boolean bRetVal = false;
-        File folder = new File("planetData");
-        String[] fileNames = folder.list();
-//        String[] fileNames = {"sun.csv", "mercury.csv", "earth.csv", "saturn.csv"};
-        Item item;
-        Statement st = createDBConnection("jdbc:odbc:ODBCtoPlanetData");
-        String itemName;
-        if (st != null) {
-            for (String oneFile:fileNames) {
-                if (oneFile.indexOf(".csv") > 0) {
-                    itemName = oneFile.substring(0, oneFile.length() - 4);
-                    item = getObjectFromTextFile(st, "planetData\\" + oneFile, itemName, colors[nowColor] );
-                    if (item == null)  {
-                        showError("Unable to create object " + itemName);
-                    }
-                    else {
-                        space.addItem(item);
-                        nowColor++;
-                        // recycle colors
-                        if (nowColor >= nColors)
-                            nowColor = 0;
-                    }
-                }
-            }
-            closeDBconnection();
-            bRetVal = true;
-        }
-        if (createInputSummary)
-            closeInputFiles();
-        return bRetVal;
-    }
+//    boolean getPlanetsFromDB() {
+//        Color[] colors = {Color.blue, Color.cyan, Color.white, Color.gray, Color.green, Color.BLUE,
+//                Color.CYAN, Color.GRAY, Color.GREEN, Color.yellow, Color.darkGray};
+//        int nowColor = 0;
+//        int nColors = colors.length;
+//        boolean bRetVal = false;
+//        File folder = new File("planetData");
+//        String[] fileNames = folder.list();
+////        String[] fileNames = {"sun.csv", "mercury.csv", "earth.csv", "saturn.csv"};
+//        Item item;
+//        Statement st = createDBConnection("jdbc:odbc:ODBCtoPlanetData");
+//        String itemName;
+//        if (st != null) {
+//            for (String oneFile:fileNames) {
+//                if (oneFile.indexOf(".csv") > 0) {
+//                    itemName = oneFile.substring(0, oneFile.length() - 4);
+//                    item = getObjectFromTextFile(st, "planetData\\" + oneFile, itemName, colors[nowColor] );
+//                    if (item == null)  {
+//                        showError("Unable to create object " + itemName);
+//                    }
+//                    else {
+//                        space.addItem(item);
+//                        nowColor++;
+//                        // recycle colors
+//                        if (nowColor >= nColors)
+//                            nowColor = 0;
+//                    }
+//                }
+//            }
+//            closeDBconnection();
+//            bRetVal = true;
+//        }
+//        if (createInputSummary)
+//            closeInputFiles();
+//        return bRetVal;
+//    }
 
     JPanel buttonPanel() {
         JPanel jp = new JPanel();
@@ -630,251 +567,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         }
     }
 
-    double dataJD = 0;
-    double oneAuInM  = Constants.oneAuInkm * 1000;
-    double secsPerDay = Constants.secsPerDay;
-
-    boolean getFromXL() {
-        boolean loaded = false;
-        String filePath = "Default Planet Data from DE405.xls";
-        Color[] colors = {Color.blue, Color.cyan, Color.white, Color.gray, Color.green, Color.BLUE,
-                Color.CYAN, Color.GRAY, Color.GREEN, Color.yellow, Color.darkGray};
-        try {
-            FileInputStream xlInput = new FileInputStream(filePath);
-            POIFSFileSystem xlFileSystem = new POIFSFileSystem(xlInput);
-
-            /** Create a workbook using the File System**/
-            HSSFWorkbook wB = new HSSFWorkbook(xlFileSystem);
-
-            /** Get the first sheet from workbook**/
-            HSSFSheet sh = wB.getSheet("PlanetData");
-            if (sh != null) {
-                dataJD = sh.getRow(0).getCell(1).getNumericCellValue();
-                dateAndJDN = new DateAndJDN(dataJD);
-                oneAuInM = sh.getRow(2).getCell(1).getNumericCellValue() * 1000;
-                int gmRow = 6;
-                int posRow = 20;
-
-                for (int pl = 0; pl < 2; pl++ ) // Mercury anc Venus
-                    space.addItem(getObjectFromXL(sh, gmRow++, posRow++, colors[pl]));
-                Item tempEarth = getObjectFromXL(sh, gmRow, posRow, colors[2]);
-                // gm ok for earth but the pos and velocity data are for EM-bary
-                gmRow = 9;
-                posRow = 23;
-                for (int pl = 3; pl < 10; pl++ ) {// Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, sun{
-                    space.addItem(getObjectFromXL(sh, gmRow++, posRow++, colors[pl]));
-                }
-                Item tempMoon = getObjectFromXL(sh, gmRow, posRow, colors[9]); //yellow for moon
-                // gm ok for moon but the pos and velocity data are for wrt earth
-                // calculate positions wrt solar-bary
-                Point3d mWRTe = new Point3d(tempMoon.getStatus().pos);
-                Point3d emWRTe = new Point3d(mWRTe);
-                emWRTe.scale(tempMoon.mass/ (tempMoon.mass + tempEarth.mass));
-                Point3d eWRTsb = new Point3d(tempEarth.getStatus().pos); // the position of em-bary
-                eWRTsb.sub(emWRTe);
-                Point3d mWRTsb = new Point3d(mWRTe);
-                mWRTsb.add(eWRTsb);
-                // calculate velocities wrt solar-bary
-                Vector3d vmWRTe = new Vector3d(tempMoon.getStatus().velocity);
-                Vector3d veWRTem = new Vector3d(vmWRTe);
-                veWRTem.scale(-tempMoon.mass/ (tempMoon.mass + tempEarth.mass));
-                Vector3d veWRTsb = new Vector3d(tempEarth.getStatus().velocity); // the velocity of em-bary
-                eWRTsb.add(veWRTem);
-                Vector3d vmWRTsb = new Vector3d(vmWRTe);
-                vmWRTsb.add(veWRTsb);
-                tempEarth.initPosEtc(eWRTsb, veWRTsb);
-//                tempEarth.setSpin(new AxisAngle4d(0, 1, 0, Math.PI / 180 * 23.5), (24 * 3600));
-//                tempEarth.setSpin(null, (24 * 3600));
-                space.addItem(tempEarth);
-                tempMoon.initPosEtc(mWRTsb, vmWRTsb);
-                space.addItem(tempMoon);
-
-                sh = wB.getSheet("ESatelites");
-                if (sh != null) {
-                    double nSats = sh.getRow(0).getCell(1).getNumericCellValue();
-                    gmRow = 6;
-                    posRow = 20;
-                    Vector3d vsatWRTsb;
-                    Point3d satWRTsb;
-                    for (double s = 0; s < nSats; s++) {
-                        Item tempSat = getObjectFromXL(sh, gmRow++, posRow++, Color.RED);
-                        satWRTsb = new Point3d(tempSat.getStatus().pos);
-                        satWRTsb.add(eWRTsb);
-                        vsatWRTsb = new Vector3d(tempSat.getStatus().velocity);
-                        vsatWRTsb.add(veWRTsb);
-                        tempSat.initPosEtc(satWRTsb, vsatWRTsb);
-                        space.addItem(tempSat);
-                    }
-                }
-                loaded = true;
-            }
-            xlInput.close();
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        return loaded;
-    }
-
-    double baseJDN = -1;
-
-    Connection dbConnection;
-
-    Statement createDBConnection(String connectTo) {
-        Statement st = null;
-        try {
-            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-            dbConnection = DriverManager.getConnection(connectTo);
-            st = dbConnection.createStatement();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return  st;
-    }
-
-    void closeDBconnection() {
-        if (dbConnection != null)
-            try {
-                dbConnection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        dbConnection = null;
-    }
-
-
-    Item baseObjectFromDBdata(Statement st, String objName, Color color) {
-        Item obj = null;
-        String name;
-        String moonOf = "";
-        String[] nameSplit = objName.split("-");
-        int nItems = nameSplit.length;
-        if (nItems > 0) {
-            name = nameSplit[0].trim();
-            if (nItems > 1) { // it is a moon of
-                moonOf = nameSplit[1].trim();
-            }
-            double radius;
-            double mass;
-            double gm;
-            double rotationPeriod;
-            double axisInclination;
-            boolean isLightSrc;
-            String imageName;
-            ResultSet res;
-            String queryStr1 = "SELECT Radius, Mass, GM, imageName, rotationPeriodH, axisInclinationDeg, isLightSrc FROM PhycialData WHERE ObjName = '" + name + "' AND ";
-            String queryStr2;
-            try {
-                if (nItems > 1) {
-                    queryStr2 = "MoonOf = '" + moonOf + "'";
-                }
-                else
-                    queryStr2 = " (NOT isMoon)";
-                res = st.executeQuery(queryStr1 + queryStr2);
-                if (res.next()) {
-                    radius = res.getDouble("Radius");
-                    try {
-                        gm = res.getDouble("GM");
-                        if (gm > 0) {
-                            mass = gm / Constants.G;
-//                            debug("got from GM for " + objName);
-                        }
-                        else
-                            mass = res.getDouble("Mass");
-                    } catch (SQLException e) {
-                        mass = res.getDouble("Mass");
-                    }
-                    if (radius > 0 && mass > 0) {
-                        obj = new Item(objName, mass, radius * 2 * 1000, color, mainF);
-                        imageName = res.getString("imageName");
-                        if (imageName != null && imageName.length() > 3) {
-                            obj.setImage(imageName);
-                            rotationPeriod = res.getDouble("rotationPeriodH");
-                            axisInclination = res.getDouble("axisInclinationDeg");
-                            isLightSrc = res.getBoolean("isLightSrc");
-                            obj.setSpin(new AxisAngle4d(0, 1, 0, Math.PI / 180 * axisInclination ), rotationPeriod * 3600);
-                            obj.enableLightSrc(isLightSrc);
-                        }
-                    }
-                    else {
-                        showError("There is some problem is Mass or radius of " + objName + ", taking as 1kg and 1m");
-                        obj = new Item(objName, 1, 1 * 2, color, mainF);
-                    }
-
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return obj;
-    }
-
-    Item getObjectFromTextFile(Statement st, String filePath, String objName, Color color) {
-        Item obj;
-        obj = baseObjectFromDBdata(st, objName, color);
-        if (obj == null) {
-            showError("There is some problem is Mass or dia of " + objName);
-        }
-        else {
-            // now get the position and velocity params
-            try {
-                BufferedInputStream iStream = new BufferedInputStream(new FileInputStream(filePath));
-                File f = new File(filePath);
-                long len = f.length();
-                if (len > 1000 && len < 15000) {
-                    int iLen = (int) len;
-                    byte[] data = new byte[iLen + 100];
-                    try {
-                        iStream.read(data);
-                        String strDat = new String(data);
-                        String vectors = StringOps.substring(strDat, "$$SOE", "$$EOE");
-                        if (vectors.length() > 50) {
-                            String[] split = vectors.split(",", 33);
-                            try {
-                                double nowJDN = Double.valueOf(split[0]);
-                                boolean jdnOk = true;
-                                if (baseJDN > 0)
-                                    jdnOk = (nowJDN == baseJDN);
-                                else
-                                    dateAndJDN = new DateAndJDN(nowJDN); // the date of data
-                                if (jdnOk) {
-                                    if (createInputSummary)
-                                        addToInputFiles(objName, split);
-                                    baseJDN = nowJDN;
-                                    double x = Double.valueOf(split[2]) * oneAuInM;
-                                    double y = Double.valueOf(split[3]) * oneAuInM;
-                                    double z = Double.valueOf(split[4]) * oneAuInM;
-                                    double vx = Double.valueOf(split[5]) * oneAuInM / secsPerDay;
-                                    double vy = Double.valueOf(split[6])* oneAuInM / secsPerDay;
-                                    double vz= Double.valueOf(split[7])* oneAuInM / secsPerDay;
-                                    obj.initPosEtc(new Point3d(x, y, z), new Vector3d(vx, vy, vz));
-                                }
-                                else {
-                                    showError("Mismatch in JDN of data for " + objName + ", skipping it");
-                                    obj = null;
-                                }
-                            } catch (NumberFormatException e) {
-                                showError("Some problem in getting " + filePath + "\n"+ e.getMessage());
-                                obj = null;
-                            }
-                        }
-                        iStream.close();
-                    }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else
-                    showError("Length of File " + filePath + " is Out of range [" + len + "]");
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return obj;
-    }
-
     public boolean writeCurrentVectorsToFile() {
         boolean bRetVal = false;
         String filePath = "results\\statusVectors.csv";
@@ -902,62 +594,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             showError("Some problem saving Vectors to file " + filePath + "\n" + e.getMessage());
         }
         return bRetVal;
-    }
-
-    /*
-    Get number after the dataName followed by '='
-    */
-    double getNumberAfter(String datStr, String dataName) {
-        String src;
-        double val = Double.NaN;
-        int locGM = datStr.indexOf(dataName);
-        if (locGM > 0) {
-            locGM += dataName.length() + 1;
-            src = datStr.substring(locGM);
-            src = StringOps.ltrim(src);
-            src = src.substring(0, 20);
-            src = src.replace("=", " "); // removed '=' if exists
-            src = StringOps.ltrim(src);
-            int spaceLoc = src.indexOf(" ");
-            if (spaceLoc > 1)
-                src = src.substring(0, spaceLoc);
-            try {
-                val = Double.valueOf(src);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        }
-        return val;
-    }
-
-    Item getObjectFromXL(Sheet sheet, int gmRow, int posRow,Color color ) {
-        Row r = sheet.getRow(gmRow);
-        String name = r.getCell(0).getStringCellValue();
-        double gm = r.getCell(1).getNumericCellValue(); // au3/day2
-        double Gau3day2 = Constants.G * secsPerDay / oneAuInM * secsPerDay / oneAuInM / oneAuInM;
-        double mass = gm / Gau3day2;
-        double dia = r.getCell(2).getNumericCellValue() * 1000; // in m
-        double axisTilt = r.getCell(5).getNumericCellValue();
-        double spinPeriod = r.getCell(6).getNumericCellValue();
-        boolean isLightSrc = (r.getCell(4).getNumericCellValue() == 1.0);
-        String imageName = r.getCell(3).getStringCellValue().trim();
-
-        r = sheet.getRow(posRow);
-
-        double x = r.getCell(1).getNumericCellValue() * oneAuInM; // im m
-        double y = r.getCell(2).getNumericCellValue() * oneAuInM; // im m
-        double z = r.getCell(3).getNumericCellValue() * oneAuInM; // im m
-
-        double vx = r.getCell(4).getNumericCellValue() * oneAuInM / secsPerDay; // im m/s
-        double vy = r.getCell(5).getNumericCellValue() * oneAuInM / secsPerDay; // im m/s
-        double vz = r.getCell(6).getNumericCellValue() * oneAuInM / secsPerDay; // im m/s
-
-        Item spObj = new Item(name, mass, dia, color, mainF);
-        spObj.setImage(imageName);
-        spObj.initPosEtc(new Point3d(x, y, z), new Vector3d(vx, vy, vz));
-        spObj.setSpin(new AxisAngle4d(0, 1, 0, Math.PI / 180 * axisTilt ), spinPeriod * 3600);
-        spObj.enableLightSrc(isLightSrc);
-        return spObj;
     }
 
     void saveDataToFile() {

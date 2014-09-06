@@ -115,6 +115,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         addLocalViewingPlatform(tgMain);
         univ.addBranchGraph(scene);
         setPick(mainCanvas, scene);
+        pauseRunB.doClick();
     }
 
     OrbitBehavior vpOrbitBehavior;
