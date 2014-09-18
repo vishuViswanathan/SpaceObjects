@@ -18,7 +18,7 @@ import java.awt.*;
 public class MultiPendulum implements DefaultScheme {
     double z = 0, y;
     double x = -0.2;
-    double zStep = 0.2;
+    double zStep = 0.05;
     double len = 0.5;
     double lenStep = 0.05;
 
@@ -26,6 +26,7 @@ public class MultiPendulum implements DefaultScheme {
     int nPendulums = 15;
     double mass1 = 0.1;
     double mass2 = 1;
+    double resistance = 0;
 
     public MultiPendulum() {
     }
@@ -44,7 +45,7 @@ public class MultiPendulum implements DefaultScheme {
             y = - Math.sqrt(Math.pow(len, 2) - Math.pow(x, 2));
             itBall.initPosEtc(new Point3d(x, y, z), new Vector3d(0, 0, 0));
             itBall.addLocalAction(new FixedAcceleration(itBall, new Vector3d(0, -1, 0), 9.81));
-            itBall.addLocalAction(new V2Resistance(itBall, 10));
+            itBall.addLocalAction(new V2Resistance(itBall, resistance));
 
             link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k) , space);
             space.addItemLink(link);

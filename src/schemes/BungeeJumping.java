@@ -18,10 +18,10 @@ import java.awt.*;
 public class BungeeJumping implements DefaultScheme{
     double pitch = 2;
     double k = 10000;
-    int nHalfChain = 5;
+    int nHalfChain = 10;
     double mass1 = 0.1;
     double mass2 = 100;
-    double resistFactor = 1;
+    double resistFactor = 5;
     double jumpXVel = 0.1;
     public BungeeJumping() {
     }
@@ -52,7 +52,8 @@ public class BungeeJumping implements DefaultScheme{
         space.addItem(it);
         it.initPosEtc(new Point3d(xPos, -(lastPos + 1) * pitch, 0), new Vector3d(0, 0, 0));
         it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
-        it.addLocalAction(new V2Resistance(it, resistFactor));        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+        it.addLocalAction(new V2Resistance(it, resistFactor));
+        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
         space.addItemLink(link);
         lastItem = it;
         xPos += pitch;
