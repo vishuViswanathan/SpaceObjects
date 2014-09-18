@@ -17,7 +17,7 @@ import java.awt.*;
  */
 public class BungeeJumping implements DefaultScheme{
     double pitch = 2;
-    double k = 10000;
+    double k = 100000;
     int nHalfChain = 10;
     double mass1 = 0.1;
     double mass2 = 100;
