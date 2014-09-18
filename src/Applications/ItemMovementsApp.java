@@ -123,7 +123,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 switch (spSize) {
                     case ASTRONOMICAL:
                         duration = 200000;
-                        calculationStep = 2; // s
+                        calculationStep = 10; // s
                         refreshInterval = 100 * calculationStep;
                         DefaultScheme  scheme = new PlanetsAndMoons();
                         if (scheme.getScheme(mainF, space)) {
@@ -138,12 +138,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         break;
                     case DAILY:
                         duration = 200;
-                        calculationStep = 0.000002;
-                        refreshInterval = 20000 * calculationStep;
+                        calculationStep = 0.0002; // was 0.000002;
+                        refreshInterval = 2000 * calculationStep; // was 20000
                         space.enableGlobalGravity(false);
-                        if ((new BungeeJumping()).getScheme(mainF, space)) {
-//                        if ((new ChainWithBall()).getScheme(mainF, space)) {
-//                        if (getMultiPendulum())  {
+//                        if ((new BungeeJumping()).getScheme(mainF, space)) {
+                        if ((new ChainWithBall()).getScheme(mainF, space)) {
+//                        if ((new MultiPendulum()).getScheme(mainF, space))  {
 //                            if ((new MultiPendulum()).getScheme(mainF, space))  {
 //                            log.info(space.getOneItem(0).dataInXML());
 //                            log.info(space.getOneItem(1).dataInXML());
@@ -467,7 +467,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         space.doCalculation(deltaT, nowT);
     }
 
-    void doCalculationFast(boolean fresh)   {
+ /*   void doCalculationFast(boolean fresh)   {
 //        space.prepareLinkEvaluator();
         enableButtons(false);
         double step = calculationStep;
@@ -542,7 +542,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     void doOneStepFast(double deltaT, double nowT) throws Exception {
         space.doCalculation(evaluator, deltaT, nowT);
     }
-
+*/
     MotionDisplay orbitDisplay;
 
     boolean showOrbitMap() {

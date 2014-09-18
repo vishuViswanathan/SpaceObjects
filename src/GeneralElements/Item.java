@@ -402,6 +402,17 @@ public class Item implements InputControl, EvalOnce {
         return status;
     }
 
+    Vector3d lastForce = new Vector3d();
+    Vector3d lastPosition = new Vector3d();
+    Vector3d lastVelocity = new Vector3d();
+    Vector3d effectiveForce = new Vector3d();
+
+    void setStartConditions() {
+        lastPosition.set(status.pos);
+        lastVelocity.set(status.velocity);
+        lastForce.set(force);
+    }
+
     void initForce() {
         if (bFixedForceOn)
             force.set(forceOfFixedGravity);
@@ -423,55 +434,42 @@ public class Item implements InputControl, EvalOnce {
     @Override
     public void evalOnce(double deltaT, double nowT) {
         try {
-            updatePosAndVel(deltaT, nowT);
+            updatePosAndVel(deltaT, nowT, true);
         } catch (Exception e) {
             ItemMovementsApp.log.error("In ITem evalOnce for " + name + ":" + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    void updatePosAndVel(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
+    void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
-            Vector3d thisAcc = new Vector3d(force);
+            effectiveForce.set(force);
+            effectiveForce.add(lastForce);
+            effectiveForce.scale(0.5); // the average force
+            Vector3d thisAcc = new Vector3d(effectiveForce);
             thisAcc.scale((1.0 / mass));
-            status.acc.set(thisAcc);
             // calculate from force
-            Vector3d deltaV = new Vector3d(force);
+            Vector3d deltaV = new Vector3d(effectiveForce);
             deltaV.scale(deltaT);
             deltaV.scale(1.0 / mass);
             Vector3d averageV = new Vector3d(deltaV);
-            status.velocity.add(deltaV);
-            averageV.scaleAdd(-0.5, status.velocity); // because the status.velocity is the new velocity
-            Point3d deltaPos = new Point3d(averageV);
-            deltaPos.scale(deltaT);
-            status.pos.add(deltaPos);
-            status.time = nowT;
-            evalMaxMinPos();
-            if (nowT > nextReport) {
-                updateOrbitAndPos();
-                nextReport += reportInterval;
-            }
-        }
-    }
-
-    void updatePosAndVelOLD(double deltaT, double nowT) throws Exception {  // deltaT is time is seconds
-        if (!bFixedLocation) {
-            Vector3d thisAcc = new Vector3d(force);
-            thisAcc.scale((1.0 / mass));
-            status.acc.set(thisAcc);
-            Vector3d deltaV = new Vector3d(status.acc);
-            deltaV.scale(deltaT);
-            Vector3d averageV = new Vector3d(deltaV);
-            status.velocity.add(deltaV);
-            averageV.scaleAdd(-0.5, status.velocity); // because the status.velocity is the new velocity
-            Point3d deltaPos = new Point3d(averageV);
-            deltaPos.scale(deltaT);
-            status.pos.add(deltaPos);
-            status.time = nowT;
-            evalMaxMinPos();
-            if (nowT > nextReport) {
-                updateOrbitAndPos();
-                nextReport += reportInterval;
+            averageV.scaleAdd(+0.5, lastVelocity); //
+            Point3d newPos = new Point3d(averageV);
+            newPos.scale(deltaT);
+            newPos.add(lastPosition);
+            status.pos.set(newPos); // only position is updated here
+            Vector3d newVelocity = new Vector3d(lastVelocity);
+            newVelocity.add(deltaV);
+            status.velocity.set(newVelocity);
+            if (bFinal) {
+                status.acc.set(thisAcc);
+                status.time = nowT;
+                lastForce.set(force);  // note down the force for the last calculation
+                evalMaxMinPos();
+                if (nowT > nextReport) {
+                    updateOrbitAndPos();
+                    nextReport += reportInterval;
+                }
             }
         }
     }

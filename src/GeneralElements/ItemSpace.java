@@ -404,21 +404,35 @@ public class ItemSpace {
         }
     }
 
+
     public void initForces() {
         for (Item i: allItems)
             i.initForce();
     }
 
-    void updatePosAndVel(double deltaT, double nowT) throws Exception {
+    void setItemStartConditions() {
         for (Item i: allItems)
-            i.updatePosAndVel(deltaT, nowT);
+            i.setStartConditions();
+    }
+
+    void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+        for (Item i: allItems)
+            i.updatePosAndVel(deltaT, nowT, bFinal);
     }
 
     void evalInfluence(double deltaT, double nowT) throws Exception  {
+        setItemStartConditions();
+        for (int t = 0; t < 10; t++) {
+            initForces();
+            for (ItemLink inf : allItemLinks)
+                inf.evalForce();
+            updatePosAndVel(deltaT, nowT, false); // not the final calculation
+        }
+        // now finalise it
         initForces();
-        for (ItemLink inf: allItemLinks)
+        for (ItemLink inf : allItemLinks)
             inf.evalForce();
-        updatePosAndVel(deltaT, nowT);
+        updatePosAndVel(deltaT, nowT, true); // the final calculation
     }
 
     void evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
@@ -440,7 +454,7 @@ public class ItemSpace {
         evaluator.awaitForceComplete();
 //        System.out.println("ItemSpace After awaitForceComplete");
 //        evaluator.resetStartBarrier();
-        updatePosAndVel(deltaT, nowT);
+        updatePosAndVel(deltaT, nowT, true);
     }
 
     public void updateLinkDisplay() {

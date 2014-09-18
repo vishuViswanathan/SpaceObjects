@@ -21,7 +21,7 @@ public class BungeeJumping implements DefaultScheme{
     int nHalfChain = 10;
     double mass1 = 0.1;
     double mass2 = 100;
-    double resistFactor = 5;
+    double resistFactor = 1;
     double jumpXVel = 0.1;
     public BungeeJumping() {
     }

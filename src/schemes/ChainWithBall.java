@@ -15,7 +15,7 @@ import java.awt.*;
  */
 public class ChainWithBall implements DefaultScheme {
     double pitch = 1;
-    double k = 100;
+    double k = 10000;
     int nChain = 10;
     double mass1 = 1;
     double mass2 = 5;
