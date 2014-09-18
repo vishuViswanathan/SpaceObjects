@@ -229,7 +229,7 @@ public class PlanetsAndMoons implements DefaultScheme {
 
     BufferedOutputStream[] inputSummaryFiles;
     String[] inputJDNs;
-    boolean createInputSummary = true;
+    boolean createInputSummary = false; // for noting down input status data in csxv file
     double dataJD = 0;
     double oneAuInM  = Constants.oneAuInkm * 1000;
     double secsPerDay = Constants.secsPerDay;
