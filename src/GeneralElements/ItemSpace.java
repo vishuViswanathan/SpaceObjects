@@ -104,13 +104,6 @@ public class ItemSpace {
             i.noteInput();
     }
 
-    public JPanel dataPanel(int i) {
-        if (i < allItems.size())
-            return allItems.get(i).dataPanel(i + 1);
-        else
-            return null;
-    }
-
     JPanel itemListPan;
     GridBagConstraints gbcItemList;
     JButton buttAddItem;
@@ -581,15 +574,15 @@ public class ItemSpace {
     }
 
     void trace(String msg) {
-        mainApp.log.trace(msg);
+        ItemMovementsApp.log.trace(msg);
     }
 
     void debug(String msg) {
-        mainApp.log.debug(msg);
+        ItemMovementsApp.log.debug(msg);
     }
 
     void error(String msg) {
-        mainApp.log.error(msg);
+        ItemMovementsApp.log.error(msg);
     }
 
 

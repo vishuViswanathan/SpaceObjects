@@ -37,7 +37,6 @@ public class Item implements InputControl, EvalOnce {
     NumberTextField ntFixedAcc;
     double fixedAcc = 9.81; // fixed acceleration value
     Vector3d forceOfFixedGravity;
-    double surfaceArea;
     boolean bFixedForceOn = false;
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
@@ -375,14 +374,6 @@ public class Item implements InputControl, EvalOnce {
 
     public void detachPlatform() {
         itemGraphic.get().detachPlatform();
-    }
-
-    public void showLocalView(ViewingPlatform mainView, int atX, int atY, JPanel jp) {
-//        itemGraphic.get().showLocalView(mainView, atX, atY, jp);
-    }
-
-    public void showLocalView(JPanel jp) {
-//        itemGraphic.get().showLocalView(jp);
     }
 
     public void setScale(double scale) {

@@ -1,11 +1,7 @@
 package Applications;
 
 import GeneralElements.Display.MotionDisplay;
-import GeneralElements.Item;
 import GeneralElements.ItemSpace;
-import GeneralElements.link.*;
-import GeneralElements.localActions.FixedAcceleration;
-import GeneralElements.localActions.V2Resistance;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
 import display.InputControl;
@@ -15,17 +11,9 @@ import mvUtils.StringOps;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import schemes.*;
 
 import javax.swing.*;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,7 +22,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.sql.*;
 import java.util.Calendar;
 
 /**
@@ -101,9 +88,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         this.asApp = asApp;
         init();
     }
-    boolean createInputSummary = true;
 
-    public void init() {
+     public void init() {
         if (log == null)
             log = Logger.getLogger(ItemMovementsApp.class);
         modifyJTextEdit();
@@ -746,10 +732,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     boolean decide(String title, String msg) {
         int resp = JOptionPane.showConfirmDialog(parent(), msg, title, JOptionPane.YES_NO_OPTION);
-        if (resp == JOptionPane.YES_OPTION)
-            return true;
-        else
-            return false;
+        return resp == JOptionPane.YES_OPTION;
     }
 
 
