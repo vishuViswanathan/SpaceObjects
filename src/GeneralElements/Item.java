@@ -298,6 +298,7 @@ public class Item implements InputControl, EvalOnce {
         resetLimits();
         status.time = 0;
         nextReport = 0;
+        initStartForce();
 //        history.add(status);
     }
 
@@ -326,10 +327,6 @@ public class Item implements InputControl, EvalOnce {
 
     public void addInfluence(ItemLink itemLink) {
         links.add(itemLink);
-    }
-
-    public boolean removeInfluence(ItemLink itemLink) {
-        return links.remove(itemLink);
     }
 
     public void clearInfluence() {
@@ -398,13 +395,17 @@ public class Item implements InputControl, EvalOnce {
     Vector3d lastVelocity = new Vector3d();
     Vector3d effectiveForce = new Vector3d();
 
+    public void initStartForce() {
+        force.set(0, 0, 0);
+    }
+
     void setStartConditions() {
         lastPosition.set(status.pos);
         lastVelocity.set(status.velocity);
         lastForce.set(force);
     }
 
-    void initForce() {
+    void setLocalForces() {
         if (bFixedForceOn)
             force.set(forceOfFixedGravity);
         else
@@ -515,8 +516,10 @@ public class Item implements InputControl, EvalOnce {
         }
         xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
         int a = 0;
-        for (LocalAction action: localActions)
+        for (LocalAction action: localActions) {
             xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
+            a++;
+        }
         return xmlStr;
     }
 

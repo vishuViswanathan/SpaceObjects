@@ -64,6 +64,9 @@ public class LocalAction {
                 case FLUIDFRICTION:
                     action = new VResistance(item, xmlStr);
                     break;
+                case FIXEDACCELERATION:
+                    action = new FixedAcceleration(item, xmlStr);
+                    break;
             }
         }
         return action;

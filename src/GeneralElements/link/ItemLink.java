@@ -145,13 +145,13 @@ public class ItemLink implements EvalOnce {
                     valid = true;
                 case SPRING:
                     if (freeLen > 0 && kCompression > 0 && kExpansion > 0) {
-                        inf = new Spring(item1, item2, freeLen, kCompression, kExpansion);
+                        inf = new Spring(item1, item2, freeLen, kCompression, kExpansion, true);
                         valid = true;
                     }
                     break;
                 case ROPE:
                     if (freeLen > 0 && kExpansion > 0) {
-                        inf = new Rope(item1, item2, freeLen, kExpansion);
+                        inf = new Rope(item1, item2, freeLen, kExpansion, true);
                         valid = true;
                     }
                     break;
@@ -375,10 +375,10 @@ public class ItemLink implements EvalOnce {
                             inf = new Rod(item1, item2, 0, 0, true);
                             break;
                         case ROPE:
-                            inf = new Rope(item1, item2, 0, 0);
+                            inf = new Rope(item1, item2, 0, 0, true);
                             break;
                         case SPRING:
-                            inf = new Spring(item1, item2, 0, 0);
+                            inf = new Spring(item1, item2, 0, 0, true);
                             break;
                     }
                     if (inf != null) {

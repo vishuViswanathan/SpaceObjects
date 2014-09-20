@@ -21,16 +21,17 @@ public class Rod extends InfluenceDef  {
         this.kCompression = kCompression;
     }
 
-    public Rod(Item item1, Item item2, double freeLen, double kCompression) {
-        super(item1, item2, freeLen, kCompression, kCompression);
+    public Rod(Item item1, Item item2, double initialLenFactor, double eCompression) {
+        super(item1, item2, initialLenFactor, eCompression, eCompression);
         type = Type.ROD;
     }
+
     @Override
     public boolean evalForce() {
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);
         double r = distVect.length();
-        Vector3d nowForce = new Vector3d();
+        Vector3d nowForce;
         double diff = r - freeLen;
         double force;
         // attraction is positive

@@ -400,7 +400,7 @@ public class ItemSpace {
 
     public void initForces() {
         for (Item i: allItems)
-            i.initForce();
+            i.setLocalForces();
     }
 
     void setItemStartConditions() {

@@ -1,7 +1,6 @@
 package GeneralElements.link;
 
 import GeneralElements.Item;
-import SpaceElements.Constants;
 
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
@@ -12,9 +11,9 @@ import java.awt.*;
 /**
  * Created by M Viswanathan on 24 May 2014
  */
-public class Spring extends Influence  {
+public class Spring extends InfluenceDef  {
     LineArray linkLine;
-    public Spring(Item item1, Item item2, double freeLen, double kCompression, double kExpansion) {
+    public Spring(Item item1, Item item2, double freeLen, double kCompression, double kExpansion, boolean bOldDef) {
         type = Type.SPRING;
         this.item1 = item1;
         this.item2 = item2;
@@ -23,8 +22,17 @@ public class Spring extends Influence  {
         this.kExpansion = kExpansion;
     }
 
-    public Spring(Item item1, Item item2, double freeLen, double kCommon) {
-        this(item1, item2, freeLen, kCommon, kCommon);
+    public Spring(Item item1, Item item2, double freeLen, double kCommon, boolean bOldDef) {
+        this(item1, item2, freeLen, kCommon, kCommon, bOldDef);
+        type = Type.SPRING;
+    }
+
+    public Spring(Item item1, Item item2, double initialLenFactor, double eCommon) {
+        super(item1, item2, initialLenFactor, eCommon, eCommon);
+    }
+
+    public Spring(Item item1, Item item2, double initialLenFactor, double eCompression, double eExpansion) {
+        super(item1, item2, initialLenFactor, eCompression, eExpansion);
     }
 
     @Override
@@ -32,7 +40,6 @@ public class Spring extends Influence  {
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);
         double r = distVect.length();
-        Vector3d nowForce = new Vector3d();
         double diff = r - freeLen;
         double force;
         // attraction is positive
@@ -41,7 +48,7 @@ public class Spring extends Influence  {
         else
             force =  diff * kCompression;
         double ratio = force / r;
-        nowForce = new Vector3d(distVect);
+        Vector3d nowForce = new Vector3d(distVect);
         nowForce.scale(ratio);
         item1.addToForce(nowForce);
         nowForce.negate();
