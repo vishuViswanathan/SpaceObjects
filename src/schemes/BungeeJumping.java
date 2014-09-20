@@ -17,7 +17,7 @@ import java.awt.*;
  */
 public class BungeeJumping implements DefaultScheme{
     double pitch = 2;
-    double k = 100000;
+    double k = 200000; // similar to e but force (ie N/100%)
     int nHalfChain = 10;
     double mass1 = 0.1;
     double mass2 = 100;
@@ -39,7 +39,8 @@ public class BungeeJumping implements DefaultScheme{
             space.addItem(it);
             it.initPosEtc(new Point3d(xPos, -linkNum * pitch, 0), new Vector3d(0, 0, 0));
             if (linkNum > 0) {
-                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+//                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
+                link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
                 space.addItemLink(link);
                 it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
                 it.addLocalAction(new V2Resistance(it, resistFactor));            }
@@ -53,7 +54,8 @@ public class BungeeJumping implements DefaultScheme{
         it.initPosEtc(new Point3d(xPos, -(lastPos + 1) * pitch, 0), new Vector3d(0, 0, 0));
         it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
         it.addLocalAction(new V2Resistance(it, resistFactor));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+//        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
+        link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
         space.addItemLink(link);
         lastItem = it;
         xPos += pitch;
@@ -63,7 +65,8 @@ public class BungeeJumping implements DefaultScheme{
             it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
             space.addItem(it);
             it.initPosEtc(new Point3d(xPos, yPos, 0), new Vector3d(0, 0, 0));
-            link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+//            link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
+            link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
             space.addItemLink(link);
             it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
             it.addLocalAction(new V2Resistance(it, resistFactor));
@@ -75,7 +78,8 @@ public class BungeeJumping implements DefaultScheme{
         it =  new Item("Ball", mass2, 1, Color.WHITE, mainF);
         space.addItem(it);
         it.initPosEtc(new Point3d(xPos, yPos, 0), new Vector3d(jumpXVel, 0, 0));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+//        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
+        link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
         it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
         it.addLocalAction(new V2Resistance(it, resistFactor));
         space.addItemLink(link);

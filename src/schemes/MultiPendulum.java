@@ -47,7 +47,7 @@ public class MultiPendulum implements DefaultScheme {
             itBall.addLocalAction(new FixedAcceleration(itBall, new Vector3d(0, -1, 0), 9.81));
             itBall.addLocalAction(new V2Resistance(itBall, resistance));
 
-            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k) , space);
+            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k, true) , space);
             space.addItemLink(link);
 
             len += lenStep;

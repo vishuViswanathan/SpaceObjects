@@ -11,9 +11,9 @@ import java.awt.*;
 /**
  * Created by M Viswanathan on 08 Jun 2014
  */
-public class Rod extends Influence  {
+public class Rod extends InfluenceDef  {
     LineArray linkLine;
-    public Rod(Item item1, Item item2, double freeLen, double kCompression) {
+    public Rod(Item item1, Item item2, double freeLen, double kCompression, boolean bOldDef) {
         type = Type.ROD;
         this.item1 = item1;
         this.item2 = item2;
@@ -21,6 +21,10 @@ public class Rod extends Influence  {
         this.kCompression = kCompression;
     }
 
+    public Rod(Item item1, Item item2, double freeLen, double kCompression) {
+        super(item1, item2, freeLen, kCompression, kCompression);
+        type = Type.ROD;
+    }
     @Override
     public boolean evalForce() {
         Vector3d distVect = new Vector3d();

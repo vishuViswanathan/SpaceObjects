@@ -1,7 +1,5 @@
 package GeneralElements.link;
 
-import Applications.ItemMovementsApp;
-import Applications.LinkEvaluator;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import display.InputControl;
@@ -15,7 +13,6 @@ import mvmath.FramedPanel;
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
 import javax.swing.*;
-import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -98,9 +95,6 @@ public class ItemLink implements EvalOnce {
         takeFromXML(xmlStr);
     }
 
-    void noteInflParams() {
-    }
-
     @Override
     public void evalOnce() {
         evalForce();
@@ -131,8 +125,7 @@ public class ItemLink implements EvalOnce {
 
 
     public boolean isValid(LinkedList<Item> allItems) {
-        boolean retVal = true;
-        retVal &= (allItems.contains(item1) && allItems.contains(item2));
+        boolean retVal = (allItems.contains(item1) && allItems.contains(item2));
         retVal &= (inf != null);
         return retVal;
     }
@@ -164,7 +157,7 @@ public class ItemLink implements EvalOnce {
                     break;
                  case ROD:
                      if (freeLen > 0 && kCompression > 0) {
-                         inf = new Rod(item1, item2, freeLen, kCompression);
+                         inf = new Rod(item1, item2, freeLen, kCompression, true);
                          valid = true;
                      }
                      break;
@@ -173,12 +166,6 @@ public class ItemLink implements EvalOnce {
         return valid;
     }
 
-    public void removeInfluence() {
-        item1.removeInfluence(this);
-        item2.removeInfluence(this);
-        item1 = null;
-        item2 = null;
-    }
 
     public boolean evalForce() {
         return inf.evalForce();
@@ -367,12 +354,6 @@ public class ItemLink implements EvalOnce {
         return xmlStr;
     }
 
-    boolean checkValidItem(String itemName) {
-        boolean retVal = false;
-
-        return retVal;
-    }
-
     public boolean takeFromXML(String xmlStr) throws NumberFormatException {
         boolean retVal = false;
         ValAndPos vp;
@@ -391,7 +372,7 @@ public class ItemLink implements EvalOnce {
                             inf = new Gravity(item1, item2);
                             break;
                         case ROD:
-                            inf = new Rod(item1, item2, 0, 0);
+                            inf = new Rod(item1, item2, 0, 0, true);
                             break;
                         case ROPE:
                             inf = new Rope(item1, item2, 0, 0);

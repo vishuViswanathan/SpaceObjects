@@ -7,7 +7,6 @@ import SpaceElements.time.DateAndJDN;
 import display.InputControl;
 import display.NumberTextField;
 import evaluations.EvalOnce;
-import mvUtils.StringOps;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 import org.apache.log4j.Logger;
@@ -178,7 +177,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     JPanel buttonPanel() {
         JPanel jp = new JPanel();
-        ntfDuration = new NumberTextField(this, duration, 8, false, 0.001, 1e10, "#,###.###", "Duration");
+        ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.####", "Duration");
         MyListener listener = new MyListener();
         pbReadData.addActionListener(listener);
         pbSaveData.addActionListener(listener);

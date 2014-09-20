@@ -33,7 +33,7 @@ public class ChainWithBall implements DefaultScheme {
             space.addItem(it);
             it.initPosEtc(new Point3d(0, -i * pitch, 0), new Vector3d(0, 0, 0));
             if (i > 0) {
-                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
                 space.addItemLink(link);
                 it.setbFixedForceOn(true);
             }
@@ -45,7 +45,7 @@ public class ChainWithBall implements DefaultScheme {
         it =  new Item("Ball", mass2, 0.5, Color.WHITE, mainF);
         space.addItem(it);
         it.initPosEtc(new Point3d(0, -(lastPos + 1) * pitch, 0), new Vector3d(2, 0, 0));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k) , space);
+        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         it.setbFixedForceOn(true);
         space.addItemLink(link);
         return true;
