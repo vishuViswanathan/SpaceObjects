@@ -1,10 +1,8 @@
 package SpaceElements;
 
-import SpaceElements.Display.GraphicOrbit;
 import mvmath.*;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.LinkedList;
 
 /**
