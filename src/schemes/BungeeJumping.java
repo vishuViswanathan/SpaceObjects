@@ -16,10 +16,10 @@ import java.awt.*;
  * Created by M Viswanathan on 29 Aug 2014
  */
 public class BungeeJumping implements DefaultScheme{
-    double pitch = 2;
+    double pitch = 1;
     double k = 200000; // similar to e but force (ie N/100%)
-    int nHalfChain = 10;
-    double mass1 = 0.1;
+    int nHalfChain = 25;
+    double mass1 = 0.02;
     double mass2 = 100;
     double resistFactor = 1;
     double jumpXVel = 0.1;

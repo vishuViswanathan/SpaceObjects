@@ -275,16 +275,21 @@ public class ItemSpace {
     }
 
     void addInfluence() {
-        LinkBasic linkDlg = new LinkBasic(tempInfList.size() + 1, this);
-        linkDlg.setLocation(600, 400);
-        linkDlg.setVisible(true);
-        if (linkDlg.selOk) {
-            ItemLink link = linkDlg.getLink();
-            tempInfList.add(link);
-            gbcInfList.gridy=tempInfList.size();
-            infListPan.add(link.dataPanel(gbcInfList.gridy), gbcInfList);
-            infListPan.updateUI();
-            linkEdited(link);
+        if (allItems.size() > 1) {
+            LinkBasic linkDlg = new LinkBasic(tempInfList.size() + 1, this);
+            linkDlg.setLocation(600, 400);
+            linkDlg.setVisible(true);
+            if (linkDlg.selOk) {
+                ItemLink link = linkDlg.getLink();
+                tempInfList.add(link);
+                gbcInfList.gridy = tempInfList.size();
+                infListPan.add(link.dataPanel(gbcInfList.gridy), gbcInfList);
+                infListPan.updateUI();
+                linkEdited(link);
+            }
+        }
+        else {
+            showError("Create items before creating links");
         }
     }
 
@@ -415,7 +420,7 @@ public class ItemSpace {
 
     void evalInfluence(double deltaT, double nowT) throws Exception  {
         setItemStartConditions();
-        for (int t = 0; t < 10; t++) {
+        for (int t = 0; t < 5; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
                 inf.evalForce();

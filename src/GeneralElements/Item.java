@@ -9,7 +9,6 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
 import display.InputControl;
 import display.MultiPairColPanel;
 import display.NumberTextField;
-import evaluations.EvalOnce;
 import mvUtils.Vector3dMV;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
@@ -26,28 +25,15 @@ import java.util.Vector;
 /**
  * Created by M Viswanathan on 31 Mar 2014
  */
-public class Item implements InputControl, EvalOnce {
-    Window parentW;
+public class Item extends DarkMatter {
     Vector<ItemLink> links;
-    ItemSpace space;
-    public ItemStat status;
-    boolean bFixedLocation = false;
-    Vector3dMV dirOfFixedGravityAcc;  // direction of fixed Acceleration, a unit Vector
     TuplePanel fixedAccVectPan;
     NumberTextField ntFixedAcc;
-    double fixedAcc = 9.81; // fixed acceleration value
-    Vector3d forceOfFixedGravity;
-    boolean bFixedForceOn = false;
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
     double xMin, yMin, zMin;
-    Vector3d force = new Vector3d();
-    public String name;
-    public double mass;
-    public double dia;
     public AxisAngle4d spinAxis; // absolute
     double spinPeriod; // in hours
-    public Color color;
     public String imageName;
     public boolean isLightSrc = false;
     Vector<LocalAction> localActions;
@@ -63,6 +49,7 @@ public class Item implements InputControl, EvalOnce {
     double nextReport; // sec
 
     public Item(Window parent) {
+        super(parent);
         this.parentW = parent;
         links = new Vector<ItemLink>();
         localActions = new Vector<LocalAction>();
@@ -89,14 +76,6 @@ public class Item implements InputControl, EvalOnce {
 
     public void addLocalAction(LocalAction action) {
         localActions.add(action);
-    }
-
-    public double getSurfaceArea() {
-        return 4 * Math.PI * Math.pow(dia / 2, 2);
-    }
-
-    public double getProjectedArea() {
-        return Math.PI * Math.pow(dia, 2) / 4;
     }
 
     void setRadioButtons() {
@@ -333,12 +312,8 @@ public class Item implements InputControl, EvalOnce {
         links.clear();
     }
 
-    public void setSpace(ItemSpace space) {
-        this.space = space;
-    }
-
-    public void initPosEtc(Point3d pos, Vector3d velocity) {
-        status.initPos(pos, velocity);
+     public void initPosEtc(Point3d pos, Vector3d velocity) {
+        super.initPosEtc(pos, velocity);
         nextReport = reportInterval;
     }
 
@@ -349,11 +324,7 @@ public class Item implements InputControl, EvalOnce {
             radPerSec = Math.PI * 2 / spinPeriod;
     }
 
-    public float getDiaFloat() {
-        return new Float(dia);
-    }
-
-    // The new methods with ItemGraphic
+      // The new methods with ItemGraphic
 
     WeakReference<ItemGraphic> itemGraphic;
 
@@ -386,30 +357,13 @@ public class Item implements InputControl, EvalOnce {
     }
 
     //    =========================== calculations ======================
-    public ItemStat getStatus() {
-        return status;
-    }
-
-    Vector3d lastForce = new Vector3d();
-    Vector3d lastPosition = new Vector3d();
-    Vector3d lastVelocity = new Vector3d();
-    Vector3d effectiveForce = new Vector3d();
-
-    public void initStartForce() {
-        force.set(0, 0, 0);
-    }
-
-    void setStartConditions() {
-        lastPosition.set(status.pos);
-        lastVelocity.set(status.velocity);
-        lastForce.set(force);
-    }
 
     void setLocalForces() {
-        if (bFixedForceOn)
-            force.set(forceOfFixedGravity);
-        else
-            force.set(0, 0, 0);
+        super.setLocalForces();
+//        if (bFixedForceOn)
+//            force.set(forceOfFixedGravity);
+//        else
+//            force.set(0, 0, 0);
         for (LocalAction action : localActions)
             force.add(action.getForce());
     }
@@ -479,21 +433,6 @@ public class Item implements InputControl, EvalOnce {
         }
         return spinIncrement;
     }
-
-//    void updateSpin() {
-//        if (radPerSec > 0) {
-//            double nowTime = status.time;
-//            double interval = (nowTime - lastTime);
-//            double increment = interval * radPerSec;
-//            Transform3D rotTr = new Transform3D();
-//            trgRotation.getTransform(rotTr);
-//            Transform3D rotZ = new Transform3D();
-//            rotZ.rotZ(increment);
-//            rotTr.mul(rotZ);
-//            trgRotation.setTransform(rotTr);
-//            lastTime = nowTime;
-//        }
-//    }
 
 //    =============================================
 
@@ -576,34 +515,5 @@ public class Item implements InputControl, EvalOnce {
             }
         }
         return retVal;
-    }
-
-    public void showError(String msg) {
-        JOptionPane.showMessageDialog(parentW, name + " has some problem at " + status.time + " \n " + msg, "ERROR", JOptionPane.ERROR_MESSAGE);
-        parentW.toFront();
-    }
-
-    void showMessage(String msg) {
-        JOptionPane.showMessageDialog(parentW, msg, "FOR INFORMATION", JOptionPane.INFORMATION_MESSAGE);
-        parentW.toFront();
-    }
-
-    @Override
-    public boolean canNotify() {
-        return true;
-    }
-
-    @Override
-    public void enableNotify(boolean b) {
-
-    }
-
-    @Override
-    public Window parent() {
-        return null;
-    }
-
-    public String toString() {
-        return name;
     }
 }

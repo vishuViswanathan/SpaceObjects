@@ -28,6 +28,7 @@ public class ItemLink implements EvalOnce {
     boolean valid = false;
     InputControl control;
     final ItemSpace space;
+    boolean bWithMass = false;
 //    int slNo;
 
     public ItemLink(Item item1, Item item2, Influence inf, ItemSpace space) {
@@ -169,6 +170,9 @@ public class ItemLink implements EvalOnce {
 
     public boolean evalForce() {
         return inf.evalForce();
+    }
+
+    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal){
     }
 
     static int cellHeight = 30;

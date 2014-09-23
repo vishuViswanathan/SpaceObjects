@@ -28,6 +28,7 @@ import java.util.Calendar;
  */
 public class ItemMovementsApp extends JApplet implements InputControl {
     static public enum SpaceSize {
+        BLANK("Blank Set as Daily Objects"),
         ASTRONOMICAL("Astronomical (km)"),
         GLOBAL("Earth and Environment (m)"),
         DAILY("Daily objects (mm)"),
@@ -121,22 +122,29 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         bShowOrbit = true;
                         bShowLinks = false;
                         break;
+                    case BLANK:
+                        duration = 200;
+                        calculationStep = 0.0002; // was 0.000002;
+                        refreshInterval = 200 * calculationStep; // was 20000
+                        space.enableGlobalGravity(false);
+                        proceedToItemList(false);
+                        bShowOrbit = false;
+                        bShowLinks = true;
+                        break;
                     case DAILY:
                         duration = 200;
                         calculationStep = 0.0002; // was 0.000002;
-                        refreshInterval = 2000 * calculationStep; // was 20000
+                        refreshInterval = 200 * calculationStep; // was 20000
                         space.enableGlobalGravity(false);
-                        if ((new BungeeJumping()).getScheme(mainF, space)) {
+//                        if ((new BungeeJumping()).getScheme(mainF, space)) {
 //                        if ((new ChainWithBall()).getScheme(mainF, space)) {
-//                        if ((new MultiPendulum()).getScheme(mainF, space))  {
-//                            if ((new MultiPendulum()).getScheme(mainF, space))  {
-//                            log.info(space.getOneItem(0).dataInXML());
-//                            log.info(space.getOneItem(1).dataInXML());
-//                           space.setGravityLinks();
+                        if ((new MultiPendulum()).getScheme(mainF, space))  {
+
                             proceedToItemList(false);
                         }
                         bShowOrbit = false;
                         bShowLinks = true;
+                        bRealTime = true;
                         break;
                 }
             }
@@ -212,6 +220,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     SpaceEvaluator evaluator;
 
     void startRunThread() {
+        continueIt = false;
         space.noteInput();
         if (showOrbitMap()) {
             runIt = true;
@@ -270,7 +279,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(false);
         double step = calculationStep;
         double hrsPerSec = 0;
-        continueIt = true;
+//        continueIt = true;
         double endT;
         if (fresh) {
             space.setGravityLinks();
@@ -280,44 +289,23 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             endT = ntfDuration.getData() * 3600;
             lastTnano = System.nanoTime(); // new Date()).getTime();
             nowDate = new DateAndJDN(dateAndJDN);
-            continueIt = true;
+//            continueIt = true;
         }
         else {
             endT = nowT + ntfDuration.getData() * 3600;
         }
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec); //.format(nowDate.getTime()));
+        boolean bLive = false;
+        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive); //.format(nowDate.getTime()));
 
         runIt = true;
         long lastStepNano = System.nanoTime();
         long nowStepNano, diffStepNano;
+
         while (runIt && nowT < endT) {
             if (continueIt) {
                 try {
                     doOneStep(step, nowT);
-                    if (bRealTime) {
-                        nowStepNano = System.nanoTime();
-                        diffStepNano = (nowStepNano - lastStepNano);
-                        stepDeltaT = (double)(diffStepNano) / 1e9;
-                        if (stepDeltaT <= calculationStep) {
-                            step = stepDeltaT;
-//                            debug("YES : stepDeltaT = " + stepDeltaT + ", calculationStep = " + calculationStep);
-                        }
-                        else {
-                            step = calculationStep;
-//                            debug("NO : stepDeltaT = " + stepDeltaT + ", calculationStep = " + calculationStep);
-                        }
-                    }
-                    else {
-                        step = calculationStep;
-                    }
-
-//                    if (++count > 1000) {
-//                        nowStepNano = System.nanoTime();
-//                        diffStepNano = (nowStepNano - lastStepNano);
-//                        System.out.println(diffStepNano);
-//                        count = 0;
-//                    }
-
+                    step = calculationStep;
                     lastStepNano = System.nanoTime();
                     nowT += step;
                     if (nowT > nextRefresh) {
@@ -326,11 +314,23 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         nowTnano = System.nanoTime(); //new Date().getTime();
                         double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
                         hrsPerSec = (refreshInterval / 3600) / deltaT;
+                        if (bRealTime && deltaT <= refreshInterval) {
+//                            debug("Realtime " + nowT);
+                            try {
+                                Thread.sleep((long)((refreshInterval - deltaT) * 1000));
+                                bLive = true;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else
+                            bLive = false;
                         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
-                        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
+                        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
+//                        bLive = false;
                         lastRefresh = nowT;
                         nextRefresh += refreshInterval;
-                        lastTnano = nowTnano;
+                        lastTnano = System.nanoTime(); //nowTnano;
                     }
                 } catch (Exception e) {
                     showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
@@ -338,7 +338,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 }
             }
         }
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
+        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
         enableButtons(true);
     }

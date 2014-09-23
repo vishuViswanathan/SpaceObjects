@@ -159,6 +159,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     JLabel nowTime = new JLabel();
+    JLabel timeLabel;
     String  pauseStr = "Pause Orbit";
     String resumeStr = "Resume";
     String continueStr = "Continue";
@@ -173,6 +174,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     //    NumberLabel lCalculStep;
     JCheckBox chkBshowOrbit;
     JCheckBox chkBshowLinks;
+    JCheckBox chkBrealTime;
     JMenuBar menuBar() {
         JMenuBar bar = new JMenuBar();
         ActionListener l = new ActionListener() {
@@ -210,15 +212,18 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         bar.add(resetViewB);
         JPanel nowTp = new JPanel();
         if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            nowTp.add(new JLabel("Time of Display "));
+            timeLabel = new JLabel("Time of Display ");
         else
-            nowTp.add(new JLabel("Elapsed Time (s) "));
+            timeLabel = new JLabel("Elapsed Time (s) ");
+        nowTp.add(timeLabel);
         nowTime.setSize(new Dimension(100, 20));
         nowTp.add(nowTime);
         bar.add(nowTp);
 //        bar.add(zPos);
         bar.add(getPlanetSizeBar());
         bar.add(getSpeedSelector());
+        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+            bar.add(showRealTimeCB());
         bar.add(showOrbitCB());
         bar.add(showLinksCB());
         pauseRunB.addActionListener(l);
@@ -271,17 +276,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     int scrollBarMin = 0, scrollbarMax = 3600, scrollExt = 60, scrollBarNow = 1;
     double intervalSrFactor;
 
-    int getIntervalScrPosOLD(double nowVal) {
-        intervalSrFactor = (maxInterval - minInterval)/(scrollbarMax - scrollBarMin);
-        return scrollBarMin + (int)((1 / intervalSrFactor) * (nowVal - minInterval));
-    }
-
-    double getIntervalFromScrBarOLD(int nowPos) {
-        scrollBarNow = nowPos;
-        return minInterval + (intervalSrFactor)*(nowPos - scrollBarMin);
-    }
-
-    int getIntervalScrPos(double nowVal) {
+     int getIntervalScrPos(double nowVal) {
         logMinInterval = Math.log10(minInterval);
         logMaxInterval = Math.log10(maxInterval);
         logSpan = logMaxInterval - logMinInterval;
@@ -292,8 +287,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     double getIntervalFromScrBar(int nowPos) {
         scrollBarNow = nowPos;
-        double val = Math.pow(10, (logMinInterval + intervalSrFactor*(nowPos - scrollBarMin)));
-        return val;
+        return Math.pow(10, (logMinInterval + intervalSrFactor*(nowPos - scrollBarMin)));
     }
 
     JPanel getSpeedSelector() {
@@ -323,19 +317,19 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
                 int val = sbUpdateSpeed.getValue();
-                if (val == scrollBarMin && controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
-                    controller.bRealTime = true;
-                    sbUpdateSpeed.setBackground(Color.RED);
-                }
-                else {
-                    if (controller.bRealTime) {
-                        controller.bRealTime = false;
-                        sbUpdateSpeed.setBackground(Color.cyan);
-                    }
+//                if (val == scrollBarMin && controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
+//                    controller.bRealTime = true;
+//                    sbUpdateSpeed.setBackground(Color.RED);
+//                }
+//                else {
+//                    if (controller.bRealTime) {
+//                        controller.bRealTime = false;
+//                        sbUpdateSpeed.setBackground(Color.cyan);
+//                    }
                     nowInterval = getIntervalFromScrBar(val); // h
                     controller.setRefreshInterval(nowInterval);
                     lSpeedSet.setData(nowInterval);
-                }
+//                }
             }
         });
         JPanel jp = new FramedPanel();
@@ -374,6 +368,18 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             }
         });
         return chkBshowLinks;
+    }
+
+    JCheckBox showRealTimeCB() {
+        chkBrealTime = new JCheckBox("Real Time", true);
+        chkBrealTime.setSelected(controller.bRealTime);
+        chkBrealTime.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                controller.bRealTime = chkBrealTime.isSelected();
+            }
+        });
+        return chkBrealTime;
     }
 
     JScrollBar planetSizeBar;
@@ -769,13 +775,18 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
     DecimalFormat nowTfmt = new DecimalFormat("#,###.000000");
-
-    public void updateDisplay(double nowT, DateAndJDN viewTime, double hrsPerSec) {
+    Color colRealTime = Color.BLUE;
+    Color colSimulation = Color.gray;
+    public void updateDisplay(double nowT, DateAndJDN viewTime, double hrsPerSec, boolean bLive) {
         if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
             nowTime.setText(sdf.format(viewTime.getTime()));
         else
             nowTime.setText(nowTfmt.format(nowT)); // / 3600));
-
+        if (bLive) {
+            nowTime.setForeground(colRealTime);
+        }
+        else
+            nowTime.setForeground(colSimulation);
         lUpdateSpeed.setData(hrsPerSec);
     }
 
