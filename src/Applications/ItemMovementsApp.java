@@ -136,10 +136,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         calculationStep = 0.0002; // was 0.000002;
                         refreshInterval = 200 * calculationStep; // was 20000
                         space.enableGlobalGravity(false);
-//                        if ((new BungeeJumping()).getScheme(mainF, space)) {
+                        if ((new BungeeJumping()).getScheme(mainF, space)) {
 //                        if ((new ChainWithBall()).getScheme(mainF, space)) {
-                        if ((new MultiPendulum()).getScheme(mainF, space))  {
-
+//                        if ((new MultiPendulum()).getScheme(mainF, space))  {
                             proceedToItemList(false);
                         }
                         bShowOrbit = false;

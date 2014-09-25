@@ -1,5 +1,6 @@
 package GeneralElements.link;
 
+import GeneralElements.DarkMatter;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import display.InputControl;
@@ -22,8 +23,8 @@ import java.util.LinkedList;
  * Created by M Viswanathan on 20 May 2014
  */
 public class ItemLink implements EvalOnce {
-    public Item item1;
-    public Item item2;
+    public DarkMatter item1;
+    public DarkMatter item2;
     Influence inf;
     boolean valid = false;
     InputControl control;
@@ -31,7 +32,7 @@ public class ItemLink implements EvalOnce {
     boolean bWithMass = false;
 //    int slNo;
 
-    public ItemLink(Item item1, Item item2, Influence inf, ItemSpace space) {
+    public ItemLink(DarkMatter item1, DarkMatter item2, Influence inf, ItemSpace space) {
         this(space);
         this.control = space.getInputControl();
         this.item1 = item1;
@@ -42,11 +43,11 @@ public class ItemLink implements EvalOnce {
         valid = true;
     }
 
-    public ItemLink(Item item1, Item item2,  ItemSpace space) {
+    public ItemLink(DarkMatter item1, DarkMatter item2,  ItemSpace space) {
         this(item1, item2, new Gravity(item1, item2), space);
     }
 
-    public ItemLink(Item item1, Item item2, Influence.Type type, ItemSpace space) {
+    public ItemLink(DarkMatter item1, DarkMatter item2, Influence.Type type, ItemSpace space) {
         this(space);
         tlItem1.setText("" + item1);
         tlItem2.setText("" + item2);
@@ -150,12 +151,12 @@ public class ItemLink implements EvalOnce {
                         valid = true;
                     }
                     break;
-                case ROPE:
-                    if (freeLen > 0 && kExpansion > 0) {
-                        inf = new Rope(item1, item2, freeLen, kExpansion, true);
-                        valid = true;
-                    }
-                    break;
+//                case ROPE:
+//                    if (freeLen > 0 && kExpansion > 0) {
+//                        inf = new Rope(item1, item2, freeLen, kExpansion, true);
+//                        valid = true;
+//                    }
+//                    break;
                  case ROD:
                      if (freeLen > 0 && kCompression > 0) {
                          inf = new Rod(item1, item2, freeLen, kCompression, true);
@@ -172,6 +173,12 @@ public class ItemLink implements EvalOnce {
         return inf.evalForce();
     }
 
+    /**
+     * For evaluatong the mass elements in the link with (multiple internal links)
+     * @param deltaT
+     * @param nowT
+     * @param bFinal
+     */
     public void updatePosAndVel(double deltaT, double nowT, boolean bFinal){
     }
 
@@ -378,9 +385,9 @@ public class ItemLink implements EvalOnce {
                         case ROD:
                             inf = new Rod(item1, item2, 0, 0, true);
                             break;
-                        case ROPE:
-                            inf = new Rope(item1, item2, 0, 0, true);
-                            break;
+//                        case ROPE:
+//                            inf = new Rope(item1, item2, 0, 0, true);
+//                            break;
                         case SPRING:
                             inf = new Spring(item1, item2, 0, 0, true);
                             break;
