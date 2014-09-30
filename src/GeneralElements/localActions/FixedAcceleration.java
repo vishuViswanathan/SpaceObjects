@@ -1,6 +1,6 @@
 package GeneralElements.localActions;
 
-import GeneralElements.Item;
+import GeneralElements.DarkMatter;
 import mvUtils.Vector3dMV;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
@@ -14,8 +14,13 @@ public class FixedAcceleration extends LocalAction {
     Vector3dMV unitDirection;  // direction of fixed Acceleration, a unit Vector
     double fixedAcc = 9.81; // fixed acceleration value
 
-    public FixedAcceleration(Item item, Vector3d direction, double fixedAcc) {
+    public FixedAcceleration(DarkMatter item, Vector3d direction, double fixedAcc) {
         super(Type.FIXEDACCELERATION, item);
+        setValues(direction, fixedAcc);
+    }
+
+    public FixedAcceleration(Vector3d direction, double fixedAcc) {
+        super(Type.FIXEDACCELERATION);
         setValues(direction, fixedAcc);
     }
 
@@ -33,7 +38,7 @@ public class FixedAcceleration extends LocalAction {
         fixedAcc = Double.valueOf(vp.val);
     }
 
-    public FixedAcceleration(Item item, String xmlStr) {
+    public FixedAcceleration(DarkMatter item, String xmlStr) {
         super(Type.FIXEDACCELERATION, item);
         setValues(xmlStr);
     }

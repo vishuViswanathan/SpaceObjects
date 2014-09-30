@@ -2,21 +2,13 @@ package GeneralElements.Display;
 
 import GeneralElements.Item;
 import SpaceElements.collection.PointArrayFIFO;
-import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
-import com.sun.j3d.utils.universe.SimpleUniverse;
-import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import display.NumberLabel;
 
 import javax.media.j3d.*;
-import javax.swing.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 
 /**
  * Created by M Viswanathan on 08 Aug 2014
@@ -28,17 +20,11 @@ public class ItemGraphic {
     TransformGroup tgPlanet;
     TransformGroup trgAxis;
     TransformGroup trgRotation;
-    OrbitBehavior vpOrbitBehavior;
     PathShape[] orbitShapes;
     PointArrayFIFO ptArr;
     int nShapeSets = 4;
     int nPos = 2000; // number of positions
     Color3f color3f;
-    Canvas3D localVewCanvas;
-    ViewingPlatform localVp;
-    NumberLabel nlViewDistance;
-    JPanel jpViewDistance;
-    double viewPosFromPlanet = 0;
     double viewScale = 1;
     Item item;
 
@@ -164,9 +150,9 @@ public class ItemGraphic {
         } catch (Exception e) {
             String msg = e.getMessage();
             item.showError(e.getMessage());
-            throw(new Exception(item.name + ": " + msg));
+            throw (new Exception(item.name + ": " + msg));
         }
-            }
+    }
 
     void updateSpin(double spinIncrement) {
         if (spinIncrement != 0) {

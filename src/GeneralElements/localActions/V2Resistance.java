@@ -1,11 +1,11 @@
 package GeneralElements.localActions;
 
+import GeneralElements.DarkMatter;
 import GeneralElements.Item;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 
 import javax.vecmath.Vector3d;
-import java.util.HashMap;
 
 /**
  * Created by M Viswanathan on 13 Aug 2014
@@ -16,13 +16,12 @@ public class V2Resistance extends LocalAction {
 
 
     public V2Resistance(Item item, double factor) {
-        super(Type.FLUIDRESISTANCE, item);
+        super(Type.FLUIDRESISTANCE);
         this.factor = factor;
-
-        evalAreas();
+        setItem(item);
     }
 
-    public V2Resistance(Item item, String xmlStr) throws Exception {
+    public V2Resistance(DarkMatter item, String xmlStr) throws Exception {
         super(Type.FLUIDRESISTANCE, item);
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "factor", 0);
@@ -34,9 +33,15 @@ public class V2Resistance extends LocalAction {
         }
     }
 
+    public void setItem(DarkMatter item) {
+        super.setItem(item);
+        evalAreas();
+    }
+
     private void evalAreas() {
         frictionArea = item.getProjectedArea();
     }
+
     public Vector3d getForce() {
         Vector3d force;
         double vel = item.status.velocity.length();

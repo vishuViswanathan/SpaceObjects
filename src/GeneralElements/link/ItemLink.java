@@ -29,8 +29,6 @@ public class ItemLink implements EvalOnce {
     boolean valid = false;
     InputControl control;
     final ItemSpace space;
-    boolean bWithMass = false;
-//    int slNo;
 
     public ItemLink(DarkMatter item1, DarkMatter item2, Influence inf, ItemSpace space) {
         this(space);
@@ -68,10 +66,17 @@ public class ItemLink implements EvalOnce {
         bDelete.addActionListener(new DeleteButtListener(this, space));
     }
 
-//    public void prepareEvaluator() {
-//        linkEvaluator = new LinkEvaluator(this);
-//    }
+    public void setLocalForces() {
+        inf.setLocalForces();
+    }
 
+    public void setGravityLinks(boolean bSet) {
+        inf.setGravityLinks(bSet);
+    }
+
+    public void initStartForce() {
+        inf.initStartForces();
+    }
 
     public ItemLink(LinkedList<Item> allItems, ItemLink oldLink, ItemSpace space) {
         this(space);
@@ -173,13 +178,12 @@ public class ItemLink implements EvalOnce {
         return inf.evalForce();
     }
 
-    /**
-     * For evaluatong the mass elements in the link with (multiple internal links)
-     * @param deltaT
-     * @param nowT
-     * @param bFinal
-     */
-    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal){
+    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception{
+        inf.updatePosAndVel(deltaT, nowT, bFinal);
+    }
+
+    public void setStartConditions() {
+        inf.setStartConditions();
     }
 
     static int cellHeight = 30;
@@ -202,7 +206,7 @@ public class ItemLink implements EvalOnce {
         JPanel jp;
         gbc.gridx++;
         jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
+        jp.setPreferredSize(allDim[col]);
         jp.add(new JLabel("Delete"));
         outerPan.add(jp, gbc);
         return outerPan;
@@ -270,16 +274,9 @@ public class ItemLink implements EvalOnce {
         gbc.gridx++;
 
         jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
+        jp.setPreferredSize(allDim[col]);
         jp.add(bDelete);
         outerPan.add(jp, gbc);
-
-//        cbLinkType.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                enableRequired();
-//            }
-//        });
         return outerPan;
     }
 
@@ -393,7 +390,6 @@ public class ItemLink implements EvalOnce {
                             break;
                     }
                     if (inf != null) {
-                        vp = XMLmv.getTag(xmlStr, "type", 0);
                         try {
                             vp = XMLmv.getTag(xmlStr, "params", 0);
                             inf.set(vp.val);

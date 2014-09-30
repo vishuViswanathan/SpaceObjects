@@ -1,7 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.Item;
-
+import GeneralElements.DarkMatter;
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
@@ -13,7 +12,7 @@ import java.awt.*;
  */
 public class Spring extends InfluenceDef  {
     LineArray linkLine;
-    public Spring(Item item1, Item item2, double freeLen, double kCompression, double kExpansion, boolean bOldDef) {
+    public Spring(DarkMatter item1, DarkMatter item2, double freeLen, double kCompression, double kExpansion, boolean bOldDef) {
         type = Type.SPRING;
         this.item1 = item1;
         this.item2 = item2;
@@ -22,16 +21,16 @@ public class Spring extends InfluenceDef  {
         this.kExpansion = kExpansion;
     }
 
-    public Spring(Item item1, Item item2, double freeLen, double kCommon, boolean bOldDef) {
+    public Spring(DarkMatter item1, DarkMatter item2, double freeLen, double kCommon, boolean bOldDef) {
         this(item1, item2, freeLen, kCommon, kCommon, bOldDef);
         type = Type.SPRING;
     }
 
-    public Spring(Item item1, Item item2, double initialLenFactor, double eCommon) {
+    public Spring(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eCommon) {
         super(item1, item2, initialLenFactor, eCommon, eCommon);
     }
 
-    public Spring(Item item1, Item item2, double initialLenFactor, double eCompression, double eExpansion) {
+    public Spring(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eCompression, double eExpansion) {
         super(item1, item2, initialLenFactor, eCompression, eExpansion);
     }
 

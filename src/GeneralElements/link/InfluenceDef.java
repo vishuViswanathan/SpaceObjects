@@ -1,7 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.Item;
-
+import GeneralElements.DarkMatter;
 import javax.vecmath.Vector3d;
 
 /**
@@ -16,7 +15,7 @@ public class InfluenceDef extends Influence {
 
     }
 
-    public InfluenceDef(Item item1, Item item2, double initialLenFactor, double eCompression, double eExpansion) {
+    public InfluenceDef(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eCompression, double eExpansion) {
         this.item1 = item1;
         this.item2 = item2;
         this.initialLenFactor = initialLenFactor;

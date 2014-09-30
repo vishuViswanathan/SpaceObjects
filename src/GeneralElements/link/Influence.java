@@ -1,6 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.Item;
+import GeneralElements.DarkMatter;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 
@@ -11,8 +11,8 @@ import javax.media.j3d.RenderingAttributes;
  * Created by M Viswanathan on 24 May 2014
  */
 public class Influence {
-    Item item1;
-    Item item2;
+    DarkMatter item1;
+    DarkMatter item2;
     Type type;
     double freeLen = 0;
     double kExpansion = 0;
@@ -54,15 +54,21 @@ public class Influence {
     }
 //    enum Types {GRAVITY, SPRING, ATTRACTION, REPULSION, CSPRING, ESPRING};
     public boolean evalForce() {return false;}
+    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    }
+
     public Type getType() {return type;}
 
     public double getFreeLength(){return freeLen;}
     public double getKCompression(){return kCompression;}
-    public double getKExpansion(){return kExpansion;};
+    public double getKExpansion(){return kExpansion;}
     public boolean addLinksDisplay(Group grp, RenderingAttributes linkAtrib) {
         return false;
     }
-
+    public void setStartConditions() {}
+    public void initStartForces(){}
+    public void setGravityLinks(boolean bSet) {}
+    public void setLocalForces() {}
     public void updateDisplay() {}
 
     public StringBuilder dataInXML() {
@@ -72,7 +78,6 @@ public class Influence {
     }
 
     public boolean set(String xmlStr) throws NumberFormatException {
-        boolean retVal = true;
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "freeLen", 0);
         freeLen = Double.valueOf(vp.val);
@@ -80,6 +85,6 @@ public class Influence {
         kCompression = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "kExpansion", 0);
         kExpansion = Double.valueOf(vp.val);
-        return retVal;
+        return true;
     }
 }

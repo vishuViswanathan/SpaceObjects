@@ -2,6 +2,7 @@ package GeneralElements;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.link.ItemLink;
+import GeneralElements.localActions.LocalAction;
 import display.InputControl;
 import evaluations.EvalOnce;
 import mvUtils.Vector3dMV;
@@ -23,6 +24,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean bFixedLocation = false;
     Vector3dMV dirOfFixedGravityAcc;  // direction of fixed Acceleration, a unit Vector
     double fixedAcc = 9.81; // fixed acceleration value
+    Vector<LocalAction> localActions;
     Vector3d forceOfFixedGravity;
     boolean bFixedForceOn = false;
     Vector3d force = new Vector3d();
@@ -33,6 +35,8 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public DarkMatter(Window parent) {
         this.parentW = parent;
+        links = new Vector<ItemLink>();
+        localActions = new Vector<LocalAction>();
     }
 
     public DarkMatter(String name, double mass, double dia, Color color, Window parent) {
@@ -47,6 +51,11 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public void addInfluence(ItemLink itemLink) {
         links.add(itemLink);
+    }
+
+    public void addLocalAction(LocalAction action) {
+        action.setItem(this);
+        localActions.add(action);
     }
 
     public void clearInfluence() {
@@ -91,17 +100,19 @@ public class DarkMatter implements InputControl, EvalOnce {
         force.set(0, 0, 0);
     }
 
-    void setStartConditions() {
+    public void setStartConditions() {
         lastPosition.set(status.pos);
         lastVelocity.set(status.velocity);
         lastForce.set(force);
     }
 
-    void setLocalForces() {
+    public void setLocalForces() {
         if (bFixedForceOn)
             force.set(forceOfFixedGravity);
         else
             force.set(0, 0, 0);
+        for (LocalAction action : localActions)
+            force.add(action.getForce());
     }
 
     public void addToForce(Vector3d addForce) {
@@ -123,7 +134,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         }
     }
 
-    void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
+    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
             effectiveForce.set(force);
             effectiveForce.add(lastForce);
@@ -150,9 +161,6 @@ public class DarkMatter implements InputControl, EvalOnce {
             }
         }
     }
-
-    double lastTime = 0;
-    double radPerSec = 0;
 
     public void showError(String msg) {
         JOptionPane.showMessageDialog(parentW, name + " has some problem at " + status.time + " \n " + msg, "ERROR", JOptionPane.ERROR_MESSAGE);

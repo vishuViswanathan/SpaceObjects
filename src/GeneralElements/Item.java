@@ -3,7 +3,6 @@ package GeneralElements;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
-import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import display.InputControl;
@@ -20,13 +19,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
-import java.util.Vector;
 
 /**
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
-    Vector<ItemLink> links;
     TuplePanel fixedAccVectPan;
     NumberTextField ntFixedAcc;
     JRadioButton rbFixedAccOn;
@@ -36,7 +33,6 @@ public class Item extends DarkMatter {
     double spinPeriod; // in hours
     public String imageName;
     public boolean isLightSrc = false;
-    Vector<LocalAction> localActions;
 
     JTextField tfName;
     NumberTextField ntMass, ntDia;
@@ -50,9 +46,7 @@ public class Item extends DarkMatter {
 
     public Item(Window parent) {
         super(parent);
-        this.parentW = parent;
-        links = new Vector<ItemLink>();
-        localActions = new Vector<LocalAction>();
+//        localActions = new Vector<LocalAction>();
     }
 
     public Item(String name, double mass, double dia, Color color, Window parent) {
@@ -74,11 +68,7 @@ public class Item extends DarkMatter {
         takeFromXMl(xmlStr);
     }
 
-    public void addLocalAction(LocalAction action) {
-        localActions.add(action);
-    }
-
-    void setRadioButtons() {
+     void setRadioButtons() {
         rbFixedPos = new JRadioButton("Fixed Position");
         rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
 
@@ -304,14 +294,6 @@ public class Item extends DarkMatter {
         this.imageName = imageName;
     }
 
-    public void addInfluence(ItemLink itemLink) {
-        links.add(itemLink);
-    }
-
-    public void clearInfluence() {
-        links.clear();
-    }
-
      public void initPosEtc(Point3d pos, Vector3d velocity) {
         super.initPosEtc(pos, velocity);
         nextReport = reportInterval;
@@ -331,25 +313,43 @@ public class Item extends DarkMatter {
     public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
         ItemGraphic itemG = new ItemGraphic(this);
         itemG.addObjectAndOrbit(grp, orbitAtrib);
-        itemGraphic = null;
+//        itemGraphic = null;
         itemGraphic = new WeakReference<ItemGraphic>(itemG);
         return itemG;
     }
 
     public void attachPlatform(ViewingPlatform platform) {
-        itemGraphic.get().attachPlatform(platform);
+        try {
+            itemGraphic.get().attachPlatform(platform);
+        } catch (NullPointerException e) {
+            showError("ERROR in Attaching a platform to an item " + name + ":" + e.getMessage());
+        }
     }
 
     public void detachPlatform() {
-        itemGraphic.get().detachPlatform();
+        try {
+            itemGraphic.get().detachPlatform();
+        } catch (NullPointerException e) {
+            showError("ERROR in Detaching a platform for an item " + name + ":" + e.getMessage());
+        }
     }
 
     public void setScale(double scale) {
-        itemGraphic.get().setScale(scale);
+        try {
+            ItemGraphic g = itemGraphic.get();
+            if (g != null)
+                g.setScale(scale);
+        } catch (Exception e) {
+            showError("ERROR in setScale an item " + name + ":" + e.getMessage());
+        }
     }
 
     public void updateOrbitAndPos() throws Exception {
-        itemGraphic.get().updateOrbitAndPos(getSpinIncrement());
+        try {
+            itemGraphic.get().updateOrbitAndPos(getSpinIncrement());
+        } catch (NullPointerException e) {
+            showError("ERROR in updateOrbitAndPos an item " + name + ":" + e.getMessage());
+        }
     }
 
     public void enableLightSrc(boolean ena) {
@@ -358,7 +358,7 @@ public class Item extends DarkMatter {
 
     //    =========================== calculations ======================
 
-    void setLocalForces() {
+ /*   public void setLocalForces() {
         super.setLocalForces();
 //        if (bFixedForceOn)
 //            force.set(forceOfFixedGravity);
@@ -367,7 +367,7 @@ public class Item extends DarkMatter {
         for (LocalAction action : localActions)
             force.add(action.getForce());
     }
-
+*/
     public void addToForce(Vector3d addForce) {
         force.add(addForce);
     }
@@ -387,7 +387,7 @@ public class Item extends DarkMatter {
         }
     }
 
-    void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
+    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
             effectiveForce.set(force);
             effectiveForce.add(lastForce);

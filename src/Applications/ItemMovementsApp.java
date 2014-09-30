@@ -68,7 +68,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     JComboBox cbSpaceSize = new JComboBox(SpaceSize.values());
     ItemSpace space;
     boolean asApp = false;
-    JFrame mainF;
+    static JFrame mainF;
     DateAndJDN dateAndJDN = new DateAndJDN();
     JButton pbStart = new JButton("Start");
     JButton pbSaveData = new JButton("Save Data to File");
@@ -136,9 +136,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         calculationStep = 0.0002; // was 0.000002;
                         refreshInterval = 200 * calculationStep; // was 20000
                         space.enableGlobalGravity(false);
-                        if ((new BungeeJumping()).getScheme(mainF, space)) {
 //                        if ((new ChainWithBall()).getScheme(mainF, space)) {
 //                        if ((new MultiPendulum()).getScheme(mainF, space))  {
+//                        if ((new BungeeJumping()).getScheme(mainF, space)) {
+                        if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
                             proceedToItemList(false);
                         }
                         bShowOrbit = false;
@@ -271,7 +272,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 //    long lastStepTms;
     long nowTnano;
     public boolean bRealTime = false;
-    double stepDeltaT;
 //    boolean updateDisplayNow = false;
 
     void doCalculation(boolean fresh)   {
@@ -297,15 +297,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive); //.format(nowDate.getTime()));
 
         runIt = true;
-        long lastStepNano = System.nanoTime();
-        long nowStepNano, diffStepNano;
 
         while (runIt && nowT < endT) {
             if (continueIt) {
                 try {
                     doOneStep(step, nowT);
                     step = calculationStep;
-                    lastStepNano = System.nanoTime();
                     nowT += step;
                     if (nowT > nextRefresh) {
                         space.updateLinkDisplay();
@@ -612,15 +609,15 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         return mainF;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    void showError(String msg) {
+    public static void showError(String msg) {
         log.info(msg);
-        JOptionPane.showMessageDialog(parent(), msg, "ERROR", JOptionPane.ERROR_MESSAGE);
-        parent().toFront();
+        JOptionPane.showMessageDialog(mainF, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
+        mainF.toFront();
     }
 
-    void showMessage(String msg) {
-        JOptionPane.showMessageDialog(parent(), msg, "FOR INFORMATION", JOptionPane.INFORMATION_MESSAGE);
-        parent().toFront();
+    public static void showMessage(String msg) {
+        JOptionPane.showMessageDialog(mainF, msg, "FOR INFORMATION", JOptionPane.INFORMATION_MESSAGE);
+        mainF.toFront();
     }
 
     boolean decide(String title, String msg) {

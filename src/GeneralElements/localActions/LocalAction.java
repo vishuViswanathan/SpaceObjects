@@ -1,6 +1,6 @@
 package GeneralElements.localActions;
 
-import GeneralElements.Item;
+import GeneralElements.DarkMatter;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 
@@ -44,14 +44,23 @@ public class LocalAction {
             return retVal;
         }
     }
-    Item item;
+    DarkMatter item;
     Type type;
-    public LocalAction(Type type, Item item) {
+
+    public LocalAction(Type type) {
         this.type = type;
+    }
+
+    public LocalAction(Type type, DarkMatter item) {
+        this(type);
         this.item = item;
     }
 
-    static public LocalAction getLocalAction(Item item, String xmlStr) throws Exception{
+    public void setItem(DarkMatter item) {
+        this.item = item;
+    }
+
+    static public LocalAction getLocalAction(DarkMatter item, String xmlStr) throws Exception{
         LocalAction action = null;
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "type", 0);
@@ -77,8 +86,7 @@ public class LocalAction {
     }
 
     public StringBuilder dataInXML() {
-        StringBuilder xmlStr = new StringBuilder("");
-        return xmlStr;
+        return new StringBuilder("");
     }
 
 }

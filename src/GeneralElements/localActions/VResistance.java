@@ -1,6 +1,6 @@
 package GeneralElements.localActions;
 
-import GeneralElements.Item;
+import GeneralElements.DarkMatter;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
 
@@ -13,14 +13,22 @@ public class VResistance extends LocalAction {
     double factor;
     double frictionArea;
 
-
-    public VResistance(Item item, double factor) {
-        super(Type.FLUIDRESISTANCE, item);
+    public VResistance(double factor) {
+        super(Type.FLUIDRESISTANCE);
         this.factor = factor;
+    }
+
+    public VResistance(DarkMatter item, double factor) {
+        this(factor);
+        setItem(item);
+   }
+
+    public void setItem(DarkMatter item) {
+        super.setItem(item);
         evalAreas();
     }
 
-    public VResistance(Item item, String xmlStr) throws Exception {
+    public VResistance(DarkMatter item, String xmlStr) throws Exception {
         super(Type.FLUIDRESISTANCE, item);
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "factor", 0);

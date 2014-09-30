@@ -1,6 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.Item;
+import GeneralElements.DarkMatter;
 import SpaceElements.Constants;
 
 import javax.vecmath.Vector3d;
@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
  */
 public class Gravity extends Influence  {
 
-    public Gravity (Item item1, Item item2) {
+    public Gravity (DarkMatter item1, DarkMatter item2) {
         type = Type.GRAVITY;
         this.item1 = item1;
         this.item2 = item2;

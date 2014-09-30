@@ -1,7 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.Item;
-
+import GeneralElements.DarkMatter;
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
@@ -13,7 +12,7 @@ import java.awt.*;
  */
 public class Rod extends InfluenceDef  {
     LineArray linkLine;
-    public Rod(Item item1, Item item2, double freeLen, double kCompression, boolean bOldDef) {
+    public Rod(DarkMatter item1, DarkMatter item2, double freeLen, double kCompression, boolean bOldDef) {
         type = Type.ROD;
         this.item1 = item1;
         this.item2 = item2;
@@ -21,7 +20,7 @@ public class Rod extends InfluenceDef  {
         this.kCompression = kCompression;
     }
 
-    public Rod(Item item1, Item item2, double initialLenFactor, double eCompression) {
+    public Rod(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eCompression) {
         super(item1, item2, initialLenFactor, eCompression, eCompression);
         type = Type.ROD;
     }

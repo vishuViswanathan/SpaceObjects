@@ -97,11 +97,19 @@ public class ItemSpace {
 //                    allItemLinks.remove(link);
 //            }
         }
+        for (ItemLink l: allItemLinks)
+            l.setGravityLinks(globalGravityOn);
     }
 
     public void noteInput() {
         for (Item i: allItems)
             i.noteInput();
+        initLinks();
+    }
+
+    void initLinks() {
+        for (ItemLink l: allItemLinks)
+            l.initStartForce();
     }
 
     JPanel itemListPan;
@@ -406,16 +414,22 @@ public class ItemSpace {
     public void initForces() {
         for (Item i: allItems)
             i.setLocalForces();
+        for (ItemLink link:allItemLinks)
+            link.setLocalForces();
     }
 
     void setItemStartConditions() {
         for (Item i: allItems)
             i.setStartConditions();
+        for (ItemLink link:allItemLinks)
+            link.setStartConditions();
     }
 
     void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
         for (Item i: allItems)
             i.updatePosAndVel(deltaT, nowT, bFinal);
+        for (ItemLink link:allItemLinks)
+            link.updatePosAndVel(deltaT, nowT, bFinal);
     }
 
     void evalInfluence(double deltaT, double nowT) throws Exception  {
@@ -555,7 +569,7 @@ public class ItemSpace {
     }
 
     public boolean takeFromXML(String xmlStr) {
-        boolean retVal = true;
+        boolean retVal;
         clearSpace();
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "allItems", 0);
