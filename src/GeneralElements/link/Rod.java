@@ -27,6 +27,7 @@ public class Rod extends InfluenceDef  {
 
     @Override
     public boolean evalForce() {
+        boolean retVal = true;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);
         double r = distVect.length();
@@ -36,12 +37,17 @@ public class Rod extends InfluenceDef  {
         // attraction is positive
         force  =   diff * kCompression;
         double ratio = force / r;
-        nowForce = new Vector3d(distVect);
-        nowForce.scale(ratio);
-        item1.addToForce(nowForce);
-        nowForce.negate();
-        item2.addToForce(nowForce);
-        return true;
+        if (Double.isNaN(ratio) ) {
+            retVal = false;
+        }
+        else {
+            nowForce = new Vector3d(distVect);
+            nowForce.scale(ratio);
+            item1.addToForce(nowForce);
+            nowForce.negate();
+            item2.addToForce(nowForce);
+        }
+        return retVal;
     }
 
     public boolean addLinksDisplay(Group grp, RenderingAttributes linkAtrib) {

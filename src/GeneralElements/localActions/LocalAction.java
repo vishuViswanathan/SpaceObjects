@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 /**
  * Created by M Viswanathan on 13 Aug 2014
  */
-public class LocalAction {
+public class LocalAction implements Cloneable {
     static public enum Type {
         FLUIDFRICTION("FluidFriction"),
         FLUIDRESISTANCE("FluidResistance"),
@@ -89,4 +89,13 @@ public class LocalAction {
         return new StringBuilder("");
     }
 
+    public Object clone() {
+        LocalAction cloned = null;
+        try {
+            cloned = (LocalAction)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return cloned;
+    }
 }

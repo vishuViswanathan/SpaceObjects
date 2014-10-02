@@ -36,6 +36,7 @@ public class Spring extends InfluenceDef  {
 
     @Override
     public boolean evalForce() {
+        boolean retVal = true;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);
         double r = distVect.length();
@@ -47,12 +48,17 @@ public class Spring extends InfluenceDef  {
         else
             force =  diff * kCompression;
         double ratio = force / r;
-        Vector3d nowForce = new Vector3d(distVect);
-        nowForce.scale(ratio);
-        item1.addToForce(nowForce);
-        nowForce.negate();
-        item2.addToForce(nowForce);
-        return true;
+        if (Double.isNaN(ratio) ) {
+            retVal = false;
+        }
+        else {
+            Vector3d nowForce = new Vector3d(distVect);
+            nowForce.scale(ratio);
+            item1.addToForce(nowForce);
+            nowForce.negate();
+            item2.addToForce(nowForce);
+        }
+        return retVal;
     }
 
     public boolean addLinksDisplay(Group grp, RenderingAttributes linkAtrib) {

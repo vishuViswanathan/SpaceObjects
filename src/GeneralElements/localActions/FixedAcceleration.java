@@ -55,4 +55,10 @@ public class FixedAcceleration extends LocalAction {
         xmlStr.append((XMLmv.putTag("fixedAcc", fixedAcc)));
         return xmlStr;
     }
+
+    public Object clone() {
+        FixedAcceleration cloned = (FixedAcceleration)super.clone();
+        cloned.unitDirection = new Vector3dMV(unitDirection);
+        return cloned;
+    }
 }

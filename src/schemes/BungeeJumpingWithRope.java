@@ -36,15 +36,15 @@ public class BungeeJumpingWithRope implements DefaultScheme{
         lastItem = it;
         it =  new Item("Ball", mass2, 1, Color.WHITE, mainF);
 //        it.setbFixedLocation(true);
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
+        it.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), 9.81));
+        it.addLocalAction(new V2Resistance(resistFactor));
         it.initPosEtc(new Point3d(4,0, 0), new Vector3d(0, 0, 0));
         space.addItem(it);
 
-        LinkWithMass rope = new Rope(lastItem, it, 30, massPerM, e, 30);
+        LinkWithMass rope = new Rope(lastItem, it, 50, massPerM, e, 60);
         if (rope.setAllElements()) {
-            rope.addLocalAction("<type>FixedAccel</type><direction>0, -1, 0</direction><fixedAcc>9.81</fixedAcc>");
-            rope.addLocalAction("<type>FluidResistance</type><factor>" + resistFactor + "</factor>");
+            rope.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), 9.81));
+            rope.addLocalAction(new V2Resistance(resistFactor));
             ItemLink link = new ItemLink(lastItem, it, rope, space);
             space.addItemLink(link);
         }

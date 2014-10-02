@@ -301,7 +301,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         while (runIt && nowT < endT) {
             if (continueIt) {
                 try {
-                    doOneStep(step, nowT);
+                    if (!doOneStep(step, nowT)) {
+                        showError("Error in one step at " + nowT + "\nSuggest restart program");
+                        break;
+                    }
                     step = calculationStep;
                     nowT += step;
                     if (nowT > nextRefresh) {
@@ -339,8 +342,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(true);
     }
 
-    void doOneStep(double deltaT, double nowT) throws Exception {
-        space.doCalculation(deltaT, nowT);
+    boolean doOneStep(double deltaT, double nowT) throws Exception {
+        return space.doCalculation(deltaT, nowT);
     }
 
  /*   void doCalculationFast(boolean fresh)   {

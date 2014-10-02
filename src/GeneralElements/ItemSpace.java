@@ -432,22 +432,37 @@ public class ItemSpace {
             link.updatePosAndVel(deltaT, nowT, bFinal);
     }
 
-    void evalInfluence(double deltaT, double nowT) throws Exception  {
+    boolean evalInfluence(double deltaT, double nowT) throws Exception  {
+        boolean ok = true;
         setItemStartConditions();
         for (int t = 0; t < 5; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                inf.evalForce();
+                if (!inf.evalForce()) {
+                    showError("In evalInfluence: evalForce is false for Link " + inf);
+                    ok = false;
+                    break;
+                }
+            if (!ok)
+                break;
             updatePosAndVel(deltaT, nowT, false); // not the final calculation
         }
         // now finalise it
-        initForces();
-        for (ItemLink inf : allItemLinks)
-            inf.evalForce();
-        updatePosAndVel(deltaT, nowT, true); // the final calculation
+        if (ok) {
+            initForces();
+            for (ItemLink inf : allItemLinks)
+                if (!inf.evalForce()) {
+                    showError("In evalInfluence: evalForce-final is false for Link " + inf);
+                    ok = false;
+                    break;
+                }
+            if (ok)
+                updatePosAndVel(deltaT, nowT, true); // the final calculation
+        }
+        return ok;
     }
 
-    void evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
+    boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         initForces();
 ////        for (ItemLink inf: allItemLinks)
 ////            inf.evalForce();
@@ -467,6 +482,7 @@ public class ItemSpace {
 //        System.out.println("ItemSpace After awaitForceComplete");
 //        evaluator.resetStartBarrier();
         updatePosAndVel(deltaT, nowT, true);
+        return false;
     }
 
     public void updateLinkDisplay() {
@@ -504,12 +520,12 @@ public class ItemSpace {
 //            lk.prepareEvaluator();
 //    }
 //
-    public void doCalculation(double deltaT, double nowT) throws Exception{
-        evalInfluence(deltaT, nowT);
+    public boolean doCalculation(double deltaT, double nowT) throws Exception{
+        return evalInfluence(deltaT, nowT);
     }
 
-    public void doCalculation( SpaceEvaluator evaluator, double deltaT, double nowT) throws Exception{
-        evalInfluence(evaluator, deltaT, nowT);
+    public boolean  doCalculation( SpaceEvaluator evaluator, double deltaT, double nowT) throws Exception{
+        return evalInfluence(evaluator, deltaT, nowT);
     }
 
     StringBuilder allItemsInXML() {

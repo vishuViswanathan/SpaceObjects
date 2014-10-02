@@ -404,6 +404,11 @@ public class ItemLink implements EvalOnce {
         return retVal;
     }
 
+    public String toString() {
+        return "" + inf + "between " + item1 + "and " + item2;
+    }
+
+
     class DeleteButtListener implements ActionListener {
         ItemSpace space;
         ItemLink link;

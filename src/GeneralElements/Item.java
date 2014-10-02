@@ -87,6 +87,8 @@ public class Item extends DarkMatter {
     public void setRefreshInterval(double interval, double nextRefresh) {
         reportInterval = interval;
         nextReport = nextRefresh;
+//        reportInterval = interval;
+//        nextReport += reportInterval;
     }
 
     public JPanel dataPanel(int objNum) {

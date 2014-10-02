@@ -87,4 +87,8 @@ public class Influence {
         kExpansion = Double.valueOf(vp.val);
         return true;
     }
+
+    public String toString() {
+        return "Influence type " + type + " ";
+    }
 }

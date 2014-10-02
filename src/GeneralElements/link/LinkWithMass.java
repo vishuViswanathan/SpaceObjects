@@ -42,7 +42,7 @@ public class LinkWithMass extends InfluenceDef  {
 
     public void addLocalAction(LocalAction action) {
         for (DarkMatter mat:massElements)
-            mat.addLocalAction(action);
+            mat.addLocalAction((LocalAction)action.clone());
     }
 
     public void addLocalAction(String xmlStr) {
@@ -81,9 +81,9 @@ public class LinkWithMass extends InfluenceDef  {
 
     public boolean setAllElements() {
         int pairs = nElements / 2;
-        allLinks = new Vector<ItemLink>(nElements);
+        allLinks = new Vector<ItemLink>(); // (nElements);
         nElements = (nElements / 2) * 2; // make it even
-        massElements = new Vector<DarkMatter>(nElements - 1); // the massElements are 1 less
+        massElements = new Vector<DarkMatter>(); //(nElements - 1); // the massElements are 1 less
         double uMass = massPerM * freeLen / (nElements - 1);
         Vector3d distVect = new Vector3d();
         Vector3d item1Pos = new Vector3d(item1.status.pos);
@@ -94,6 +94,7 @@ public class LinkWithMass extends InfluenceDef  {
         double oneLinkLen = freeLen / nElements;
         double oneLinkLen2 = Math.pow(oneLinkLen, 2);
         boolean retVal = true;
+        double initialLenFactor = 1;
         if (distance <= freeLen) {
             // create mass elements and position them uniformly between item1 and item2, but at an oneLinkLen
             // in zigzag fashion if required
@@ -102,13 +103,15 @@ public class LinkWithMass extends InfluenceDef  {
             double x = 0;
             double y = Math.sqrt(oneLinkLen2 - stPitch2);
             double z = 0;
+            boolean invert = false;
             for (int i = 0; i < pairs - 1; i++) {
                 // the first point is offset from x axis
                 x += stPitch;
-                points.add(new Point3d(x, y, z));
+                points.add(new Point3d(x, y * ((invert) ? -1: 1), z));
                 // the next point is on the x axis
                 x += stPitch;
                 points.add(new Point3d(x, 0, z));
+                invert = !invert;
             }
             // for the last pair, take only the offset point since the next point will be item2
             x += stPitch;
@@ -160,10 +163,12 @@ public class LinkWithMass extends InfluenceDef  {
             // create rods between the points
             DarkMatter lastItem = item1;
             for (DarkMatter oneItem : massElements) {
-                allLinks.add(new ItemLink(lastItem, oneItem, new Rod(lastItem, oneItem, 1, eExpansion), space));
+                allLinks.add(new ItemLink(lastItem, oneItem, new Rod(lastItem, oneItem,
+                        initialLenFactor, eExpansion), space));
                 lastItem = oneItem;
             }
-            allLinks.add(new ItemLink(lastItem, item2, new Rod(lastItem, item2, 1, eExpansion), space));
+            allLinks.add(new ItemLink(lastItem, item2, new Rod(lastItem, item2,
+                    initialLenFactor, eExpansion), space));
         }
         else {
             showMessage("Free Length " + freeLen + " is greater than distance " + distance + "\nLink is NOT created!");
@@ -196,9 +201,13 @@ public class LinkWithMass extends InfluenceDef  {
 
     @Override
     public boolean evalForce() {
+        boolean retVal = true;
         for (ItemLink l: allLinks)
-            l.evalForce();
-        return true;
+            if (!l.evalForce()) {
+                retVal = false;
+                break;
+            }
+        return retVal;
     }
 
     void showMessage(String msg) {

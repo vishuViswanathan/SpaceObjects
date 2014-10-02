@@ -14,7 +14,7 @@ public class VResistance extends LocalAction {
     double frictionArea;
 
     public VResistance(double factor) {
-        super(Type.FLUIDRESISTANCE);
+        super(Type.FLUIDFRICTION);
         this.factor = factor;
     }
 
@@ -61,6 +61,11 @@ public class VResistance extends LocalAction {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("type", type.toString()));
         xmlStr.append(XMLmv.putTag("factor", factor));
         return xmlStr;
+    }
+
+    public Object clone() {
+        VResistance cloned = (VResistance)super.clone();
+        return cloned;
     }
 }
 
