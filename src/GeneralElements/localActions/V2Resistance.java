@@ -16,9 +16,13 @@ public class V2Resistance extends LocalAction {
 
 
     public V2Resistance(Item item, double factor) {
+        this(factor);
+        setItem(item);
+    }
+
+    public V2Resistance(double factor) {
         super(Type.FLUIDRESISTANCE);
         this.factor = factor;
-        setItem(item);
     }
 
     public V2Resistance(DarkMatter item, String xmlStr) throws Exception {
@@ -59,5 +63,10 @@ public class V2Resistance extends LocalAction {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("type", type.toString()));
         xmlStr.append(XMLmv.putTag("factor", factor));
         return xmlStr;
+    }
+
+    public Object clone() {
+        V2Resistance cloned = (V2Resistance)super.clone();
+        return cloned;
     }
 }
