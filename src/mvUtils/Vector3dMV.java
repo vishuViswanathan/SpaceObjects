@@ -25,6 +25,24 @@ public class Vector3dMV extends Vector3d {
         super(tuple);
     }
 
+    public Vector3dMV(double scale, Tuple3d vecRef) {
+        super();
+        scale(scale, vecRef); // suoer call
+    }
+
+    public static Vector3dMV meanVector3dMV(Tuple3d vec1, Tuple3d vec2) {
+        Vector3dMV vec = new Vector3dMV();
+        vec.setMean(vec1, vec2);
+        return vec;
+    }
+
+    public Vector3dMV setMean(Tuple3d vec1, Tuple3d vec2) {
+        set(vec1);
+        add(vec2);
+        scale(0.5);
+        return this;
+    }
+
     public void set(String strCSV) throws NumberFormatException {
         String[] split = strCSV.split(",");
         if (split.length == 3)

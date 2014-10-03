@@ -91,10 +91,16 @@ public class DarkMatter implements InputControl, EvalOnce {
         return status;
     }
 
-    Vector3d lastForce = new Vector3d();
+    Vector3d lastForce = new Vector3dMV();
     Vector3d lastPosition = new Vector3d();
     Vector3d lastVelocity = new Vector3d();
-    Vector3d effectiveForce = new Vector3d();
+    Vector3dMV effectiveForce = new Vector3dMV();
+    Vector3dMV thisAcc = new Vector3dMV();
+    Vector3dMV deltaV = new Vector3dMV();
+    Vector3dMV newVelocity = new Vector3dMV();
+    Vector3dMV averageV = new Vector3dMV();
+    Vector3dMV deltaPos = new Vector3dMV();
+    Vector3dMV newPos = new Vector3dMV();
 
     public void initStartForce() {
         force.set(0, 0, 0);
@@ -134,11 +140,72 @@ public class DarkMatter implements InputControl, EvalOnce {
         }
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
+    public void updatePosAndVelORIGINAL(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
+//            effectiveForce.set(force);
+//            effectiveForce.add(lastForce);
+//            effectiveForce.scale(0.5); // the average force
+            effectiveForce.setMean(force, lastForce);
+//            Vector3d thisAcc = new Vector3d(effectiveForce);
+//            thisAcc.scale((1.0 / mass));
+            thisAcc.scale((1.0/ mass), effectiveForce);
+            // calculate from force
+//            Vector3d deltaV = new Vector3d(effectiveForce);
+//            deltaV.scale(deltaT);
+//            deltaV.scale(1.0 / mass);
+            newVelocity.add(lastVelocity, deltaV);
+            deltaV.scale(deltaT, thisAcc);
+            Vector3d averageV = new Vector3d(deltaV);
+            averageV.scaleAdd(+0.5, lastVelocity); //
+            Point3d newPos = new Point3d(averageV);
+            newPos.scale(deltaT);
+            newPos.add(lastPosition);
+            status.pos.set(newPos); // only position is updated here
+//            Vector3d newVelocity = new Vector3d(lastVelocity);
+//            newVelocity.add(deltaV);
+            status.velocity.set(newVelocity);
+            if (bFinal) {
+                status.acc.set(thisAcc);
+                status.time = nowT;
+                lastForce.set(force);  // note down the force for the last calculation
+            }
+        }
+    }
+
+    public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+        boolean changed = true;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            effectiveForce.setMean(force, lastForce);
+            thisAcc.scale((1.0/ mass), effectiveForce);
+            // calculate from force
+            deltaV.scale(deltaT, thisAcc);
+            newVelocity.add(lastVelocity, deltaV);
+            averageV.setMean(lastVelocity, newVelocity);
+            deltaPos.scale(deltaT, averageV);
+            if (deltaPos.length() > 0.25)
+                ItemMovementsApp.log.info("deltaPos for " + name + "at " + nowT + " = " + deltaPos );
+            newPos.add(lastPosition, deltaPos);
+            status.pos.set(newPos); // only position is updated here
+            if (bFinal) {
+                status.velocity.set(newVelocity);
+                status.acc.set(thisAcc);
+                status.time = nowT;
+            }
+        }
+        return changed;
+    }
+
+    public boolean updatePosAndVelOLD(double deltaT, double nowT, boolean bFinal) throws Exception {
+        boolean changed = true;
+        if (bFixedLocation)
+            changed = false;
+        else {
             effectiveForce.set(force);
             effectiveForce.add(lastForce);
             effectiveForce.scale(0.5); // the average force
+
             Vector3d thisAcc = new Vector3d(effectiveForce);
             thisAcc.scale((1.0 / mass));
             // calculate from force
@@ -160,6 +227,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                 lastForce.set(force);  // note down the force for the last calculation
             }
         }
+        return changed;
     }
 
     public void showError(String msg) {

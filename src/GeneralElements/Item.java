@@ -370,26 +370,26 @@ public class Item extends DarkMatter {
             force.add(action.getForce());
     }
 */
-    public void addToForce(Vector3d addForce) {
-        force.add(addForce);
-    }
+//    public void addToForce(Vector3d addForce) {
+//        force.add(addForce);
+//    }
 
     // dummy not used
-    @Override
-    public void evalOnce() {
-    }
+//    @Override
+//    public void evalOnce() {
+//    }
 
-    @Override
-    public void evalOnce(double deltaT, double nowT) {
-        try {
-            updatePosAndVel(deltaT, nowT, true);
-        } catch (Exception e) {
-            ItemMovementsApp.log.error("In ITem evalOnce for " + name + ":" + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    public void evalOnce(double deltaT, double nowT) {
+//        try {
+//            updatePosAndVel(deltaT, nowT, true);
+//        } catch (Exception e) {
+//            ItemMovementsApp.log.error("In ITem evalOnce for " + name + ":" + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 
-    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
+    public void updatePosAndVelORIGINAL(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
         if (!bFixedLocation) {
             effectiveForce.set(force);
             effectiveForce.add(lastForce);
@@ -422,7 +422,18 @@ public class Item extends DarkMatter {
         }
     }
 
-    double lastTime = 0;
+    public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+        if (super.updatePosAndVel(deltaT, nowT, bFinal)) {
+            evalMaxMinPos();
+            if (nowT > nextReport) {
+                updateOrbitAndPos();
+                nextReport += reportInterval;
+            }
+        }
+        return true;
+    }
+
+        double lastTime = 0;
     double radPerSec = 0;
 
     double getSpinIncrement() {

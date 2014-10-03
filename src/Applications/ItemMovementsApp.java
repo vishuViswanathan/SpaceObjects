@@ -125,7 +125,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     case BLANK:
                         duration = 200;
                         calculationStep = 0.0002; // was 0.000002;
-                        refreshInterval = 200 * calculationStep; // was 20000
+                        refreshInterval = 2 * calculationStep; // was 20000
                         space.enableGlobalGravity(false);
                         proceedToItemList(false);
                         bShowOrbit = false;
@@ -337,6 +337,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 }
             }
         }
+        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
         enableButtons(true);

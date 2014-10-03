@@ -33,6 +33,16 @@ public class Rod extends InfluenceDef  {
         double r = distVect.length();
         Vector3d nowForce;
         double diff = r - freeLen;
+//        double deadBand = freeLen * 0.5;
+//        if (Math.abs(diff) < deadBand)
+//            diff = 0;
+//        else {
+//            ItemMovementsApp.log.info("diff = " + diff);
+//            if (diff > 0)
+//                diff = deadBand;
+//            else
+//                diff += deadBand;
+//        }
         double force;
         // attraction is positive
         force  =   diff * kCompression;

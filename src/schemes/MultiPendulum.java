@@ -22,7 +22,7 @@ public class MultiPendulum implements DefaultScheme {
     double len = 0.5;
     double lenStep = 0.05;
 
-    double k = 10000;
+    double e = 20000;
     int nPendulums = 15;
     double mass1 = 0.1;
     double mass2 = 1;
@@ -44,10 +44,11 @@ public class MultiPendulum implements DefaultScheme {
             space.addItem(itBall);
             y = - Math.sqrt(Math.pow(len, 2) - Math.pow(x, 2));
             itBall.initPosEtc(new Point3d(x, y, z), new Vector3d(0, 0, 0));
-            itBall.addLocalAction(new FixedAcceleration(itBall, new Vector3d(0, -1, 0), 9.81));
-            itBall.addLocalAction(new V2Resistance(itBall, resistance));
+            itBall.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), 9.81));
+            itBall.addLocalAction(new V2Resistance(resistance));
 
-            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k, true) , space);
+//            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k, true) , space);
+            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, 1, e) , space);
             space.addItemLink(link);
 
             len += lenStep;
