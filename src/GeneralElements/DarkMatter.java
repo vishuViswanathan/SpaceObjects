@@ -200,8 +200,8 @@ public class DarkMatter implements InputControl, EvalOnce {
             newVelocity.add(lastVelocity, deltaV);
             averageV.setMean(lastVelocity, newVelocity);
             deltaPos.scale(deltaT, averageV);
-            if (deltaPos.length() > 0.25)
-                ItemMovementsApp.log.info("deltaPos for " + name + "at " + nowT + " = " + deltaPos );
+//            if (deltaPos.length() > 0.25)
+//                ItemMovementsApp.log.info("deltaPos for " + name + "at " + nowT + " = " + deltaPos );
             newPos.add(lastPosition, deltaPos);
             status.pos.set(newPos); // only position is updated here
             if (bFinal) {
