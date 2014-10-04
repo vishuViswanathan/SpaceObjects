@@ -185,7 +185,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     JPanel buttonPanel() {
         JPanel jp = new JPanel();
-        ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.####", "Duration");
+        ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.######", "Duration");
         MyListener listener = new MyListener();
         pbReadData.addActionListener(listener);
         pbSaveData.addActionListener(listener);
@@ -338,6 +338,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             }
         }
         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
+        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
         enableButtons(true);

@@ -19,6 +19,8 @@ import java.util.Vector;
 public class LinkWithMass extends InfluenceDef  {
     int nElements;
     double massPerM;
+    double surfAreaPerM;
+    double projectedAreaPerM;
     Vector<DarkMatter> massElements;
     Vector<ItemLink> allLinks;
     Window parent;
@@ -93,6 +95,8 @@ public class LinkWithMass extends InfluenceDef  {
         double stPitch2 = Math.pow(stPitch, 2);
         double oneLinkLen = freeLen / nElements;
         double oneLinkLen2 = Math.pow(oneLinkLen, 2);
+        double uSurfaceArea = surfAreaPerM * oneLinkLen;
+        double uProjectedArea = projectedAreaPerM * oneLinkLen;
         boolean retVal = true;
         double initialLenFactor = 1;
         if (distance <= freeLen) {
@@ -154,8 +158,11 @@ public class LinkWithMass extends InfluenceDef  {
                 zRevRot.transform(point);
                 yRotRev.transform(point);
                 trRev.transform(point);
+                // oneElem dia is set at 0.1, but of no consequence since projected and surface areas are set subsequently
                 oneElem = new DarkMatter("pa" + i++, uMass, 0.1, Color.BLACK, parent);
                 oneElem.initPosEtc(point, new Vector3d(0, 0, 0));
+                oneElem.setProjectedArea(uProjectedArea);
+                oneElem.setSurfaceArea(uSurfaceArea);
                 for (LocalAction action : localActions)
                     oneElem.addLocalAction(action);
                 massElements.add(oneElem);

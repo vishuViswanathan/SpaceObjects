@@ -23,10 +23,10 @@ public class VResistance extends LocalAction {
         setItem(item);
    }
 
-    public void setItem(DarkMatter item) {
-        super.setItem(item);
-        evalAreas();
-    }
+//    public void setItem(DarkMatter item) {
+//        super.setItem(item);
+//        evalAreas();
+//    }
 
     public VResistance(DarkMatter item, String xmlStr) throws Exception {
         super(Type.FLUIDRESISTANCE, item);
@@ -34,21 +34,21 @@ public class VResistance extends LocalAction {
         vp = XMLmv.getTag(xmlStr, "factor", 0);
         try {
             factor = Double.valueOf(vp.val);
-            evalAreas();
+//            evalAreas();
         } catch (NumberFormatException e) {
             throw new Exception("in VResistance: " + e.getMessage());
         }
     }
 
-    private void evalAreas() {
-        frictionArea = item.getSurfaceArea();
-    }
-
+//    private void evalAreas() {
+//        frictionArea = item.getSurfaceArea();
+//    }
+//
     public Vector3d getForce() {
         Vector3d force;
         double vel = item.status.velocity.length();
         if (vel > 0) {
-            double forceMagnitude = -vel * factor * frictionArea; // opposing the velocity
+            double forceMagnitude = -vel * factor * item.getSurfaceArea(); // opposing the velocity
             double scaleFactor = forceMagnitude / vel;
             force = new Vector3d(item.status.velocity);
             force.scale(scaleFactor);

@@ -31,26 +31,26 @@ public class V2Resistance extends LocalAction {
         vp = XMLmv.getTag(xmlStr, "factor", 0);
         try {
             factor = Double.valueOf(vp.val);
-            evalAreas();
+//            evalAreas();
         } catch (NumberFormatException e) {
             throw new Exception("in V2Resistance: " + e.getMessage());
         }
     }
 
-    public void setItem(DarkMatter item) {
-        super.setItem(item);
-        evalAreas();
-    }
-
-    private void evalAreas() {
-        frictionArea = item.getProjectedArea();
-    }
+//    public void setItem(DarkMatter item) {
+//        super.setItem(item);
+//        evalAreas();
+//    }
+//
+//    private void evalAreas() {
+//        frictionArea = item.getProjectedArea();
+//    }
 
     public Vector3d getForce() {
         Vector3d force;
         double vel = item.status.velocity.length();
         if (vel > 0) {
-            double forceMagnitude = -Math.pow(vel, 2) * factor * frictionArea; // opposing the velocity
+            double forceMagnitude = -Math.pow(vel, 2) * factor * item.getProjectedArea(); // opposing the velocity
             double scaleFactor = forceMagnitude / vel;
             force = new Vector3d(item.status.velocity);
             force.scale(scaleFactor);

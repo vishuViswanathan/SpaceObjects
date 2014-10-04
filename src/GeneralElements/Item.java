@@ -266,6 +266,7 @@ public class Item extends DarkMatter {
                 ItemMovementsApp.log.error("Acc Vector Length is < 0 [" + vecLen);
             }
         }
+        calculateAreas();
         resetLimits();
         status.time = 0;
         nextReport = 0;

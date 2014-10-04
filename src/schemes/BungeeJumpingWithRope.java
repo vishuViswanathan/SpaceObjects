@@ -21,6 +21,7 @@ public class BungeeJumpingWithRope implements DefaultScheme{
     double mass2 = 100;
     double resistFactor = 1;
     double gAcc = 9.81;
+    double ropeDia = 0.0157079632679489;
 
     public BungeeJumpingWithRope() {
     }
@@ -42,7 +43,7 @@ public class BungeeJumpingWithRope implements DefaultScheme{
         it.initPosEtc(new Point3d(4,0, 0), new Vector3d(0, 0, 0));
         space.addItem(it);
 
-        LinkWithMass rope = new Rope(lastItem, it, 25, massPerM, e, 50);
+        LinkWithMass rope = new Rope(lastItem, it, 25, massPerM, ropeDia, e, 50);
         if (rope.setAllElements()) {
             rope.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), gAcc));
             rope.addLocalAction(new V2Resistance(resistFactor));

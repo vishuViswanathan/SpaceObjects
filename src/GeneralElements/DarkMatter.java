@@ -31,6 +31,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     public String name;
     public double mass;
     public double dia;
+    double projectedArea;
+    double surfaceArea;
     public Color color;
 
     public DarkMatter(Window parent) {
@@ -46,11 +48,25 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.dia = dia;
         this.color = color;
         status = new ItemStat();
+        calculateAreas();
         dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
     }
 
     public void addInfluence(ItemLink itemLink) {
         links.add(itemLink);
+    }
+
+    void calculateAreas() {
+        surfaceArea = 4 * Math.PI * Math.pow(dia / 2, 2);
+        projectedArea =  Math.PI * Math.pow(dia, 2) / 4;
+    }
+
+    public void setSurfaceArea(double surfaceArea) {
+        this.surfaceArea = surfaceArea;
+    }
+
+    public void setProjectedArea(double projectedArea) {
+        this.projectedArea = projectedArea;
     }
 
     public void addLocalAction(LocalAction action) {
@@ -63,11 +79,11 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public double getSurfaceArea() {
-        return 4 * Math.PI * Math.pow(dia / 2, 2);
+        return surfaceArea;
     }
 
     public double getProjectedArea() {
-        return Math.PI * Math.pow(dia, 2) / 4;
+        return projectedArea;
     }
 
     public void setbFixedForceOn(boolean set) {
