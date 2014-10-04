@@ -40,8 +40,8 @@ import java.util.Vector;
  */
 public class MotionDisplay  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
     ItemSpace space;
-    Transform3D defVPFtransform = new Transform3D();
-    Transform3D defTGMaintransform = new Transform3D();
+    Transform3D defVPFTransform = new Transform3D();
+    Transform3D defTGMainTransform = new Transform3D();
     ViewingPlatform vPf;
     TransformGroup tgMain;
     double maxOnOneSide;
@@ -50,7 +50,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     Vector<ItemGraphic> itemGraphics;
 
     public MotionDisplay(ItemSpace space, double interval, double duration, ItemMovementsApp controller) throws Exception {
-        super("Items in Motion");
+        super("Objects in Motion");
         this.controller = controller;
         this.space = space;
         this.duration = duration;
@@ -102,7 +102,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         t3.setTranslation(new Vector3d(0, 0, viewPosFromOrigin));
         TransformGroup vTg = vPf.getViewPlatformTransform();
         vTg.setTransform(t3);
-        vTg.getTransform(defVPFtransform);
+        vTg.getTransform(defVPFTransform);
         addMouseAction(vTg);
         Viewer viewer = new Viewer( mainCanvas );
         viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
@@ -160,10 +160,10 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     JLabel nowTime = new JLabel();
     JLabel timeLabel;
-    String  pauseStr = "Pause Orbit";
+    String  pauseStr = "Pause Action";
     String resumeStr = "Resume";
     String continueStr = "Continue";
-    String stopItStr = "Stop Orbit";
+    String stopItStr = "Stop Action";
     JButton pauseRunB = new JButton(pauseStr);
     JButton resetViewB = new JButton("Reset View");
     JButton stopB = new JButton(stopItStr);
@@ -345,7 +345,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     JCheckBox showOrbitCB() {
-        chkBshowOrbit = new JCheckBox("Show Orbit", true);
+        chkBshowOrbit = new JCheckBox("Show Path", true);
         chkBshowOrbit.setSelected(controller.bShowOrbit);
          chkBshowOrbit.addChangeListener(new ChangeListener() {
             @Override
@@ -413,7 +413,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     void resetView() {
-        vPf.getViewPlatformTransform().setTransform(defVPFtransform);
+        vPf.getViewPlatformTransform().setTransform(defVPFTransform);
         setDefaultPan();
     }
 
@@ -438,7 +438,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         tgMain.addChild(oneAxis(1, 1e13, Color.red));
         tgMain.addChild(oneAxis(2, 1e13, Color.blue));
         tgMain.addChild(oneAxis(3, -1e13, Color.lightGray));
-        tgMain.getTransform(defTGMaintransform);
+        tgMain.getTransform(defTGMainTransform);
         brGrpMain.addChild(tgMain);
         return brGrpMain;
     }
@@ -791,6 +791,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     void debug(String msg) {
-        System.out.println("OrbitDisplay: " + msg);
+        System.out.println("MotionDisplay: " + msg);
     }
 }
