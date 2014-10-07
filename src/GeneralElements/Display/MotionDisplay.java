@@ -76,18 +76,17 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 //                controller.stopIt();
 //            }
             public void windowClosing(WindowEvent e) {
+                if (localFrameON)
+                    localViewFrame.setVisible(false);
                 controller.stopIt();
             }
          });
-        setJMenuBar(menuBar());
+//        setJMenuBar(menuBar());
         setLayout(new BorderLayout());
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
         mainCanvas = new Canvas3D(config);
         add(mainCanvas, BorderLayout.CENTER);
-        localViewPanel = new FramedPanel(new BorderLayout());
-        localViewPanel.setPreferredSize(new Dimension(700, 700));
-        add(localViewPanel, BorderLayout.EAST);
-        //----
+        add(menuPanel(), BorderLayout.EAST);
         DoubleMaxMin xMaxMin = space.xMaxMin();
         DoubleMaxMin yMaxMin = space.yMaxMin();
         maxOnOneSide = Math.max(Math.max(xMaxMin.max, -xMaxMin.min), Math.max(yMaxMin.max, -yMaxMin.min));
@@ -112,10 +111,16 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         addMouseAction(vPf, mainCanvas);  //.getViewPlatformTransform());
         BranchGroup scene;
         scene = createSceneGraph();
-        addLocalViewingPlatform(tgMain);
+        prepareLocalViewPanel();
         univ.addBranchGraph(scene);
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
+    }
+
+    void prepareLocalViewPanel() {
+        localViewPanel = new FramedPanel(new BorderLayout());
+        localViewPanel.setPreferredSize(new Dimension(700, 700));
+        addLocalViewingPlatform();
     }
 
     OrbitBehavior vpOrbitBehavior;
@@ -175,8 +180,13 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JCheckBox chkBshowOrbit;
     JCheckBox chkBshowLinks;
     JCheckBox chkBrealTime;
-    JMenuBar menuBar() {
-        JMenuBar bar = new JMenuBar();
+
+    JPanel menuPanel() {
+        JPanel menuP = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 0, 5, 0);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         ActionListener l = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -209,31 +219,41 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         };
         resetViewB.addActionListener(l);
 
-        bar.add(resetViewB);
-        JPanel nowTp = new JPanel();
-        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+        menuP.add(resetViewB, gbc);
+        gbc.gridy++;
+        FramedPanel nowTp = new FramedPanel();
+        nowTp.setLayout(new BoxLayout(nowTp, BoxLayout.Y_AXIS));
+         if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
             timeLabel = new JLabel("Time of Display ");
         else
             timeLabel = new JLabel("Elapsed Time (s) ");
         nowTp.add(timeLabel);
         nowTime.setSize(new Dimension(100, 20));
         nowTp.add(nowTime);
-        bar.add(nowTp);
-//        bar.add(zPos);
-        bar.add(getPlanetSizeBar());
-        bar.add(getSpeedSelector());
-        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            bar.add(showRealTimeCB());
-        bar.add(showOrbitCB());
-        bar.add(showLinksCB());
+        menuP.add(nowTp, gbc);
+        gbc.gridy++;
+        menuP.add(getPlanetSizeBar(), gbc);
+        gbc.gridy++;
+        menuP.add(getSpeedSelector(), gbc);
+        gbc.gridy++;
+        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
+            menuP.add(showRealTimeCB(), gbc);
+            gbc.gridy++;
+        }
+        menuP.add(showLinksCB(), gbc);
+        gbc.gridy++;
+        menuP.add(showOrbitCB(), gbc);
+        gbc.gridy++;
         pauseRunB.addActionListener(l);
-        bar.add(pauseRunB);
+        menuP.add(pauseRunB, gbc);
+        gbc.gridy++;
         stopB.addActionListener(l);
-        bar.add(stopB);
+        menuP.add(stopB, gbc);
+        gbc.gridy++;
         resultsB.setEnabled(false);
         resultsB.addActionListener(l);
-        bar.add(resultsB);
-        return bar;
+        menuP.add(resultsB, gbc);
+        return menuP;
     }
 
     void tuneStopButt(boolean toContinue) {
@@ -293,7 +313,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JPanel getSpeedSelector() {
         switch (controller.spSize) {
             case ASTRONOMICAL:
-                minInterval = 1;
+                minInterval = 10;
                 maxInterval = 14400;
                 break;
             case DAILY:
@@ -317,26 +337,17 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
                 int val = sbUpdateSpeed.getValue();
-//                if (val == scrollBarMin && controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
-//                    controller.bRealTime = true;
-//                    sbUpdateSpeed.setBackground(Color.RED);
-//                }
-//                else {
-//                    if (controller.bRealTime) {
-//                        controller.bRealTime = false;
-//                        sbUpdateSpeed.setBackground(Color.cyan);
-//                    }
                     nowInterval = getIntervalFromScrBar(val); // h
                     controller.setRefreshInterval(nowInterval);
                     lSpeedSet.setData(nowInterval);
-//                }
             }
         });
         JPanel jp = new FramedPanel();
+        jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
+        jp.add(new JLabel("Update Speed"));
         jp.add(lSpeedSet);
         jp.add(sbUpdateSpeed);
         jp.add(lUpdateSpeed);
-//        jp.add(lCalculStep);
         return jp;
     }
 
@@ -402,6 +413,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             }
         });
         JPanel jp = new FramedPanel();
+        jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
         nlPlanetScale = new NumberTextField(null, 1, 4, false, 1, 1000, "####", "");
         nlPlanetScale.setBackground(Color.cyan);
         nlPlanetScale.setEditable(false);
@@ -530,14 +542,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         vpTransBehavior.setFactor(distance / 100);
     }
 
-    void showPlanet(ItemSphere p) {
-//        p.planet.showLocalView(localViewPanel);
-    }
-
-    void showPlanet(ItemSphere p, int atX, int atY) {
-//        p.planet.showLocalView(vPf, atX, atY, localViewPanel);
-    }
-
     @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getSource() == localViewCanvas) {
@@ -598,15 +602,19 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     @Override
     public void mouseEntered(MouseEvent e) {
         //To change body of implemented methods use File | Settings | File Templates.
-//        Object src = e.getSource();
-//        if (src == localViewCanvas) {
-//            localVpOrbitBehavior.setEnable(true);
-//            vpOrbitBehavior.setEnable(false);
-//        }
-//        else if (src == mainCanvas) {
-//            localVpOrbitBehavior.setEnable(false);
-//            vpOrbitBehavior.setEnable(true);
-//        }
+        Object src = e.getSource();
+        if (src == localViewCanvas) {
+            localVpOrbitBehavior.setEnable(true);
+            vpOrbitBehavior.setEnable(false);
+            vpRotateBehavior.setEnable(false);
+            vpTransBehavior.setEnable(false);
+        }
+        else if (src == mainCanvas) {
+            localVpOrbitBehavior.setEnable(false);
+            vpOrbitBehavior.setEnable(true);
+            vpRotateBehavior.setEnable(true);
+            vpTransBehavior.setEnable(true);
+        }
     }
 
     @Override
@@ -659,7 +667,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     double viewPosFromPlanet;
     OrbitBehavior localVpOrbitBehavior;
 
-    public void addLocalViewingPlatform(TransformGroup trGrp) {
+    public void addLocalViewingPlatform() {
         // create a Viewer and attach to its canvas
         // a Canvas3D can only be attached to a single Viewer
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
@@ -680,7 +688,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         // create a ViewingPlatform with 1 TransformGroups above the ViewPlatform
         localVp = new ViewingPlatform();
         localVp.setNominalViewingTransform();
-        Transform3D t3 = new Transform3D();
         viewer.setViewingPlatform(localVp);
 
         BoundingSphere bounds =
@@ -718,6 +725,18 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         bPlatformWasAttached = true;
     }
 
+    LocalViewFrame localViewFrame;
+    boolean localFrameON = false;
+
+    void showLocalViewFrame(String showWhat) {
+        if (!localFrameON) {
+            localViewFrame = new LocalViewFrame("Local View of " + showWhat, localViewPanel, controller);
+            localFrameON = true;
+        }
+        localViewFrame.setTitle("Local View of " + showWhat);
+        localViewFrame.setVisible(true);
+    }
+
     public void showLocalView(Item item) {
         jlItemName.setText(item.name);
         attachPlatformToItem(item);
@@ -729,6 +748,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         localVp.getViewPlatformTransform().setTransform(defaultTr);
 
         updateViewDistanceUI(1.0);
+        showLocalViewFrame(item.name);
     }
 
     public void showLocalView(Item item, int atX, int atY) {
@@ -769,6 +789,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         localVpt.setTranslation(diff);
         localVp.getViewPlatformTransform().setTransform(localVpt);
         updateViewDistanceUI(1.0);
+        showLocalViewFrame(item.name);
     }
 
 //  ===============================      Transferred from ItemGraphics
