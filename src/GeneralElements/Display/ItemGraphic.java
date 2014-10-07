@@ -49,17 +49,17 @@ public class ItemGraphic {
     }
 
     public void attachPlatform(ViewingPlatform platform) {
-        attachedPlaform = platform;
-        positionTrGrp.addChild(attachedPlaform);
+        attachedPlatform = platform;
+        positionTrGrp.addChild(attachedPlatform);
         bPlatformAttached = true;
     }
 
-    ViewingPlatform attachedPlaform;
+    ViewingPlatform attachedPlatform;
     boolean bPlatformAttached = false;
 
     public void detachPlatform() {
         if (bPlatformAttached)
-            positionTrGrp.removeChild(attachedPlaform);
+            positionTrGrp.removeChild(attachedPlatform);
         bPlatformAttached = false;
     }
 
