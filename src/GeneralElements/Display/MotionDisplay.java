@@ -42,7 +42,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     ItemSpace space;
     Transform3D defVPFTransform = new Transform3D();
     Transform3D defTGMainTransform = new Transform3D();
-    ViewingPlatform vPf;
+    ViewingPlatform mainViewPlatform;
     TransformGroup tgMain;
     double maxOnOneSide;
     double duration;
@@ -90,16 +90,16 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         DoubleMaxMin xMaxMin = space.xMaxMin();
         DoubleMaxMin yMaxMin = space.yMaxMin();
         maxOnOneSide = Math.max(Math.max(xMaxMin.max, -xMaxMin.min), Math.max(yMaxMin.max, -yMaxMin.min));
-        vPf = new ViewingPlatform();
-        vPf.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        vPf.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        mainViewPlatform = new ViewingPlatform();
+        mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
-        vPf.setNominalViewingTransform();
+        mainViewPlatform.setNominalViewingTransform();
         Transform3D t3 = new Transform3D();
-        vPf.getViewPlatformTransform().getTransform(t3);
+        mainViewPlatform.getViewPlatformTransform().getTransform(t3);
         double viewPosFromOrigin = 3 * maxOnOneSide;
         t3.setTranslation(new Vector3d(0, 0, viewPosFromOrigin));
-        TransformGroup vTg = vPf.getViewPlatformTransform();
+        TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
         vTg.setTransform(t3);
         vTg.getTransform(defVPFTransform);
         addMouseAction(vTg);
@@ -107,8 +107,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
         if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
             viewer.getView().setFrontClipDistance(0.00001);
-        univ = new SimpleUniverse(vPf, viewer );
-        addMouseAction(vPf, mainCanvas);  //.getViewPlatformTransform());
+        univ = new SimpleUniverse(mainViewPlatform, viewer );
+        addMouseAction(mainViewPlatform, mainCanvas);  //.getViewPlatformTransform());
         BranchGroup scene;
         scene = createSceneGraph();
         prepareLocalViewPanel();
@@ -123,7 +123,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         addLocalViewingPlatform();
     }
 
-    OrbitBehavior vpOrbitBehavior;
+    OrbitBehavior mainVpOrbitBehavior;
     MouseRotate vpRotateBehavior;
     MouseTranslate vpTransBehavior;
 
@@ -137,10 +137,9 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         BoundingSphere bounds =
                 new BoundingSphere(new Point3d(0.0,0.0,0.0), 10* maxOnOneSide);
         // with left button pressed
-        vpOrbitBehavior = new OrbitBehavior(canvas);
-        vpOrbitBehavior.setSchedulingBounds(bounds);
-        vP.setViewPlatformBehavior(vpOrbitBehavior);
-
+        mainVpOrbitBehavior = new OrbitBehavior(canvas);
+        mainVpOrbitBehavior.setSchedulingBounds(bounds);
+        vP.setViewPlatformBehavior(mainVpOrbitBehavior);
     }
 
     void addMouseAction(TransformGroup tg) {
@@ -425,7 +424,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     void resetView() {
-        vPf.getViewPlatformTransform().setTransform(defVPFTransform);
+        mainViewPlatform.getViewPlatformTransform().setTransform(defVPFTransform);
         setDefaultPan();
     }
 
@@ -491,17 +490,17 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     void zoom(double factor, Point3d objPos) {
         Transform3D tr =  new Transform3D();
-        vPf.getViewPlatformTransform().getTransform(tr);
+        mainViewPlatform.getViewPlatformTransform().getTransform(tr);
 
         Transform3D vpT = new Transform3D();
-        vPf.getViewPlatformTransform().getTransform(vpT);
+        mainViewPlatform.getViewPlatformTransform().getTransform(vpT);
         Vector3d eye = new Vector3d();
         vpT.get(eye);
         Point3d diff = new Point3d(eye);
         diff.sub(objPos);
         diff.scaleAdd(factor, objPos);
         tr.setTranslation(new Vector3d(diff));
-        vPf.getViewPlatformTransform().setTransform(tr);
+        mainViewPlatform.getViewPlatformTransform().setTransform(tr);
         adjustPanScale(objPos);
     }
 
@@ -513,7 +512,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             pickCanvas.setShapeLocation(e);
             PickResult result = pickCanvas.pickClosest();
             if (result == null) {
-                vpOrbitBehavior.setEnable(false);
+                mainVpOrbitBehavior.setEnable(false);
                 vpRotateBehavior.setEnable(true);
             }
             if (result != null)   {
@@ -522,8 +521,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                 mouseSelPt = pInter.getPointCoordinatesVW();
                 selPtOnScreen.x = e.getXOnScreen();
                 selPtOnScreen.y = e.getYOnScreen();
-                vpOrbitBehavior.setRotationCenter(mouseSelPt);
-                vpOrbitBehavior.setEnable(true);
+                mainVpOrbitBehavior.setRotationCenter(mouseSelPt);
+                mainVpOrbitBehavior.setEnable(true);
                 vpRotateBehavior.setEnable(false);
 
                 adjustPanScale(mouseSelPt);
@@ -533,7 +532,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     void adjustPanScale(Point3d thePointOfInterest) {
         Transform3D tr = new Transform3D();
-        vPf.getViewPlatformTransform().getTransform(tr);
+        mainViewPlatform.getViewPlatformTransform().getTransform(tr);
         Vector3d eye = new Vector3d();
         tr.get(eye);
         Vector3d dist = new Vector3d(eye);
@@ -546,11 +545,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     public void mouseClicked(MouseEvent e) {
         if (e.getSource() == localViewCanvas) {
             localVpOrbitBehavior.setEnable(true);
-            vpOrbitBehavior.setEnable(false);
+            mainVpOrbitBehavior.setEnable(false);
         }
         else {
             localVpOrbitBehavior.setEnable(false);
-            vpOrbitBehavior.setEnable(true);
+            mainVpOrbitBehavior.setEnable(true);
             pickCanvas.setShapeLocation(e);
             PickResult result = pickCanvas.pickClosest();
             Point3d pt = new Point3d();
@@ -583,11 +582,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     public void mousePressed(MouseEvent e) {
         if (e.getSource() == localViewCanvas) {
             localVpOrbitBehavior.setEnable(true);
-            vpOrbitBehavior.setEnable(false);
+            mainVpOrbitBehavior.setEnable(false);
         }
         else {
             localVpOrbitBehavior.setEnable(false);
-            vpOrbitBehavior.setEnable(true);
+            mainVpOrbitBehavior.setEnable(true);
             int butt = e.getButton();
             if (butt == MouseEvent.BUTTON1)
                 noteMouseSelObject(e);
@@ -605,13 +604,13 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         Object src = e.getSource();
         if (src == localViewCanvas) {
             localVpOrbitBehavior.setEnable(true);
-            vpOrbitBehavior.setEnable(false);
+            mainVpOrbitBehavior.setEnable(false);
             vpRotateBehavior.setEnable(false);
             vpTransBehavior.setEnable(false);
         }
         else if (src == mainCanvas) {
             localVpOrbitBehavior.setEnable(false);
-            vpOrbitBehavior.setEnable(true);
+            mainVpOrbitBehavior.setEnable(true);
             vpRotateBehavior.setEnable(true);
             vpTransBehavior.setEnable(true);
         }
@@ -756,10 +755,10 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         attachPlatformToItem(item);
         viewPosFromPlanet = 4 * item.dia;
         Transform3D mainVTr = new Transform3D();
-        vPf.getViewPlatformTransform().getTransform(mainVTr);
+        mainViewPlatform.getViewPlatformTransform().getTransform(mainVTr);
 
         Point3d eyePosINViewPlate= new Point3d();
-        Viewer[] viewers = vPf.getViewers();
+        Viewer[] viewers = mainViewPlatform.getViewers();
         Canvas3D canvas = viewers[0].getCanvas3D();
         canvas.getCenterEyeInImagePlate(eyePosINViewPlate);
         double midX = eyePosINViewPlate.x;
