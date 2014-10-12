@@ -19,6 +19,7 @@ import java.sql.*;
  */
 public class PlanetsAndMoons implements DefaultScheme {
     JFrame mainF;
+    String subDir = "/20141011";
 
     public PlanetsAndMoons() {
 
@@ -32,7 +33,8 @@ public class PlanetsAndMoons implements DefaultScheme {
         int nowColor = 0;
         int nColors = colors.length;
         boolean bRetVal = false;
-        File folder = new File("planetData");
+        String folderName = "planetData" + subDir;
+        File folder = new File(folderName);
         String[] fileNames = folder.list();
 //        String[] fileNames = {"sun.csv", "mercury.csv", "earth.csv", "saturn.csv"};
         Item item;
@@ -42,7 +44,7 @@ public class PlanetsAndMoons implements DefaultScheme {
             for (String oneFile:fileNames) {
                 if (oneFile.indexOf(".csv") > 0) {
                     itemName = oneFile.substring(0, oneFile.length() - 4);
-                    item = getObjectFromTextFile(st, "planetData\\" + oneFile, itemName, colors[nowColor] );
+                    item = getObjectFromTextFile(st, folderName + "\\" + oneFile, itemName, colors[nowColor] );
                     if (item == null)  {
                         showError("Unable to create object " + itemName);
                     }

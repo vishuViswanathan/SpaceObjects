@@ -161,7 +161,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         vpTransBehavior.setSchedulingBounds(bounds);
         tg.addChild(vpTransBehavior);
     }
-
     JLabel nowTime = new JLabel();
     JLabel timeLabel;
     String  pauseStr = "Pause Action";
