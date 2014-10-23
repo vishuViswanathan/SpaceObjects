@@ -444,6 +444,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             return true;
         } catch (Exception e) {
             showError("In showOrbitMap : " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

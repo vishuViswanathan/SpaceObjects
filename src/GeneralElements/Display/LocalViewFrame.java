@@ -13,6 +13,8 @@ import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.Transform3D;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
@@ -34,9 +36,11 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     JLabel jlItemName;
     double viewPosFromPlanet;
     boolean bPlatformWasAttached = false;
+    JCheckBox slowRevolveCB;  // slowing down MouseOrbit
 
     LocalViewFrame(ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller) {
         super(name);
+        setLayout(new BorderLayout());
         this.mainViewPlatform = mainViewPlatform;
         this.controller = controller;
         jbInit();
@@ -45,7 +49,8 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     void jbInit() {
         this.setSize(1300, 700);
         prepareLocalViewPanel();
-        add(localViewPanel);
+        add(localViewPanel, BorderLayout.CENTER);
+        add(menuPanel(), BorderLayout.EAST);
         pack();
     }
 
@@ -168,6 +173,34 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         nlViewDistance.setData(viewPosFromPlanet / 1000);
     }
 
+    JPanel menuPanel() {
+        JPanel menuP = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 0, 5, 0);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        menuP.add(showLinksCB(), gbc);
+        return menuP;
+    }
+
+    JCheckBox showLinksCB() {
+        slowRevolveCB = new JCheckBox("Slow Revolve", true);
+        slowRevolveCB.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                boolean bSel = slowRevolveCB.isSelected();
+                if (bSel) {
+                    localVpOrbitBehavior.setRotXFactor(0.1);
+                    localVpOrbitBehavior.setRotYFactor(0.1);
+                }
+                else {
+                    localVpOrbitBehavior.setRotXFactor(1);
+                    localVpOrbitBehavior.setRotYFactor(1);
+                }
+            }
+        });
+        return slowRevolveCB;
+    }
 
 
 

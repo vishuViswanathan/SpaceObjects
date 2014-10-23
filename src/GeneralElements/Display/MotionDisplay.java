@@ -576,6 +576,9 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     @Override
     public void mouseExited(MouseEvent e) {
+        mainVpOrbitBehavior.setEnable(false);
+        vpRotateBehavior.setEnable(false);
+        vpTransBehavior.setEnable(false);
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
