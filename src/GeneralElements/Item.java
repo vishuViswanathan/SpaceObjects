@@ -157,7 +157,7 @@ public class Item extends DarkMatter {
     RelativeDlg relDlg;
 
     void getRelativeData(JComponent butt) {
-        space.noteInput();
+        space.noteItemData();
         relDlg = new RelativeDlg(this);
         relDlg.setLocationRelativeTo(butt);
         relDlg.setVisible(true);

@@ -101,7 +101,7 @@ public class ItemSpace {
             l.setGravityLinks(globalGravityOn);
     }
 
-    public void noteInput() {
+    public void noteItemData() {
         for (Item i: allItems)
             i.noteInput();
         initLinks();
@@ -202,16 +202,21 @@ public class ItemSpace {
         JPanel colHeader = ItemLink.colHeader();
         outerP.add(colHeader, BorderLayout.NORTH);
         JScrollPane sP = new JScrollPane();
-        sP.setPreferredSize(new Dimension(colHeader.getPreferredSize().width + 20, 600));
+//        sP.setPreferredSize(new Dimension(colHeader.getPreferredSize().width + 20, 600));
         infListPan = new JPanel(new GridBagLayout());
         gbcInfList = new GridBagConstraints();
         prepareLinkList();
         sP.setViewportView(infListPan);
         outerP.add(sP, BorderLayout.CENTER);
-        JPanel buttPan = new JPanel(new GridLayout(1, 2));
-        buttPan.add(rbItemGravity);
-        buttPan.add(buttAddInf);
-        buttPan.add(buttSaveInf);
+        JPanel buttPan = new JPanel(new GridBagLayout());
+        GridBagConstraints gbcButton = new GridBagConstraints();
+        gbcButton.gridx = 0;
+        gbcButton.gridy = 0;
+        buttPan.add(rbItemGravity, gbcButton);
+        gbcButton.gridx++;
+        buttPan.add(buttAddInf, gbcButton);
+        gbcButton.gridx++;
+        buttPan.add(buttSaveInf, gbcButton);
         outerP.add(buttPan, BorderLayout.SOUTH);
         return outerP;
     }
@@ -263,12 +268,13 @@ public class ItemSpace {
 
     void saveInfluenceList() {
         clearItemLinks();
-//        gravityAdded = false;
         ItemLink ilNow;
-        for (ItemLink iL:tempInfList)
-            if ((ilNow = iL.getInfFromUI()) != null)
+        for (ItemLink iL:tempInfList) {
+//            if ((ilNow = iL.getInfFromUI()) != null)
+//                allItemLinks.add(ilNow);
+            if ((ilNow = iL) != null)
                 allItemLinks.add(ilNow);
-//       setGravityLinks();
+        }
         listEdited = false;
     }
 
@@ -283,12 +289,20 @@ public class ItemSpace {
     }
 
     void addInfluence() {
+        noteItemData();
         if (allItems.size() > 1) {
             LinkBasic linkDlg = new LinkBasic(tempInfList.size() + 1, this);
             linkDlg.setLocation(600, 400);
             linkDlg.setVisible(true);
             if (linkDlg.selOk) {
                 ItemLink link = linkDlg.getLink();
+                Influence inf = link.getInfluence();
+                if (inf.hasDetails) {
+                    LinkDetails detDlg = new LinkDetails(inf);
+                    detDlg.setLocation(600, 400);
+                    detDlg.setVisible(true);
+                }
+
                 tempInfList.add(link);
                 gbcInfList.gridy = tempInfList.size();
                 infListPan.add(link.dataPanel(gbcInfList.gridy), gbcInfList);
@@ -320,6 +334,51 @@ public class ItemSpace {
         }
     }
 
+    class LinkDetails extends JDialog {
+        JButton ok = new JButton("OK");
+        JButton cancel = new JButton("Cancel");
+        Influence inf;
+        LinkDetails(Influence inf) {
+            setModal(true);
+            this.inf = inf;
+            dbInit();
+        }
+
+        void dbInit() {
+            JPanel outerP = new JPanel(new BorderLayout());
+            MultiPairColPanel jpBasic = new MultiPairColPanel("Link Details");
+            jpBasic.addItemPair("Item 1 ", "" + inf.item1, false);
+            jpBasic.addItemPair("Item 2 ",  "" + inf.item2, false);
+            jpBasic.addItemPair("Link type ", "" + inf.getType(), false);
+            outerP.add(jpBasic, BorderLayout.NORTH);
+            if (inf.hasDetails) {
+                outerP.add(inf.detailsPanel(), BorderLayout.CENTER);
+            }
+            ActionListener li = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Object src = e.getSource();
+                    if (src == ok) {
+                        if (inf.takeDataFromUI())
+                            closeThisWindow();
+                    } else
+                        closeThisWindow();
+                }
+            };
+            ok.addActionListener(li);
+            cancel.addActionListener(li);
+            MultiPairColPanel buttonP = new MultiPairColPanel("");
+            buttonP.addItemPair(cancel, ok);
+            outerP.add(buttonP, BorderLayout.SOUTH);
+            add(outerP);
+            pack();
+        }
+
+        void closeThisWindow() {
+            setVisible(false);
+            dispose();
+        }
+    }
+
     class LinkBasic extends JDialog {
         Item[] allI = (Item[])allItems.toArray(new Item[0]);
         JComboBox<Item> cbItem1 = new JComboBox<Item>(allI);
@@ -335,6 +394,7 @@ public class ItemSpace {
         int slNo;
         LinkBasic(int slNo, ItemSpace space) {
             setModal(true);
+            setTitle("New Link between Items");
             this.slNo = slNo;
             this.space = space;
             dbInit();
@@ -393,13 +453,6 @@ public class ItemSpace {
             dispose();
         }
     }
-
-//    public void addObjectAndOrbitOLD(Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception{
-//        for (Item it: allItems)
-//            it.addObjectAndOrbit(grp, orbitAttrib);
-//        for (ItemLink inf: allItemLinks)
-//            inf.addLinksDisplay(grp, linkAttrib);
-//    }
 
     public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
         for (Item it: allItems)

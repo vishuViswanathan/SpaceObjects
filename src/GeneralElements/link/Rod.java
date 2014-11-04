@@ -1,7 +1,11 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
+import display.MultiPairColPanel;
+import display.NumberTextField;
+
 import javax.media.j3d.*;
+import javax.swing.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -33,16 +37,6 @@ public class Rod extends InfluenceDef  {
         double r = distVect.length();
         Vector3d nowForce;
         double diff = r - freeLen;
-//        double deadBand = freeLen * 0.5;
-//        if (Math.abs(diff) < deadBand)
-//            diff = 0;
-//        else {
-//            ItemMovementsApp.log.info("diff = " + diff);
-//            if (diff > 0)
-//                diff = deadBand;
-//            else
-//                diff += deadBand;
-//        }
         double force;
         // attraction is positive
         force  =   diff * kCompression;
@@ -79,4 +73,32 @@ public class Rod extends InfluenceDef  {
     public void updateDisplay() {
         linkLine.setCoordinates(0, new Point3d[]{item1.status.pos, item2.status.pos});
     }
+
+    NumberTextField nteCompression;
+    NumberTextField ntLenFactor;
+
+    @Override
+    public JPanel detailsPanel() {
+        MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
+        nteCompression = new NumberTextField(null, eCompression, 6, false, 1, 1e10, "#,##0", "Elasticity (Force in Newton for 100%)");
+        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 02, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
+        outerP.addItemPair(ntLenFactor);
+        outerP.addItemPair(nteCompression);
+        return outerP;
+    }
+
+    @Override
+    public boolean takeDataFromUI() {
+        boolean  retVal = true;
+        if ((ntLenFactor != null) && (nteCompression != null)) {
+            initialLenFactor = ntLenFactor.getData();
+            eCompression = nteCompression.getData();
+            eExpansion = eCompression;
+            setFreeLenAndKvalues();
+        }
+        else
+            retVal = false;
+        return retVal;
+    }
+
 }

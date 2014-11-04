@@ -125,11 +125,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     case BLANK:
                         duration = 200;
                         calculationStep = 0.0002; // was 0.000002;
-                        refreshInterval = 2 * calculationStep; // was 20000
+                        refreshInterval = 200 * calculationStep; // was 20000
                         space.enableGlobalGravity(false);
                         proceedToItemList(false);
                         bShowOrbit = false;
                         bShowLinks = true;
+                        bRealTime = true;
                         break;
                     case DAILY:
                         duration = 200;
@@ -221,7 +222,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     void startRunThread() {
         continueIt = false;
-        space.noteInput();
+        space.noteItemData();
         if (showOrbitMap()) {
             runIt = true;
             SpaceEvaluator.closePool();
@@ -480,7 +481,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     void saveDataToFile() {
         boolean proceed = true;
-        space.noteInput();
+        space.noteItemData();
         if (space.anyUnsavedLink()) {
             proceed = decide("Unsaved Item/link", "Do you want to proceed abandoning the changes made?");
             if (proceed)

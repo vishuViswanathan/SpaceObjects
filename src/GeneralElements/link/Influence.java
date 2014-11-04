@@ -6,17 +6,19 @@ import mvXML.XMLmv;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
+import javax.swing.*;
 
 /**
  * Created by M Viswanathan on 24 May 2014
  */
 public class Influence {
-    DarkMatter item1;
-    DarkMatter item2;
+    public DarkMatter item1;
+    public DarkMatter item2;
     Type type;
     double freeLen = 0;
     double kExpansion = 0;
     double kCompression = 0;
+    public boolean hasDetails = true;
 
     static public enum Type {
         GRAVITY("Gravity"),
@@ -86,6 +88,33 @@ public class Influence {
         vp = XMLmv.getTag(xmlStr, "kExpansion", 0);
         kExpansion = Double.valueOf(vp.val);
         return true;
+    }
+
+    public static Influence createInfluence(DarkMatter dm1, DarkMatter dm2, Type ofType) {
+        Influence inf = null;
+        switch (ofType) {
+            case GRAVITY:
+                inf = new Gravity(dm1, dm2);
+                break;
+            case ROD:
+                inf = new Rod(dm1, dm2, 1, 20000);
+                break;
+            case SPRING:
+                inf = new Spring(dm1, dm2, 1, 1000);
+                break;
+            case ROPE:
+                inf = new Rope(dm1, dm2, 1, 20000);
+                break;
+        }
+        return inf;
+    }
+
+    public boolean takeDataFromUI() {
+        return false;
+    }
+
+    public JPanel detailsPanel() {
+        return null;
     }
 
     public String toString() {

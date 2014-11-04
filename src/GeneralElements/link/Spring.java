@@ -1,7 +1,11 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
+import display.MultiPairColPanel;
+import display.NumberTextField;
+
 import javax.media.j3d.*;
+import javax.swing.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -28,10 +32,12 @@ public class Spring extends InfluenceDef  {
 
     public Spring(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eCommon) {
         super(item1, item2, initialLenFactor, eCommon, eCommon);
+        type = Type.SPRING;
     }
 
     public Spring(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eCompression, double eExpansion) {
         super(item1, item2, initialLenFactor, eCompression, eExpansion);
+        type = Type.SPRING;
     }
 
     @Override
@@ -79,5 +85,35 @@ public class Spring extends InfluenceDef  {
 
     public void updateDisplay() {
         linkLine.setCoordinates(0, new Point3d[]{item1.status.pos, item2.status.pos});
+    }
+
+    NumberTextField nteCompression;
+    NumberTextField nteExpansion;
+    NumberTextField ntLenFactor;
+
+    @Override
+    public JPanel detailsPanel() {
+        MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
+        nteCompression = new NumberTextField(null, eCompression, 6, false, 1, 1e10, "#,##0", "Elasticity - Compression (Force in Newton for 100%)");
+        nteExpansion = new NumberTextField(null, eExpansion, 6, false, 1, 1e10, "#,##0", "Elasticity - Expansion (Force in Newton for 100%)");
+        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 02, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
+        outerP.addItemPair(ntLenFactor);
+        outerP.addItemPair(nteCompression);
+        outerP.addItemPair(nteExpansion);
+        return outerP;
+    }
+
+    @Override
+    public boolean takeDataFromUI() {
+        boolean  retVal = true;
+        if ((ntLenFactor != null) && (nteCompression != null) && (nteExpansion != null)) {
+            initialLenFactor = ntLenFactor.getData();
+            eCompression = nteCompression.getData();
+            eExpansion = nteExpansion.getData();
+            setFreeLenAndKvalues();
+        }
+        else
+            retVal = false;
+        return retVal;
     }
 }

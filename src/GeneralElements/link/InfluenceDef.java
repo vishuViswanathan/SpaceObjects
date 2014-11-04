@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
  * Created by M Viswanathan on 20 Sep 2014
  */
 public class InfluenceDef extends Influence {
-    double initialLenFactor; // factor (itemsDistance/freeLength) at start of run
+    double initialLenFactor; // factor (freeLength/Item Distance) at start of run
     double eCompression; // Force for 100% compression (similar to modulus of elasticity definition, but Force instead of pressure)
     double eExpansion; //
 
@@ -28,7 +28,7 @@ public class InfluenceDef extends Influence {
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);
         double distance = distVect.length();
-        freeLen = distance / initialLenFactor;
+        freeLen = distance * initialLenFactor;
         kCompression = eCompression / freeLen;
         kExpansion = eExpansion / freeLen;
     }

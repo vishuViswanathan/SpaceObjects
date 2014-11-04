@@ -31,15 +31,50 @@ public class LinkWithMass extends InfluenceDef  {
         type = Type.ROPE;
         this.item1 = item1;
         this.item2 = item2;
-        this.massPerM = massPerM;
+//        this.massPerM = massPerM;
         this.freeLen = freeLen;
         this.eExpansion = eExpansion;
+        noteBasicData(massPerM, nElements);
+//        allLinks = new Vector<ItemLink>(nElements);
+//        this.nElements = (nElements / 2) * 2; // make it even
+//        this.parent = item1.parentW;
+//        this.space = item1.space;
+//        localActions = new Vector<LocalAction>();
+    }
+
+    public LinkWithMass(DarkMatter item1, DarkMatter item2, double massPerM, double eExpansion, int nElements) {
+        super(item1, item2, 1, eExpansion, eExpansion);
+        noteBasicData(massPerM, nElements);
+//        type = Type.ROPE;
+//        this.massPerM = massPerM;
+//        allLinks = new Vector<ItemLink>(nElements);
+//        this.nElements = (nElements / 2) * 2; // make it even
+//        this.parent = item1.parentW;
+//        this.space = item1.space;
+//        localActions = new Vector<LocalAction>();
+    }
+
+    static int defElements = 50;
+    static double defE = 1000;
+    static double defMassPerM = 0.1;
+
+    public LinkWithMass(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eExpansion) {
+        super(item1, item2, initialLenFactor, eExpansion, eExpansion);
+        noteBasicData(defMassPerM, defElements);
+    }
+
+    public LinkWithMass(DarkMatter item1, DarkMatter item2) {
+        super(item1, item2, 1, defE, defElements);
+    }
+
+    void noteBasicData(double massPerM, int nElements) {
+        type = Type.ROPE;
+        this.massPerM = massPerM;
         allLinks = new Vector<ItemLink>(nElements);
         this.nElements = (nElements / 2) * 2; // make it even
         this.parent = item1.parentW;
         this.space = item1.space;
         localActions = new Vector<LocalAction>();
-//        setAllElements();
     }
 
     public void addLocalAction(LocalAction action) {
@@ -178,7 +213,7 @@ public class LinkWithMass extends InfluenceDef  {
                     initialLenFactor, eExpansion), space));
         }
         else {
-            showMessage("Free Length " + freeLen + " is greater than distance " + distance + "\nLink is NOT created!");
+            showMessage("Free Length " + freeLen + " is less than distance " + distance + "\nLink is NOT created!");
             retVal = false;
         }
         return retVal;

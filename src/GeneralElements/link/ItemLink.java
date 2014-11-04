@@ -50,6 +50,9 @@ public class ItemLink implements EvalOnce {
         tlItem1.setText("" + item1);
         tlItem2.setText("" + item2);
         tlLinkType.setText("" + type);
+        this.item1 = item1;
+        this.item2 = item2;
+        inf = Influence.createInfluence(item1, item2, type);
         enableRequired();
     }
 
@@ -64,6 +67,10 @@ public class ItemLink implements EvalOnce {
         ntkExpansion = new NumberTextField(control, kExpansion, 8, false, 0, 1e20, "##0.00000E00", "k Expansion in N/m", false);
         bDelete = new JButton("X");
         bDelete.addActionListener(new DeleteButtListener(this, space));
+    }
+
+    public Influence getInfluence() {
+        return inf;
     }
 
     public void setLocalForces() {
@@ -187,13 +194,13 @@ public class ItemLink implements EvalOnce {
     }
 
     static int cellHeight = 30;
-    static Dimension[] allDim = {new Dimension(30, cellHeight),
+    static Dimension[] allDim = {new Dimension(20, cellHeight),
             new Dimension(70, cellHeight),
-            new Dimension(140, cellHeight),
-            new Dimension(140, cellHeight),
-            new Dimension(120, cellHeight),
-            new Dimension(120, cellHeight),
-            new Dimension(120, cellHeight),
+            new Dimension(100, cellHeight),
+            new Dimension(100, cellHeight),
+//            new Dimension(120, cellHeight),
+//            new Dimension(120, cellHeight),
+//            new Dimension(120, cellHeight),
             new Dimension(50, cellHeight)};
 
     public static JPanel colHeader() {
@@ -206,7 +213,7 @@ public class ItemLink implements EvalOnce {
         JPanel jp;
         gbc.gridx++;
         jp = new JPanel();
-        jp.setPreferredSize(allDim[col]);
+//        jp.setPreferredSize(allDim[col]);
         jp.add(new JLabel("Delete"));
         outerPan.add(jp, gbc);
         return outerPan;
@@ -237,23 +244,23 @@ public class ItemLink implements EvalOnce {
         jp.add(new JLabel("Item 2"));
         outerPan.add(jp, gbc);
         gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("Free Length (m)"));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("K Compress (N/m)"));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("K Expand (N/m)"));
-        outerPan.add(jp, gbc);
+//
+//        jp = new JPanel();
+//        jp.setPreferredSize(allDim[col++]);
+//        jp.add(new JLabel("Free Length (m)"));
+//        outerPan.add(jp, gbc);
+//        gbc.gridx++;
+//
+//        jp = new JPanel();
+//        jp.setPreferredSize(allDim[col++]);
+//        jp.add(new JLabel("K Compress (N/m)"));
+//        outerPan.add(jp, gbc);
+//        gbc.gridx++;
+//
+//        jp = new JPanel();
+//        jp.setPreferredSize(allDim[col++]);
+//        jp.add(new JLabel("K Expand (N/m)"));
+//        outerPan.add(jp, gbc);
         return col;
     }
 
@@ -306,22 +313,22 @@ public class ItemLink implements EvalOnce {
         outerPan.add(jp, gbc);
         gbc.gridx++;
 
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(ntFreeLength);
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(ntkCompression);
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(ntkExpansion);
-        outerPan.add(jp, gbc);
+//        jp = new JPanel();
+//        jp.setPreferredSize(allDim[col++]);
+//        jp.add(ntFreeLength);
+//        outerPan.add(jp, gbc);
+//        gbc.gridx++;
+//
+//        jp = new JPanel();
+//        jp.setPreferredSize(allDim[col++]);
+//        jp.add(ntkCompression);
+//        outerPan.add(jp, gbc);
+//        gbc.gridx++;
+//
+//        jp = new JPanel();
+//        jp.setPreferredSize(allDim[col++]);
+//        jp.add(ntkExpansion);
+//        outerPan.add(jp, gbc);
         return col;
     }
 
