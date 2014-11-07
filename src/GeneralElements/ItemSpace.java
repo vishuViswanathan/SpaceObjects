@@ -4,6 +4,7 @@ import Applications.ItemMovementsApp;
 //import Applications.SpaceEvaluator;
 import Applications.SpaceEvaluator;
 import GeneralElements.Display.ItemGraphic;
+import GeneralElements.Display.ItemTable;
 import GeneralElements.link.Influence;
 import GeneralElements.link.ItemLink;
 import display.InputControl;
@@ -116,8 +117,29 @@ public class ItemSpace {
     GridBagConstraints gbcItemList;
     JButton buttAddItem;
     ButtonListener bl;
+    ItemTable itemTable;
 
     public JComponent itemListPanel() {
+        buttAddItem = new JButton("Add a new Item");
+        if (bl == null)
+            bl = new ButtonListener();
+        buttAddItem.addActionListener(bl);
+        JPanel outerP = new JPanel(new BorderLayout());
+        JScrollPane sP = new JScrollPane();
+        sP.setPreferredSize(new Dimension(800, 600));
+//        itemListPan = new JPanel(new GridBagLayout());
+//        gbcItemList = new GridBagConstraints();
+//        prepareItemList();
+        itemTable  = new ItemTable(mainApp, allItems);
+        sP.setViewportView(itemTable.getTable());
+        outerP.add(sP, BorderLayout.CENTER);
+        JPanel buttPan = new JPanel(new GridLayout(1, 2));
+        buttPan.add(buttAddItem);
+        outerP.add(buttPan, BorderLayout.SOUTH);
+        return outerP;
+    }
+
+    public JComponent itemListPanelOLD() {
         buttAddItem = new JButton("Add a new Item");
         if (bl == null)
             bl = new ButtonListener();
@@ -149,11 +171,13 @@ public class ItemSpace {
     }
 
     void addItem() {
-        Item newItem = new Item("Item New #" + (allItems.size() + 1), 1, 1, Color.RED,  mainApp.parent());
+        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
+        newItem.editItem(mainApp);
         newItem.setSpace(this);
         allItems.add(newItem);
-        prepareItemList();
-        itemListPan.updateUI();
+        itemTable.addOneRow(newItem);
+//        prepareItemList();
+//        itemListPan.updateUI();
     }
 
      LinkedList <ItemLink> tempInfList;

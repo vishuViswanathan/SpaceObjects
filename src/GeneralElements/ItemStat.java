@@ -6,22 +6,60 @@ import mvXML.ValAndPos;
 import mvXML.XMLmv;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 /**
  * Created by M Viswanathan on 20 May 2014
  */
 public class ItemStat {
+    static public enum Param {
+        POSITION("Position"),
+        VELOCITY("VELOCITY"),
+        ACCELERATION("Acceleration"),
+        TIME("Time");
+
+        private final String statusName;
+
+        Param(String statusName) {
+            this.statusName = statusName;
+        }
+
+        public String getValue() {
+            return name();
+        }
+
+        @Override
+        public String toString() {
+            return statusName;
+        }
+
+        public static Param getEnum(String text) {
+            Param retVal = null;
+            if (text != null) {
+                for (Param b : Param.values()) {
+                    if (text.equalsIgnoreCase(b.statusName)) {
+                        retVal = b;
+                        break;
+                    }
+                }
+                if (retVal == null)
+                    retVal = POSITION;
+            }
+            return retVal;
+        }
+    }
+
     double time;
     double distFromPrimary;
     public Point3dMV pos;
     public Vector3dMV velocity;
-    Vector3d acc;
+    Vector3dMV acc;
 
     public ItemStat () {
         velocity = new Vector3dMV();
         pos = new Point3dMV();
-        acc = new Vector3d();
+        acc = new Vector3dMV();
     }
 
     public ItemStat(String xmlStr) throws NumberFormatException {
@@ -70,5 +108,79 @@ public class ItemStat {
         vp = XMLmv.getTag(xmlStr, "vel", 0);
         velocity.set(vp.val);
         return retVal;
+    }
+
+    public Tuple3d getOneParam(Param param) {
+        Tuple3d vector = null;
+        switch(param) {
+            case POSITION:
+                vector = new Point3d(pos);
+                break;
+            case VELOCITY:
+                vector = new Vector3d(velocity);
+                break;
+            case ACCELERATION:
+                vector = new Vector3d(acc);
+                break;
+        }
+        return vector;
+    }
+
+    public void setParam(Tuple3d newVal, Param param) {
+        switch(param) {
+            case POSITION:
+                pos.set(newVal);
+                break;
+            case VELOCITY:
+                velocity.set(newVal);
+                break;
+            case ACCELERATION:
+                acc.set(newVal);
+                break;
+        }
+    }
+
+    String dataInCSV(Param param) {
+        String csv = "";
+        switch(param) {
+            case POSITION:
+                csv =  pos.dataInCSV();
+                break;
+            case VELOCITY:
+                csv = velocity.dataInCSV();
+                break;
+            case ACCELERATION:
+                csv = acc.dataInCSV();
+                break;
+        }
+        return csv;
+    }
+
+    String dataInCSV(Param param, String fmtStr) {
+        String csv = "";
+        switch(param) {
+            case POSITION:
+                csv =  pos.dataInCSV(fmtStr);
+                break;
+            case VELOCITY:
+                csv = velocity.dataInCSV(fmtStr);
+                break;
+            case ACCELERATION:
+                csv = acc.dataInCSV(fmtStr);
+                break;
+        }
+        return csv;
+    }
+
+    String dataInCSV(Param param, int significantDigits) {
+        switch(param) {
+            case POSITION:
+                return pos.dataInCSV(significantDigits);
+            case VELOCITY:
+                return velocity.dataInCSV(significantDigits);
+            case ACCELERATION:
+                return acc.dataInCSV(significantDigits);
+         }
+        return "";
     }
 }

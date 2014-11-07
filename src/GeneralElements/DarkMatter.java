@@ -156,38 +156,6 @@ public class DarkMatter implements InputControl, EvalOnce {
         }
     }
 
-    public void updatePosAndVelORIGINAL(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
-        if (!bFixedLocation) {
-//            effectiveForce.set(force);
-//            effectiveForce.add(lastForce);
-//            effectiveForce.scale(0.5); // the average force
-            effectiveForce.setMean(force, lastForce);
-//            Vector3d thisAcc = new Vector3d(effectiveForce);
-//            thisAcc.scale((1.0 / mass));
-            thisAcc.scale((1.0/ mass), effectiveForce);
-            // calculate from force
-//            Vector3d deltaV = new Vector3d(effectiveForce);
-//            deltaV.scale(deltaT);
-//            deltaV.scale(1.0 / mass);
-            newVelocity.add(lastVelocity, deltaV);
-            deltaV.scale(deltaT, thisAcc);
-            Vector3d averageV = new Vector3d(deltaV);
-            averageV.scaleAdd(+0.5, lastVelocity); //
-            Point3d newPos = new Point3d(averageV);
-            newPos.scale(deltaT);
-            newPos.add(lastPosition);
-            status.pos.set(newPos); // only position is updated here
-//            Vector3d newVelocity = new Vector3d(lastVelocity);
-//            newVelocity.add(deltaV);
-            status.velocity.set(newVelocity);
-            if (bFinal) {
-                status.acc.set(thisAcc);
-                status.time = nowT;
-                lastForce.set(force);  // note down the force for the last calculation
-            }
-        }
-    }
-
     public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
         boolean changed = true;
         if (bFixedLocation)

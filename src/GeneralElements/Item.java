@@ -8,9 +8,11 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
 import display.InputControl;
 import display.MultiPairColPanel;
 import display.NumberTextField;
+import mvUtils.SmartFormatter;
 import mvUtils.Vector3dMV;
 import mvXML.ValAndPos;
 import mvXML.XMLmv;
+import sun.text.resources.CollationData_th;
 
 import javax.media.j3d.*;
 import javax.swing.*;
@@ -19,11 +21,51 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
+import java.text.DecimalFormat;
 
 /**
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
+    static public enum ColType {
+        SLNO("SlNo."),
+        NAME("Name"),
+        MASS("Mass(kg)"),
+        DIA("Dia(m)"),
+        POS("x, y, z Position(m)"),
+        STATICPOS("FixedPos"),
+        VEL("x, y, z Velocity(m)"),
+        DIRACCON("DirAccON");
+
+        private final String typeName;
+
+        ColType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public String getValue() {
+            return typeName;
+        }
+
+        @Override
+        public String toString() {
+            return typeName;
+        }
+
+        public static ColType getEnum(String text) {
+            ColType retVal = null;
+            if (text != null) {
+                for (ColType b : ColType.values()) {
+                    if (text.equalsIgnoreCase(b.typeName)) {
+                        retVal = b;
+                        break;
+                    }
+                }
+            }
+            return retVal;
+        }
+    }
+
     TuplePanel fixedAccVectPan;
     NumberTextField ntFixedAcc;
     JRadioButton rbFixedAccOn;
@@ -36,6 +78,7 @@ public class Item extends DarkMatter {
 
     JTextField tfName;
     NumberTextField ntMass, ntDia;
+
     TuplePanel posTuplePan;
     JRadioButton rbFixedPos;
     TuplePanel velTuplePan;
@@ -62,10 +105,92 @@ public class Item extends DarkMatter {
 //        rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
     }
 
+    public Item(ItemSpace space, String name, double mass, double dia, Color color, Window parent) {
+        this(parent);
+        this.space = space;
+        this.name = name;
+        this.mass = mass;
+        this.dia = dia;
+        this.color = color;
+        status = new ItemStat();
+//        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
+//        setRadioButtons();
+//        rbFixedPos = new JRadioButton("Fixed Position");
+//        rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
+    }
+
     public Item(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
         takeFromXMl(xmlStr);
+    }
+
+    public static String[] getColHeader() {
+        ColType[] values = ColType.values();
+        String[] colHeader = new String[values.length];
+        for (int i = 0; i < colHeader.length; i++)
+            colHeader[i] = "" + values[i];
+        return colHeader;
+    }
+
+    public static int[] getColumnWidths() {
+        ColType[] values = ColType.values();
+        int[] colWidths = new int[values.length];
+        for (int i = 0; i < colWidths.length; i++)
+           colWidths[i] = oneColWidth(values[i]);
+        return colWidths;
+    }
+
+    static int oneColWidth(ColType colType) {
+        switch(colType) {
+            case SLNO:
+                return 30;
+            case NAME:
+                return 100;
+            case MASS:
+                return 100;
+            case DIA:
+                return 100;
+            case POS:
+                return 200;
+            case STATICPOS:
+                return 30;
+            case VEL:
+                return 200;
+            case DIRACCON:
+                return 30;
+        }
+        return 0;
+    }
+
+    public Object[] getRowData(int slNo) {
+        ColType[] values = ColType.values();
+        Object[] rowData = new Object[values.length];
+        rowData[0] = "" + slNo;
+        for (int i = 1; i < rowData.length; i++)
+            rowData[i] = getOneColData(values[i]);
+        return rowData;
+    }
+
+    Object getOneColData(ColType colType) {
+        SmartFormatter fmt = new SmartFormatter(6);
+        switch(colType) {
+            case MASS:
+                return "" + fmt.format(mass);
+            case NAME:
+                return name;
+            case DIA:
+                return "" + fmt.format(dia);
+            case POS:
+                return status.dataInCSV(ItemStat.Param.POSITION, 4);
+            case STATICPOS:
+                return (bFixedLocation) ? "Y" : "N";
+            case VEL:
+                return  status.dataInCSV(ItemStat.Param.VELOCITY, 4);
+            case DIRACCON:
+                return (bFixedForceOn) ? "Y" : "N";
+        }
+        return "";
     }
 
      void setRadioButtons() {
@@ -89,6 +214,58 @@ public class Item extends DarkMatter {
         nextReport = nextRefresh;
 //        reportInterval = interval;
 //        nextReport += reportInterval;
+    }
+
+    public JPanel dataPanelOLD(int objNum) {
+        JPanel outerPan = new JPanel(new BorderLayout());
+        MultiPairColPanel jp = new MultiPairColPanel("Data of Item " + objNum);
+        tfName = new JTextField(name, 10);
+        jp.addItemPair("Object Name", tfName);
+        ntMass = new NumberTextField(this, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
+        jp.addItemPair(ntMass);
+        ntDia = new NumberTextField(this, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
+        jp.addItemPair(ntDia);
+        relButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getRelativeData(relButton);
+            }
+        });
+        jp.addItemPair("", relButton);
+
+        JPanel jpPos = new JPanel(new BorderLayout());
+        posTuplePan = new TuplePanel(this, status.pos, 8, -1e30, 1e20, "##0.#####E00", "Position in m");
+        rbFixedPos.setSelected(bFixedLocation);
+        rbFixedPos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkFixedPos();
+            }
+        });
+        jpPos.add(posTuplePan, BorderLayout.CENTER);
+        jp.addItemPair("Position in m", jpPos);
+        jp.addItemPair("", rbFixedPos);
+        JPanel jpVel = new JPanel(new BorderLayout());
+        velTuplePan = new TuplePanel(this, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
+        jpVel.add(velTuplePan, BorderLayout.CENTER);
+        jp.addItemPair("Velocity in m/s", jpVel);
+        rbFixedAccOn.setSelected(bFixedForceOn);
+        rbFixedAccOn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkFixedAcc();
+            }
+        });
+        jp.addItemPair("", rbFixedAccOn);
+        outerPan.add(jp, BorderLayout.WEST);
+//        JPanel jpFixedAcc = new JPanel(new BorderLayout());
+        fixedAccVectPan = new TuplePanel(this, dirOfFixedGravityAcc, 8, -100, 100, "##0.#####E00", "Direction of Acc Vector");
+        ntFixedAcc = new NumberTextField(this, fixedAcc, 8, false, 0, 2000, "##0.#####E00", "Fixed Acc in m/s2");
+        checkFixedAcc();
+        jp.addItemPair(ntFixedAcc);
+        jp.addItemPair("Direction of Acc", fixedAccVectPan);
+        outerPan.add(jp, BorderLayout.SOUTH);
+        return outerPan;
     }
 
     public JPanel dataPanel(int objNum) {
@@ -143,6 +320,7 @@ public class Item extends DarkMatter {
         return outerPan;
     }
 
+
     void checkFixedPos() {
         bFixedLocation = rbFixedPos.isSelected();
         velTuplePan.setEnabled(!bFixedLocation);
@@ -157,7 +335,7 @@ public class Item extends DarkMatter {
     RelativeDlg relDlg;
 
     void getRelativeData(JComponent butt) {
-        space.noteItemData();
+//        space.noteItemData();
         relDlg = new RelativeDlg(this);
         relDlg.setLocationRelativeTo(butt);
         relDlg.setVisible(true);
@@ -184,6 +362,7 @@ public class Item extends DarkMatter {
         JComboBox<Object> othersCB;
 
         RelativeDlg(InputControl inpC) {
+            setModal(true);
             this.inpC = inpC;
             dbInit();
         }
@@ -229,14 +408,125 @@ public class Item extends DarkMatter {
                 tupRelVel.add(parent.status.velocity);
                 status.velocity.set(tupRelVel);
             }
-            updateUI();
+//            updateUI();
         }
 
         void closeThisWindow() {
             setVisible(false);
             dispose();
         }
+    }
 
+    public void editItem(InputControl inpC) {
+        ItemDialog dlg = new ItemDialog(inpC);
+        dlg.setVisible(true);
+    }
+
+    class ItemDialog extends JDialog {
+        JTextField tfItemName;
+        NumberTextField ntItemMass, ntItemDia;
+
+        TuplePanel itemPosTuplePan;
+        JRadioButton rbItemFixedPos;
+        JRadioButton rbItemFixedAccOn;
+        TuplePanel itemVelTuplePan;
+        JButton itemRelButton = new JButton("Set Relative Data");
+        Vector3d tupPos, tupVel;
+        JButton ok = new JButton("OK");
+        JButton cancel = new JButton("Cancel");
+        TuplePanel relPosPan, relVelPan;
+        InputControl inpC;
+        JComboBox<Object> othersCB;
+
+        ItemDialog(InputControl inpC) {
+            setModal(true);
+            this.inpC = inpC;
+            dbInit();
+        }
+        void dbInit() {
+            JPanel outerPan = new JPanel(new BorderLayout());
+            MultiPairColPanel jp = new MultiPairColPanel("Data of Item");
+            tfItemName = new JTextField(name, 10);
+            jp.addItemPair("Object Name", tfItemName);
+            ntItemMass = new NumberTextField(inpC, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
+            jp.addItemPair(ntItemMass);
+            ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
+            jp.addItemPair(ntItemDia);
+            itemRelButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    relDlg = new RelativeDlg(inpC);
+                    relDlg.setLocationRelativeTo(itemRelButton);
+                    relDlg.setVisible(true);
+                }
+            });
+            jp.addItemPair("", itemRelButton);
+
+            JPanel jpPos = new JPanel(new BorderLayout());
+            itemPosTuplePan = new TuplePanel(inpC, status.pos, 8, -1e30, 1e20, "##0.#####E00", "Position in m");
+            rbItemFixedPos = new JRadioButton("Fixed Position");
+            rbItemFixedPos.setSelected(bFixedLocation);
+            rbItemFixedPos.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    checkFixedPos();
+                }
+            });
+            jpPos.add(itemPosTuplePan, BorderLayout.CENTER);
+            jp.addItemPair("Position in m", jpPos);
+            jp.addItemPair("", rbItemFixedPos);
+            JPanel jpVel = new JPanel(new BorderLayout());
+            itemVelTuplePan = new TuplePanel(inpC, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
+            jpVel.add(itemVelTuplePan, BorderLayout.CENTER);
+            jp.addItemPair("Velocity in m/s", jpVel);
+            rbItemFixedAccOn = new JRadioButton("Directional Acceleration ON");
+            rbItemFixedAccOn.setSelected(bFixedForceOn);
+            rbItemFixedAccOn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    checkFixedAcc();
+                }
+            });
+            jp.addItemPair("", rbItemFixedAccOn);
+            ActionListener li = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Object src = e.getSource();
+                    if (src == ok) {
+                        if (takeValuesFromUI())
+                            closeThisWindow();
+                    }
+                }
+            };
+            ok.addActionListener(li);
+            cancel.addActionListener(li);
+            jp.addItemPair(cancel, ok);
+            outerPan.add(jp, BorderLayout.WEST);
+//        JPanel jpFixedAcc = new JPanel(new BorderLayout());
+            add(outerPan);
+            pack();
+        }
+
+        boolean takeValuesFromUI() {
+            boolean retVal = false;
+            name = tfItemName.getText();
+            if (name.length() > 1 && (!name.substring(0,2).equals("##"))) {
+                mass = ntItemMass.getData();
+                dia = ntItemDia.getData();
+                status.pos.set(itemPosTuplePan.getTuple3d());
+                status.velocity.set(itemVelTuplePan.getTuple3d());
+                bFixedLocation = rbItemFixedPos.isSelected();
+                bFixedForceOn = rbItemFixedAccOn.isSelected();
+                retVal = true;
+            }
+            else
+                showError("Enter Item Name");
+            return retVal;
+        }
+
+        void closeThisWindow() {
+            setVisible(false);
+            dispose();
+        }
     }
 
     void noteInput() {
@@ -361,68 +651,6 @@ public class Item extends DarkMatter {
 
     //    =========================== calculations ======================
 
- /*   public void setLocalForces() {
-        super.setLocalForces();
-//        if (bFixedForceOn)
-//            force.set(forceOfFixedGravity);
-//        else
-//            force.set(0, 0, 0);
-        for (LocalAction action : localActions)
-            force.add(action.getForce());
-    }
-*/
-//    public void addToForce(Vector3d addForce) {
-//        force.add(addForce);
-//    }
-
-    // dummy not used
-//    @Override
-//    public void evalOnce() {
-//    }
-
-//    @Override
-//    public void evalOnce(double deltaT, double nowT) {
-//        try {
-//            updatePosAndVel(deltaT, nowT, true);
-//        } catch (Exception e) {
-//            ItemMovementsApp.log.error("In ITem evalOnce for " + name + ":" + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
-
-    public void updatePosAndVelORIGINAL(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
-        if (!bFixedLocation) {
-            effectiveForce.set(force);
-            effectiveForce.add(lastForce);
-            effectiveForce.scale(0.5); // the average force
-            Vector3d thisAcc = new Vector3d(effectiveForce);
-            thisAcc.scale((1.0 / mass));
-            // calculate from force
-            Vector3d deltaV = new Vector3d(effectiveForce);
-            deltaV.scale(deltaT);
-            deltaV.scale(1.0 / mass);
-            Vector3d averageV = new Vector3d(deltaV);
-            averageV.scaleAdd(+0.5, lastVelocity); //
-            Point3d newPos = new Point3d(averageV);
-            newPos.scale(deltaT);
-            newPos.add(lastPosition);
-            status.pos.set(newPos); // only position is updated here
-            Vector3d newVelocity = new Vector3d(lastVelocity);
-            newVelocity.add(deltaV);
-            status.velocity.set(newVelocity);
-            if (bFinal) {
-                status.acc.set(thisAcc);
-                status.time = nowT;
-                lastForce.set(force);  // note down the force for the last calculation
-                evalMaxMinPos();
-                if (nowT > nextReport) {
-                    updateOrbitAndPos();
-                    nextReport += reportInterval;
-                }
-            }
-        }
-    }
-
     public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
         if (super.updatePosAndVel(deltaT, nowT, bFinal)) {
             evalMaxMinPos();
@@ -529,5 +757,101 @@ public class Item extends DarkMatter {
             }
         }
         return retVal;
+    }
+
+    class VectorDataEntry extends JTextField{
+        ItemStat.Param param;
+        InputControl inpC;
+        VectorDataEntry(InputControl inpC, ItemStat.Param param) {
+            this.inpC = inpC;
+            this.param = param;
+            fillLabel();
+            addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    getValue();
+                }
+            });
+
+        }
+
+        void getValue() {
+            VectorDialog dlg = new VectorDialog(inpC, param);
+            dlg.setLocationRelativeTo(this);
+            dlg.setVisible(true);
+        }
+
+        void fillLabel() {
+            setText(status.dataInCSV(param));
+        }
+    }
+
+    class VectorDialog extends JDialog {
+        Item parent;
+        ItemStat.Param param;
+        Vector3d data;
+        JButton ok = new JButton("OK");
+        JButton cancel = new JButton("Cancel");
+        TuplePanel dataPan;
+        InputControl inpC;
+        JComboBox<Object> othersCB;
+        boolean bRelative = false;
+
+        VectorDialog(InputControl inpC, ItemStat.Param param) {
+            setModal(true);
+            this.inpC = inpC;
+            this.param = param;
+            dbInit();
+        }
+
+        void dbInit() {
+            data = new Vector3d(status.getOneParam(param));
+            MultiPairColPanel jp = new MultiPairColPanel("" + param + " of Object");
+            othersCB = new JComboBox<Object>(space.getAllItems().toArray());
+            othersCB.setEditable(bRelative);
+            final JRadioButton relChoice = new JRadioButton("Set Relative Values");
+            relChoice.addActionListener( new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    bRelative = relChoice.isSelected();
+                    othersCB.setEditable(bRelative);
+                }
+            });
+            jp.addItemPair(new JLabel("Relative to "), othersCB);
+            dataPan = new TuplePanel(inpC, data, 8, -1e20, 1e20, "##0.#####E00", "x, y, z Values in m");
+            jp.addItemPair("x, y, z Values in m", dataPan);
+            ActionListener li = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Object src = e.getSource();
+                    if (src == ok) {
+                        takeValuesFromUI();
+                        closeThisWindow();
+
+                    } else {
+                        closeThisWindow();
+                    }
+                }
+            };
+            ok.addActionListener(li);
+            cancel.addActionListener(li);
+            jp.addItemPair(cancel, ok);
+            add(jp);
+            pack();
+        }
+
+        void takeValuesFromUI() {
+            if (bRelative) {
+                parent = space.getAllItems().get(othersCB.getSelectedIndex());
+                Tuple3d parentValue = parent.getStatus().getOneParam(param);
+                data.set(dataPan.getTuple3d());
+                data.add(parentValue);
+                status.setParam(data, param);
+            }
+        }
+
+        void closeThisWindow() {
+            setVisible(false);
+            dispose();
+        }
     }
 }

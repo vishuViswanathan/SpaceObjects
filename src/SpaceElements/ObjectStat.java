@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
  * Date: 11/30/13
  * Time: 6:03 PM
  * To change this template use File | Settings | File Templates.
- * Status of the space object
+ * Param of the space object
  */
 public class ObjectStat {
     double time;

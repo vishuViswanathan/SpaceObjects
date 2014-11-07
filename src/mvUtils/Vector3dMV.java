@@ -2,6 +2,7 @@ package mvUtils;
 
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
+import java.text.DecimalFormat;
 
 /**
  * Created by M Viswanathan on 15 Jun 2014
@@ -53,5 +54,15 @@ public class Vector3dMV extends Vector3d {
 
      public String dataInCSV() {
         return "" + x + ", " + y + ", " + z;
+    }
+
+    public String dataInCSV(String fmtStr) {
+        DecimalFormat fmt = new DecimalFormat(fmtStr);
+        return fmt.format(x)+ ", " + fmt.format(y) + ", " + fmt.format(z);
+    }
+
+    public String dataInCSV(int significantDigits) {
+        SmartFormatter fmt = new SmartFormatter(significantDigits);
+        return fmt.format(x)+ ", " + fmt.format(y) + ", " + fmt.format(z);
     }
 }
