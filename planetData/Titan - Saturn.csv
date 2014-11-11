@@ -1,0 +1,160 @@
+ Automated mail xmit by MAIL_REQUEST, PID=   3657 Sat Apr 12 04:59:54 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Dec 30, 2013               Automated mail xmit by MAIL_REQUEST, PID=   3657 Sat Apr 12 04:59:54 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Dec 30, 2013              Titan / (Saturn)                        606
+                         http://ssd.jpl.nasa.gov/?sat_phys_par
+                           http://ssd.jpl.nasa.gov/?sat_elem
+
+ SATELLITE PHYSICAL PROPERTIES:
+  Mean Radius (km)       = 2575.5   +-  2.0  Density (g/cm^3) =  1.880 +- 0.004
+  Mass (10^22 g)         = 13455.3           Geometric Albedo =  0.2 
+  GM (km^3/s^2)          = 8978.13  +-  0.06  V(1,0)          = -1.2 
+
+ SATELLITE ORBITAL DATA:
+  Semi-major axis, a (km)= 1221.87 (10^3)  Orbital period     = 15.945421 d
+  Eccentricity, e        = 0.0288          Rotational period  = 
+  Inclination, i  (deg)  = 0.28
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Apr 12 04:59:54 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Titan (606)                     {source: SAT360}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2013-Jan-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Jan-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456293.916666667, A.D. 2013-Jan-01 10:00:00.0000, -8.078020836283745E+00, -5.509574451445546E+00,  4.138072193302808E-01, -2.667616145644342E-04, -3.808053704721556E-03, -1.439566871587096E-04,  5.652372874565041E-02,  9.786780251044041E+00,  2.357883836531403E-03, 2456476.416666667, A.D. 2013-Jul-02 22:00:00.0000, -7.525716365454667E+00, -6.334975810836629E+00,  4.128345935561358E-01,  5.826926818749442E-03, -6.081503647601423E-03,  6.203936368104682E-04,  5.686429925129943E-02,  9.845748206144318E+00, -5.148923127079876E-04, 2456658.916666667, A.D. 2014-Jan-01 10:00:00.0000, -6.877327909571489E+00, -7.072993010267681E+00,  3.943555000898065E-01,  1.755964896095842E-03, -1.486994133909421E-03, -1.135166351665543E-03,  5.702293747610569E-02,  9.873215563306491E+00, -2.032272418370631E-04, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************
+                        606
+                         http://ssd.jpl.nasa.gov/?sat_phys_par
+                           http://ssd.jpl.nasa.gov/?sat_elem
+
+ SATELLITE PHYSICAL PROPERTIES:
+  Mean Radius (km)       = 2575.5   +-  2.0  Density (g/cm^3) =  1.880 +- 0.004
+  Mass (10^22 g)         = 13455.3           Geometric Albedo =  0.2 
+  GM (km^3/s^2)          = 8978.13  +-  0.06  V(1,0)          = -1.2 
+
+ SATELLITE ORBITAL DATA:
+  Semi-major axis, a (km)= 1221.87 (10^3)  Orbital period     = 15.945421 d
+  Eccentricity, e        = 0.0288          Rotational period  = 
+  Inclination, i  (deg)  = 0.28
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Apr 12 04:59:54 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Titan (606)                     {source: SAT360}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2013-Jan-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Jan-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456293.916666667, A.D. 2013-Jan-01 10:00:00.0000, -8.078020836283745E+00, -5.509574451445546E+00,  4.138072193302808E-01, -2.667616145644342E-04, -3.808053704721556E-03, -1.439566871587096E-04,  5.652372874565041E-02,  9.786780251044041E+00,  2.357883836531403E-03, 2456476.416666667, A.D. 2013-Jul-02 22:00:00.0000, -7.525716365454667E+00, -6.334975810836629E+00,  4.128345935561358E-01,  5.826926818749442E-03, -6.081503647601423E-03,  6.203936368104682E-04,  5.686429925129943E-02,  9.845748206144318E+00, -5.148923127079876E-04, 2456658.916666667, A.D. 2014-Jan-01 10:00:00.0000, -6.877327909571489E+00, -7.072993010267681E+00,  3.943555000898065E-01,  1.755964896095842E-03, -1.486994133909421E-03, -1.135166351665543E-03,  5.702293747610569E-02,  9.873215563306491E+00, -2.032272418370631E-04, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************

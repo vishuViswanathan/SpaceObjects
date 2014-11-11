@@ -1,0 +1,85 @@
+ Automated mail xmit by MAIL_REQUEST, PID=   7160 Sat Oct 11 04:53:15 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Jul 31, 2013           Pluto Barycenter                             9
+ 
+ ICRF/J2000.0 heliocentric ecliptic osculating elements (AU, DAYS, DEG),
+ (DE431):
+
+ EPOCH= 2456504.5 ! 2013-Jul-31 00:00:00.0000 (CT)
+  EC= 2.472474378055403E-01 QR= 2.962147811334705E+01 IN= 1.717008568728039E+01
+  OM= 1.102844806866985E+02 W = 1.132765167608166E+02 Tp=  2447724.741131972056
+  A = 3.935088314677154E+01 AD= 4.908028818019603E+01 PR= 9.016337309517009E+04
+
+ System GM (DE431)
+ ----------------
+  977.0  km^3/s^2
+
+ Dynamical point:
+ ---------------
+ The location of the center-of-mass of the Pluto system. The point about which  Pluto and its satellites revolve. See 999 (or 134340) for Pluto planet center,
+ 901 for Charon, 902 for Nyx, 903 for Hydra, 904 for Kerberos, 905 for Styx.
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Oct 11 04:53:14 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Pluto Barycenter (9)            {source: DE-0431LE-0431}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2014-Sep-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Oct-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456901.916666667, A.D. 2014-Sep-01 10:00:00.0000,  7.018481154222345E+00, -3.192486350244944E+01,  1.385610522187035E+00,  3.122843906553594E-03,  3.206490380834834E-05, -9.084870992082979E-04,  1.889553220114697E-01,  3.271659982151871E+01,  6.001584593633401E-04, 2456916.916666667, A.D. 2014-Sep-16 10:00:00.0000,  7.065317848225027E+00, -3.192435306682431E+01,  1.371981880502605E+00,  3.122048599365686E-03,  3.599362784348727E-05, -9.086648206550528E-04,  1.890073445295621E-01,  3.272560724130462E+01,  6.008298209509473E-04, 2456931.916666667, A.D. 2014-Oct-01 10:00:00.0000,  7.112142604716543E+00, -3.192378367752531E+01,  1.358350587110852E+00,  3.121251722429336E-03,  3.992550145571709E-05, -9.088406302946710E-04,  1.890594249205447E-01,  3.273462468147085E+01,  6.014942975912521E-04, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************

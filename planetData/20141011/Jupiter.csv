@@ -1,0 +1,92 @@
+ Automated mail xmit by MAIL_REQUEST, PID=   7160 Sat Oct 11 04:53:17 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Dec 02, 2013              Jupiter                                 599
+ 
+ PHYSICAL DATA (updated 2009-Jan-28):
+  Mass (10^24 kg)       =  1898.13+-.19   Density (g/cm^3)       =  1.326
+  Equat. radius (1 bar) = 71492+-4 km     Polar radius (km)      = 66854+-10
+  Volumetric mean radius= 69911+-6 km     Flattening             =  0.06487
+
+  Rotation period       = 9h 55m 29.685s  Rot. rate(10^-4 rad/s) =  1.75865
+  m = w^2a^3/GM         =  0.089195       Hydrostatic flat., fh  =  0.06509
+  Inferred rot. period  =  9.894+-0.02 hr ks = 3*J2/m            =  0.494
+  Mom. of inert. I/MRo^2=  0.254          I/MRo^2 (upper bound)  =  0.267 
+  Rocky core mass (Mc/M)=  0.0261         Y factor (He/H ratio)  =  0.18+-0.04
+
+  GM (km^3/s^2)         = 126,686,511     GM 1-sigma (km^3/s^2)  = +-100
+  Equ. grav, ge (m/s^2) = 24.79           Pol. grav, gp (m/s^2)  = 28.34
+
+  Geometric albedo      =  0.52           Visual magnitude V(1,0)= -9.40
+  Vis. mag. (opposition)= -2.70           Obliquity to orbit     =  3.12 deg
+  Sidereal orbit period = 11.862615 yr    Sidereal orbit period  = 4332.820 d
+  Mean daily motion     = 0.0831294 deg/d Mean orbit velocity    = 13.0697 km/s
+
+  Atmos. temp. (1 bar)  = 165+-5 K        Heat flow/mass (x10^7) = 15 erg/gm*s
+  Planetary Solar Const =  50.5 W/m^2     Dipole tilt/offset     = 9.6deg/0.1Rp 
+  Escape velocity (km/s)=  59.5           Mag.dip.mom(gauss-Rp^3)= 4.2 
+  A_roche(ice)/Rp       =  2.76           Hill's sphere rad. Rp  = 740
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Oct 11 04:53:16 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Jupiter (599)                   {source: JUP310}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2014-Sep-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Oct-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456901.916666667, A.D. 2014-Sep-01 10:00:00.0000, -3.012464820250808E+00,  4.336167818255636E+00,  4.940033361461218E-02, -6.292754562761014E-03, -3.953067001247496E-03,  1.572411945508434E-04,  3.049546749056150E-02,  5.280126516882509E+00,  3.453151340619569E-04, 2456916.916666667, A.D. 2014-Sep-16 10:00:00.0000, -3.106180102170744E+00,  4.275902435207300E+00,  5.174767844186495E-02, -6.200910212392065E-03, -4.081650341528798E-03,  1.557566544521734E-04,  3.052533512328821E-02,  5.285297937179823E+00,  3.436826738874279E-04, 2456931.916666667, A.D. 2014-Oct-01 10:00:00.0000, -3.198493751398283E+00,  4.213707333366648E+00,  5.407165506543100E-02, -6.106847169215459E-03, -4.210064417504045E-03,  1.541272672221608E-04,  3.055495684811023E-02,  5.290426779843309E+00,  3.404389084050256E-04, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************

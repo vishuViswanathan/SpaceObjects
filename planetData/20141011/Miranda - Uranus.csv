@@ -1,0 +1,78 @@
+ Automated mail xmit by MAIL_REQUEST, PID=   7160 Sat Oct 11 04:53:19 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Jan 08, 2014             Miranda / (Uranus)                       705
+
+ SATELLITE PHYSICAL PROPERTIES:
+  Radius (km)           = 240x234.2x232.9   Density (g cm^-3)   =  1.20 +- 0.14
+  Mass (10^20 kg )      =  0.659 +- 0.075   Geometric Albedo    =  0.27 
+                                            V(1,0)              = +3.6 
+
+ SATELLITE ORBITAL DATA:
+  Semi-major axis, a (km) = 129.8 (10^3)    Orbital period      =  1.413 d
+  Eccentricity, e         =   0.0027        Rotational period   = Synchronous
+  Inclination, i  (deg)   =   4.22
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Oct 11 04:53:19 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Miranda (705)                   {source: URA111}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2014-Sep-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Oct-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456901.916666667, A.D. 2014-Sep-01 10:00:00.0000,  1.942778660587400E+01,  4.811385508346148E+00, -2.345869526624243E-01, -4.690048534751369E-03,  4.382226631320796E-03,  7.643925493892726E-04,  1.156032218705345E-01,  2.001607738673239E+01, -3.507780048924826E-03, 2456916.916666667, A.D. 2014-Sep-16 10:00:00.0000,  1.941387278175256E+01,  4.865746355307651E+00, -2.328008812172194E-01,  1.347019349501936E-03,  2.991637875839764E-03, -2.982386321852187E-03,  1.156010269359931E-01,  2.001569734559748E+01,  2.068462308635034E-03, 2456931.916666667, A.D. 2014-Oct-01 10:00:00.0000,  1.939742826437417E+01,  4.920388827807556E+00, -2.329195435984950E-01, -8.384562534091507E-04,  3.844431890993749E-03,  3.869824593189498E-03,  1.155861023066734E-01,  2.001311322613614E+01,  8.748498544715876E-05, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************

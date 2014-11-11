@@ -1,0 +1,89 @@
+ Automated mail xmit by MAIL_REQUEST, PID=   3657 Sat Apr 12 04:59:52 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Sep 28, 2012                 Mars                             499 / 4
+ 
+ GEOPHYSICAL DATA (updated 2009-May-26):
+  Mean radius (km)      = 3389.9(2+-4)    Density (g cm^-3)     =  3.933(5+-4)
+  Mass (10^23 kg )      =    6.4185       Flattening, f         =  1/154.409
+  Volume (x10^10 km^3)  =   16.318        Semi-major axis       =  3397+-4
+  Sidereal rot. period  =   24.622962 hr  Rot. Rate (x10^5 s)   =  7.088218
+  Mean solar day        =    1.0274907 d  Polar gravity ms^-2   =  3.758
+  Mom. of Inertia       =    0.366        Equ. gravity  ms^-2   =  3.71
+  Core radius (km)      =  ~1700          Potential Love # k2   =  0.153 +-.017
+ 
+  Grav spectral fact u  =   14 (x10^5)    Topo. spectral fact t = 96 (x10^5)
+  Fig. offset (Rcf-Rcm) = 2.50+-0.07 km   Offset (lat./long.)   = 62d / 88d
+  GM (km^3 s^-2)        = 42828.3         Equatorial Radius, Re = 3394.0 km 
+  GM 1-sigma (km^3 s^-2)= +- 0.1          Mass ratio (Sun/Mars) = 3098708+-9
+  
+  Atmos. pressure (bar) =    0.0056       Max. angular diam.    =  17.9"
+  Mean Temperature (K)  =  210            Visual mag. V(1,0)    =  -1.52
+  Geometric albedo      =    0.150        Obliquity to orbit    =  25.19 deg
+  Mean sidereal orb per =    1.88081578 y Orbit vel.  km/s      =  24.1309
+  Mean sidereal orb per =  686.98 d       Escape vel. km/s      =   5.027
+  Hill's sphere rad. Rp =  319.8          Mag. mom (gauss Rp^3) = < 1x10^-4 
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Apr 12 04:59:52 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Mars (499)                      {source: MAR097}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2013-Jan-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Jan-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456293.916666667, A.D. 2013-Jan-01 10:00:00.0000,  1.083924358553313E+00, -8.614598897741291E-01, -4.466229952634253E-02,  9.239206088540756E-03,  1.215090268081813E-02,  2.773513974662527E-05,  8.000708365143305E-03,  1.385279711016460E+00, -3.278424295955991E-04, 2456476.416666667, A.D. 2013-Jul-02 22:00:00.0000,  5.109395063299893E-01,  1.432520663969098E+00,  1.746829712957187E-02, -1.264999146090207E-02,  5.889522450273237E-03,  4.339626477842679E-04,  8.784636996373654E-03,  1.521012745913658E+00,  1.302462988960077E-03, 2456658.916666667, A.D. 2014-Jan-01 10:00:00.0000, -1.514651577982224E+00,  6.920138355564752E-01,  5.167777616958323E-02, -5.290579074819068E-03, -1.153305092510327E-02, -1.117843456413481E-04,  9.622303254385588E-03,  1.666050162460740E+00,  1.595172340609193E-05, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************

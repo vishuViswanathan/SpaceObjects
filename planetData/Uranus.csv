@@ -1,0 +1,92 @@
+ Automated mail xmit by MAIL_REQUEST, PID=   3657 Sat Apr 12 04:59:56 2014
+++++++++++++++++++++++++++++++++ (part 1 of 1)  
+++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++
+
+*******************************************************************************
+ Revised: Jan 08, 2014                Uranus                                799
+ 
+ PHYSICAL DATA (updated 2009-May-26):
+  Mass (10^24 kg)       =    86.8103      Density (g/cm^3)       =  1.318
+  Equat. radius (1 bar) = 25559+-4 km     Polar radius (km)      = 24973+-20
+  Volumetric mean radius= 25362+-12 km    Flattening             =  0.02293
+
+  Rotation period       = 17.24+-0.01 hr  Rot. rate(10^-4 rad/s) =  1.012   
+  m = w^2a^3/GM         =  0.02954        Hydrostatic flat., fh  =  0.01987
+  Inferred rot. period  = 17.14+-0.9 hr   ks = 3*J2/m            =  0.357
+  Mom. of inert. I/MRo^2=  0.225          I/MRo^2 (upper bound)  =  0.232 
+  Rocky core mass (Mc/M)=  0.0012         Y factor (He/H ratio)  =  0.262+-.048
+
+  GM (km^3/s^2)         = 5,793,966       GM 1-sigma( km^3/s^2)  = +-23
+  Equ. grav, ge (m/s^2) =  8.87           Pol. grav, gp (m/s^2)  =  9.19+-0.02
+
+  Geometric albedo      =  0.51           Visual magnitude V(1,0)= -7.19
+  Vis. mag. (opposition)= +5.52           Obliquity to orbit     = 97.86 deg
+  Sidereal orbit period = 84.016846 yr    Sidereal orbit period  = 30687.153 d
+  Mean daily motion     = 0.01176904 dg/d Mean orbit velocity    =  6.8352 km/s
+
+  Atmos. temp. (1 bar)  =  76+-2 K        Heat flow/mass (x10^7) = 
+  Planetary Solar Const =   3.71 W/m^2    Dipole tilt/offset     = 58.6dg/0.3Rp 
+  Escape velocity (km/s)=  21.3           Mag.dip.mom(gauss-Rp^3)= 0.23
+  Aroche(ice)/Rp        =  2.20           Hill's sphere rad., Rp = 2700
+*******************************************************************************
+ 
+ 
+*******************************************************************************
+Ephemeris / MAIL_REQUEST Sat Apr 12 04:59:56 2014 Pasadena, USA  / Horizons    
+*******************************************************************************
+Target body name: Uranus (799)                    {source: URA111}
+Center body name: Sun (10)                        {source: DE-0431LE-0431}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2013-Jan-01 10:00:00.0000 CT 
+Stop  time      : A.D. 2014-Jan-01 10:00:00.0000 CT 
+Step-size       : 2 steps
+*******************************************************************************
+Center geodetic : 0.00000000,0.00000000,0.0000000 {E-lon(deg),Lat(deg),Alt(km)} Center cylindric: 0.00000000,0.00000000,0.0000000 {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : 696000.0 x 696000.0 x 696000.0 k{Equator, meridian, pole}    
+Output units    : AU-D                                                         
+Output format   : 03
+Reference frame : ICRF/J2000.0                                                 
+Output type     : GEOMETRIC cartesian states
+Coordinate systm: Ecliptic and Mean Equinox of Reference Epoch                 
+*******************************************************************************
+JDCT ,   , X, Y, Z, VX, VY, VZ, LT, RG, RR,
+*******************************************************************************
+$$SOE
+2456293.916666667, A.D. 2013-Jan-01 10:00:00.0000,  1.989011085102507E+01,  2.574906117114240E+00, -2.480730792230992E-01, -5.393781696695479E-04,  3.718577955125504E-03,  2.090309579973873E-05,  1.158431622698226E-01,  2.005762177903086E+01, -5.775799194114668E-05, 2456476.416666667, A.D. 2013-Jul-02 22:00:00.0000,  1.977949673588314E+01,  3.251670301405245E+00, -2.441155447245523E-01, -6.727252698186518E-04,  3.697238804229494E-03,  2.249713960701225E-05,  1.157788246602906E-01,  2.004648206726130E+01, -6.432338396190788E-05, 2456658.916666667, A.D. 2014-Jan-01 10:00:00.0000,  1.964467583042083E+01,  3.924129449840649E+00, -2.398582188564322E-01, -8.047338582403806E-04,  3.671327605245873E-03,  2.413251371032756E-05,  1.157079531738031E-01,  2.003421104976634E+01, -7.026777233183516E-05, $$EOE
+*******************************************************************************
+Coordinate system description:
+
+  Ecliptic and Mean Equinox of Reference Epoch
+
+    Reference epoch: J2000.0
+    xy-plane: plane of the Earth's orbit at the reference epoch
+    x-axis  : out along ascending node of instantaneous plane of the Earth's
+              orbit and the Earth's mean equator at the reference epoch
+    z-axis  : perpendicular to the xy-plane in the directional (+ or -) sense
+              of Earth's north pole at the reference epoch.
+
+Symbol meaning [1 au=149597870.700 km, 1 day=86400.0 s]:
+
+    JDCT     Epoch Julian Date, Coordinate Time
+      X      x-component of position vector (AU)                               
+      Y      y-component of position vector (AU)                               
+      Z      z-component of position vector (AU)                               
+      VX     x-component of velocity vector (AU/day)                           
+      VY     y-component of velocity vector (AU/day)                           
+      VZ     z-component of velocity vector (AU/day)                           
+      LT     One-way down-leg Newtonian light-time (day)                       
+      RG     Range; distance from coordinate center (AU)                       
+      RR     Range-rate; radial velocity wrt coord. center (AU/day)            
+
+Geometric states/elements have no aberration corrections applied.
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.Giorgini@jpl.nasa.gov
+*******************************************************************************

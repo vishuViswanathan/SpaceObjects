@@ -1,0 +1,18 @@
+ Volumetric mean radius= 58232+-6 km
+  Polar radius (km)      = 54364+-10
+  Equat. radius (1 bar) = 60268+-4 km 
+  Mean radius, km          = 6371.01+-0.01 
+  Equ. radius, km          = 6378.14+-0.01
+Radius (km)           = 581.1x577.9x577.7
+ Radius (km)             = 2403   +- 5
+Radius (km)             = 605 
+
+
+
+
+Mass (10^20 kg )      =   13.53 +- 1.20
+Mass (10^21 kg )        =   1.53
+ Mass (10^20 kg )        = 1.80 (10^-5)
+ Mass, 10^24 kg = 5.97219+-0.0006
+ GM (km^3/s^2)           = 102.271
+ GM, km^3 s^-2            = 398600.440
