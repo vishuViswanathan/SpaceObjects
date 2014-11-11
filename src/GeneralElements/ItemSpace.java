@@ -119,7 +119,7 @@ public class ItemSpace {
     ButtonListener bl;
     ItemTable itemTable;
 
-    public JComponent itemListPanel() {
+    public JComponent itemListPanelNEW() {
         buttAddItem = new JButton("Add a new Item");
         if (bl == null)
             bl = new ButtonListener();
@@ -139,7 +139,7 @@ public class ItemSpace {
         return outerP;
     }
 
-    public JComponent itemListPanelOLD() {
+    public JComponent itemListPanel() {
         buttAddItem = new JButton("Add a new Item");
         if (bl == null)
             bl = new ButtonListener();
