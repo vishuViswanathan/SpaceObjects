@@ -72,31 +72,22 @@ public class ItemSpace {
     }
 
     public void setGravityLinks() {
-        if (globalGravityOn) {
-//            if (!gravityAdded) {
-                Item item;
-                int iLen = allItems.size();
-                for (int i = 0; i < iLen; i++) {
-                    item = allItems.get(i);
-                    for (int n = i + 1; n < iLen; n++)
-                        addItemLink(new ItemLink(item, allItems.get(n), this));  // by default is GRAVITY
-               }
-//                gravityAdded = true;
-//            }
-        }
-        else {
-            ItemLink link;
-            for (int il = 0; il < allItemLinks.size();il++ ) {
-                link = allItemLinks.get(il);
-                if (link.isGravity()) {
-                    allItemLinks.remove(il);
-                    il--;
-                }
+        ItemLink link;
+        for (int il = 0; il < allItemLinks.size();il++ ) {
+            link = allItemLinks.get(il);
+            if (link.isGravity()) {
+                allItemLinks.remove(il);
+                il--;
             }
-//            for (ItemLink link: allItemLinks) {
-//                if (link.isGravity())
-//                    allItemLinks.remove(link);
-//            }
+        }
+        if (globalGravityOn) {
+            Item item;
+            int iLen = allItems.size();
+            for (int i = 0; i < iLen; i++) {
+                item = allItems.get(i);
+                for (int n = i + 1; n < iLen; n++)
+                    addItemLink(new ItemLink(item, allItems.get(n), this));  // by default is GRAVITY
+            }
         }
         for (ItemLink l: allItemLinks)
             l.setGravityLinks(globalGravityOn);
@@ -171,13 +162,11 @@ public class ItemSpace {
     }
 
     void addItem() {
-        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
-        newItem.editItem(mainApp);
+        Item newItem = new Item("Item New #" + (allItems.size() + 1), 1, 1, Color.RED,  mainApp.parent());
         newItem.setSpace(this);
         allItems.add(newItem);
-        itemTable.addOneRow(newItem);
-//        prepareItemList();
-//        itemListPan.updateUI();
+        prepareItemList();
+        itemListPan.updateUI();
     }
 
      LinkedList <ItemLink> tempInfList;

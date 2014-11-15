@@ -119,7 +119,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3dMV newPos = new Vector3dMV();
 
     public void initStartForce() {
-        force.set(0, 0, 0);
+        force.set(0, 0, 0); // this may not be correct
     }
 
     public void setStartConditions() {

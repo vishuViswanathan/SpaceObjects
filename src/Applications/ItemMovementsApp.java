@@ -29,6 +29,7 @@ import java.util.Calendar;
 public class ItemMovementsApp extends JApplet implements InputControl {
     static public enum SpaceSize {
         BLANK("Blank Set as Daily Objects"),
+        BLANKSPACE("Blank Set as Space Objects"),
         ASTRONOMICAL("Astronomical (km)"),
         GLOBAL("Earth and Environment (m)"),
         DAILY("Daily objects (mm)"),
@@ -116,9 +117,18 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                             dateAndJDN = new DateAndJDN(scheme.startJDN());
 //                        if (getPlanetsFromDB()) {
 //                            space.setGravityLinks();
-//                            space.enableGlobalGravity(true);
+                            space.enableGlobalGravity(true);
                             proceedToItemList(false);
                         }
+                        bShowOrbit = true;
+                        bShowLinks = false;
+                        break;
+                    case BLANKSPACE:
+                        duration = 200000;
+                        calculationStep = 0.001; // s
+                        refreshInterval = 200 * calculationStep;
+                        space.enableGlobalGravity(true);
+                        proceedToItemList(false);
                         bShowOrbit = true;
                         bShowLinks = false;
                         break;
