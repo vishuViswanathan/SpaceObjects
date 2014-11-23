@@ -6,8 +6,8 @@ import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import display.NumberLabel;
-import mvmath.FramedPanel;
+import mvUtils.display.NumberLabel;
+import mvUtils.display.FramedPanel;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Canvas3D;

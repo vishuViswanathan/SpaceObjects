@@ -1,7 +1,7 @@
 package GeneralElements.Display;
 
-import display.InputControl;
-import display.NumberTextField;
+import mvUtils.display.InputControl;
+import mvUtils.display.NumberTextField;
 
 import javax.swing.*;
 import javax.vecmath.Tuple3d;

@@ -1,8 +1,8 @@
 package SpaceElements.time;
 
-import display.InputControl;
-import display.MultiPairColPanel;
-import display.NumberTextField;
+import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.NumberTextField;
 
 import javax.swing.*;
 import java.awt.*;

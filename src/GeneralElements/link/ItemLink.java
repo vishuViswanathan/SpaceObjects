@@ -3,13 +3,13 @@ package GeneralElements.link;
 import GeneralElements.DarkMatter;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
-import display.InputControl;
-import display.NumberTextField;
-import display.TextLabel;
+import mvUtils.display.InputControl;
+import mvUtils.display.NumberTextField;
+import mvUtils.display.TextLabel;
 import evaluations.EvalOnce;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
-import mvmath.FramedPanel;
+import mvUtils.mvXML.*;
+
+import mvUtils.display.FramedPanel;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -412,7 +412,7 @@ public class ItemLink implements EvalOnce {
     }
 
     public String toString() {
-        return "" + inf + "between " + item1 + "and " + item2;
+        return "" + inf + "between " + item1 + " and " + item2;
     }
 
 

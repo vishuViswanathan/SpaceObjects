@@ -7,11 +7,10 @@ import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.ItemTable;
 import GeneralElements.link.Influence;
 import GeneralElements.link.ItemLink;
-import display.InputControl;
-import display.MultiPairColPanel;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
-import mvmath.DoubleMaxMin;
+import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
+import mvUtils.mvXML.*;
+import mvUtils.math.DoubleMaxMin;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -110,7 +109,7 @@ public class ItemSpace {
     ButtonListener bl;
     ItemTable itemTable;
 
-    public JComponent itemListPanelNEW() {
+    public JComponent itemListPanel() {
         buttAddItem = new JButton("Add a new Item");
         if (bl == null)
             bl = new ButtonListener();
@@ -130,7 +129,12 @@ public class ItemSpace {
         return outerP;
     }
 
-    public JComponent itemListPanel() {
+    public void updateItemTable() {
+        if (itemTable != null)
+            itemTable.updateUI();
+    }
+
+    public JComponent itemListPanelOLD() {
         buttAddItem = new JButton("Add a new Item");
         if (bl == null)
             bl = new ButtonListener();
@@ -162,6 +166,14 @@ public class ItemSpace {
     }
 
     void addItem() {
+        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
+        newItem.editItem(mainApp);
+        newItem.setSpace(this);
+//        allItems.add(newItem);
+        itemTable.addOneRow(newItem);
+    }
+
+    void addItemOLD() {
         Item newItem = new Item("Item New #" + (allItems.size() + 1), 1, 1, Color.RED,  mainApp.parent());
         newItem.setSpace(this);
         allItems.add(newItem);
@@ -505,7 +517,7 @@ public class ItemSpace {
             initForces();
             for (ItemLink inf : allItemLinks)
                 if (!inf.evalForce()) {
-                    showError("In evalInfluence: evalForce is false for Link " + inf);
+                    showError("in evalInfluence: evalForce is false for Link " + inf);
                     ok = false;
                     break;
                 }
@@ -669,7 +681,7 @@ public class ItemSpace {
     }
 
     void showError(String msg) {
-        error(msg);
+        error("ItemSpace:" + msg);
         JOptionPane.showMessageDialog(mainApp.parent(), msg, "ERROR", JOptionPane.ERROR_MESSAGE);
         mainApp.parent().toFront();
     }

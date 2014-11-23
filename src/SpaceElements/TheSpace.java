@@ -1,6 +1,6 @@
 package SpaceElements;
 
-import mvmath.*;
+import mvUtils.math.*;
 
 import javax.swing.*;
 import java.util.LinkedList;

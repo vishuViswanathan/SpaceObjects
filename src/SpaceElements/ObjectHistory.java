@@ -1,10 +1,10 @@
 package SpaceElements;
 
-import display.NumberLabel;
-import mvmath.DoublePoint;
-import mvmath.GraphInfoAdapter;
-import mvmath.MultiColData;
-import mvmath.VariableDataTrace;
+import mvUtils.display.NumberLabel;
+import mvUtils.math.DoublePoint;
+import mvUtils.display.GraphInfoAdapter;
+import mvUtils.math.MultiColData;
+import mvUtils.display.VariableDataTrace;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

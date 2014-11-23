@@ -2,8 +2,7 @@ package GeneralElements;
 
 import mvUtils.Point3dMV;
 import mvUtils.Vector3dMV;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
+import mvUtils.mvXML.*;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;

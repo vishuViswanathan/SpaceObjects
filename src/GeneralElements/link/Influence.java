@@ -1,8 +1,7 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
+import mvUtils.mvXML.*;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;

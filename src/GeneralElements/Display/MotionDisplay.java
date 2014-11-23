@@ -16,10 +16,10 @@ import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import display.NumberLabel;
-import display.NumberTextField;
-import mvmath.DoubleMaxMin;
-import mvmath.FramedPanel;
+import mvUtils.display.NumberLabel;
+import mvUtils.display.NumberTextField;
+import mvUtils.math.DoubleMaxMin;
+import mvUtils.display.FramedPanel;
 
 import javax.media.j3d.*;
 import javax.swing.*;

@@ -4,11 +4,11 @@ import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemSpace;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
-import display.InputControl;
-import display.NumberTextField;
+import mvUtils.display.InputControl;
+import mvUtils.display.NumberTextField;
+import mvUtils.display.NumberLabel;
+import mvUtils.mvXML.*;
 import evaluations.EvalOnce;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
 import org.apache.log4j.Logger;
 import schemes.*;
 
@@ -449,6 +449,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 public void windowClosing(WindowEvent e) {
                     super.windowClosed(e);
                     pbStart.setEnabled(true);
+                    space.updateItemTable();
                 }
             });
             orbitDisplay.setVisible(true);
@@ -572,6 +573,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     String baseDatainXML() {
+
         return XMLmv.putTag("baseData" , XMLmv.putTag("calculationStep", calculationStep) +
                 XMLmv.putTag("refreshInterval", refreshInterval) +
                 XMLmv.putTag("duration", duration) +
@@ -637,8 +639,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         mainF.toFront();
     }
 
-    boolean decide(String title, String msg) {
-        int resp = JOptionPane.showConfirmDialog(parent(), msg, title, JOptionPane.YES_NO_OPTION);
+    public static boolean decide(String title, String msg) {
+        int resp = JOptionPane.showConfirmDialog(mainF, msg, title, JOptionPane.YES_NO_OPTION);
         return resp == JOptionPane.YES_OPTION;
     }
 

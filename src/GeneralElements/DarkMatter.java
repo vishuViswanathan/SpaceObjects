@@ -3,7 +3,7 @@ package GeneralElements;
 import Applications.ItemMovementsApp;
 import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
-import display.InputControl;
+import mvUtils.display.InputControl;
 import evaluations.EvalOnce;
 import mvUtils.Vector3dMV;
 

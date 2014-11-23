@@ -5,11 +5,11 @@ import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import display.InputControl;
-import display.MultiPairColPanel;
-import display.NumberLabel;
-import display.NumberTextField;
-import mvmath.DoublePoint;
+import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.NumberLabel;
+import mvUtils.display.NumberTextField;
+import mvUtils.math.DoublePoint;
 
 import javax.media.j3d.*;
 import javax.swing.*;

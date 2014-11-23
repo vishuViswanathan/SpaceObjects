@@ -1,8 +1,8 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
-import display.MultiPairColPanel;
-import display.NumberTextField;
+import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.NumberTextField;
 
 import javax.swing.*;
 

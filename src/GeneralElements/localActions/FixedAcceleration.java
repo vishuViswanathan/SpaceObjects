@@ -2,8 +2,7 @@ package GeneralElements.localActions;
 
 import GeneralElements.DarkMatter;
 import mvUtils.Vector3dMV;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
+import mvUtils.mvXML.*;
 
 import javax.vecmath.Vector3d;
 

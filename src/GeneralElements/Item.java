@@ -5,13 +5,12 @@ import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import display.InputControl;
-import display.MultiPairColPanel;
-import display.NumberTextField;
+import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.NumberTextField;
 import mvUtils.SmartFormatter;
 import mvUtils.Vector3dMV;
-import mvXML.ValAndPos;
-import mvXML.XMLmv;
+import mvUtils.mvXML.*;
 import sun.text.resources.CollationData_th;
 
 import javax.media.j3d.*;
@@ -27,6 +26,8 @@ import java.text.DecimalFormat;
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
+    static public enum EditResponse{CHANGED, NOTCHANGED, DELETE};
+
     static public enum ColType {
         SLNO("SlNo."),
         NAME("Name"),
@@ -403,11 +404,11 @@ public class Item extends DarkMatter {
             tupRelPos.set(relPosPan.getTuple3d());
             tupRelPos.add(parent.status.pos);
             status.pos.set(tupRelPos);
-            if (!bFixedLocation) {
+//            if (!bFixedLocation) {
                 tupRelVel.set(relVelPan.getTuple3d());
                 tupRelVel.add(parent.status.velocity);
                 status.velocity.set(tupRelVel);
-            }
+//            }
 //            updateUI();
         }
 
@@ -417,9 +418,10 @@ public class Item extends DarkMatter {
         }
     }
 
-    public void editItem(InputControl inpC) {
+    public EditResponse editItem(InputControl inpC) {
         ItemDialog dlg = new ItemDialog(inpC);
         dlg.setVisible(true);
+        return dlg.getResponse();
     }
 
     class ItemDialog extends JDialog {
@@ -432,14 +434,17 @@ public class Item extends DarkMatter {
         TuplePanel itemVelTuplePan;
         JButton itemRelButton = new JButton("Set Relative Data");
         Vector3d tupPos, tupVel;
-        JButton ok = new JButton("OK");
+        JButton delete = new JButton("DELETE");
+        JButton ok = new JButton("Save");
         JButton cancel = new JButton("Cancel");
         TuplePanel relPosPan, relVelPan;
         InputControl inpC;
         JComboBox<Object> othersCB;
+        EditResponse response = EditResponse.CHANGED;
 
         ItemDialog(InputControl inpC) {
             setModal(true);
+            setResizable(false);
             this.inpC = inpC;
             dbInit();
         }
@@ -452,14 +457,6 @@ public class Item extends DarkMatter {
             jp.addItemPair(ntItemMass);
             ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
             jp.addItemPair(ntItemDia);
-            itemRelButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    relDlg = new RelativeDlg(inpC);
-                    relDlg.setLocationRelativeTo(itemRelButton);
-                    relDlg.setVisible(true);
-                }
-            });
             jp.addItemPair("", itemRelButton);
 
             JPanel jpPos = new JPanel(new BorderLayout());
@@ -479,6 +476,16 @@ public class Item extends DarkMatter {
             itemVelTuplePan = new TuplePanel(inpC, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
             jpVel.add(itemVelTuplePan, BorderLayout.CENTER);
             jp.addItemPair("Velocity in m/s", jpVel);
+            itemRelButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    relDlg = new RelativeDlg(inpC);
+                    relDlg.setLocationRelativeTo(itemRelButton);
+                    relDlg.setVisible(true);
+                    itemPosTuplePan.updateTuple(status.pos);
+                    itemVelTuplePan.updateTuple(status.velocity );
+                }
+            });
             rbItemFixedAccOn = new JRadioButton("Directional Acceleration ON");
             rbItemFixedAccOn.setSelected(bFixedForceOn);
             rbItemFixedAccOn.addActionListener(new ActionListener() {
@@ -488,6 +495,7 @@ public class Item extends DarkMatter {
                 }
             });
             jp.addItemPair("", rbItemFixedAccOn);
+            outerPan.add(jp, BorderLayout.WEST);
             ActionListener li = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
@@ -495,15 +503,33 @@ public class Item extends DarkMatter {
                         if (takeValuesFromUI())
                             closeThisWindow();
                     }
+                    else if (src == delete) {
+                        if (ItemMovementsApp.decide("Deleting Object ", "Do you want to DELETE this Object?")) {
+                            response = EditResponse.DELETE;
+                            closeThisWindow();
+                        }
+                    }
+                    else {
+                        response = EditResponse.NOTCHANGED;
+                        closeThisWindow();
+                     }
                 }
             };
+            delete.addActionListener(li);
             ok.addActionListener(li);
             cancel.addActionListener(li);
-            jp.addItemPair(cancel, ok);
-            outerPan.add(jp, BorderLayout.WEST);
+            JPanel buttPanel = new JPanel(new BorderLayout());
+            buttPanel.add(delete, BorderLayout.WEST);
+            buttPanel.add(cancel, BorderLayout.CENTER);
+            buttPanel.add(ok, BorderLayout.EAST);
+            outerPan.add(buttPanel, BorderLayout.SOUTH);
 //        JPanel jpFixedAcc = new JPanel(new BorderLayout());
             add(outerPan);
             pack();
+        }
+
+        EditResponse getResponse() {
+            return response;
         }
 
         boolean takeValuesFromUI() {
@@ -530,6 +556,14 @@ public class Item extends DarkMatter {
     }
 
     void noteInput() {
+        calculateAreas();
+        resetLimits();
+        status.time = 0;
+        nextReport = 0;
+        initStartForce();
+//        history.add(status);
+    }
+    void noteInputOLD() {
         name = tfName.getText();
         dia = ntDia.getData();
         mass = ntMass.getData();
