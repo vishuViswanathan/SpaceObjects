@@ -1,7 +1,8 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
-import mvUtils.mvXML.*;
+import GeneralElements.localActions.FixedAcceleration;
+import mvUtils.mvXML.XMLmv;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -38,6 +39,17 @@ public class Influence {
         @Override
         public String toString() {
             return inflName;
+        }
+
+        static public Type[] getValidTypes() {
+            Type[] values = values();
+            int len = values.length;
+            Type[] validTypes = new Type[len - 1];
+            int vLoc = 0;
+            for (Type t:values)
+                if (t != GRAVITY)
+                    validTypes[vLoc++] = t;
+            return validTypes;
         }
 
         public static Type getEnum(String text) {
@@ -79,13 +91,13 @@ public class Influence {
     }
 
     public boolean set(String xmlStr) throws NumberFormatException {
-        ValAndPos vp;
-        vp = XMLmv.getTag(xmlStr, "freeLen", 0);
-        freeLen = Double.valueOf(vp.val);
-        vp = XMLmv.getTag(xmlStr, "kCompression", 0);
-        kCompression = Double.valueOf(vp.val);
-        vp = XMLmv.getTag(xmlStr, "kExpansion", 0);
-        kExpansion = Double.valueOf(vp.val);
+//        ValAndPos vp;
+//        vp = XMLmv.getTag(xmlStr, "freeLen", 0);
+//        freeLen = Double.valueOf(vp.val);
+//        vp = XMLmv.getTag(xmlStr, "kCompression", 0);
+//        kCompression = Double.valueOf(vp.val);
+//        vp = XMLmv.getTag(xmlStr, "kExpansion", 0);
+//        kExpansion = Double.valueOf(vp.val);
         return true;
     }
 
@@ -102,7 +114,10 @@ public class Influence {
                 inf = new Spring(dm1, dm2, 1, 1000);
                 break;
             case ROPE:
-                inf = new Rope(dm1, dm2, 1, 20000);
+                Rope rope = new Rope(dm1, dm2);
+                rope.addLocalAction(new FixedAcceleration());
+//                rope.addLocalAction(new V2Resistance());
+                inf = rope;
                 break;
         }
         return inf;

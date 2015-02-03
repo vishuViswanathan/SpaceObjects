@@ -1,11 +1,12 @@
 package GeneralElements;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.GlobalActions.GlobalAction;
 import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
-import mvUtils.display.InputControl;
 import evaluations.EvalOnce;
 import mvUtils.Vector3dMV;
+import mvUtils.display.InputControl;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -22,11 +23,11 @@ public class DarkMatter implements InputControl, EvalOnce {
     public ItemSpace space;
     public ItemStat status;
     boolean bFixedLocation = false;
-    Vector3dMV dirOfFixedGravityAcc;  // direction of fixed Acceleration, a unit Vector
+//    Vector3dMV dirOfFixedGravityAcc;  // direction of fixed Acceleration, a unit Vector
     double fixedAcc = 9.81; // fixed acceleration value
     Vector<LocalAction> localActions;
-    Vector3d forceOfFixedGravity;
-    boolean bFixedForceOn = false;
+//    Vector3d forceOfFixedGravity;
+//    boolean bFixedForceOn = false;
     Vector3d force = new Vector3d();
     public String name;
     public double mass;
@@ -49,7 +50,11 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.color = color;
         status = new ItemStat();
         calculateAreas();
-        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
+//        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
+    }
+
+    public Vector<LocalAction> getLocalActions() {
+        return localActions;
     }
 
     public void addInfluence(ItemLink itemLink) {
@@ -74,7 +79,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         localActions.add(action);
     }
 
-    public void clearInfluence() {
+     public void clearInfluence() {
         links.clear();
     }
 
@@ -86,9 +91,9 @@ public class DarkMatter implements InputControl, EvalOnce {
         return projectedArea;
     }
 
-    public void setbFixedForceOn(boolean set) {
-        bFixedForceOn = set;
-    }
+//    public void setbFixedForceOn(boolean set) {
+//        bFixedForceOn = set;
+//    }
 
     public void setSpace(ItemSpace space) {
         this.space = space;
@@ -129,12 +134,14 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public void setLocalForces() {
-        if (bFixedForceOn)
-            force.set(forceOfFixedGravity);
-        else
+//        if (bFixedForceOn)
+//            force.set(forceOfFixedGravity);
+//        else
             force.set(0, 0, 0);
         for (LocalAction action : localActions)
             force.add(action.getForce());
+        for (GlobalAction gAction : space.getActiveGlobalActions())
+            force.add(gAction.getForce(this));
     }
 
     public void addToForce(Vector3d addForce) {

@@ -1,19 +1,23 @@
 package GeneralElements.localActions;
 
 import GeneralElements.DarkMatter;
-import mvUtils.mvXML.*;
+import GeneralElements.Item;
+import mvUtils.display.InputControl;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
 import javax.vecmath.Vector3d;
+import java.awt.*;
 
 /**
  * Created by M Viswanathan on 13 Aug 2014
  */
-public class LocalAction implements Cloneable {
+public abstract class LocalAction implements Cloneable {
     static public enum Type {
-        FLUIDFRICTION("FluidFriction"),
-        FLUIDRESISTANCE("FluidResistance"),
-        ITEMELASTICITY("ItemElasticity"),
-        FIXEDACCELERATION("FixedAccel");
+        FLUIDFRICTION("Fluid Friction"),
+        FLUIDRESISTANCE("Fluid Resistance"),
+        ITEMELASTICITY("Item Elasticity"),
+        FIXEDACCELERATION("Fixed Acceleration");
 
         private final String actionName;
 
@@ -43,6 +47,72 @@ public class LocalAction implements Cloneable {
             return retVal;
         }
     }
+
+//    static public enum EditResponse{CHANGED, NOTCHANGED, DELETE};
+
+    static public enum ColType {
+        SLNO("SlNo."),
+        ACTION("Action Type"),
+        PARAMS("Parameters");
+
+        private final String typeName;
+
+        ColType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public String getValue() {
+            return typeName;
+        }
+
+        @Override
+        public String toString() {
+            return typeName;
+        }
+
+        public static ColType getEnum(String text) {
+            ColType retVal = null;
+            if (text != null) {
+                for (ColType b : ColType.values()) {
+                    if (text.equalsIgnoreCase(b.typeName)) {
+                        retVal = b;
+                        break;
+                    }
+                }
+            }
+            return retVal;
+        }
+    }
+
+    public static String[] getColHeader() {
+        ColType[] values = ColType.values();
+        String[] colHeader = new String[values.length];
+        for (int i = 0; i < colHeader.length; i++)
+            colHeader[i] = "" + values[i];
+        return colHeader;
+    }
+
+    public static int[] getColumnWidths() {
+        ColType[] values = ColType.values();
+        int[] colWidths = new int[values.length];
+        for (int i = 0; i < colWidths.length; i++)
+            colWidths[i] = oneColWidth(values[i]);
+        return colWidths;
+    }
+
+    static int oneColWidth(ColType colType) {
+        switch(colType) {
+            case SLNO:
+                return 30;
+            case ACTION:
+                return 100;
+            case PARAMS:
+                return 300;
+        }
+        return 0;
+    }
+
+
     DarkMatter item;
     Type type;
 
@@ -87,6 +157,31 @@ public class LocalAction implements Cloneable {
     public StringBuilder dataInXML() {
         return new StringBuilder("");
     }
+
+    public Object[] getRowData(int slNo) {
+        ColType[] values = ColType.values();
+        Object[] rowData = new Object[values.length];
+        rowData[0] = "" + slNo;
+        for (int i = 1; i < rowData.length; i++)
+            rowData[i] = getOneColData(values[i]);
+        return rowData;
+    }
+
+    Object getOneColData(ColType colType) {
+        switch(colType) {
+            case ACTION:
+                return "" + type;
+            case PARAMS:
+                return getParamString();
+ //            case DIRACCON:
+//                return (bFixedForceOn) ? "Y" : "N";
+        }
+        return "";
+    }
+
+    abstract String getParamString();
+
+    public abstract Item.EditResponse editAction(InputControl inpC, Component c);
 
     public Object clone() {
         LocalAction cloned = null;

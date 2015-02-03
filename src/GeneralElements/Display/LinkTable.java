@@ -1,8 +1,8 @@
 package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
-import GeneralElements.Item;
-import GeneralElements.ItemSpace;
+import GeneralElements.DarkMatter;
+import GeneralElements.link.ItemLink;
 import mvUtils.display.InputControl;
 
 import javax.swing.*;
@@ -14,25 +14,24 @@ import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 
 /**
- * Created by M Viswanathan on 04 Nov 2014
+ * Created by M Viswanathan on 10 Jan 2015
  */
-public class ItemTable {
+public class LinkTable {
     JTable table;
     InputControl inpC;
-    LinkedList<Item> allItems;
+    LinkedList<ItemLink> linkList;
     int slNo = 0;
-    ItemSpace space;
-    ItemTableModel tableModel;
 
-    public ItemTable(InputControl inpC, ItemSpace space, LinkedList<Item> allItems) {
+    LinkTableModel tableModel;
+
+    public LinkTable(InputControl inpC, LinkedList<ItemLink> linkList) {
         this.inpC = inpC;
-        this.space = space;
-        this.allItems = allItems;
-        tableModel = new ItemTableModel();
+        this.linkList = linkList;
+        tableModel = new LinkTableModel();
         table = new JTable(tableModel);
         table.addMouseListener(new TableListener());
         TableColumnModel colModel = table.getColumnModel();
-        int[] colWidth = Item.getColumnWidths();
+        int[] colWidth = ItemLink.getColumnWidths();
         for (int c = 0; c < colModel.getColumnCount(); c++)
             colModel.getColumn(c).setPreferredWidth(colWidth[c]);
     }
@@ -41,11 +40,11 @@ public class ItemTable {
         return table;
     }
 
-    public void addOneRow(Item item) {
+    public void addOneRow(ItemLink itemLink) {
         slNo++;
-        Object[] data = item.getRowData(slNo);
+        Object[] data = itemLink.getRowData(slNo);
         tableModel.addRow(data);
-        allItems.add(item);
+        linkList.add(itemLink);
     }
 
     public void updateUI() {
@@ -53,40 +52,51 @@ public class ItemTable {
     }
 
     public void deleteRow(int row) {
-        if (row >= 0 && row < allItems.size()) {
-            allItems.remove(row);
+        if (row >= 0 && row < linkList.size()) {
+            linkList.remove(row);
             updateUI();
         }
     }
 
+    public boolean deleteLinksOfItem(DarkMatter item) {
+        boolean retVal = false;
+        for (int l = 0; l < linkList.size(); l++) {
+            if (linkList.get(l).linksItem(item)) {
+                linkList.remove(l);
+                retVal = true;
+                l--;
+            }
+        }
+        updateUI();
+        return retVal;
+    }
+
     public void setOneRow(int row) {
         if (row >= 0 && row < table.getRowCount()) {
-            Object[] data = allItems.get(row).getRowData(row + 1);
+            Object[] data = linkList.get(row).getRowData(row + 1);
             int nCol = table.getColumnCount();
             for (int col = 0; col < nCol; col++)
                 tableModel.setValueAt(data[col], row, col);
         }
     }
 
-     class ItemTableModel extends DefaultTableModel {
-         ItemTableModel() {
-             super(Item.getColHeader(), 0);
-             fillTable();
-//             for (int i = 0; i < allItems.size(); i++)
-//                 addRow(allItems.get(i).getRowData(slNo = (i + 1)));
-         }
+    class LinkTableModel extends DefaultTableModel {
+        LinkTableModel() {
+            super(ItemLink.getColHeader(), 0);
+            fillTable();
+        }
 
-         void fillTable() {
-             clearTable();
-             for (int i = 0; i < allItems.size(); i++)
-                 addRow(allItems.get(i).getRowData(slNo = (i + 1)));
-         }
+        void fillTable() {
+            clearTable();
+            for (int i = 0; i < linkList.size(); i++)
+                addRow(linkList.get(i).getRowData(slNo = (i + 1)));
+        }
 
-         void clearTable() {
-             int nRow = getRowCount();
-             for (int r = nRow - 1;  r >= 0; r--)
-                 tableModel.removeRow(r);
-         }
+        void clearTable() {
+            int nRow = getRowCount();
+            for (int r = nRow - 1;  r >= 0; r--)
+                tableModel.removeRow(r);
+        }
     }
 
     class TableListener extends MouseAdapter {
@@ -94,8 +104,8 @@ public class ItemTable {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 int row = table.getSelectedRow();
-                Item thisItem = allItems.get(row);
-                switch (thisItem.editItem(inpC, (Component)e.getSource())) {
+                ItemLink thisLink = linkList.get(row);
+                switch (thisLink.editLink(inpC, (Component)e.getSource())) {
                     case CHANGED:
                         setOneRow(row);
                         break;
@@ -103,8 +113,6 @@ public class ItemTable {
                         ItemMovementsApp.showMessage("no Change");
                         break;
                     case DELETE:
-                        ItemMovementsApp.showMessage("DELETE WHAT ABOUT LINKS?");
-                        space.removeLinksOf(thisItem);
                         deleteRow(row);
                         break;
                 }

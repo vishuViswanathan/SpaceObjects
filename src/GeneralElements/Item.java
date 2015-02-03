@@ -2,31 +2,33 @@ package GeneralElements;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
+import GeneralElements.Display.LocalActionsTable;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
+import mvUtils.SmartFormatter;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
-import mvUtils.SmartFormatter;
-import mvUtils.Vector3dMV;
-import mvUtils.mvXML.*;
-import sun.text.resources.CollationData_th;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
-import javax.media.j3d.*;
+import javax.media.j3d.Group;
+import javax.media.j3d.RenderingAttributes;
 import javax.swing.*;
-import javax.vecmath.*;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
-import java.text.DecimalFormat;
 
 /**
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
-    static public enum EditResponse{CHANGED, NOTCHANGED, DELETE};
+    static public enum EditResponse{CHANGED, NOTCHANGED, DELETE, CANCEL, OK}
 
     static public enum ColType {
         SLNO("SlNo."),
@@ -35,8 +37,7 @@ public class Item extends DarkMatter {
         DIA("Dia(m)"),
         POS("x, y, z Position(m)"),
         STATICPOS("FixedPos"),
-        VEL("x, y, z Velocity(m)"),
-        DIRACCON("DirAccON");
+        VEL("x, y, z Velocity(m)");
 
         private final String typeName;
 
@@ -67,7 +68,6 @@ public class Item extends DarkMatter {
         }
     }
 
-    TuplePanel fixedAccVectPan;
     NumberTextField ntFixedAcc;
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
@@ -77,13 +77,7 @@ public class Item extends DarkMatter {
     public String imageName;
     public boolean isLightSrc = false;
 
-    JTextField tfName;
-    NumberTextField ntMass, ntDia;
-
-    TuplePanel posTuplePan;
     JRadioButton rbFixedPos;
-    TuplePanel velTuplePan;
-    JButton relButton = new JButton("Set Relative Data");
 
     public double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
@@ -100,7 +94,7 @@ public class Item extends DarkMatter {
         this.dia = dia;
         this.color = color;
         status = new ItemStat();
-        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
+//        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
         setRadioButtons();
 //        rbFixedPos = new JRadioButton("Fixed Position");
 //        rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
@@ -158,8 +152,6 @@ public class Item extends DarkMatter {
                 return 30;
             case VEL:
                 return 200;
-            case DIRACCON:
-                return 30;
         }
         return 0;
     }
@@ -188,8 +180,8 @@ public class Item extends DarkMatter {
                 return (bFixedLocation) ? "Y" : "N";
             case VEL:
                 return  status.dataInCSV(ItemStat.Param.VELOCITY, 4);
-            case DIRACCON:
-                return (bFixedForceOn) ? "Y" : "N";
+//            case DIRACCON:
+//                return (bFixedForceOn) ? "Y" : "N";
         }
         return "";
     }
@@ -205,10 +197,10 @@ public class Item extends DarkMatter {
         rbFixedPos.setSelected(set);
     }
 
-    public void setbFixedForceOn(boolean set) {
-        bFixedForceOn = set;
-        rbFixedAccOn.setSelected(set);
-    }
+//    public void setbFixedForceOn(boolean set) {
+//        bFixedForceOn = set;
+//        rbFixedAccOn.setSelected(set);
+//    }
 
     public void setRefreshInterval(double interval, double nextRefresh) {
         reportInterval = interval;
@@ -217,141 +209,12 @@ public class Item extends DarkMatter {
 //        nextReport += reportInterval;
     }
 
-    public JPanel dataPanelOLD(int objNum) {
-        JPanel outerPan = new JPanel(new BorderLayout());
-        MultiPairColPanel jp = new MultiPairColPanel("Data of Item " + objNum);
-        tfName = new JTextField(name, 10);
-        jp.addItemPair("Object Name", tfName);
-        ntMass = new NumberTextField(this, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
-        jp.addItemPair(ntMass);
-        ntDia = new NumberTextField(this, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
-        jp.addItemPair(ntDia);
-        relButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getRelativeData(relButton);
-            }
-        });
-        jp.addItemPair("", relButton);
-
-        JPanel jpPos = new JPanel(new BorderLayout());
-        posTuplePan = new TuplePanel(this, status.pos, 8, -1e30, 1e20, "##0.#####E00", "Position in m");
-        rbFixedPos.setSelected(bFixedLocation);
-        rbFixedPos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                checkFixedPos();
-            }
-        });
-        jpPos.add(posTuplePan, BorderLayout.CENTER);
-        jp.addItemPair("Position in m", jpPos);
-        jp.addItemPair("", rbFixedPos);
-        JPanel jpVel = new JPanel(new BorderLayout());
-        velTuplePan = new TuplePanel(this, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
-        jpVel.add(velTuplePan, BorderLayout.CENTER);
-        jp.addItemPair("Velocity in m/s", jpVel);
-        rbFixedAccOn.setSelected(bFixedForceOn);
-        rbFixedAccOn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                checkFixedAcc();
-            }
-        });
-        jp.addItemPair("", rbFixedAccOn);
-        outerPan.add(jp, BorderLayout.WEST);
-//        JPanel jpFixedAcc = new JPanel(new BorderLayout());
-        fixedAccVectPan = new TuplePanel(this, dirOfFixedGravityAcc, 8, -100, 100, "##0.#####E00", "Direction of Acc Vector");
-        ntFixedAcc = new NumberTextField(this, fixedAcc, 8, false, 0, 2000, "##0.#####E00", "Fixed Acc in m/s2");
-        checkFixedAcc();
-        jp.addItemPair(ntFixedAcc);
-        jp.addItemPair("Direction of Acc", fixedAccVectPan);
-        outerPan.add(jp, BorderLayout.SOUTH);
-        return outerPan;
-    }
-
-    public JPanel dataPanel(int objNum) {
-        JPanel outerPan = new JPanel(new BorderLayout());
-        MultiPairColPanel jp = new MultiPairColPanel("Data of Item " + objNum);
-        tfName = new JTextField(name, 10);
-        jp.addItemPair("Object Name", tfName);
-        ntMass = new NumberTextField(this, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
-        jp.addItemPair(ntMass);
-        ntDia = new NumberTextField(this, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
-        jp.addItemPair(ntDia);
-        relButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getRelativeData(relButton);
-            }
-        });
-        jp.addItemPair("", relButton);
-
-        JPanel jpPos = new JPanel(new BorderLayout());
-        posTuplePan = new TuplePanel(this, status.pos, 8, -1e30, 1e20, "##0.#####E00", "Position in m");
-        rbFixedPos.setSelected(bFixedLocation);
-        rbFixedPos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                checkFixedPos();
-            }
-        });
-        jpPos.add(posTuplePan, BorderLayout.CENTER);
-        jp.addItemPair("Position in m", jpPos);
-        jp.addItemPair("", rbFixedPos);
-        JPanel jpVel = new JPanel(new BorderLayout());
-        velTuplePan = new TuplePanel(this, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
-        jpVel.add(velTuplePan, BorderLayout.CENTER);
-        jp.addItemPair("Velocity in m/s", jpVel);
-        rbFixedAccOn.setSelected(bFixedForceOn);
-        rbFixedAccOn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                checkFixedAcc();
-            }
-        });
-        jp.addItemPair("", rbFixedAccOn);
-        outerPan.add(jp, BorderLayout.WEST);
-//        JPanel jpFixedAcc = new JPanel(new BorderLayout());
-        fixedAccVectPan = new TuplePanel(this, dirOfFixedGravityAcc, 8, -100, 100, "##0.#####E00", "Direction of Acc Vector");
-        ntFixedAcc = new NumberTextField(this, fixedAcc, 8, false, 0, 2000, "##0.#####E00", "Fixed Acc in m/s2");
-        checkFixedAcc();
-        jp.addItemPair(ntFixedAcc);
-        jp.addItemPair("Direction of Acc", fixedAccVectPan);
-        outerPan.add(jp, BorderLayout.SOUTH);
-        return outerPan;
-    }
-
-
     void checkFixedPos() {
         bFixedLocation = rbFixedPos.isSelected();
-        velTuplePan.setEnabled(!bFixedLocation);
-    }
-
-    void checkFixedAcc() {
-        bFixedForceOn = rbFixedAccOn.isSelected();
-        fixedAccVectPan.setEnabled(bFixedForceOn);
-        ntFixedAcc.setEnabled(bFixedForceOn);
+//        velTuplePan.setEnabled(!bFixedLocation);
     }
 
     RelativeDlg relDlg;
-
-    void getRelativeData(JComponent butt) {
-//        space.noteItemData();
-        relDlg = new RelativeDlg(this);
-        relDlg.setLocationRelativeTo(butt);
-        relDlg.setVisible(true);
-    }
-
-    void updateUI() {
-        posTuplePan.updateTuple(status.pos);
-        rbFixedPos.setSelected(bFixedLocation);
-        velTuplePan.updateTuple(status.velocity);
-        fixedAccVectPan.updateTuple(dirOfFixedGravityAcc);
-        ntFixedAcc.setData(fixedAcc);
-        rbFixedAccOn.setSelected(bFixedForceOn);
-        checkFixedPos();
-        checkFixedAcc();
-    }
 
     class RelativeDlg extends JDialog {
         Item parent;
@@ -418,10 +281,18 @@ public class Item extends DarkMatter {
         }
     }
 
-    public EditResponse editItem(InputControl inpC) {
-        ItemDialog dlg = new ItemDialog(inpC);
+    public EditResponse editItem(InputControl inpC, Component c) {
+        ItemDialog dlg = new ItemDialog(inpC, c);
         dlg.setVisible(true);
         return dlg.getResponse();
+    }
+
+    public EditResponse editItem(InputControl inpC) {
+        return editItem(inpC, null);
+    }
+
+    DarkMatter getThisItem() {
+        return this;
     }
 
     class ItemDialog extends JDialog {
@@ -437,16 +308,20 @@ public class Item extends DarkMatter {
         JButton delete = new JButton("DELETE");
         JButton ok = new JButton("Save");
         JButton cancel = new JButton("Cancel");
-        TuplePanel relPosPan, relVelPan;
         InputControl inpC;
         JComboBox<Object> othersCB;
         EditResponse response = EditResponse.CHANGED;
+        LocalActionsTable localActionTable;
 
-        ItemDialog(InputControl inpC) {
+        ItemDialog(InputControl inpC, Component c) {
             setModal(true);
             setResizable(false);
             this.inpC = inpC;
             dbInit();
+            if (c == null)
+                setLocation(100, 100);
+            else
+                setLocationRelativeTo(c);
         }
         void dbInit() {
             JPanel outerPan = new JPanel(new BorderLayout());
@@ -461,12 +336,13 @@ public class Item extends DarkMatter {
 
             JPanel jpPos = new JPanel(new BorderLayout());
             itemPosTuplePan = new TuplePanel(inpC, status.pos, 8, -1e30, 1e20, "##0.#####E00", "Position in m");
-            rbItemFixedPos = new JRadioButton("Fixed Position");
-            rbItemFixedPos.setSelected(bFixedLocation);
+            rbItemFixedPos = new JRadioButton("Fixed Position", bFixedLocation);
+//            rbItemFixedPos.setSelected(bFixedLocation);
             rbItemFixedPos.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    checkFixedPos();
+                    bFixedLocation = rbItemFixedPos.isSelected();
+//                    checkFixedPos();
                 }
             });
             jpPos.add(itemPosTuplePan, BorderLayout.CENTER);
@@ -486,16 +362,9 @@ public class Item extends DarkMatter {
                     itemVelTuplePan.updateTuple(status.velocity );
                 }
             });
-            rbItemFixedAccOn = new JRadioButton("Directional Acceleration ON");
-            rbItemFixedAccOn.setSelected(bFixedForceOn);
-            rbItemFixedAccOn.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    checkFixedAcc();
-                }
-            });
-            jp.addItemPair("", rbItemFixedAccOn);
-            outerPan.add(jp, BorderLayout.WEST);
+            outerPan.add(jp, BorderLayout.CENTER);
+            localActionTable = new LocalActionsTable(getThisItem(), inpC);
+            outerPan.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
             ActionListener li = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
@@ -510,7 +379,12 @@ public class Item extends DarkMatter {
                         }
                     }
                     else {
-                        response = EditResponse.NOTCHANGED;
+                        if (localActionTable.getEditResponse() == EditResponse.CHANGED) {
+                            ItemMovementsApp.showMessage("Some Local Responses have changed and Saved");
+                            response = EditResponse.CHANGED;
+                        }
+                        else
+                            response = EditResponse.NOTCHANGED;
                         closeThisWindow();
                      }
                 }
@@ -541,7 +415,7 @@ public class Item extends DarkMatter {
                 status.pos.set(itemPosTuplePan.getTuple3d());
                 status.velocity.set(itemVelTuplePan.getTuple3d());
                 bFixedLocation = rbItemFixedPos.isSelected();
-                bFixedForceOn = rbItemFixedAccOn.isSelected();
+//                bFixedForceOn = rbItemFixedAccOn.isSelected();
                 retVal = true;
             }
             else
@@ -556,40 +430,6 @@ public class Item extends DarkMatter {
     }
 
     void noteInput() {
-        calculateAreas();
-        resetLimits();
-        status.time = 0;
-        nextReport = 0;
-        initStartForce();
-//        history.add(status);
-    }
-    void noteInputOLD() {
-        name = tfName.getText();
-        dia = ntDia.getData();
-        mass = ntMass.getData();
-        bFixedLocation = rbFixedPos.isSelected();
-        Tuple3d posTuple = posTuplePan.getTuple3d();
-        if (posTuple != null)
-            status.pos.set(posTuple);
-        Tuple3d velTuple = velTuplePan.getTuple3d();
-        if (velTuple != null)
-            status.velocity.set(velTuple);
-        bFixedForceOn = rbFixedAccOn.isSelected();
-        if (bFixedForceOn) {
-            Tuple3d accTuple = fixedAccVectPan.getTuple3d();
-            if (accTuple != null)
-                dirOfFixedGravityAcc.set(accTuple);
-            double vecLen = dirOfFixedGravityAcc.length();
-            if (vecLen > 0) {
-                fixedAcc = ntFixedAcc.getData();
-                dirOfFixedGravityAcc.scale(1 / vecLen);
-                forceOfFixedGravity = new Vector3d(dirOfFixedGravityAcc);
-                forceOfFixedGravity.scale(mass * fixedAcc);
-            } else {
-                bFixedForceOn = false;
-                ItemMovementsApp.log.error("Acc Vector Length is < 0 [" + vecLen);
-            }
-        }
         calculateAreas();
         resetLimits();
         status.time = 0;
@@ -722,13 +562,14 @@ public class Item extends DarkMatter {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("mass", mass)).append(XMLmv.putTag("dia", dia));
-        xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation)).append(XMLmv.putTag("bFixedForceOn", bFixedForceOn));
+//        xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation)).append(XMLmv.putTag("bFixedForceOn", bFixedForceOn));
         xmlStr.append(XMLmv.putTag("color", ("" + color.getRGB())));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
-        if (bFixedForceOn) {
-            xmlStr.append(XMLmv.putTag("dirOfFixedGravityAcc", dirOfFixedGravityAcc.dataInCSV())).
-                    append(XMLmv.putTag("fixedAcc", fixedAcc));
-        }
+        xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation));
+//        if (bFixedForceOn) {
+//            xmlStr.append(XMLmv.putTag("dirOfFixedGravityAcc", dirOfFixedGravityAcc.dataInCSV())).
+//                    append(XMLmv.putTag("fixedAcc", fixedAcc));
+//        }
         xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
         int a = 0;
         for (LocalAction action: localActions) {
@@ -749,8 +590,8 @@ public class Item extends DarkMatter {
         dia = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "bFixedLocation", 0);
         bFixedLocation = (vp.val.equals("1"));
-        vp = XMLmv.getTag(xmlStr, "bFixedForceOn", 0);
-        bFixedForceOn = (vp.val.equals("1"));
+//        vp = XMLmv.getTag(xmlStr, "bFixedForceOn", 0);
+//        bFixedForceOn = (vp.val.equals("1"));
         vp = XMLmv.getTag(xmlStr, "color", 0);
         color = new Color(Integer.valueOf(vp.val));
         vp = XMLmv.getTag(xmlStr, "status", 0);
@@ -761,21 +602,6 @@ public class Item extends DarkMatter {
                 status.takeFromXML(xmlStr);
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Status data of " + name + " :" + e.getMessage());
-        }
-        if (dirOfFixedGravityAcc == null)
-            dirOfFixedGravityAcc = new Vector3dMV(0, 0, 0);
-        if (bFixedForceOn) {
-            vp = XMLmv.getTag(xmlStr, "dirOfFixedGravityAcc", 0);
-            try {
-                if (dirOfFixedGravityAcc == null)
-                    dirOfFixedGravityAcc = new Vector3dMV(vp.val);
-                else
-                    dirOfFixedGravityAcc.set(vp.val);
-            } catch (NumberFormatException e) {
-                throw new NumberFormatException("dirOfFixedGravityAcc data of " + name + " :" + e.getMessage());
-            }
-            vp = XMLmv.getTag(xmlStr, "fixedAcc", 0);
-            fixedAcc = Double.valueOf(vp.val);
         }
         vp = XMLmv.getTag(xmlStr, "nLocalActions", vp.endPos);
         if (vp.val.length() > 0) {
@@ -791,101 +617,5 @@ public class Item extends DarkMatter {
             }
         }
         return retVal;
-    }
-
-    class VectorDataEntry extends JTextField{
-        ItemStat.Param param;
-        InputControl inpC;
-        VectorDataEntry(InputControl inpC, ItemStat.Param param) {
-            this.inpC = inpC;
-            this.param = param;
-            fillLabel();
-            addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    getValue();
-                }
-            });
-
-        }
-
-        void getValue() {
-            VectorDialog dlg = new VectorDialog(inpC, param);
-            dlg.setLocationRelativeTo(this);
-            dlg.setVisible(true);
-        }
-
-        void fillLabel() {
-            setText(status.dataInCSV(param));
-        }
-    }
-
-    class VectorDialog extends JDialog {
-        Item parent;
-        ItemStat.Param param;
-        Vector3d data;
-        JButton ok = new JButton("OK");
-        JButton cancel = new JButton("Cancel");
-        TuplePanel dataPan;
-        InputControl inpC;
-        JComboBox<Object> othersCB;
-        boolean bRelative = false;
-
-        VectorDialog(InputControl inpC, ItemStat.Param param) {
-            setModal(true);
-            this.inpC = inpC;
-            this.param = param;
-            dbInit();
-        }
-
-        void dbInit() {
-            data = new Vector3d(status.getOneParam(param));
-            MultiPairColPanel jp = new MultiPairColPanel("" + param + " of Object");
-            othersCB = new JComboBox<Object>(space.getAllItems().toArray());
-            othersCB.setEditable(bRelative);
-            final JRadioButton relChoice = new JRadioButton("Set Relative Values");
-            relChoice.addActionListener( new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    bRelative = relChoice.isSelected();
-                    othersCB.setEditable(bRelative);
-                }
-            });
-            jp.addItemPair(new JLabel("Relative to "), othersCB);
-            dataPan = new TuplePanel(inpC, data, 8, -1e20, 1e20, "##0.#####E00", "x, y, z Values in m");
-            jp.addItemPair("x, y, z Values in m", dataPan);
-            ActionListener li = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    Object src = e.getSource();
-                    if (src == ok) {
-                        takeValuesFromUI();
-                        closeThisWindow();
-
-                    } else {
-                        closeThisWindow();
-                    }
-                }
-            };
-            ok.addActionListener(li);
-            cancel.addActionListener(li);
-            jp.addItemPair(cancel, ok);
-            add(jp);
-            pack();
-        }
-
-        void takeValuesFromUI() {
-            if (bRelative) {
-                parent = space.getAllItems().get(othersCB.getSelectedIndex());
-                Tuple3d parentValue = parent.getStatus().getOneParam(param);
-                data.set(dataPan.getTuple3d());
-                data.add(parentValue);
-                status.setParam(data, param);
-            }
-        }
-
-        void closeThisWindow() {
-            setVisible(false);
-            dispose();
-        }
     }
 }

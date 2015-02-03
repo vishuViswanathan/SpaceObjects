@@ -1,16 +1,19 @@
 package GeneralElements;
 
 import Applications.ItemMovementsApp;
-//import Applications.SpaceEvaluator;
 import Applications.SpaceEvaluator;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.ItemTable;
+import GeneralElements.Display.LinkTable;
+import GeneralElements.GlobalActions.AllGlobalActions;
+import GeneralElements.GlobalActions.GlobalAction;
 import GeneralElements.link.Influence;
 import GeneralElements.link.ItemLink;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
-import mvUtils.mvXML.*;
 import mvUtils.math.DoubleMaxMin;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -21,13 +24,18 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.Vector;
 
+//import Applications.SpaceEvaluator;
+
 /**
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
     LinkedList<Item> allItems;
     LinkedList<ItemLink> allItemLinks;
+//    Vector<GlobalAction> globalActions;
+    Vector<GlobalAction> activeGlobalActions;
     ItemMovementsApp mainApp;
+    AllGlobalActions allGlobalActions;
 
     public ItemSpace(ItemMovementsApp mainApp) {
         this.mainApp = mainApp;
@@ -37,7 +45,23 @@ public class ItemSpace {
     void clearSpace() {
         allItems = new LinkedList<Item>();
         allItemLinks = new LinkedList<ItemLink>();
+        allGlobalActions = new AllGlobalActions();
+//        globalActions = new Vector<GlobalAction>();
+//        for (GlobalAction.Type type:GlobalAction.Type.values())
+//            globalActions.add(GlobalAction.getGlobalAction(type));
         trace("clearing ItemSpace");
+    }
+
+    public Vector<GlobalAction> getActiveGlobalActions() {
+        return activeGlobalActions;
+    }
+
+    public LinkedList<Item> getAlItems() {
+        return allItems;
+    }
+
+    public LinkedList<ItemLink> getAllItemLinks() {
+        return allItemLinks;
     }
 
     public Item getOneItem(int i) {
@@ -70,7 +94,9 @@ public class ItemSpace {
         allItemLinks.add(l);
     }
 
-    public void setGravityLinks() {
+
+
+    public void setGlobalLinksAndActions() {
         ItemLink link;
         for (int il = 0; il < allItemLinks.size();il++ ) {
             link = allItemLinks.get(il);
@@ -79,7 +105,7 @@ public class ItemSpace {
                 il--;
             }
         }
-        if (globalGravityOn) {
+        if (bItemGravityOn) {
             Item item;
             int iLen = allItems.size();
             for (int i = 0; i < iLen; i++) {
@@ -88,8 +114,10 @@ public class ItemSpace {
                     addItemLink(new ItemLink(item, allItems.get(n), this));  // by default is GRAVITY
             }
         }
+        activeGlobalActions = allGlobalActions.aciveActions();
+
         for (ItemLink l: allItemLinks)
-            l.setGravityLinks(globalGravityOn);
+            l.setGravityLinks(bItemGravityOn);
     }
 
     public void noteItemData() {
@@ -106,21 +134,28 @@ public class ItemSpace {
     JPanel itemListPan;
     GridBagConstraints gbcItemList;
     JButton buttAddItem;
+    JButton buttAddLink;
     ButtonListener bl;
     ItemTable itemTable;
+    LinkTable linkTable;
 
-    public JComponent itemListPanel() {
+    public JComponent dataEntryPanel() {
+        JPanel outerP = new JPanel(new BorderLayout());
+        outerP.add(itemListPanel(), BorderLayout.WEST);
+        outerP.add(influenceListPanel(), BorderLayout.EAST);
+        outerP.add(allGlobalActions.globalActionPanel(mainApp), BorderLayout.SOUTH);
+        return outerP;
+    }
+
+    JComponent itemListPanel() {
         buttAddItem = new JButton("Add a new Item");
         if (bl == null)
             bl = new ButtonListener();
         buttAddItem.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
-        sP.setPreferredSize(new Dimension(800, 600));
-//        itemListPan = new JPanel(new GridBagLayout());
-//        gbcItemList = new GridBagConstraints();
-//        prepareItemList();
-        itemTable  = new ItemTable(mainApp, allItems);
+        sP.setPreferredSize(new Dimension(800, 550));
+        itemTable  = new ItemTable(mainApp, this, allItems);
         sP.setViewportView(itemTable.getTable());
         outerP.add(sP, BorderLayout.CENTER);
         JPanel buttPan = new JPanel(new GridLayout(1, 2));
@@ -134,114 +169,67 @@ public class ItemSpace {
             itemTable.updateUI();
     }
 
-    public JComponent itemListPanelOLD() {
-        buttAddItem = new JButton("Add a new Item");
-        if (bl == null)
-            bl = new ButtonListener();
-        buttAddItem.addActionListener(bl);
-        JPanel outerP = new JPanel(new BorderLayout());
-        JScrollPane sP = new JScrollPane();
-        sP.setPreferredSize(new Dimension(450, 600));
-        itemListPan = new JPanel(new GridBagLayout());
-        gbcItemList = new GridBagConstraints();
-        prepareItemList();
-        sP.setViewportView(itemListPan);
-        outerP.add(sP, BorderLayout.CENTER);
-        JPanel buttPan = new JPanel(new GridLayout(1, 2));
-        buttPan.add(buttAddItem);
-        outerP.add(buttPan, BorderLayout.SOUTH);
-        return outerP;
-    }
-
-    void prepareItemList() {
-        if (itemListPan != null)
-            itemListPan.removeAll();
-        int itN = 1;
-        gbcItemList.gridx = 0;
-        gbcItemList.gridy = 0;
-        for (Item it: allItems) {
-            itemListPan.add(it.dataPanel(itN++), gbcItemList);
-            gbcItemList.gridy++;
+    void addItem(Component c) {
+        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
+        if (newItem.editItem(mainApp) == Item.EditResponse.CHANGED) {
+            newItem.setSpace(this);
+            itemTable.addOneRow(newItem);
         }
     }
 
-    void addItem() {
-        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
-        newItem.editItem(mainApp);
-        newItem.setSpace(this);
-//        allItems.add(newItem);
-        itemTable.addOneRow(newItem);
-    }
-
-    void addItemOLD() {
-        Item newItem = new Item("Item New #" + (allItems.size() + 1), 1, 1, Color.RED,  mainApp.parent());
-        newItem.setSpace(this);
-        allItems.add(newItem);
-        prepareItemList();
-        itemListPan.updateUI();
-    }
-
-     LinkedList <ItemLink> tempInfList;
-    JButton buttSaveInf;
-    JButton buttAddInf;
+    LinkedList <ItemLink> tempInfList;
     JRadioButton rbItemGravity;
     boolean listEdited = false;
 
+    /**
+     * This is requires to filter out inter item gravity which is gloabal and not item specific
+     */
     void fillTempInfList() {
         tempInfList = new LinkedList<ItemLink>();
-//        int slNo = 0;
         for (ItemLink il: allItemLinks)
             if (!il.isGravity())
-            tempInfList.add(new ItemLink(allItems, il, this));
+            tempInfList.add(il); //new ItemLink(allItems, il, this));
         listEdited = false;
     }
 
     JPanel infListPan;
     GridBagConstraints gbcInfList;
-    boolean globalGravityOn = false;
-//    boolean gravityAdded = false;
+    boolean bItemGravityOn = false;
 
-    public void enableGlobalGravity(boolean ena) {
-        globalGravityOn = ena;
-//        setGravityLinks();
+    public void enableItemGravity(boolean ena) {
+        bItemGravityOn = ena;
     }
+
+
 
     public void enableButtons(boolean ena) {
-        buttSaveInf.setEnabled(ena);
-        buttAddInf.setEnabled(ena);
-        rbItemGravity.setEnabled(ena);
+//        buttSaveInf.setEnabled(ena);
+//        buttAddInf.setEnabled(ena);
+//        rbItemGravity.setEnabled(ena);
     }
 
-    public JComponent influenceListPanel() {
+    public void removeLinksOf(DarkMatter item) {
+        linkTable.deleteLinksOfItem(item);
+    }
+
+    JComponent influenceListPanel() {
         fillTempInfList();
-        buttSaveInf = new JButton("Save Links");
-        buttAddInf = new JButton("Add a new Link");
+        buttAddLink = new JButton("Add New Link");
         rbItemGravity = new JRadioButton("Inter-Item Gravity Enabled");
-        rbItemGravity.setSelected(globalGravityOn);
+        rbItemGravity.setSelected(bItemGravityOn);
         if (bl == null)
             bl = new ButtonListener();
-        buttSaveInf.addActionListener(bl);
-        buttAddInf.addActionListener(bl);
+        buttAddLink.addActionListener(bl);
         rbItemGravity.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
-        JPanel colHeader = ItemLink.colHeader();
-        outerP.add(colHeader, BorderLayout.NORTH);
         JScrollPane sP = new JScrollPane();
-//        sP.setPreferredSize(new Dimension(colHeader.getPreferredSize().width + 20, 600));
-        infListPan = new JPanel(new GridBagLayout());
-        gbcInfList = new GridBagConstraints();
-        prepareLinkList();
-        sP.setViewportView(infListPan);
+        sP.setPreferredSize(new Dimension(400, 550));
+        linkTable  = new LinkTable(mainApp, tempInfList);
+        sP.setViewportView(linkTable.getTable());
         outerP.add(sP, BorderLayout.CENTER);
-        JPanel buttPan = new JPanel(new GridBagLayout());
-        GridBagConstraints gbcButton = new GridBagConstraints();
-        gbcButton.gridx = 0;
-        gbcButton.gridy = 0;
-        buttPan.add(rbItemGravity, gbcButton);
-        gbcButton.gridx++;
-        buttPan.add(buttAddInf, gbcButton);
-        gbcButton.gridx++;
-        buttPan.add(buttSaveInf, gbcButton);
+        JPanel buttPan = new JPanel(new GridLayout(1, 2));
+        buttPan.add(rbItemGravity);
+        buttPan.add(buttAddLink);
         outerP.add(buttPan, BorderLayout.SOUTH);
         return outerP;
     }
@@ -258,7 +246,7 @@ public class ItemSpace {
         }
     }
 
-    public  void resetLinkList() {
+    public void resetLinkList() {
         if (infListPan != null) {
             fillTempInfList();
             prepareLinkList();
@@ -291,10 +279,10 @@ public class ItemSpace {
             it.clearInfluence();
     }
 
-    void saveInfluenceList() {
+    public void saveInfluenceList() {
         clearItemLinks();
         ItemLink ilNow;
-        for (ItemLink iL:tempInfList) {
+        for (ItemLink iL : tempInfList) {
 //            if ((ilNow = iL.getInfFromUI()) != null)
 //                allItemLinks.add(ilNow);
             if ((ilNow = iL) != null)
@@ -314,6 +302,21 @@ public class ItemSpace {
     }
 
     void addInfluence() {
+        noteItemData();
+        if (allItems.size() > 1) {
+            ItemLink link = new ItemLink(this);
+            Item.EditResponse resp = link.editLink(getInputControl());
+            if (resp == Item.EditResponse.CHANGED) {
+                linkTable.addOneRow(link);
+                linkEdited(link);
+            }
+        }
+        else {
+            showError("Create items before creating links");
+        }
+    }
+
+    void addInfluenceOLD() {
         noteItemData();
         if (allItems.size() > 1) {
             LinkBasic linkDlg = new LinkBasic(tempInfList.size() + 1, this);
@@ -343,18 +346,18 @@ public class ItemSpace {
     class ButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Object src = e.getSource();
-            if (src == buttAddInf)
+            Component src = (Component)e.getSource();
+            if (src == buttAddLink)
                 addInfluence();
-            else if (src == buttSaveInf) {
-                saveInfluenceList();
-                showMessage("Saving Links");
-            }
+//            else if (src == buttSaveInf) {
+//                saveInfluenceList();
+//                showMessage("Saving Links");
+//            }
             else if (src == buttAddItem) {
-                addItem();
+                addItem(src);
             }
             else if (src == rbItemGravity) {
-                globalGravityOn = rbItemGravity.isSelected();
+                bItemGravityOn = rbItemGravity.isSelected();
             }
         }
     }
@@ -606,6 +609,15 @@ public class ItemSpace {
         return evalInfluence(evaluator, deltaT, nowT);
     }
 
+    StringBuilder allGlobalActionsInXML() {
+        return allGlobalActions.dataInXML();
+//        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("nGActions", globalActions.size()));
+//        int i = 0;
+//        for (GlobalAction gA: globalActions)
+//            xmlStr.append(XMLmv.putTag("gA#" + ("" + i++).trim(), gA.dataInXML().toString()));
+//        return xmlStr;
+    }
+
     StringBuilder allItemsInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("nItems", nItems()));
         int i = 0;
@@ -625,6 +637,7 @@ public class ItemSpace {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("allItems", allItemsInXML().toString()));
         xmlStr.append(XMLmv.putTag("allItemLinks", allItemLinksInXML().toString()));
+        xmlStr.append(XMLmv.putTag("allGlobalActions", allGlobalActionsInXML().toString()));
         return xmlStr;
     }
 
@@ -634,9 +647,12 @@ public class ItemSpace {
         vp = XMLmv.getTag(xmlStr, "nItems", 0);
         try {
             int nItems = Integer.valueOf(vp.val);
+            Item oneItem;
             for (int i = 0; i < nItems; i++) {
                 vp = XMLmv.getTag(xmlStr, "it#" + ("" + i).trim(), vp.endPos);
-                allItems.add(new Item(vp.val, mainApp.parent()));
+                oneItem = new Item(vp.val, mainApp.parent());
+                addItem(oneItem);
+//                allItems.add(new Item(vp.val, mainApp.parent()));
             }
         } catch (NumberFormatException e) {
             showError("Problem in XML data for Items:" + e.getMessage());
@@ -671,16 +687,21 @@ public class ItemSpace {
         if (retVal) {
             vp = XMLmv.getTag(xmlStr, "allItemLinks", vp.endPos);
             retVal = takeLinksFromXML(vp.val);
+            if (retVal) {
+                vp = XMLmv.getTag(xmlStr, "allGlobalActions", vp.endPos);
+                if (vp.val.length() > 10)
+                    retVal = allGlobalActions.setAllValues(vp.val);
+            }
         }
         return retVal;
     }
 
-    void showMessage(String msg) {
+    public void showMessage(String msg) {
         JOptionPane.showMessageDialog(mainApp.parent(), msg, "FOR INFORMATION", JOptionPane.INFORMATION_MESSAGE);
         mainApp.parent().toFront();
     }
 
-    void showError(String msg) {
+    public void showError(String msg) {
         error("ItemSpace:" + msg);
         JOptionPane.showMessageDialog(mainApp.parent(), msg, "ERROR", JOptionPane.ERROR_MESSAGE);
         mainApp.parent().toFront();

@@ -2,9 +2,9 @@ package schemes;
 
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
-import GeneralElements.link.*;
-import GeneralElements.localActions.FixedAcceleration;
-import GeneralElements.localActions.V2Resistance;
+import GeneralElements.link.ItemLink;
+import GeneralElements.link.LinkWithMass;
+import GeneralElements.link.Rope;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -38,16 +38,18 @@ public class BungeeJumpingWithRope implements DefaultScheme{
         lastItem = it;
         it =  new Item("Ball", mass2, 1, Color.WHITE, mainF);
 //        it.setbFixedLocation(true);
-        it.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), gAcc));
-        it.addLocalAction(new V2Resistance(resistFactor));
+// 20150126       it.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), gAcc));
+// 20150126        it.addLocalAction(new V2Resistance(resistFactor));
         it.initPosEtc(new Point3d(4,0, 0), new Vector3d(0, 0, 0));
         space.addItem(it);
 
 //        LinkWithMass rope = new Rope(lastItem, it, 25, massPerM, ropeDia, e, 50);
         LinkWithMass rope = new Rope(lastItem, it, (25.0/4), e);
+// 20150126       rope.addLocalAction(new FixedAcceleration());
+// 20150126       rope.addLocalAction(new V2Resistance(resistFactor));
         if (rope.setAllElements()) {
-            rope.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), gAcc));
-            rope.addLocalAction(new V2Resistance(resistFactor));
+//            rope.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), gAcc));
+//            rope.addLocalAction(new V2Resistance(resistFactor));
             ItemLink link = new ItemLink(lastItem, it, rope, space);
             space.addItemLink(link);
         }

@@ -41,7 +41,7 @@ public class BungeeJumping implements DefaultScheme{
 //                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
                 link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
                 space.addItemLink(link);
-                it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
+                it.addLocalAction(new FixedAcceleration(it));
                 it.addLocalAction(new V2Resistance(it, resistFactor));            }
             else
                 it.setbFixedLocation(true);
@@ -51,7 +51,7 @@ public class BungeeJumping implements DefaultScheme{
         it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
         space.addItem(it);
         it.initPosEtc(new Point3d(xPos, -(lastPos + 1) * pitch, 0), new Vector3d(0, 0, 0));
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
+        it.addLocalAction(new FixedAcceleration(it));
         it.addLocalAction(new V2Resistance(it, resistFactor));
 //        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
@@ -67,7 +67,7 @@ public class BungeeJumping implements DefaultScheme{
 //            link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
             link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
             space.addItemLink(link);
-            it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
+            it.addLocalAction(new FixedAcceleration(it));
             it.addLocalAction(new V2Resistance(it, resistFactor));
 //            lastPos = linkNum;
             lastItem = it;
@@ -79,70 +79,11 @@ public class BungeeJumping implements DefaultScheme{
         it.initPosEtc(new Point3d(xPos, yPos, 0), new Vector3d(jumpXVel, 0, 0));
 //        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
+        it.addLocalAction(new FixedAcceleration(it));
         it.addLocalAction(new V2Resistance(it, resistFactor));
         space.addItemLink(link);
         return true;
     }
-
-    public boolean getSchemeTEST(JFrame mainF, ItemSpace space) {
-        Item it;
-        Item lastItem;
-        ItemLink link;
-        int linkNum = 0;
-
-        double xPos = 0;
-        it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
-        it.setbFixedLocation(true);
-        space.addItem(it);
-        it.initPosEtc(new Point3d(xPos, -linkNum * pitch, 0), new Vector3d(0, 0, 0));
-        lastItem = it;
-        xPos += pitch;
-        linkNum++;
-        it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
-        space.addItem(it);
-        it.initPosEtc(new Point3d(xPos, pitch, 0), new Vector3d(0, 0, 0));
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-        space.addItemLink(link);
-        lastItem = it;
-        xPos += pitch;
-        linkNum++;
-
-        it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
-        space.addItem(it);
-        it.initPosEtc(new Point3d(xPos, 0, 0), new Vector3d(0, 0, 0));
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-        space.addItemLink(link);
-        lastItem = it;
-        xPos += pitch;
-        linkNum++;
-
-        it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
-        space.addItem(it);
-        it.initPosEtc(new Point3d(xPos, pitch, 0), new Vector3d(0, 0, 0));
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-        space.addItemLink(link);
-        lastItem = it;
-        xPos += pitch;
-
-        it =  new Item("Ball", mass2, 1, Color.WHITE, mainF);
-        it.setbFixedLocation(true);
-        space.addItem(it);
-        it.initPosEtc(new Point3d(xPos, 0, 0), new Vector3d(jumpXVel, 0, 0));
-        link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-        it.addLocalAction(new FixedAcceleration(it, new Vector3d(0, -1, 0), 9.81));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
-        space.addItemLink(link);
-
-        return true;
-    }
-
 
     @Override
     public double startJDN() {

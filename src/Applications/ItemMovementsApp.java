@@ -4,13 +4,15 @@ import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemSpace;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
+import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
 import mvUtils.display.NumberTextField;
-import mvUtils.display.NumberLabel;
-import mvUtils.mvXML.*;
-import evaluations.EvalOnce;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 import org.apache.log4j.Logger;
-import schemes.*;
+import schemes.BungeeJumpingWithRope;
+import schemes.DefaultScheme;
+import schemes.PlanetsAndMoons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -90,7 +92,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         init();
     }
 
-     public void init() {
+    public void init() {
         if (log == null)
             log = Logger.getLogger(ItemMovementsApp.class);
         modifyJTextEdit();
@@ -116,8 +118,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         if (scheme.getScheme(mainF, space)) {
                             dateAndJDN = new DateAndJDN(scheme.startJDN());
 //                        if (getPlanetsFromDB()) {
-//                            space.setGravityLinks();
-                            space.enableGlobalGravity(true);
+//                            space.setGlobalLinksAndActions();
+                            space.enableItemGravity(true);
                             proceedToItemList(false);
                         }
                         bShowOrbit = true;
@@ -127,7 +129,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         duration = 200000;
                         calculationStep = 0.001; // s
                         refreshInterval = 200 * calculationStep;
-                        space.enableGlobalGravity(true);
+                        space.enableItemGravity(true);
                         proceedToItemList(false);
                         bShowOrbit = true;
                         bShowLinks = false;
@@ -136,7 +138,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         duration = 200;
                         calculationStep = 0.0002; // was 0.000002;
                         refreshInterval = 200 * calculationStep; // was 20000
-                        space.enableGlobalGravity(false);
+                        space.enableItemGravity(false);
                         proceedToItemList(false);
                         bShowOrbit = false;
                         bShowLinks = true;
@@ -146,11 +148,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         duration = 200;
                         calculationStep = 0.0002; // was 0.000002;
                         refreshInterval = 200 * calculationStep; // was 20000
-                        space.enableGlobalGravity(false);
+                        space.enableItemGravity(false);
 //                        if ((new ChainWithBall()).getScheme(mainF, space)) {
 //                        if ((new MultiPendulum()).getScheme(mainF, space))  {
 //                        if ((new BungeeJumping()).getScheme(mainF, space)) {
                         if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
+//                        if ((new Mesh()).getScheme(mainF, space)) {
                             proceedToItemList(false);
                         }
                         bShowOrbit = false;
@@ -167,9 +170,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     JComponent jcItemList;
     JComponent jcInfluenceList;
     JComponent jcAstroDate;
+    JComponent dataEntryPanel;
 
     void proceedToItemList(boolean reDo) {
+        // reDo can ber removed    REMOVE
         if (reDo) {
+            if (dataEntryPanel != null) mainF.remove(dataEntryPanel);
             if (jcItemList != null) mainF.remove(jcItemList);
             if (jcInfluenceList != null) mainF.remove(jcInfluenceList);
             if (jcAstroDate != null) mainF.remove(jcAstroDate);
@@ -183,10 +189,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             jcAstroDate = dateP;
             mainF.add(jcAstroDate, BorderLayout.NORTH);
         }
-        jcItemList = space.itemListPanel();
-        mainF.add(jcItemList, BorderLayout.WEST);
-        jcInfluenceList = space.influenceListPanel();
-        mainF.add(jcInfluenceList, BorderLayout.EAST);
+        dataEntryPanel = space.dataEntryPanel();
+        mainF.add(dataEntryPanel, BorderLayout.CENTER);
+//        jcItemList = space.itemListPanel();
+//        mainF.add(jcItemList, BorderLayout.WEST);
+//        jcInfluenceList = space.influenceListPanel();
+//        mainF.add(jcInfluenceList, BorderLayout.EAST);
         if (!reDo) {
             mainF.add(buttonPanel(), BorderLayout.SOUTH);
         }
@@ -280,7 +288,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     double nextRefresh = 0; // sec
     double lastRefresh = 0; // sec
     long lastTnano;
-//    long lastStepTms;
+    //    long lastStepTms;
     long nowTnano;
     public boolean bRealTime = false;
 //    boolean updateDisplayNow = false;
@@ -292,7 +300,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 //        continueIt = true;
         double endT;
         if (fresh) {
-            space.setGravityLinks();
+            space.setGlobalLinksAndActions();
             nowT = 0;
             setRefreshInterval(refreshInterval);
             nextRefresh = 0;
@@ -359,82 +367,82 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         return space.doCalculation(deltaT, nowT);
     }
 
- /*   void doCalculationFast(boolean fresh)   {
-//        space.prepareLinkEvaluator();
-        enableButtons(false);
-        double step = calculationStep;
-        double hrsPerSec = 0;
-        continueIt = true;
-        double endT;
-        if (fresh) {
-            space.setGravityLinks();
-            nowT = 0;
-            setRefreshInterval(refreshInterval);
-            nextRefresh = 0;
-            endT = ntfDuration.getData() * 3600;
-            lastTnano = System.nanoTime(); // new Date()).getTime();
-            nowDate = new DateAndJDN(dateAndJDN);
-            continueIt = true;
-        }
-        else {
-            endT = nowT + ntfDuration.getData() * 3600;
-        }
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec); //.format(nowDate.getTime()));
+    /*   void doCalculationFast(boolean fresh)   {
+   //        space.prepareLinkEvaluator();
+           enableButtons(false);
+           double step = calculationStep;
+           double hrsPerSec = 0;
+           continueIt = true;
+           double endT;
+           if (fresh) {
+               space.setGlobalLinksAndActions();
+               nowT = 0;
+               setRefreshInterval(refreshInterval);
+               nextRefresh = 0;
+               endT = ntfDuration.getData() * 3600;
+               lastTnano = System.nanoTime(); // new Date()).getTime();
+               nowDate = new DateAndJDN(dateAndJDN);
+               continueIt = true;
+           }
+           else {
+               endT = nowT + ntfDuration.getData() * 3600;
+           }
+           orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec); //.format(nowDate.getTime()));
 
-        runIt = true;
-        long lastStepNano = System.nanoTime();
-        long nowStepNano, diffStepNano;
-        while (runIt && nowT < endT) {
-            if (continueIt) {
-                try {
-                    doOneStepFast(step, nowT);
-//                    doOneStep(step, nowT);
-                    if (bRealTime) {
-                        nowStepNano = System.nanoTime();
-                        diffStepNano = (nowStepNano - lastStepNano);
-                        stepDeltaT = (double)(diffStepNano) / 1e9;
-                        if (stepDeltaT <= calculationStep) {
-                            step = stepDeltaT;
-//                            debug("YES : stepDeltaT = " + stepDeltaT + ", calculationStep = " + calculationStep);
-                        }
-                        else {
-                            step = calculationStep;
-//                            debug("NO : stepDeltaT = " + stepDeltaT + ", calculationStep = " + calculationStep);
-                        }
-                    }
-                    else {
-                        step = calculationStep;
-                    }
-                    lastStepNano = System.nanoTime();
-                    nowT += step;
-                    if (nowT > nextRefresh) {
-                        space.updateLinkDisplay();
-                        showNow = false;
-                        nowTnano = System.nanoTime(); //new Date().getTime();
-                        double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
-                        hrsPerSec = (refreshInterval / 3600) / deltaT;
-                        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
-                        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
-                        lastRefresh = nowT;
-                        nextRefresh += refreshInterval;
-                        lastTnano = nowTnano;
-                    }
-                } catch (Exception e) {
-                    showError("Aborting in 'doCalculationFast()' at nowT = " + nowT + " due to :" + e.getMessage());
-                    runIt = false;
-                }
-            }
-        }
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
-        orbitDisplay.resultsReady();
-        evaluator.stopTasks();
-        enableButtons(true);
-    }
+           runIt = true;
+           long lastStepNano = System.nanoTime();
+           long nowStepNano, diffStepNano;
+           while (runIt && nowT < endT) {
+               if (continueIt) {
+                   try {
+                       doOneStepFast(step, nowT);
+   //                    doOneStep(step, nowT);
+                       if (bRealTime) {
+                           nowStepNano = System.nanoTime();
+                           diffStepNano = (nowStepNano - lastStepNano);
+                           stepDeltaT = (double)(diffStepNano) / 1e9;
+                           if (stepDeltaT <= calculationStep) {
+                               step = stepDeltaT;
+   //                            debug("YES : stepDeltaT = " + stepDeltaT + ", calculationStep = " + calculationStep);
+                           }
+                           else {
+                               step = calculationStep;
+   //                            debug("NO : stepDeltaT = " + stepDeltaT + ", calculationStep = " + calculationStep);
+                           }
+                       }
+                       else {
+                           step = calculationStep;
+                       }
+                       lastStepNano = System.nanoTime();
+                       nowT += step;
+                       if (nowT > nextRefresh) {
+                           space.updateLinkDisplay();
+                           showNow = false;
+                           nowTnano = System.nanoTime(); //new Date().getTime();
+                           double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
+                           hrsPerSec = (refreshInterval / 3600) / deltaT;
+                           nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
+                           orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
+                           lastRefresh = nowT;
+                           nextRefresh += refreshInterval;
+                           lastTnano = nowTnano;
+                       }
+                   } catch (Exception e) {
+                       showError("Aborting in 'doCalculationFast()' at nowT = " + nowT + " due to :" + e.getMessage());
+                       runIt = false;
+                   }
+               }
+           }
+           orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec);
+           orbitDisplay.resultsReady();
+           evaluator.stopTasks();
+           enableButtons(true);
+       }
 
-    void doOneStepFast(double deltaT, double nowT) throws Exception {
-        space.doCalculation(evaluator, deltaT, nowT);
-    }
-*/
+       void doOneStepFast(double deltaT, double nowT) throws Exception {
+           space.doCalculation(evaluator, deltaT, nowT);
+       }
+   */
     MotionDisplay orbitDisplay;
 
     boolean showOrbitMap() {
@@ -491,48 +499,42 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     void saveDataToFile() {
-        boolean proceed = true;
+//        boolean proceed = true;
         space.noteItemData();
-        if (space.anyUnsavedLink()) {
-            proceed = decide("Unsaved Item/link", "Do you want to proceed abandoning the changes made?");
-            if (proceed)
-                space.resetLinkList();
-        }
-        if (proceed) {
-            String xmlData = baseDatainXML() +
-                            space.dataInXML().toString();
+        space.saveInfluenceList();
+        String xmlData = baseDatainXML() +
+                space.dataInXML().toString();
 
-            String title = "Data for ItemMovementsApp";
-            FileDialog fileDlg =
-                    new FileDialog(mainF, title,
-                            FileDialog.SAVE);
-            fileDlg.setFile("*.imDat");
-            fileDlg.setVisible(true);
+        String title = "Data for ItemMovementsApp";
+        FileDialog fileDlg =
+                new FileDialog(mainF, title,
+                        FileDialog.SAVE);
+        fileDlg.setFile("*.imDat");
+        fileDlg.setVisible(true);
 
-            String bareFile = fileDlg.getFile();
-            if (!(bareFile == null)) {
-                int len = bareFile.length();
-                if ((len < 8) || !(bareFile.substring(len - 6).equalsIgnoreCase(".imDat"))) {
-                    showMessage("Adding '.imDat' to file name");
-                    bareFile = bareFile + ".imDat";
-                }
-                String fileName = fileDlg.getDirectory() + bareFile;
-                debug("Save Data file name :" + fileName);
-                boolean goAhead = true;
-                if (goAhead) {
-                    try {
-                        BufferedOutputStream oStream = new BufferedOutputStream(new FileOutputStream(fileName));
-                        oStream.write(xmlData.getBytes());
-                        oStream.close();
-                    } catch (FileNotFoundException e) {
-                        showError("File " + fileName + " NOT found!");
-                    } catch (IOException e) {
-                        showError("Some IO Error in writing to file " + fileName + "!");
-                    }
+        String bareFile = fileDlg.getFile();
+        if (!(bareFile == null)) {
+            int len = bareFile.length();
+            if ((len < 8) || !(bareFile.substring(len - 6).equalsIgnoreCase(".imDat"))) {
+                showMessage("Adding '.imDat' to file name");
+                bareFile = bareFile + ".imDat";
+            }
+            String fileName = fileDlg.getDirectory() + bareFile;
+            debug("Save Data file name :" + fileName);
+            boolean goAhead = true;
+            if (goAhead) {
+                try {
+                    BufferedOutputStream oStream = new BufferedOutputStream(new FileOutputStream(fileName));
+                    oStream.write(xmlData.getBytes());
+                    oStream.close();
+                } catch (FileNotFoundException e) {
+                    showError("File " + fileName + " NOT found!");
+                } catch (IOException e) {
+                    showError("Some IO Error in writing to file " + fileName + "!");
                 }
             }
-            parent().toFront();
         }
+        parent().toFront();
     }
 
     boolean getDataFromFile() {
@@ -552,22 +554,22 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     //           FileInputStream iStream = new FileInputStream(fileName);
                     File f = new File(filePath);
                     long len = f.length();
-                    if (len > 100 && len < 50000) {
+                    if (len > 100 && len < 5e6) {
                         int iLen = (int) len;
                         byte[] data = new byte[iLen + 100];
-                            iStream.read(data);
+                        iStream.read(data);
                         String xmlStr = new String(data);
                         if (getBaseDataFromXML(xmlStr) && space.takeFromXML(xmlStr)) {
-                                bRetVal = true;
-                                parent().toFront();
-                             } else
-                                showError("Unable to take data from file");
+                            bRetVal = true;
+                            parent().toFront();
+                        } else
+                            showError("Unable to take data from file");
                     } else
                         showError("File size " + len + " for " + filePath);
                 } catch (Exception e) {
                     showError("Some Problem in getting file!");
                 }
-             }
+            }
         }
         return bRetVal;
     }
@@ -654,18 +656,20 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             Object src = e.getSource();
             aBlock: {
                 if (src == pbStart) {
-                    boolean proceed = true;
-                    if (space.anyUnsavedLink()) {
-                        proceed = decide("Unsaved Item/link", "Do you want to proceed abandoning the changes made?");
-                        if (proceed)
-                            space.resetLinkList();
+//                    boolean proceed = true;
+//                    if (space.anyUnsavedLink()) {
+//                        proceed = decide("Unsaved Item/link", "Do you want to proceed abandoning the changes made?");
+//                        if (proceed)
+//                            space.resetLinkList();
+//                    }
+//                    if (proceed) {
+                    duration = ntfDuration.getData();
+                    if (duration > 0) {
+                        space.saveInfluenceList();
+                        startRunThread();
                     }
-                    if (proceed) {
-                        duration = ntfDuration.getData();
-                        if (duration > 0)
-                            startRunThread();
-                        pbStart.setEnabled(false);
-                    }
+                    pbStart.setEnabled(false);
+//                    }
                     break aBlock;
                 }
 

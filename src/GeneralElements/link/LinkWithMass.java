@@ -2,12 +2,17 @@ package GeneralElements.link;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
+import GeneralElements.Display.LocalActionsTable;
+import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.localActions.LocalAction;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
+import javax.swing.*;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
@@ -26,33 +31,22 @@ public class LinkWithMass extends InfluenceDef  {
     Window parent;
     ItemSpace space;
     Vector<LocalAction> localActions;
+    boolean elementsSet = false;
 
-    public LinkWithMass(DarkMatter item1, DarkMatter item2, double freeLen, double massPerM, double eExpansion, int nElements) {
-        type = Type.ROPE;
-        this.item1 = item1;
-        this.item2 = item2;
-//        this.massPerM = massPerM;
-        this.freeLen = freeLen;
-        this.eExpansion = eExpansion;
-        noteBasicData(massPerM, nElements);
-//        allLinks = new Vector<ItemLink>(nElements);
-//        this.nElements = (nElements / 2) * 2; // make it even
-//        this.parent = item1.parentW;
-//        this.space = item1.space;
-//        localActions = new Vector<LocalAction>();
-    }
-
-    public LinkWithMass(DarkMatter item1, DarkMatter item2, double massPerM, double eExpansion, int nElements) {
-        super(item1, item2, 1, eExpansion, eExpansion);
-        noteBasicData(massPerM, nElements);
+//    public LinkWithMass(DarkMatter item1, DarkMatter item2, double freeLen, double massPerM, double eExpansion, int nElements) {
 //        type = Type.ROPE;
-//        this.massPerM = massPerM;
-//        allLinks = new Vector<ItemLink>(nElements);
-//        this.nElements = (nElements / 2) * 2; // make it even
-//        this.parent = item1.parentW;
-//        this.space = item1.space;
+//        this.item1 = item1;
+//        this.item2 = item2;
+//        this.freeLen = freeLen;
+//        this.eExpansion = eExpansion;
+//        noteBasicData(massPerM, nElements);
 //        localActions = new Vector<LocalAction>();
-    }
+//    }
+//
+//    public LinkWithMass(DarkMatter item1, DarkMatter item2, double massPerM, double eExpansion, int nElements) {
+//        super(item1, item2, 1, eExpansion, eExpansion);
+//        noteBasicData(massPerM, nElements);
+//    }
 
     static int defElements = 50;
     static double defE = 1000;
@@ -61,11 +55,12 @@ public class LinkWithMass extends InfluenceDef  {
     public LinkWithMass(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eExpansion) {
         super(item1, item2, initialLenFactor, eExpansion, eExpansion);
         noteBasicData(defMassPerM, defElements);
+        elementsSet = false;
     }
 
-    public LinkWithMass(DarkMatter item1, DarkMatter item2) {
-        super(item1, item2, 1, defE, defElements);
-    }
+//    public LinkWithMass(DarkMatter item1, DarkMatter item2) {
+//        super(item1, item2, 1, defE, defElements);
+//    }
 
     void noteBasicData(double massPerM, int nElements) {
         type = Type.ROPE;
@@ -78,18 +73,19 @@ public class LinkWithMass extends InfluenceDef  {
     }
 
     public void addLocalAction(LocalAction action) {
-        for (DarkMatter mat:massElements)
-            mat.addLocalAction((LocalAction)action.clone());
+        localActions.add(action);
+//        for (DarkMatter mat:massElements)
+//            mat.addLocalAction((LocalAction)action.clone());
     }
 
-    public void addLocalAction(String xmlStr) {
-        try {
-            for (DarkMatter mat:massElements)
-                mat.addLocalAction(LocalAction.getLocalAction(mat, xmlStr));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    public void addLocalAction(String xmlStr) {
+//        try {
+//            for (DarkMatter mat:massElements)
+//                mat.addLocalAction(LocalAction.getLocalAction(mat, xmlStr));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void setStartConditions() {
         for (DarkMatter mat:massElements)
@@ -97,6 +93,8 @@ public class LinkWithMass extends InfluenceDef  {
     }
 
     public void initStartForces() {
+        if (!elementsSet)
+            setAllElements();
         for (DarkMatter mat:massElements)
             mat.initStartForce();
     }
@@ -133,14 +131,19 @@ public class LinkWithMass extends InfluenceDef  {
         double uSurfaceArea = surfAreaPerM * oneLinkLen;
         double uProjectedArea = projectedAreaPerM * oneLinkLen;
         boolean retVal = true;
-        double initialLenFactor = 1;
-        if (distance <= freeLen) {
+        double initialLenF = 1;
+//        if (distance <= freeLen) {
+        if (distance > 0) {
             // create mass elements and position them uniformly between item1 and item2, but at an oneLinkLen
             // in zigzag fashion if required
             // mark along x axis in xy plane
             Vector<Point3d> points = new Vector<Point3d>();
             double x = 0;
-            double y = Math.sqrt(oneLinkLen2 - stPitch2);
+            double y = 0;
+            if (oneLinkLen > stPitch)
+                y = Math.sqrt(oneLinkLen2 - stPitch2);
+            else
+                initialLenF = oneLinkLen / stPitch;
             double z = 0;
             boolean invert = false;
             for (int i = 0; i < pairs - 1; i++) {
@@ -195,6 +198,7 @@ public class LinkWithMass extends InfluenceDef  {
                 trRev.transform(point);
                 // oneElem dia is set at 0.1, but of no consequence since projected and surface areas are set subsequently
                 oneElem = new DarkMatter("pa" + i++, uMass, 0.1, Color.BLACK, parent);
+                oneElem.setSpace(space);
                 oneElem.initPosEtc(point, new Vector3d(0, 0, 0));
                 oneElem.setProjectedArea(uProjectedArea);
                 oneElem.setSurfaceArea(uSurfaceArea);
@@ -206,17 +210,26 @@ public class LinkWithMass extends InfluenceDef  {
             DarkMatter lastItem = item1;
             for (DarkMatter oneItem : massElements) {
                 allLinks.add(new ItemLink(lastItem, oneItem, new Rod(lastItem, oneItem,
-                        initialLenFactor, eExpansion), space));
+                        initialLenF, eExpansion), space));
                 lastItem = oneItem;
             }
             allLinks.add(new ItemLink(lastItem, item2, new Rod(lastItem, item2,
-                    initialLenFactor, eExpansion), space));
+                    initialLenF, eExpansion), space));
+            assignLocalActions();
         }
         else {
-            showMessage("Free Length " + freeLen + " is less than distance " + distance + "\nLink is NOT created!");
+//            showMessage("Free Length " + freeLen + " is less than distance " + distance + "\nLink is NOT created!");
+            showMessage("Distance is less than or equal to 0 " + distance + "\nLink is NOT created!");
             retVal = false;
         }
+        elementsSet = retVal;
         return retVal;
+    }
+
+    void assignLocalActions() {
+        for (LocalAction la: localActions)
+            for (DarkMatter m: massElements)
+                m.addLocalAction((LocalAction)la.clone());
     }
 
     // numerator and denominator for tan of the angle (for anticlockwise rotation
@@ -241,8 +254,86 @@ public class LinkWithMass extends InfluenceDef  {
 
     }
 
+    LocalActionsTable localActionTable;
+
+    @Override
+    public JPanel detailsPanel() {
+        JPanel outerP = new JPanel(new BorderLayout());
+        outerP.add(lwmDetailsPanel(), BorderLayout.WEST);
+        DarkMatter dummyItem = new Item(item1.parentW);
+        for (LocalAction la:localActions)
+            dummyItem.addLocalAction(la);
+        localActionTable = new LocalActionsTable(dummyItem, item1);
+        outerP.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
+        return outerP;
+    }
+
+    @Override
+    public boolean takeDataFromUI() {
+        boolean retVal = false;
+        if (lwmTakeDataFromUI()) {
+//            if (localActionTable.getEditResponse() == Item.EditResponse.CHANGED) {
+                localActions.clear();
+                DarkMatter dummyItem = localActionTable.item;
+                for (LocalAction la : dummyItem.getLocalActions())
+                    localActions.add(la);
+//            }
+//            setAllElements();
+            retVal = true;
+        }
+        return retVal;
+    }
+
+    public JPanel lwmDetailsPanel() {
+        return null;
+    }
+
+    public boolean lwmTakeDataFromUI() {
+        return false;
+    }
+
+    public StringBuilder dataInXML() {
+        StringBuilder xmlStr = super.dataInXML();
+        xmlStr.append(XMLmv.putTag("massPerM", massPerM)).append(XMLmv.putTag("nElements", nElements));
+        xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
+        int a = 0;
+        for (LocalAction action: localActions) {
+            xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
+            a++;
+        }
+        return xmlStr;
+    }
+
+    public boolean set(String xmlStr) throws NumberFormatException {
+        boolean retVal = true;
+        super.set(xmlStr);
+        ValAndPos vp;
+        vp = XMLmv.getTag(xmlStr, "massPerM", 0);
+        massPerM = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "nElements", 0);
+        nElements = Integer.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "nLocalActions", vp.endPos);
+        if (vp.val.length() > 0) {
+            int nActions = Integer.valueOf(vp.val);
+            DarkMatter dummyItem = item1;
+            try {
+                for (int a = 0; a < nActions; a++) {
+                    vp = XMLmv.getTag(xmlStr, "a#" + ("" + a).trim(), vp.endPos);
+                    addLocalAction(LocalAction.getLocalAction(dummyItem, vp.val));
+                }
+            } catch (Exception e) {
+                retVal = false;
+                e.printStackTrace();
+            }
+        }
+        elementsSet = false;
+        return retVal;
+    }
+
     @Override
     public boolean evalForce() {
+//        if (!elementsSet)
+//            setAllElements();
         boolean retVal = true;
         for (ItemLink l: allLinks)
             if (!l.evalForce()) {

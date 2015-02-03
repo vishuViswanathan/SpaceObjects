@@ -1,6 +1,9 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
+
 import javax.vecmath.Vector3d;
 
 /**
@@ -23,6 +26,25 @@ public class InfluenceDef extends Influence {
         this.eExpansion = eExpansion;
         setFreeLenAndKvalues();
     }
+
+    public StringBuilder dataInXML() {
+        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("initialLenFactor", initialLenFactor));
+        xmlStr.append(XMLmv.putTag("eCompression", eCompression)).append(XMLmv.putTag("eExpansion", eExpansion));
+        return xmlStr;
+    }
+
+    public boolean set(String xmlStr) throws NumberFormatException {
+        ValAndPos vp;
+        vp = XMLmv.getTag(xmlStr, "initialLenFactor", 0);
+        initialLenFactor = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "eCompression", 0);
+        eCompression = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "eExpansion", 0);
+        eExpansion = Double.valueOf(vp.val);
+        setFreeLenAndKvalues();
+        return true;
+    }
+
 
     void setFreeLenAndKvalues() {
         Vector3d distVect = new Vector3d();
