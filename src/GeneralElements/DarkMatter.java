@@ -1,7 +1,7 @@
 package GeneralElements;
 
 import Applications.ItemMovementsApp;
-import GeneralElements.GlobalActions.GlobalAction;
+import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
