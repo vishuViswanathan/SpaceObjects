@@ -33,11 +33,6 @@ public class FixedAcceleration extends LocalAction {
         super(Type.FIXEDACCELERATION, item);
     }
 
-    public FixedAcceleration(DarkMatter item, Vector3d direction, double fixedAcc) {
-        this(item);
-        setValues(direction, fixedAcc);
-    }
-
     public FixedAcceleration(Vector3d direction, double fixedAcc) {
         super(Type.FIXEDACCELERATION);
         setValues(direction, fixedAcc);
