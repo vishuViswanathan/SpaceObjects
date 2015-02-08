@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 public class Gravity extends Influence  {
 
     public Gravity (DarkMatter item1, DarkMatter item2) {
-        type = Type.GRAVITY;
+//        type = Type.GRAVITY;
         hasDetails = false;
         this.item1 = item1;
         this.item2 = item2;

@@ -23,17 +23,14 @@ public class DarkMatter implements InputControl, EvalOnce {
     public ItemSpace space;
     public ItemStat status;
     boolean bFixedLocation = false;
-//    Vector3dMV dirOfFixedGravityAcc;  // direction of fixed Acceleration, a unit Vector
-    double fixedAcc = 9.81; // fixed acceleration value
     Vector<LocalAction> localActions;
-//    Vector3d forceOfFixedGravity;
-//    boolean bFixedForceOn = false;
     Vector3d force = new Vector3d();
     public String name;
     public double mass;
     public double dia;
     double projectedArea;
     double surfaceArea;
+    double eCompression; // for elastic material
     public Color color;
 
     public DarkMatter(Window parent) {
@@ -50,7 +47,10 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.color = color;
         status = new ItemStat();
         calculateAreas();
-//        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
+    }
+
+    boolean isElastic() {
+        return (eCompression > 0);
     }
 
     public Vector<LocalAction> getLocalActions() {
@@ -91,10 +91,6 @@ public class DarkMatter implements InputControl, EvalOnce {
         return projectedArea;
     }
 
-//    public void setbFixedForceOn(boolean set) {
-//        bFixedForceOn = set;
-//    }
-
     public void setSpace(ItemSpace space) {
         this.space = space;
     }
@@ -105,6 +101,14 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public float getDiaFloat() {
         return new Float(dia);
+    }
+
+    public double getDia() {
+        return dia;
+    }
+
+    public double getECompression() {
+        return eCompression;
     }
 
     //    =========================== calculations ======================
@@ -134,10 +138,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public void setLocalForces() {
-//        if (bFixedForceOn)
-//            force.set(forceOfFixedGravity);
-//        else
-            force.set(0, 0, 0);
+        force.set(0, 0, 0);
         for (LocalAction action : localActions)
             force.add(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
@@ -188,40 +189,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-    public boolean updatePosAndVelOLD(double deltaT, double nowT, boolean bFinal) throws Exception {
-        boolean changed = true;
-        if (bFixedLocation)
-            changed = false;
-        else {
-            effectiveForce.set(force);
-            effectiveForce.add(lastForce);
-            effectiveForce.scale(0.5); // the average force
-
-            Vector3d thisAcc = new Vector3d(effectiveForce);
-            thisAcc.scale((1.0 / mass));
-            // calculate from force
-            Vector3d deltaV = new Vector3d(effectiveForce);
-            deltaV.scale(deltaT);
-            deltaV.scale(1.0 / mass);
-            Vector3d averageV = new Vector3d(deltaV);
-            averageV.scaleAdd(+0.5, lastVelocity); //
-            Point3d newPos = new Point3d(averageV);
-            newPos.scale(deltaT);
-            newPos.add(lastPosition);
-            status.pos.set(newPos); // only position is updated here
-            Vector3d newVelocity = new Vector3d(lastVelocity);
-            newVelocity.add(deltaV);
-            status.velocity.set(newVelocity);
-            if (bFinal) {
-                status.acc.set(thisAcc);
-                status.time = nowT;
-                lastForce.set(force);  // note down the force for the last calculation
-            }
-        }
-        return changed;
-    }
-
-    public void showError(String msg) {
+     public void showError(String msg) {
         JOptionPane.showMessageDialog(parentW, name + " has some problem at " + status.time + " \n " + msg, "ERROR", JOptionPane.ERROR_MESSAGE);
         parentW.toFront();
     }

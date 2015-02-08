@@ -68,7 +68,6 @@ public class Item extends DarkMatter {
         }
     }
 
-    NumberTextField ntFixedAcc;
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
     double xMin, yMin, zMin;
@@ -84,7 +83,6 @@ public class Item extends DarkMatter {
 
     public Item(Window parent) {
         super(parent);
-//        localActions = new Vector<LocalAction>();
     }
 
     public Item(String name, double mass, double dia, Color color, Window parent) {
@@ -94,10 +92,7 @@ public class Item extends DarkMatter {
         this.dia = dia;
         this.color = color;
         status = new ItemStat();
-//        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
         setRadioButtons();
-//        rbFixedPos = new JRadioButton("Fixed Position");
-//        rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
     }
 
     public Item(ItemSpace space, String name, double mass, double dia, Color color, Window parent) {
@@ -108,10 +103,6 @@ public class Item extends DarkMatter {
         this.dia = dia;
         this.color = color;
         status = new ItemStat();
-//        dirOfFixedGravityAcc = new Vector3dMV(0, -1, 0);
-//        setRadioButtons();
-//        rbFixedPos = new JRadioButton("Fixed Position");
-//        rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
     }
 
     public Item(String xmlStr, Window parent) {
@@ -180,8 +171,6 @@ public class Item extends DarkMatter {
                 return (bFixedLocation) ? "Y" : "N";
             case VEL:
                 return  status.dataInCSV(ItemStat.Param.VELOCITY, 4);
-//            case DIRACCON:
-//                return (bFixedForceOn) ? "Y" : "N";
         }
         return "";
     }
@@ -197,21 +186,9 @@ public class Item extends DarkMatter {
         rbFixedPos.setSelected(set);
     }
 
-//    public void setbFixedForceOn(boolean set) {
-//        bFixedForceOn = set;
-//        rbFixedAccOn.setSelected(set);
-//    }
-
     public void setRefreshInterval(double interval, double nextRefresh) {
         reportInterval = interval;
         nextReport = nextRefresh;
-//        reportInterval = interval;
-//        nextReport += reportInterval;
-    }
-
-    void checkFixedPos() {
-        bFixedLocation = rbFixedPos.isSelected();
-//        velTuplePan.setEnabled(!bFixedLocation);
     }
 
     RelativeDlg relDlg;
@@ -267,12 +244,9 @@ public class Item extends DarkMatter {
             tupRelPos.set(relPosPan.getTuple3d());
             tupRelPos.add(parent.status.pos);
             status.pos.set(tupRelPos);
-//            if (!bFixedLocation) {
-                tupRelVel.set(relVelPan.getTuple3d());
-                tupRelVel.add(parent.status.velocity);
-                status.velocity.set(tupRelVel);
-//            }
-//            updateUI();
+            tupRelVel.set(relVelPan.getTuple3d());
+            tupRelVel.add(parent.status.velocity);
+            status.velocity.set(tupRelVel);
         }
 
         void closeThisWindow() {
@@ -298,18 +272,15 @@ public class Item extends DarkMatter {
     class ItemDialog extends JDialog {
         JTextField tfItemName;
         NumberTextField ntItemMass, ntItemDia;
-
+        NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
         JRadioButton rbItemFixedPos;
-        JRadioButton rbItemFixedAccOn;
         TuplePanel itemVelTuplePan;
         JButton itemRelButton = new JButton("Set Relative Data");
-        Vector3d tupPos, tupVel;
         JButton delete = new JButton("DELETE");
         JButton ok = new JButton("Save");
         JButton cancel = new JButton("Cancel");
         InputControl inpC;
-        JComboBox<Object> othersCB;
         EditResponse response = EditResponse.CHANGED;
         LocalActionsTable localActionTable;
 
@@ -332,17 +303,17 @@ public class Item extends DarkMatter {
             jp.addItemPair(ntItemMass);
             ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
             jp.addItemPair(ntItemDia);
+            ntElasticity = new NumberTextField(inpC, eCompression, 6, false, 0, 1e20, "##0.####E00", "Elasticity N/100%");
+            jp.addItemPair(ntElasticity);
             jp.addItemPair("", itemRelButton);
 
             JPanel jpPos = new JPanel(new BorderLayout());
             itemPosTuplePan = new TuplePanel(inpC, status.pos, 8, -1e30, 1e20, "##0.#####E00", "Position in m");
             rbItemFixedPos = new JRadioButton("Fixed Position", bFixedLocation);
-//            rbItemFixedPos.setSelected(bFixedLocation);
             rbItemFixedPos.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     bFixedLocation = rbItemFixedPos.isSelected();
-//                    checkFixedPos();
                 }
             });
             jpPos.add(itemPosTuplePan, BorderLayout.CENTER);
@@ -397,7 +368,6 @@ public class Item extends DarkMatter {
             buttPanel.add(cancel, BorderLayout.CENTER);
             buttPanel.add(ok, BorderLayout.EAST);
             outerPan.add(buttPanel, BorderLayout.SOUTH);
-//        JPanel jpFixedAcc = new JPanel(new BorderLayout());
             add(outerPan);
             pack();
         }
@@ -412,10 +382,10 @@ public class Item extends DarkMatter {
             if (name.length() > 1 && (!name.substring(0,2).equals("##"))) {
                 mass = ntItemMass.getData();
                 dia = ntItemDia.getData();
+                eCompression = ntElasticity.getData();
                 status.pos.set(itemPosTuplePan.getTuple3d());
                 status.velocity.set(itemVelTuplePan.getTuple3d());
                 bFixedLocation = rbItemFixedPos.isSelected();
-//                bFixedForceOn = rbItemFixedAccOn.isSelected();
                 retVal = true;
             }
             else
@@ -480,7 +450,6 @@ public class Item extends DarkMatter {
     public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
         ItemGraphic itemG = new ItemGraphic(this);
         itemG.addObjectAndOrbit(grp, orbitAtrib);
-//        itemGraphic = null;
         itemGraphic = new WeakReference<ItemGraphic>(itemG);
         return itemG;
     }
@@ -562,14 +531,10 @@ public class Item extends DarkMatter {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("mass", mass)).append(XMLmv.putTag("dia", dia));
-//        xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation)).append(XMLmv.putTag("bFixedForceOn", bFixedForceOn));
+        xmlStr.append(XMLmv.putTag("eCompressions", eCompression));
         xmlStr.append(XMLmv.putTag("color", ("" + color.getRGB())));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
         xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation));
-//        if (bFixedForceOn) {
-//            xmlStr.append(XMLmv.putTag("dirOfFixedGravityAcc", dirOfFixedGravityAcc.dataInCSV())).
-//                    append(XMLmv.putTag("fixedAcc", fixedAcc));
-//        }
         xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
         int a = 0;
         for (LocalAction action: localActions) {
@@ -588,10 +553,13 @@ public class Item extends DarkMatter {
         mass = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "dia", 0);
         dia = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "eCompression", 0);
+        if (vp.val.length() > 1)
+            eCompression = Double.valueOf(vp.val);
+        else
+            eCompression = 0;
         vp = XMLmv.getTag(xmlStr, "bFixedLocation", 0);
         bFixedLocation = (vp.val.equals("1"));
-//        vp = XMLmv.getTag(xmlStr, "bFixedForceOn", 0);
-//        bFixedForceOn = (vp.val.equals("1"));
         vp = XMLmv.getTag(xmlStr, "color", 0);
         color = new Color(Integer.valueOf(vp.val));
         vp = XMLmv.getTag(xmlStr, "status", 0);

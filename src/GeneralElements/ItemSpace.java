@@ -100,24 +100,33 @@ public class ItemSpace {
         ItemLink link;
         for (int il = 0; il < allItemLinks.size();il++ ) {
             link = allItemLinks.get(il);
-            if (link.isGravity()) {
+//            if (link.isGravity() || link.isContact()) {
+            if (link.isInterItem()) {
                 allItemLinks.remove(il);
                 il--;
             }
         }
-        if (bItemGravityOn) {
+        if (bItemGravityOn || anyElasticItem()) {
             Item item;
             int iLen = allItems.size();
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
                 for (int n = i + 1; n < iLen; n++)
-                    addItemLink(new ItemLink(item, allItems.get(n), this));  // by default is GRAVITY
+                    addItemLink(new ItemLink(item, allItems.get(n), bItemGravityOn, this));  // by default is GRAVITY
             }
         }
         activeGlobalActions = allGlobalActions.aciveActions();
 
         for (ItemLink l: allItemLinks)
             l.setGravityLinks(bItemGravityOn);
+    }
+
+    boolean anyElasticItem() {
+        boolean retVal = false;
+        for (DarkMatter item: allItems)
+            if (retVal = item.isElastic())
+                break;
+        return retVal;
     }
 
     public void noteItemData() {
@@ -131,8 +140,6 @@ public class ItemSpace {
             l.initStartForce();
     }
 
-    JPanel itemListPan;
-    GridBagConstraints gbcItemList;
     JButton buttAddItem;
     JButton buttAddLink;
     ButtonListener bl;
@@ -187,8 +194,9 @@ public class ItemSpace {
     void fillTempInfList() {
         tempInfList = new LinkedList<ItemLink>();
         for (ItemLink il: allItemLinks)
-            if (!il.isGravity())
-            tempInfList.add(il); //new ItemLink(allItems, il, this));
+//            if (!il.isGravity())
+            if (!il.isInterItem())
+                tempInfList.add(il); //new ItemLink(allItems, il, this));
         listEdited = false;
     }
 
@@ -246,15 +254,7 @@ public class ItemSpace {
         }
     }
 
-    public void resetLinkList() {
-        if (infListPan != null) {
-            fillTempInfList();
-            prepareLinkList();
-            infListPan.updateUI();
-        }
-    }
-
-    public void deleteThisLink(ItemLink link) {
+     public void deleteThisLink(ItemLink link) {
         trace("deleting " + link);
         if (tempInfList.remove(link)) {
             prepareLinkList();
@@ -308,33 +308,6 @@ public class ItemSpace {
             Item.EditResponse resp = link.editLink(getInputControl());
             if (resp == Item.EditResponse.CHANGED) {
                 linkTable.addOneRow(link);
-                linkEdited(link);
-            }
-        }
-        else {
-            showError("Create items before creating links");
-        }
-    }
-
-    void addInfluenceOLD() {
-        noteItemData();
-        if (allItems.size() > 1) {
-            LinkBasic linkDlg = new LinkBasic(tempInfList.size() + 1, this);
-            linkDlg.setLocation(600, 400);
-            linkDlg.setVisible(true);
-            if (linkDlg.selOk) {
-                ItemLink link = linkDlg.getLink();
-                Influence inf = link.getInfluence();
-                if (inf.hasDetails) {
-                    LinkDetails detDlg = new LinkDetails(inf);
-                    detDlg.setLocation(600, 400);
-                    detDlg.setVisible(true);
-                }
-
-                tempInfList.add(link);
-                gbcInfList.gridy = tempInfList.size();
-                infListPan.add(link.dataPanel(gbcInfList.gridy), gbcInfList);
-                infListPan.updateUI();
                 linkEdited(link);
             }
         }

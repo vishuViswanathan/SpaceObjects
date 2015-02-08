@@ -21,7 +21,9 @@ public class Influence {
     public boolean hasDetails = true;
 
     static public enum Type {
-        GRAVITY("Gravity"),
+        INTERITEM("InterItem"),
+//        ITEMCONTACT("Contact"),
+//        GRAVITY("Gravity"),
         SPRING("Spring"),
         ROPE("Rope"),
         ROD("Rod");
@@ -46,8 +48,9 @@ public class Influence {
             int len = values.length;
             Type[] validTypes = new Type[len - 1];
             int vLoc = 0;
-            for (Type t:values)
-                if (t != GRAVITY)
+            for (Type t : values)
+//                if (t != GRAVITY)
+                if (t != INTERITEM)
                     validTypes[vLoc++] = t;
             return validTypes;
         }
@@ -104,8 +107,11 @@ public class Influence {
     public static Influence createInfluence(DarkMatter dm1, DarkMatter dm2, Type ofType) {
         Influence inf = null;
         switch (ofType) {
-            case GRAVITY:
-                inf = new Gravity(dm1, dm2);
+//            case GRAVITY:
+//                inf = new Gravity(dm1, dm2);
+//                break;
+            case INTERITEM:
+                inf = new InterItem(dm1, dm2, true);
                 break;
             case ROD:
                 inf = new Rod(dm1, dm2, 1, 20000);

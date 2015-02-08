@@ -4,7 +4,6 @@ import GeneralElements.DarkMatter;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import evaluations.EvalOnce;
-import mvUtils.SmartFormatter;
 import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
@@ -39,8 +38,14 @@ public class ItemLink implements EvalOnce {
         valid = true;
     }
 
-    public ItemLink(DarkMatter item1, DarkMatter item2,  ItemSpace space) {
-        this(item1, item2, new Gravity(item1, item2), space);
+    public ItemLink(DarkMatter item1, DarkMatter item2, ItemSpace space) {
+//        this(item1, item2, new Gravity(item1, item2), space);
+        this(item1, item2, true, space);
+    }
+
+    public ItemLink(DarkMatter item1, DarkMatter item2, boolean gravityON, ItemSpace space) {
+//        this(item1, item2, new Gravity(item1, item2), space);
+        this(item1, item2, new InterItem(item1, item2, gravityON), space);
     }
 
     public ItemLink(DarkMatter item1, DarkMatter item2, Influence.Type type, ItemSpace space) {
@@ -126,10 +131,13 @@ public class ItemLink implements EvalOnce {
         inf.updateDisplay();
     }
 
-    public boolean isGravity() {
-        return (inf.getType() == Influence.Type.GRAVITY);
-    }
+//    public boolean isGravity() {
+//        return (inf.getType() == Influence.Type.GRAVITY);
+//    }
 
+    public boolean isInterItem() {
+        return (inf.getType() == Influence.Type.INTERITEM);
+    }
 
     public boolean isValid(LinkedList<Item> allItems) {
         boolean retVal = (allItems.contains(item1) && allItems.contains(item2));
@@ -232,7 +240,6 @@ public class ItemLink implements EvalOnce {
     }
 
     Object getOneColData(ColType colType) {
-        SmartFormatter fmt = new SmartFormatter(6);
         switch(colType) {
             case LINKTYPE:
                 return "" + inf.type;
@@ -424,48 +431,6 @@ public class ItemLink implements EvalOnce {
     public boolean linksItem(DarkMatter item) {
         return (item == item1 || item == item2);
     }
-    public static JPanel colHeader() {
-        JPanel outerPan = new FramedPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        int col = 0;
-        col = addBasicColHeads(outerPan, gbc, col);
-        JPanel jp;
-        gbc.gridx++;
-        jp = new JPanel();
-        jp.add(new JLabel("Delete"));
-        outerPan.add(jp, gbc);
-        return outerPan;
-    }
-
-    static int addBasicColHeads(JPanel outerPan, GridBagConstraints gbc, int col) {
-        JPanel jp;
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("#"));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("Link Type"));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("Item 1"));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("Item 2"));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-        return col;
-    }
 
     TextLabel tlItem1, tlItem2, tlLinkType;
     NumberTextField ntFreeLength, ntkCompression, ntkExpansion;
@@ -528,8 +493,8 @@ public class ItemLink implements EvalOnce {
                 ntkExpansion.setEnabled(true);
                 ntkCompression.setEnabled(true);
                 break;
-            case GRAVITY:
-                break;
+//            case GRAVITY:
+//                break;
             case ROD:
                 ntFreeLength.setEnabled(true);
                 ntkCompression.setEnabled(true);
@@ -569,9 +534,9 @@ public class ItemLink implements EvalOnce {
                 Influence.Type type = Influence.Type.getEnum(typeStr);
                 if (type != null) {
                     switch (type) {
-                        case GRAVITY:
-                            inf = new Gravity(item1, item2);
-                            break;
+//                        case GRAVITY:
+//                            inf = new Gravity(item1, item2);
+//                            break;
                         case ROD:
                             inf = new Rod(item1, item2, 0, 0, true);
                             break;
