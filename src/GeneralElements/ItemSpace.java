@@ -94,8 +94,6 @@ public class ItemSpace {
         allItemLinks.add(l);
     }
 
-
-
     public void setGlobalLinksAndActions() {
         ItemLink link;
         for (int il = 0; il < allItemLinks.size();il++ ) {
@@ -109,13 +107,17 @@ public class ItemSpace {
         if (bItemGravityOn || anyElasticItem()) {
             Item item;
             int iLen = allItems.size();
+            ItemLink oneLink;
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
-                for (int n = i + 1; n < iLen; n++)
-                    addItemLink(new ItemLink(item, allItems.get(n), bItemGravityOn, this));  // by default is GRAVITY
+                for (int n = i + 1; n < iLen; n++) {
+                    oneLink = new ItemLink(item, allItems.get(n), bItemGravityOn, this);
+                    if (oneLink.isValid())
+                        addItemLink(oneLink);
+                }
             }
         }
-        activeGlobalActions = allGlobalActions.aciveActions();
+        activeGlobalActions = allGlobalActions.activeActions();
 
         for (ItemLink l: allItemLinks)
             l.setGravityLinks(bItemGravityOn);
@@ -456,8 +458,12 @@ public class ItemSpace {
     }
 
     public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
-        for (Item it: allItems)
-            itemGraphics.add(it.createItemGraphic(grp, orbitAttrib));
+        int count = 0;
+        for (Item it: allItems) {
+            count++;
+            if (!it.boundaryItem)
+                itemGraphics.add(it.createItemGraphic(grp, orbitAttrib));
+        }
         for (ItemLink inf: allItemLinks) {
             inf.addLinksDisplay(grp, linkAttrib);
 //            inf.prepareEvaluator();
@@ -547,21 +553,24 @@ public class ItemSpace {
     public DoubleMaxMin xMaxMin() {
         DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
         for (Item i: allItems)
-            maxMin.takeMaxValue(i.status.pos.getX());
+//            maxMin.takeMaxValue(i.status.pos.getX());
+            maxMin.takeMaxValue(i.getPositionX());
         return maxMin;
     }
 
     public DoubleMaxMin yMaxMin() {
         DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
         for (Item i: allItems)
-            maxMin.takeMaxValue(i.status.pos.getY());
+//            maxMin.takeMaxValue(i.status.pos.getY());
+            maxMin.takeMaxValue(i.getPositionY());
         return maxMin;
     }
 
     public DoubleMaxMin zMaxMin() {
         DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
         for (Item i: allItems)
-            maxMin.takeMaxValue(i.status.pos.getZ());
+//            maxMin.takeMaxValue(i.status.pos.getZ());
+            maxMin.takeMaxValue(i.getPositionZ());
         return maxMin;
     }
 
@@ -623,7 +632,8 @@ public class ItemSpace {
             Item oneItem;
             for (int i = 0; i < nItems; i++) {
                 vp = XMLmv.getTag(xmlStr, "it#" + ("" + i).trim(), vp.endPos);
-                oneItem = new Item(vp.val, mainApp.parent());
+//                oneItem = new Item(vp.val, mainApp.parent());
+                oneItem = Item.getItemFromXML(vp.val, mainApp.parent());
                 addItem(oneItem);
 //                allItems.add(new Item(vp.val, mainApp.parent()));
             }

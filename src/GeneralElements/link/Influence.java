@@ -19,6 +19,7 @@ public class Influence {
     double kExpansion = 0;
     double kCompression = 0;
     public boolean hasDetails = true;
+    boolean valid = true;
 
     static public enum Type {
         INTERITEM("InterItem"),
@@ -71,6 +72,10 @@ public class Influence {
 //    enum Types {GRAVITY, SPRING, ATTRACTION, REPULSION, CSPRING, ESPRING};
     public boolean evalForce() {return false;}
     public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 
     public Type getType() {return type;}

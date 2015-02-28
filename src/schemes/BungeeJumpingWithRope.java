@@ -2,6 +2,7 @@ package schemes;
 
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
+import GeneralElements.Surface;
 import GeneralElements.link.ItemLink;
 import GeneralElements.link.LinkWithMass;
 import GeneralElements.link.Rope;
@@ -41,8 +42,8 @@ public class BungeeJumpingWithRope implements DefaultScheme{
 // 20150126       it.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), gAcc));
 // 20150126        it.addLocalAction(new V2Resistance(resistFactor));
         it.initPosEtc(new Point3d(4,0, 0), new Vector3d(0, 0, 0));
+        it.seteCompression(20000);
         space.addItem(it);
-
 //        LinkWithMass rope = new Rope(lastItem, it, 25, massPerM, ropeDia, e, 50);
         LinkWithMass rope = new Rope(lastItem, it, (25.0/4), e);
 // 20150126       rope.addLocalAction(new FixedAcceleration());
@@ -53,6 +54,9 @@ public class BungeeJumpingWithRope implements DefaultScheme{
             ItemLink link = new ItemLink(lastItem, it, rope, space);
             space.addItemLink(link);
         }
+        it = new Surface("Floor", new Point3d( -5, -5, -5), new Point3d( -5, -5, 0), new Point3d( 0, -5, 5), mainF );
+        space.addItem(it);
+
         return true;
     }
 

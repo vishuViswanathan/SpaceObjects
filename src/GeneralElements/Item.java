@@ -28,6 +28,39 @@ import java.lang.ref.WeakReference;
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
+    static public enum ItemType {
+        ITEM("Item"), // default spherical object
+        SURFACE("Surface");
+
+        private final String typeName;
+
+        ItemType(String actionName) {
+            this.typeName = actionName;
+        }
+
+        public String getValue() {
+            return typeName;
+        }
+
+        @Override
+        public String toString() {
+            return typeName;
+        }
+
+        public static ItemType getEnum(String text) {
+            ItemType retVal = null;
+            if (text != null) {
+                for (ItemType b : ItemType.values()) {
+                    if (text.equalsIgnoreCase(b.typeName)) {
+                        retVal = b;
+                        break;
+                    }
+                }
+            }
+            return retVal;
+        }
+    }
+
     static public enum EditResponse{CHANGED, NOTCHANGED, DELETE, CANCEL, OK}
 
     static public enum ColType {
@@ -67,7 +100,7 @@ public class Item extends DarkMatter {
             return retVal;
         }
     }
-
+    ItemType itemType;
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
     double xMin, yMin, zMin;
@@ -83,32 +116,57 @@ public class Item extends DarkMatter {
 
     public Item(Window parent) {
         super(parent);
+        itemType = ItemType.ITEM;
     }
 
     public Item(String name, double mass, double dia, Color color, Window parent) {
-        this(parent);
-        this.name = name;
-        this.mass = mass;
-        this.dia = dia;
-        this.color = color;
-        status = new ItemStat();
+        super(name, mass, dia, color, parent);
+        itemType = ItemType.ITEM;
+//        this(parent);
+//        this.name = name;
+//        this.mass = mass;
+//        this.dia = dia;
+//        this.color = color;
+//        status = new ItemStat();
         setRadioButtons();
     }
 
     public Item(ItemSpace space, String name, double mass, double dia, Color color, Window parent) {
-        this(parent);
+        this(name, mass, dia, color, parent);
+//        this(parent);
         this.space = space;
-        this.name = name;
-        this.mass = mass;
-        this.dia = dia;
-        this.color = color;
-        status = new ItemStat();
+//        this.name = name;
+//        this.mass = mass;
+//        this.dia = dia;
+//        this.color = color;
+//        status = new ItemStat();
     }
 
     public Item(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
-        takeFromXMl(xmlStr);
+        takeFromXML(xmlStr);
+    }
+
+    static public Item getItemFromXML(String xmlStr, Window parent) {
+        ValAndPos vp;
+        vp = XMLmv.getTag(xmlStr, "itemType", 0);
+        boolean done = false;
+        Item theItem = null;
+        if (vp.val.length() > 2) {
+            ItemType nowType = ItemType.getEnum(vp.val);
+            if (nowType != null) {
+                switch(nowType) {
+                    case SURFACE:
+                        theItem = new Surface(xmlStr, parent);
+                        done = true;
+                        break;
+                }
+            }
+        }
+        if (!done)
+            theItem = new Item(xmlStr, parent);
+        return theItem;
     }
 
     public static String[] getColHeader() {
@@ -271,6 +329,8 @@ public class Item extends DarkMatter {
 
     class ItemDialog extends JDialog {
         JTextField tfItemName;
+        JButton colorButton = new JButton("Object Color");
+        JLabel banner = new JLabel("");
         NumberTextField ntItemMass, ntItemDia;
         NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
@@ -299,6 +359,24 @@ public class Item extends DarkMatter {
             MultiPairColPanel jp = new MultiPairColPanel("Data of Item");
             tfItemName = new JTextField(name, 10);
             jp.addItemPair("Object Name", tfItemName);
+            banner.setPreferredSize(new Dimension(100, 20));
+            banner.setBackground(color);
+            banner.setOpaque(true);
+            colorButton.addActionListener(new ActionListener() {
+                                              @Override
+                                              public void actionPerformed(ActionEvent e) {
+                                                  Color newColor = JColorChooser.showDialog(
+                                                          ItemDialog.this,
+                                                          "Choose Item Color",
+                                                          banner.getBackground());
+                                                  if (newColor != null) {
+                                                      color = newColor;
+                                                      banner.setBackground(newColor);
+                                                  }
+                                              }
+
+                                          });
+            jp.addItemPair(colorButton, banner);
             ntItemMass = new NumberTextField(inpC, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
             jp.addItemPair(ntItemMass);
             ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
@@ -330,7 +408,7 @@ public class Item extends DarkMatter {
                     relDlg.setLocationRelativeTo(itemRelButton);
                     relDlg.setVisible(true);
                     itemPosTuplePan.updateTuple(status.pos);
-                    itemVelTuplePan.updateTuple(status.velocity );
+                    itemVelTuplePan.updateTuple(status.velocity);
                 }
             });
             outerPan.add(jp, BorderLayout.CENTER);
@@ -528,10 +606,17 @@ public class Item extends DarkMatter {
         return csvStr;
     }
 
-    public StringBuilder dataInXML() {
+    protected StringBuilder defaultDataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
+        xmlStr.append(XMLmv.putTag("itemType", ("" + itemType)));
+        return xmlStr;
+    }
+
+    public StringBuilder dataInXML() {
+//        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
+        StringBuilder xmlStr = defaultDataInXML();
         xmlStr.append(XMLmv.putTag("mass", mass)).append(XMLmv.putTag("dia", dia));
-        xmlStr.append(XMLmv.putTag("eCompressions", eCompression));
+        xmlStr.append(XMLmv.putTag("eCompression", eCompression));
         xmlStr.append(XMLmv.putTag("color", ("" + color.getRGB())));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
         xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation));
@@ -544,7 +629,7 @@ public class Item extends DarkMatter {
         return xmlStr;
     }
 
-    public boolean takeFromXMl(String xmlStr) throws NumberFormatException {
+    public boolean takeFromXML(String xmlStr) throws NumberFormatException {
         boolean retVal = true;
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "name", 0);
@@ -553,6 +638,7 @@ public class Item extends DarkMatter {
         mass = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "dia", 0);
         dia = Double.valueOf(vp.val);
+        radius = dia / 2;
         vp = XMLmv.getTag(xmlStr, "eCompression", 0);
         if (vp.val.length() > 1)
             eCompression = Double.valueOf(vp.val);

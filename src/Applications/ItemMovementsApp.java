@@ -10,7 +10,7 @@ import mvUtils.display.NumberTextField;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import org.apache.log4j.Logger;
-import schemes.BungeeJumpingWithRope;
+import schemes.BallAndFloor;
 import schemes.DefaultScheme;
 import schemes.PlanetsAndMoons;
 
@@ -152,8 +152,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 //                        if ((new ChainWithBall()).getScheme(mainF, space)) {
 //                        if ((new MultiPendulum()).getScheme(mainF, space))  {
 //                        if ((new BungeeJumping()).getScheme(mainF, space)) {
-                        if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
+//                        if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
 //                        if ((new Mesh()).getScheme(mainF, space)) {
+                        if ((new BallAndFloor()).getScheme(mainF, space)) {
                             proceedToItemList(false);
                         }
                         bShowOrbit = false;
@@ -333,7 +334,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
                         hrsPerSec = (refreshInterval / 3600) / deltaT;
                         if (bRealTime && deltaT <= refreshInterval) {
-//                            debug("Realtime " + nowT);
+//                            debug("Real time " + nowT);
                             try {
                                 Thread.sleep((long)((refreshInterval - deltaT) * 1000));
                                 bLive = true;
@@ -451,6 +452,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             orbitDisplay.dispose();
         }
         try {
+//            orbitDisplay = new MotionDisplay(space, refreshInterval, duration, this);
             orbitDisplay = new MotionDisplay(space, refreshInterval, duration, this);
             orbitDisplay.addWindowListener(new WindowAdapter() {
                 @Override

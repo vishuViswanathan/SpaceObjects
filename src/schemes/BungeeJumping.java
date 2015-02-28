@@ -2,6 +2,7 @@ package schemes;
 
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
+import GeneralElements.Surface;
 import GeneralElements.link.ItemLink;
 import GeneralElements.link.Rod;
 import GeneralElements.localActions.FixedAcceleration;
@@ -75,8 +76,11 @@ public class BungeeJumping implements DefaultScheme{
         }
 
         it =  new Item("Ball", mass2, 1, Color.WHITE, mainF);
+        it.seteCompression(20000);;
         space.addItem(it);
         it.initPosEtc(new Point3d(xPos, yPos, 0), new Vector3d(jumpXVel, 0, 0));
+        it = new Surface("Floor", new Point3d( -5, -5, -5), new Point3d( -5, -5, 0), new Point3d( 0, -5, 5), mainF );
+        space.addItem(it);
 //        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
         it.addLocalAction(new FixedAcceleration(it));

@@ -21,10 +21,10 @@ public class Mesh implements DefaultScheme {
     double ptMass = 0.1;
     double midMass = ptMass * 10000;
     double ptDia = 0.01;
-    double eX = 20000;
-    double eZ = 20000;
+    double eX = 2000;
+    double eZ = 2000;
     double resistance = 100;
-    double initialLenFactor = 1.2;
+    double initialLenFactor = 1.01;
 
     public Mesh() {
     }
@@ -48,11 +48,12 @@ public class Mesh implements DefaultScheme {
 //                else
                     item = new Item("P" + str(x) + "." + str(z), ptMass, ptDia, Color.yellow, mainF);
                 item.initPosEtc(new Point3d(locX, locY, locZ ), new Vector3d());
+                item.seteCompression(20000);
                 // fix the corners
 //                if ((x == 0 && z == 0) || (x == 0 && z == zPoints) || (x == xPoints && z == 0))
 //                if ((x == 0 && z == 0) || (x == 0 && z == zPoints) || (x == xPoints && z == 0) || (x == xPoints && z == zPoints))
-//                if (x == 0 || z == 0 || z == zPoints || x == xPoints)
-                if (x == 0)
+                if (x == 0 || z == 0 || z == zPoints || x == xPoints)
+//                if (x == 0)
                     item.setbFixedLocation(true);
 //                item.addLocalAction(new FixedAcceleration());
 //                item.addLocalAction(new V2Resistance(resistance));
@@ -62,6 +63,11 @@ public class Mesh implements DefaultScheme {
             }
             locX += xStep;
         }
+
+        item = new Item("BALL", 100, 2, Color.RED, mainF);
+        item.seteCompression(20000);
+        item.initPosEtc(new Point3d(5, 1, 5), new Vector3d());
+        space.addItem(item);
         ItemLink link;
         Item item1;
         Item item2;

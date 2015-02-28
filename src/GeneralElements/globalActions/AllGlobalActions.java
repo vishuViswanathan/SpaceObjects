@@ -21,7 +21,7 @@ public class AllGlobalActions {
             allActions.put(type, GlobalAction.getGlobalAction(type));
     }
 
-    public Vector<GlobalAction> aciveActions() {
+    public Vector<GlobalAction> activeActions() {
         Vector<GlobalAction> activeActions = new Vector<GlobalAction>();
         for (GlobalAction gA: allActions.values())
             if (gA.bUsed)

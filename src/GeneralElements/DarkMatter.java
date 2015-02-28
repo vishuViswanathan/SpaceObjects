@@ -28,10 +28,15 @@ public class DarkMatter implements InputControl, EvalOnce {
     public String name;
     public double mass;
     public double dia;
+    double radius;
     double projectedArea;
     double surfaceArea;
     double eCompression; // for elastic material
+    double stickingPressure = 0; // in N/m2 of the area of contact (of the flattened sphere for eg.
+    double collisionLossFactor = 1;
+    boolean canStick = false;
     public Color color;
+    public boolean boundaryItem = false;
 
     public DarkMatter(Window parent) {
         this.parentW = parent;
@@ -44,6 +49,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.name = name;
         this.mass = mass;
         this.dia = dia;
+        radius = dia / 2;
         this.color = color;
         status = new ItemStat();
         calculateAreas();
@@ -53,12 +59,28 @@ public class DarkMatter implements InputControl, EvalOnce {
         return (eCompression > 0);
     }
 
+    public void seteCompression(double eCompression) {
+        this.eCompression = eCompression;
+    }
+
     public Vector<LocalAction> getLocalActions() {
         return localActions;
     }
 
     public void addInfluence(ItemLink itemLink) {
         links.add(itemLink);
+    }
+
+    public double getPositionX() {
+        return status.pos.getX();
+    }
+
+    public double getPositionY() {
+        return status.pos.getY();
+    }
+
+    public double getPositionZ() {
+        return status.pos.getZ();
     }
 
     void calculateAreas() {
@@ -89,6 +111,36 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public double getProjectedArea() {
         return projectedArea;
+    }
+
+    public boolean canStick() {
+        return canStick;
+    }
+
+    public double getCollisionLossFactor() {
+        return collisionLossFactor;
+    }
+
+    public void setStickingPressure(double stickingPressure) {
+        this.stickingPressure = stickingPressure;
+        canStick = (stickingPressure > 0);
+    }
+
+    /**
+     * Contact area with a flat surface a flatFaceDistance from item center of sphere
+     * @param flatFaceDistance
+     * @return
+     */
+    public double getStickingArea(double flatFaceDistance) {
+        double stickingArea = 0;
+        if (flatFaceDistance < radius)
+            if (flatFaceDistance > 0)
+                stickingArea = 2 * Math.PI * (radius- flatFaceDistance) * (dia - flatFaceDistance);
+        return stickingArea;
+    }
+
+    public double getStickingForce(double onArea) {
+        return stickingPressure * onArea;
     }
 
     public void setSpace(ItemSpace space) {
@@ -132,9 +184,11 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public void setStartConditions() {
-        lastPosition.set(status.pos);
-        lastVelocity.set(status.velocity);
-        lastForce.set(force);
+        if (!bFixedLocation) {
+            lastPosition.set(status.pos);
+            lastVelocity.set(status.velocity);
+            lastForce.set(force);
+        }
     }
 
     public void setLocalForces() {
@@ -149,7 +203,18 @@ public class DarkMatter implements InputControl, EvalOnce {
         force.add(addForce);
     }
 
-    // dummy not used
+    /**
+     * This is generally overridden in the subclass
+     * @param fromPoint
+     * @return
+     */
+    public Vector3d distanceVector(Point3d fromPoint) {
+        Vector3d distance = new Vector3d(status.pos);
+        distance.sub(fromPoint);
+        return distance;
+    }
+
+        // dummy not used
     @Override
     public void evalOnce() {
     }
@@ -159,7 +224,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         try {
             updatePosAndVel(deltaT, nowT, true);
         } catch (Exception e) {
-            ItemMovementsApp.log.error("In ITem evalOnce for " + name + ":" + e.getMessage());
+            ItemMovementsApp.log.error("In Item evalOnce for " + name + ":" + e.getMessage());
             e.printStackTrace();
         }
     }

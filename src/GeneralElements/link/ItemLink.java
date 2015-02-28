@@ -33,9 +33,11 @@ public class ItemLink implements EvalOnce {
         this.item1 = item1;
         this.item2 = item2;
         this.inf = inf;
-        item1.addInfluence(this);
-        item2.addInfluence(this);
-        valid = true;
+        valid = inf.isValid();
+        if (valid) {
+            item1.addInfluence(this);
+            item2.addInfluence(this);
+        }
     }
 
     public ItemLink(DarkMatter item1, DarkMatter item2, ItemSpace space) {
@@ -139,8 +141,12 @@ public class ItemLink implements EvalOnce {
         return (inf.getType() == Influence.Type.INTERITEM);
     }
 
+    public boolean isValid() {
+        return valid;
+    }
+
     public boolean isValid(LinkedList<Item> allItems) {
-        boolean retVal = (allItems.contains(item1) && allItems.contains(item2));
+        boolean retVal = valid && (allItems.contains(item1) && allItems.contains(item2));
         retVal &= (inf != null);
         return retVal;
     }
