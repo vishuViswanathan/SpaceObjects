@@ -122,30 +122,24 @@ public class Item extends DarkMatter {
     public Item(String name, double mass, double dia, Color color, Window parent) {
         super(name, mass, dia, color, parent);
         itemType = ItemType.ITEM;
-//        this(parent);
-//        this.name = name;
-//        this.mass = mass;
-//        this.dia = dia;
-//        this.color = color;
-//        status = new ItemStat();
         setRadioButtons();
     }
 
     public Item(ItemSpace space, String name, double mass, double dia, Color color, Window parent) {
         this(name, mass, dia, color, parent);
-//        this(parent);
         this.space = space;
-//        this.name = name;
-//        this.mass = mass;
-//        this.dia = dia;
-//        this.color = color;
-//        status = new ItemStat();
     }
 
     public Item(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
         takeFromXML(xmlStr);
+    }
+
+    static public Item getNewItem(ItemSpace space, String name) {
+        Item theItem = null;
+
+        return theItem;
     }
 
     static public Item getItemFromXML(String xmlStr, Window parent) {

@@ -324,10 +324,6 @@ public class ItemSpace {
             Component src = (Component)e.getSource();
             if (src == buttAddLink)
                 addInfluence();
-//            else if (src == buttSaveInf) {
-//                saveInfluenceList();
-//                showMessage("Saving Links");
-//            }
             else if (src == buttAddItem) {
                 addItem(src);
             }
@@ -382,85 +378,8 @@ public class ItemSpace {
         }
     }
 
-    class LinkBasic extends JDialog {
-        Item[] allI = (Item[])allItems.toArray(new Item[0]);
-        JComboBox<Item> cbItem1 = new JComboBox<Item>(allI);
-        JComboBox<Item> cbItem2 = new JComboBox<Item>(allI);
-        Item item1;
-        Item item2;
-        Influence.Type type;
-        JButton ok = new JButton("OK");
-        JButton cancel = new JButton("Cancel");
-        JComboBox<Influence.Type> cbType = new JComboBox<Influence.Type>(Influence.Type.values());
-        ItemSpace space;
-        boolean selOk = false;
-        int slNo;
-        LinkBasic(int slNo, ItemSpace space) {
-            setModal(true);
-            setTitle("New Link between Items");
-            this.slNo = slNo;
-            this.space = space;
-            dbInit();
-        }
-
-        void dbInit() {
-            MultiPairColPanel jp = new MultiPairColPanel("Items to Link");
-            jp.addItemPair("Item 1 ", cbItem1);
-            jp.addItemPair("Item 2 ", cbItem2);
-            jp.addItemPair("Link type ", cbType);
-            jp.addBlank();
-            jp.addItemPair(cancel, ok);
-            ActionListener li = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    Object src = e.getSource();
-                    if (src == ok) {
-                        if (takeValuesFromUI())
-                            closeThisWindow();
-                    } else  {
-                        selOk = false;
-                        closeThisWindow();
-                    }
-                }
-            };
-            ok.addActionListener(li);
-            cancel.addActionListener(li);
-            jp.addItemPair(cancel, ok);
-            add(jp);
-            pack();
-        }
-
-        boolean takeValuesFromUI() {
-            item1 = (Item)cbItem1.getSelectedItem();
-            item2 = (Item)cbItem2.getSelectedItem();
-            type = (Influence.Type)(cbType.getSelectedItem());
-            if (item1 != null && item2 != null && item1 != item2) {
-                selOk = true;
-            }
-            else {
-                showMessage("Cannot link a Item to itself!");
-                selOk = false;
-            }
-            return selOk;
-        }
-
-        ItemLink getLink() {
-            if (selOk)
-//                return new ItemLink(allItems, new ItemLink(item1, item2, space), space);
-                return new ItemLink(item1, item2, type, space);
-            else
-                return null;
-        }
-
-        void closeThisWindow() {
-            setVisible(false);
-            dispose();
-        }
-    }
-
-    public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
-        int count = 0;
+      public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
         for (Item it: allItems) {
-            count++;
             if (!it.boundaryItem)
                 itemGraphics.add(it.createItemGraphic(grp, orbitAttrib));
         }
