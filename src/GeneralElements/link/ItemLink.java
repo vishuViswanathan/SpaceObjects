@@ -4,7 +4,8 @@ import GeneralElements.DarkMatter;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import evaluations.EvalOnce;
-import mvUtils.display.*;
+import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 
@@ -41,38 +42,24 @@ public class ItemLink implements EvalOnce {
     }
 
     public ItemLink(DarkMatter item1, DarkMatter item2, ItemSpace space) {
-//        this(item1, item2, new Gravity(item1, item2), space);
         this(item1, item2, true, space);
     }
 
     public ItemLink(DarkMatter item1, DarkMatter item2, boolean gravityON, ItemSpace space) {
-//        this(item1, item2, new Gravity(item1, item2), space);
         this(item1, item2, new InterItem(item1, item2, gravityON), space);
     }
 
     public ItemLink(DarkMatter item1, DarkMatter item2, Influence.Type type, ItemSpace space) {
         this(space);
-        tlItem1.setText("" + item1);
-        tlItem2.setText("" + item2);
-        tlLinkType.setText("" + type);
         this.item1 = item1;
         this.item2 = item2;
         inf = Influence.createInfluence(item1, item2, type);
-        enableRequired();
         valid = true;
     }
 
     public ItemLink(ItemSpace space) {
         this.space = space;
         this.control = space.getInputControl();
-        tlItem1 = new TextLabel("Item1");
-        tlItem2 = new TextLabel("Item2");
-        tlLinkType = new TextLabel("Type");
-        ntFreeLength = new NumberTextField(control, freeLen, 8, false, 0, 1e20, "##0.00000E00", "Free Length in m", false);
-        ntkCompression = new NumberTextField(control, kCompression, 8, false, 0, 1e20, "##0.00000E00", "k Compression in N/m", false);
-        ntkExpansion = new NumberTextField(control, kExpansion, 8, false, 0, 1e20, "##0.00000E00", "k Expansion in N/m", false);
-        bDelete = new JButton("X");
-        bDelete.addActionListener(new DeleteButtListener(this, space));
         valid = false;
     }
 
@@ -90,25 +77,6 @@ public class ItemLink implements EvalOnce {
 
     public void initStartForce() {
         inf.initStartForces();
-    }
-
-    public ItemLink(LinkedList<Item> allItems, ItemLink oldLink, ItemSpace space) {
-        this(space);
-//        this.slNo = slNo;
-        if (oldLink.isValid(allItems)) {
-//            cbLinkType.setSelectedItem(oldLink.inf.getType());
-            tlLinkType.setText("" + oldLink.inf.getType());
-            enableRequired();
-            item1 = oldLink.item1;
-            tlItem1.setText("" + item1);
-
-            item2 = oldLink.item2;
-            tlItem2.setText("" + oldLink.item2);
-            ntFreeLength.setData(oldLink.inf.getFreeLength());
-            ntkCompression.setData(oldLink.inf.getKCompression());
-            ntkExpansion.setData(oldLink.inf.getKExpansion());
-            valid = true;
-        }
     }
 
     public ItemLink(String xmlStr, ItemSpace space) throws NumberFormatException {
@@ -132,10 +100,6 @@ public class ItemLink implements EvalOnce {
     public void updateDisplay() {
         inf.updateDisplay();
     }
-
-//    public boolean isGravity() {
-//        return (inf.getType() == Influence.Type.GRAVITY);
-//    }
 
     public boolean isInterItem() {
         return (inf.getType() == Influence.Type.INTERITEM);
@@ -438,80 +402,6 @@ public class ItemLink implements EvalOnce {
         return (item == item1 || item == item2);
     }
 
-    TextLabel tlItem1, tlItem2, tlLinkType;
-    NumberTextField ntFreeLength, ntkCompression, ntkExpansion;
-    JButton bDelete;
-    double freeLen = 0, kCompression = 0, kExpansion = 0;
-
-    public JPanel dataPanel(int objNum) {
-        JPanel outerPan = new FramedPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        int col = 0;
-        col = addDataFields(objNum, outerPan, gbc, col);
-        JPanel jp;
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col]);
-        jp.add(bDelete);
-        outerPan.add(jp, gbc);
-        return outerPan;
-    }
-
-     int addDataFields(int objNum, JPanel outerPan, GridBagConstraints gbc, int col) {
-        JPanel jp;
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(new JLabel("" + objNum));
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(tlLinkType); //  cbLinkType);
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(tlItem1);
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        jp = new JPanel();
-        jp.setPreferredSize(allDim[col++]);
-        jp.add(tlItem2);
-        outerPan.add(jp, gbc);
-        gbc.gridx++;
-
-        return col;
-    }
-
-    void enableRequired() {
-        ntFreeLength.setEnabled(false);
-        ntkExpansion.setEnabled(false);
-        ntkCompression.setEnabled(false);
-        switch(Influence.Type.getEnum(tlLinkType.getText())) { //(Influence.Type)cbLinkType.getSelectedItem()) {
-            case SPRING:
-                ntFreeLength.setEnabled(true);
-                ntkExpansion.setEnabled(true);
-                ntkCompression.setEnabled(true);
-                break;
-//            case GRAVITY:
-//                break;
-            case ROD:
-                ntFreeLength.setEnabled(true);
-                ntkCompression.setEnabled(true);
-                break;
-            case ROPE:
-                ntFreeLength.setEnabled(true);
-                ntkExpansion.setEnabled(true);
-                break;
-        }
-    }
-
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("item1", item1.toString()));
         xmlStr.append(XMLmv.putTag("item2", item2.toString())).
@@ -540,9 +430,6 @@ public class ItemLink implements EvalOnce {
                 Influence.Type type = Influence.Type.getEnum(typeStr);
                 if (type != null) {
                     switch (type) {
-//                        case GRAVITY:
-//                            inf = new Gravity(item1, item2);
-//                            break;
                         case ROD:
                             inf = new Rod(item1, item2, 0, 0, true);
                             break;
@@ -572,18 +459,4 @@ public class ItemLink implements EvalOnce {
         return "" + inf + "between " + item1 + " and " + item2;
     }
 
-
-    class DeleteButtListener implements ActionListener {
-        ItemSpace space;
-        ItemLink link;
-        DeleteButtListener(ItemLink link, ItemSpace space) {
-            this.space = space;
-            this.link = link;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            space.deleteThisLink(link);
-        }
-    }
 }

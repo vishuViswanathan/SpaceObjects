@@ -2,7 +2,6 @@ package GeneralElements;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
-import GeneralElements.Display.LocalActionsTable;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
@@ -119,6 +118,10 @@ public class Item extends DarkMatter {
         itemType = ItemType.ITEM;
     }
 
+    public Item(Window theParent, String name) {
+        this(name, 1, 1, Color.RED, theParent);
+    }
+
     public Item(String name, double mass, double dia, Color color, Window parent) {
         super(name, mass, dia, color, parent);
         itemType = ItemType.ITEM;
@@ -136,10 +139,57 @@ public class Item extends DarkMatter {
         takeFromXML(xmlStr);
     }
 
-    static public Item getNewItem(ItemSpace space, String name) {
+    static public Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
         Item theItem = null;
-
+        ItemBasic dlg = new ItemBasic(theSpace, theName);
+        dlg.setLocation(600, 400);
+        dlg.setVisible(true);
+        ItemType selectedType = dlg.getSelectedType();
+        switch (selectedType) {
+            case SURFACE:
+                theItem = new Surface(theParent, theName);
+                break;
+            default:
+                theItem = new Item(theParent, theName);
+                break;
+        }
         return theItem;
+    }
+
+    static class  ItemBasic extends JDialog {
+        JComboBox<ItemType> jcItem = new JComboBox<ItemType>(ItemType.values());
+        JButton ok = new JButton("OK");
+        JButton cancel = new JButton("Cancel");
+        ItemSpace theSpace;
+        String theName;
+        ItemBasic(ItemSpace theSpace, String theName) {
+            setModal(true);
+            this.theSpace = theSpace;
+            this.theName = theName;
+            jcItem.setSelectedItem(ItemType.ITEM);
+            setTitle("Selection Object Type");
+            MultiPairColPanel jp = new MultiPairColPanel("Selection Object Type");
+            jp.addItemPair("Selected Type", jcItem);
+            jp.addBlank();
+            jp.addItemPair(cancel, ok);
+            add(jp);
+            pack();
+            ok.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    closeThisWindow();
+                }
+            });
+        }
+
+        void closeThisWindow() {
+            setVisible(false);
+            dispose();
+        }
+
+        ItemType getSelectedType() {
+            return jcItem.getItemAt(jcItem.getSelectedIndex());
+        }
     }
 
     static public Item getItemFromXML(String xmlStr, Window parent) {
@@ -317,10 +367,6 @@ public class Item extends DarkMatter {
         return editItem(inpC, null);
     }
 
-    DarkMatter getThisItem() {
-        return this;
-    }
-
     class ItemDialog extends JDialog {
         JTextField tfItemName;
         JButton colorButton = new JButton("Object Color");
@@ -336,7 +382,7 @@ public class Item extends DarkMatter {
         JButton cancel = new JButton("Cancel");
         InputControl inpC;
         EditResponse response = EditResponse.CHANGED;
-        LocalActionsTable localActionTable;
+//        LocalActionsTable localActionTable;
 
         ItemDialog(InputControl inpC, Component c) {
             setModal(true);
@@ -406,8 +452,8 @@ public class Item extends DarkMatter {
                 }
             });
             outerPan.add(jp, BorderLayout.CENTER);
-            localActionTable = new LocalActionsTable(getThisItem(), inpC);
-            outerPan.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
+//            localActionTable = new LocalActionsTable(getThisItem(), inpC);
+//            outerPan.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
             ActionListener li = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
@@ -422,11 +468,11 @@ public class Item extends DarkMatter {
                         }
                     }
                     else {
-                        if (localActionTable.getEditResponse() == EditResponse.CHANGED) {
-                            ItemMovementsApp.showMessage("Some Local Responses have changed and Saved");
-                            response = EditResponse.CHANGED;
-                        }
-                        else
+//                        if (localActionTable.getEditResponse() == EditResponse.CHANGED) {
+//                            ItemMovementsApp.showMessage("Some Local Responses have changed and Saved");
+//                            response = EditResponse.CHANGED;
+//                        }
+//                        else
                             response = EditResponse.NOTCHANGED;
                         closeThisWindow();
                      }

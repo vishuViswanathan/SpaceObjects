@@ -33,11 +33,15 @@ public class Surface extends Item {
     double sqrtA2B2C2;
     Vector3dMV distanceFromOrigin;
 
-    public Surface(Window parent) {
+    private Surface(Window parent) {
         super(parent);
         itemType = ItemType.SURFACE;
         bFixedLocation = true;
         boundaryItem = true;
+    }
+
+    public Surface(Window parent, String name) {
+        this(name, new Point3d(0, 0, 0), new Point3d (5, 0, 0), new Point3d(0, 0, -5), parent);
     }
 
     public Surface(String name, Point3d p1, Point3d p2, Point3d p3, double collisionLossFactor, Window parent) {
@@ -159,10 +163,6 @@ public class Surface extends Item {
         return editItem(inpC, null);
     }
 
-    DarkMatter getThisItem() {
-        return this;
-    }
-
     class ItemDialog extends JDialog {
         JTextField tfItemName;
         JButton colorButton = new JButton("Object Color");
@@ -174,7 +174,7 @@ public class Surface extends Item {
         JButton ok = new JButton("Save");
         JButton cancel = new JButton("Cancel");
         InputControl inpC;
-        EditResponse response = EditResponse.CHANGED;
+        EditResponse response = EditResponse.CANCEL;
 
         ItemDialog(InputControl inpC, Component c) {
             setModal(true);
@@ -235,8 +235,10 @@ public class Surface extends Item {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
                     if (src == ok) {
-                        if (takeValuesFromUI())
+                        if (takeValuesFromUI()) {
+                            response = EditResponse.CHANGED;
                             closeThisWindow();
+                        }
                     }
                     else if (src == delete) {
                         if (ItemMovementsApp.decide("Deleting Object ", "Do you want to DELETE this Object?")) {

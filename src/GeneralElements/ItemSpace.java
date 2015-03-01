@@ -7,10 +7,8 @@ import GeneralElements.Display.ItemTable;
 import GeneralElements.Display.LinkTable;
 import GeneralElements.globalActions.AllGlobalActions;
 import GeneralElements.globalActions.GlobalAction;
-import GeneralElements.link.Influence;
 import GeneralElements.link.ItemLink;
 import mvUtils.display.InputControl;
-import mvUtils.display.MultiPairColPanel;
 import mvUtils.math.DoubleMaxMin;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
@@ -32,7 +30,6 @@ import java.util.Vector;
 public class ItemSpace {
     LinkedList<Item> allItems;
     LinkedList<ItemLink> allItemLinks;
-//    Vector<GlobalAction> globalActions;
     Vector<GlobalAction> activeGlobalActions;
     ItemMovementsApp mainApp;
     AllGlobalActions allGlobalActions;
@@ -46,9 +43,6 @@ public class ItemSpace {
         allItems = new LinkedList<Item>();
         allItemLinks = new LinkedList<ItemLink>();
         allGlobalActions = new AllGlobalActions();
-//        globalActions = new Vector<GlobalAction>();
-//        for (GlobalAction.Type type:GlobalAction.Type.values())
-//            globalActions.add(GlobalAction.getGlobalAction(type));
         trace("clearing ItemSpace");
     }
 
@@ -58,10 +52,6 @@ public class ItemSpace {
 
     public LinkedList<Item> getAlItems() {
         return allItems;
-    }
-
-    public LinkedList<ItemLink> getAllItemLinks() {
-        return allItemLinks;
     }
 
     public Item getOneItem(int i) {
@@ -98,7 +88,6 @@ public class ItemSpace {
         ItemLink link;
         for (int il = 0; il < allItemLinks.size();il++ ) {
             link = allItemLinks.get(il);
-//            if (link.isGravity() || link.isContact()) {
             if (link.isInterItem()) {
                 allItemLinks.remove(il);
                 il--;
@@ -179,7 +168,8 @@ public class ItemSpace {
     }
 
     void addItem(Component c) {
-        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
+//        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
+        Item newItem = Item.getNewItem(this, "## Enter Item Name ##",mainApp.parent());
         if (newItem.editItem(mainApp) == Item.EditResponse.CHANGED) {
             newItem.setSpace(this);
             itemTable.addOneRow(newItem);
@@ -196,7 +186,6 @@ public class ItemSpace {
     void fillTempInfList() {
         tempInfList = new LinkedList<ItemLink>();
         for (ItemLink il: allItemLinks)
-//            if (!il.isGravity())
             if (!il.isInterItem())
                 tempInfList.add(il); //new ItemLink(allItems, il, this));
         listEdited = false;
@@ -209,7 +198,6 @@ public class ItemSpace {
     public void enableItemGravity(boolean ena) {
         bItemGravityOn = ena;
     }
-
 
 
     public void enableButtons(boolean ena) {
@@ -244,35 +232,9 @@ public class ItemSpace {
         return outerP;
     }
 
-    void prepareLinkList() {
-        if (infListPan != null)
-            infListPan.removeAll();
-        int infN = 1;
-        gbcInfList.gridx = 0;
-        gbcInfList.gridy = 0;
-        for (ItemLink il: tempInfList) {
-            infListPan.add(il.dataPanel(infN++), gbcInfList);
-            gbcInfList.gridy++;
-        }
-    }
-
-     public void deleteThisLink(ItemLink link) {
-        trace("deleting " + link);
-        if (tempInfList.remove(link)) {
-            prepareLinkList();
-            infListPan.updateUI();
-            listEdited = true;
-        }
-        else
-            showError("The link is not in the list!");
-    }
 
     public void linkEdited(ItemLink link) {
         listEdited = true;
-    }
-
-    public boolean anyUnsavedLink() {
-        return listEdited;
     }
 
     void clearItemLinks() {
@@ -285,8 +247,6 @@ public class ItemSpace {
         clearItemLinks();
         ItemLink ilNow;
         for (ItemLink iL : tempInfList) {
-//            if ((ilNow = iL.getInfFromUI()) != null)
-//                allItemLinks.add(ilNow);
             if ((ilNow = iL) != null)
                 allItemLinks.add(ilNow);
         }
@@ -330,51 +290,6 @@ public class ItemSpace {
             else if (src == rbItemGravity) {
                 bItemGravityOn = rbItemGravity.isSelected();
             }
-        }
-    }
-
-    class LinkDetails extends JDialog {
-        JButton ok = new JButton("OK");
-        JButton cancel = new JButton("Cancel");
-        Influence inf;
-        LinkDetails(Influence inf) {
-            setModal(true);
-            this.inf = inf;
-            dbInit();
-        }
-
-        void dbInit() {
-            JPanel outerP = new JPanel(new BorderLayout());
-            MultiPairColPanel jpBasic = new MultiPairColPanel("Link Details");
-            jpBasic.addItemPair("Item 1 ", "" + inf.item1, false);
-            jpBasic.addItemPair("Item 2 ",  "" + inf.item2, false);
-            jpBasic.addItemPair("Link type ", "" + inf.getType(), false);
-            outerP.add(jpBasic, BorderLayout.NORTH);
-            if (inf.hasDetails) {
-                outerP.add(inf.detailsPanel(), BorderLayout.CENTER);
-            }
-            ActionListener li = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    Object src = e.getSource();
-                    if (src == ok) {
-                        if (inf.takeDataFromUI())
-                            closeThisWindow();
-                    } else
-                        closeThisWindow();
-                }
-            };
-            ok.addActionListener(li);
-            cancel.addActionListener(li);
-            MultiPairColPanel buttonP = new MultiPairColPanel("");
-            buttonP.addItemPair(cancel, ok);
-            outerP.add(buttonP, BorderLayout.SOUTH);
-            add(outerP);
-            pack();
-        }
-
-        void closeThisWindow() {
-            setVisible(false);
-            dispose();
         }
     }
 
@@ -443,13 +358,6 @@ public class ItemSpace {
 
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         initForces();
-////        for (ItemLink inf: allItemLinks)
-////            inf.evalForce();
-//        evaluator.submitLinkTasks();
-//        if (evaluator.isComplete())
-//            updatePosAndVel(deltaT, nowT);
-////        evaluator.submitItemTasks(deltaT, nowT);
-////        evaluator.isComplete();
 
         evaluator.resetForceBarrier();
 //        evaluator.startItemLinkGroups();
@@ -472,7 +380,6 @@ public class ItemSpace {
     public DoubleMaxMin xMaxMin() {
         DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
         for (Item i: allItems)
-//            maxMin.takeMaxValue(i.status.pos.getX());
             maxMin.takeMaxValue(i.getPositionX());
         return maxMin;
     }
@@ -480,7 +387,6 @@ public class ItemSpace {
     public DoubleMaxMin yMaxMin() {
         DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
         for (Item i: allItems)
-//            maxMin.takeMaxValue(i.status.pos.getY());
             maxMin.takeMaxValue(i.getPositionY());
         return maxMin;
     }
@@ -488,7 +394,6 @@ public class ItemSpace {
     public DoubleMaxMin zMaxMin() {
         DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
         for (Item i: allItems)
-//            maxMin.takeMaxValue(i.status.pos.getZ());
             maxMin.takeMaxValue(i.getPositionZ());
         return maxMin;
     }
@@ -501,7 +406,7 @@ public class ItemSpace {
 //        for (ItemLink lk: allItemLinks)
 //            lk.prepareEvaluator();
 //    }
-//
+
     public boolean doCalculation(double deltaT, double nowT) throws Exception{
         return evalInfluence(deltaT, nowT);
     }
@@ -512,11 +417,6 @@ public class ItemSpace {
 
     StringBuilder allGlobalActionsInXML() {
         return allGlobalActions.dataInXML();
-//        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("nGActions", globalActions.size()));
-//        int i = 0;
-//        for (GlobalAction gA: globalActions)
-//            xmlStr.append(XMLmv.putTag("gA#" + ("" + i++).trim(), gA.dataInXML().toString()));
-//        return xmlStr;
     }
 
     StringBuilder allItemsInXML() {
@@ -551,10 +451,8 @@ public class ItemSpace {
             Item oneItem;
             for (int i = 0; i < nItems; i++) {
                 vp = XMLmv.getTag(xmlStr, "it#" + ("" + i).trim(), vp.endPos);
-//                oneItem = new Item(vp.val, mainApp.parent());
                 oneItem = Item.getItemFromXML(vp.val, mainApp.parent());
                 addItem(oneItem);
-//                allItems.add(new Item(vp.val, mainApp.parent()));
             }
         } catch (NumberFormatException e) {
             showError("Problem in XML data for Items:" + e.getMessage());

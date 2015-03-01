@@ -2,8 +2,6 @@ package GeneralElements.link;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
-import GeneralElements.Display.LocalActionsTable;
-import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.localActions.LocalAction;
 import mvUtils.mvXML.ValAndPos;
@@ -254,17 +252,17 @@ public class LinkWithMass extends InfluenceDef  {
 
     }
 
-    LocalActionsTable localActionTable;
+//    LocalActionsTable localActionTable;
 
     @Override
     public JPanel detailsPanel() {
         JPanel outerP = new JPanel(new BorderLayout());
         outerP.add(lwmDetailsPanel(), BorderLayout.WEST);
-        DarkMatter dummyItem = new Item(item1.parentW);
-        for (LocalAction la:localActions)
-            dummyItem.addLocalAction(la);
-        localActionTable = new LocalActionsTable(dummyItem, item1);
-        outerP.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
+//        DarkMatter dummyItem = new Item(item1.parentW);
+//        for (LocalAction la:localActions)
+//            dummyItem.addLocalAction(la);
+//        localActionTable = new LocalActionsTable(dummyItem, item1);
+//        outerP.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
         return outerP;
     }
 
@@ -272,13 +270,13 @@ public class LinkWithMass extends InfluenceDef  {
     public boolean takeDataFromUI() {
         boolean retVal = false;
         if (lwmTakeDataFromUI()) {
-//            if (localActionTable.getEditResponse() == Item.EditResponse.CHANGED) {
-                localActions.clear();
-                DarkMatter dummyItem = localActionTable.item;
-                for (LocalAction la : dummyItem.getLocalActions())
-                    localActions.add(la);
-//            }
-//            setAllElements();
+////            if (localActionTable.getEditResponse() == Item.EditResponse.CHANGED) {
+//                localActions.clear();
+//                DarkMatter dummyItem = localActionTable.item;
+//                for (LocalAction la : dummyItem.getLocalActions())
+//                    localActions.add(la);
+////            }
+            setAllElements();
             retVal = true;
         }
         return retVal;
