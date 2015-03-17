@@ -1,5 +1,6 @@
 package schemes;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.ItemLink;
@@ -56,6 +57,11 @@ public class MultiPendulum implements DefaultScheme {
         }
         return true;
     }
+
+    public ItemMovementsApp.SpaceSize getSpaceSize() {
+        return ItemMovementsApp.SpaceSize.DAILY;
+    }
+
 
     @Override
     public double startJDN() {

@@ -16,10 +16,10 @@ import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
+import mvUtils.display.FramedPanel;
 import mvUtils.display.NumberLabel;
 import mvUtils.display.NumberTextField;
 import mvUtils.math.DoubleMaxMin;
-import mvUtils.display.FramedPanel;
 
 import javax.media.j3d.*;
 import javax.swing.*;
@@ -293,20 +293,22 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     JPanel getSpeedSelector() {
-        switch (controller.spSize) {
-            case ASTRONOMICAL:
-                minInterval = 10;
-                maxInterval = 14400;
-                break;
-            case DAILY:
-                minInterval = 0.0001;
-                maxInterval = 10;
-                break;
-            default:
-                minInterval = 1;
-                maxInterval = 3600;
-                break;
-        }
+        minInterval = controller.calculationStep;
+        maxInterval = controller.refreshInterval * 10;
+//        switch (controller.spSize) {
+//            case ASTRONOMICAL:
+//                minInterval = 10;
+//                maxInterval = 14400;
+//                break;
+//            case DAILY:
+//                minInterval = 0.0001;
+//                maxInterval = 10;
+//                break;
+//            default:
+//                minInterval = 1;
+//                maxInterval = 3600;
+//                break;
+//        }
 
         sbUpdateSpeed = new JScrollBar(JScrollBar.HORIZONTAL,
                 getIntervalScrPos(nowInterval), scrollExt, scrollBarMin, scrollbarMax);

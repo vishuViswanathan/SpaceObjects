@@ -1,5 +1,6 @@
 package schemes;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.Surface;
@@ -40,12 +41,17 @@ public class BallAndFloor implements DefaultScheme {
         return true;
     }
 
+    public ItemMovementsApp.SpaceSize getSpaceSize() {
+        return ItemMovementsApp.SpaceSize.DAILY;
+    }
+
+
     @Override
     public double startJDN() {
         return 0;
     }
 
     public String toString() {
-        return "Bungee Jumping with Rope";
+        return "Ball and Floor";
     }
 }

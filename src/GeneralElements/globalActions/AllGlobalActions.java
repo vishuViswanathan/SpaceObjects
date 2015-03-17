@@ -1,4 +1,5 @@
 package GeneralElements.globalActions;
+
 import mvUtils.display.InputControl;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
@@ -6,17 +7,17 @@ import mvUtils.mvXML.XMLmv;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 /**
  * Created by M Viswanathan on 01 Feb 2015
  */
 public class AllGlobalActions {
-    HashMap <GlobalAction.Type, GlobalAction> allActions;
+    LinkedHashMap<GlobalAction.Type, GlobalAction> allActions;
 
     public AllGlobalActions() {
-        allActions = new HashMap<GlobalAction.Type, GlobalAction>();
+        allActions = new LinkedHashMap<GlobalAction.Type, GlobalAction>();
         for (GlobalAction.Type type:GlobalAction.Type.values())
             allActions.put(type, GlobalAction.getGlobalAction(type));
     }

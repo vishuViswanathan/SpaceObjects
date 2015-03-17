@@ -99,7 +99,7 @@ public class InterItem extends Influence {
             double force;
             nowForce.set(distVect);
             if (equalE) {
-                double compFraction = 1 - compression / limitDistance;  // note the compressions is negative;
+                double compFraction = 1 - compression / limitDistance;
 //                double force = compression * factorLbyR;
                 force = - compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
             }
@@ -130,8 +130,9 @@ public class InterItem extends Influence {
         }
         if (retVal) {
             item1.addToForce(nowForce);
-            nowForce.negate();
-            item2.addToForce(nowForce);
+//            nowForce.negate();
+//            item2.addToForce(nowForce);
+            item2.subtractFromForce(nowForce);
         }
         return retVal;
     }

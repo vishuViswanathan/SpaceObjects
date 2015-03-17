@@ -48,8 +48,9 @@ public class Rod extends InfluenceDef  {
             nowForce = new Vector3d(distVect);
             nowForce.scale(ratio);
             item1.addToForce(nowForce);
-            nowForce.negate();
-            item2.addToForce(nowForce);
+//            nowForce.negate();
+//            item2.addToForce(nowForce);
+            item2.subtractFromForce(nowForce);
         }
         return retVal;
     }

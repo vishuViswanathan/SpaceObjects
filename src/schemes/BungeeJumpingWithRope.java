@@ -1,8 +1,8 @@
 package schemes;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
-import GeneralElements.Surface;
 import GeneralElements.link.ItemLink;
 import GeneralElements.link.LinkWithMass;
 import GeneralElements.link.Rope;
@@ -54,11 +54,16 @@ public class BungeeJumpingWithRope implements DefaultScheme{
             ItemLink link = new ItemLink(lastItem, it, rope, space);
             space.addItemLink(link);
         }
-        it = new Surface("Floor", new Point3d( -5, -5, -5), new Point3d( -5, -5, 0), new Point3d( 0, -5, 5), mainF );
+//        it = new Surface("Floor", new Point3d( -5, -5, -5), new Point3d( -5, -5, 0), new Point3d( 0, -5, 5), mainF );
         space.addItem(it);
 
         return true;
     }
+
+    public ItemMovementsApp.SpaceSize getSpaceSize() {
+        return ItemMovementsApp.SpaceSize.DAILY;
+    }
+
 
     @Override
     public double startJDN() {

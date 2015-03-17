@@ -65,11 +65,7 @@ public class Item extends DarkMatter {
     static public enum ColType {
         SLNO("SlNo."),
         NAME("Name"),
-        MASS("Mass(kg)"),
-        DIA("Dia(m)"),
-        POS("x, y, z Position(m)"),
-        STATICPOS("FixedPos"),
-        VEL("x, y, z Velocity(m)");
+        DETAILS("Details");
 
         private final String typeName;
 
@@ -235,17 +231,9 @@ public class Item extends DarkMatter {
                 return 30;
             case NAME:
                 return 100;
-            case MASS:
-                return 100;
-            case DIA:
-                return 100;
-            case POS:
-                return 200;
-            case STATICPOS:
-                return 30;
-            case VEL:
-                return 200;
-        }
+            case DETAILS:
+                return 630;
+           }
         return 0;
     }
 
@@ -261,18 +249,13 @@ public class Item extends DarkMatter {
     Object getOneColData(ColType colType) {
         SmartFormatter fmt = new SmartFormatter(6);
         switch(colType) {
-            case MASS:
-                return "" + fmt.format(mass);
             case NAME:
                 return name;
-            case DIA:
-                return "" + fmt.format(dia);
-            case POS:
-                return status.dataInCSV(ItemStat.Param.POSITION, 4);
-            case STATICPOS:
-                return (bFixedLocation) ? "Y" : "N";
-            case VEL:
-                return  status.dataInCSV(ItemStat.Param.VELOCITY, 4);
+            case DETAILS:
+                return "Sphere with Mass:" + fmt.format(mass) +
+                        ",    Dia:" + fmt.format(dia) +
+                        ",    Pos:" + status.dataInCSV(ItemStat.Param.POSITION, 4) +
+                        ((bFixedLocation) ? " Static"  : ",    Vel:" + status.dataInCSV(ItemStat.Param.VELOCITY, 4));
         }
         return "";
     }

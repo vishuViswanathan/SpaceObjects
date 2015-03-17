@@ -55,12 +55,14 @@ public class VResistanceG extends GlobalAction{
 //    }
 //
     public Vector3d getForce(DarkMatter item) {
-        Vector3d force;
+//        Vector3d force;
+        Vector3d force = item.tempForce;
         double vel = item.status.velocity.length();
         if (vel > 0) {
             double forceMagnitude = -vel * factor * item.getSurfaceArea(); // opposing the velocity
             double scaleFactor = forceMagnitude / vel;
-            force = new Vector3d(item.status.velocity);
+//            force = new Vector3d(item.status.velocity);
+            force.set(item.status.velocity);
             force.scale(scaleFactor);
         } else
             force = new Vector3d();

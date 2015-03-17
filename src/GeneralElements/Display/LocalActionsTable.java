@@ -21,6 +21,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
 
+//TODO LocalActionTable is not required
 /**
  * Created by M Viswanathan on 23 Nov 2014
  */
@@ -81,6 +82,8 @@ public class LocalActionsTable {
         }
         return retVal;
     }
+
+
 
     public Component getLocalActionPanel() {
         FramedPanel fp = new FramedPanel(new BorderLayout());

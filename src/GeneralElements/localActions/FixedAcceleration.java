@@ -21,6 +21,8 @@ import java.awt.event.ActionListener;
 /**
  * Created by M Viswanathan on 27 Aug 2014
  */
+
+// TODO FixedAcceleration is not required since handled by GlobalActions
 public class FixedAcceleration extends LocalAction {
     static Vector3dMV unitDirection = new Vector3dMV(0, -1, 0);  // direction of fixed Acceleration, a unit Vector
     static double fixedAcc = 9.81; // fixed acceleration value

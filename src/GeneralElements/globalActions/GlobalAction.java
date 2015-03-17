@@ -17,10 +17,10 @@ import java.awt.event.ActionListener;
  */
 public abstract class GlobalAction {
     static public enum Type {
+        FIXEDACCELERATION("Fixed Acceleration"),
         FLUIDRESISTANCEg("Global V2Resistance"),
         FLUIDFRICTIONg("Global VResistance"),
-        WIND("Wind"),
-        FIXEDACCELERATION("Fixed Acceleration");
+        WIND("Wind");
 
         private final String actionName;
 
@@ -140,7 +140,10 @@ public abstract class GlobalAction {
 
 
     public Vector3d getForce(DarkMatter item) {
-        return new Vector3d();
+//        return new Vector3d();
+        Vector3d force = item.tempForce;
+        force.set(0, 0, 0);
+        return force;
     }
 
     abstract String getParamString();

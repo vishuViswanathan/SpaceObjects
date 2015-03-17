@@ -24,6 +24,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     public ItemStat status;
     boolean bFixedLocation = false;
     Vector<LocalAction> localActions;
+    public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
     Vector3d force = new Vector3d();
     public String name;
     public double mass;
@@ -201,6 +202,10 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public void addToForce(Vector3d addForce) {
         force.add(addForce);
+    }
+
+    public void subtractFromForce(Vector3d subtractForce) {
+        force.sub(subtractForce);
     }
 
     /**

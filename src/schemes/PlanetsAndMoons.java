@@ -1,5 +1,6 @@
 package schemes;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import SpaceElements.Constants;
@@ -63,6 +64,10 @@ public class PlanetsAndMoons implements DefaultScheme {
         if (createInputSummary)
             closeInputFiles();
         return bRetVal;
+    }
+
+    public ItemMovementsApp.SpaceSize getSpaceSize() {
+        return ItemMovementsApp.SpaceSize.ASTRONOMICAL;
     }
 
     double baseJDN = -1;

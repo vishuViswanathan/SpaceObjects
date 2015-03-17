@@ -39,7 +39,7 @@ public class ItemSpace {
         clearSpace();
     }
 
-    void clearSpace() {
+    public void clearSpace() {
         allItems = new LinkedList<Item>();
         allItemLinks = new LinkedList<ItemLink>();
         allGlobalActions = new AllGlobalActions();
@@ -197,6 +197,7 @@ public class ItemSpace {
 
     public void enableItemGravity(boolean ena) {
         bItemGravityOn = ena;
+        rbItemGravity.setSelected(ena);
     }
 
 

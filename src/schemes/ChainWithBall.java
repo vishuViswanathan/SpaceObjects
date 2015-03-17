@@ -1,5 +1,6 @@
 package schemes;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.ItemLink;
@@ -50,6 +51,11 @@ public class ChainWithBall implements DefaultScheme {
         space.addItemLink(link);
         return true;
     }
+
+    public ItemMovementsApp.SpaceSize getSpaceSize() {
+        return ItemMovementsApp.SpaceSize.DAILY;
+    }
+
 
     @Override
     public double startJDN() {

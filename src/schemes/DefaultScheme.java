@@ -11,6 +11,6 @@ import javax.swing.*;
 public interface DefaultScheme {
 
     public boolean getScheme(JFrame parent, ItemSpace space);
-
+    public ItemMovementsApp.SpaceSize getSpaceSize();
     public double startJDN();
 }

@@ -18,6 +18,8 @@ import java.awt.event.ActionListener;
 /**
  * Created by M Viswanathan on 26 Aug 2014
  */
+// TODO VResistance is Not required since handled by GlobalActions
+
 public class VResistance extends LocalAction {
     double factor;
     double frictionArea;

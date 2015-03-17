@@ -1,5 +1,6 @@
 package schemes;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.ItemLink;
@@ -19,12 +20,11 @@ public class Mesh implements DefaultScheme {
     double xLen = 10;
     double zLen = 10;
     double ptMass = 0.1;
-    double midMass = ptMass * 10000;
     double ptDia = 0.01;
     double eX = 2000;
     double eZ = 2000;
     double resistance = 100;
-    double initialLenFactor = 1.01;
+    double initialLenFactor = 1.00;
 
     public Mesh() {
     }
@@ -64,7 +64,7 @@ public class Mesh implements DefaultScheme {
             locX += xStep;
         }
 
-        item = new Item("BALL", 100, 2, Color.RED, mainF);
+        item = new Item("BALL", 50, 2, Color.RED, mainF);
         item.seteCompression(20000);
         item.initPosEtc(new Point3d(5, 1, 5), new Vector3d());
         space.addItem(item);
@@ -90,6 +90,11 @@ public class Mesh implements DefaultScheme {
         return true;
     }
 
+    @Override
+    public ItemMovementsApp.SpaceSize getSpaceSize() {
+        return ItemMovementsApp.SpaceSize.DAILY;
+    }
+
     String str(int value) {
         return ("" + value).trim();
     }
@@ -98,4 +103,10 @@ public class Mesh implements DefaultScheme {
     public double startJDN() {
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return "Net With a Ball";
+    }
+
 }

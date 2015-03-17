@@ -55,7 +55,11 @@ public class FixedAccelerationG extends GlobalAction {
     }
 
     public Vector3d getForce(DarkMatter item) {
-        Vector3d force = new Vector3d(unitDirection);
+//        Vector3d force = new Vector3d(unitDirection);
+//        force.scale(fixedAcc * item.mass);
+//        return force;
+        Vector3d force = item.tempForce;
+        force.set(unitDirection);
         force.scale(fixedAcc * item.mass);
         return force;
     }

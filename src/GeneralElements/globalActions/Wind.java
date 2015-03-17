@@ -63,7 +63,9 @@ public class Wind extends GlobalAction {
     }
 
     public Vector3d getForce(DarkMatter item) {
-        Vector3d force = new Vector3d(pressure);
+//        Vector3d force = new Vector3d(pressure);
+        Vector3d force = item.tempForce;
+        force.set(pressure);
         force.scale(item.getProjectedArea());
         return force;
     }

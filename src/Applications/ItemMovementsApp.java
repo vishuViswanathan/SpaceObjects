@@ -6,13 +6,12 @@ import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import org.apache.log4j.Logger;
-import schemes.BallAndFloor;
 import schemes.DefaultScheme;
-import schemes.PlanetsAndMoons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +23,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.Calendar;
+import java.util.Vector;
 
 /**
  * Created by M Viswanathan on 23 May 2014
@@ -67,6 +67,15 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             return retVal;
         }
     }
+
+    String[] schemesList = {"BallAndFloor",
+                            "BungeeJumping",
+                            "BungeeJumpingWithRope",
+                            "ChainWithBall",
+                            "Mesh",
+                            "MultiPendulum",
+                            "PlanetsAndMoons"
+    };
     public SpaceSize spSize;
     JComboBox cbSpaceSize = new JComboBox(SpaceSize.values());
     ItemSpace space;
@@ -74,11 +83,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     static JFrame mainF;
     DateAndJDN dateAndJDN = new DateAndJDN();
     JButton pbStart = new JButton("Start");
-    JButton pbSaveData = new JButton("Save Data to File");
-    JButton pbReadData = new JButton("Data From file");
+//    JButton pbSaveData = new JButton("Save Data to File");
+//    JButton pbReadData = new JButton("Data From file");
     NumberTextField ntfDuration;  // , ntfStep;
     double duration = 2000; // in h
-    double calculationStep =2; //in seconds
+    public double calculationStep =2; //in seconds
     public boolean bShowOrbit = false;
     public boolean bShowLinks = false;
     public static Logger log;
@@ -97,7 +106,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             log = Logger.getLogger(ItemMovementsApp.class);
         modifyJTextEdit();
         space = new ItemSpace(this);
-        mainF = new JFrame("Items in Motion") ;
+        mainF = new JFrame("Items in Motion");
+        mainF.setJMenuBar(getMenuBar());
         mainF.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 mainF.dispose();
@@ -105,67 +115,216 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             }
         });
         mainF.add(cbSpaceSize);
-        cbSpaceSize.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                spSize = (SpaceSize) cbSpaceSize.getSelectedItem();
-                switch (spSize) {
-                    case ASTRONOMICAL:
-                        duration = 200000;
-                        calculationStep = 10; // s
-                        refreshInterval = 100 * calculationStep;
-                        DefaultScheme  scheme = new PlanetsAndMoons();
-                        if (scheme.getScheme(mainF, space)) {
-                            dateAndJDN = new DateAndJDN(scheme.startJDN());
-//                        if (getPlanetsFromDB()) {
-//                            space.setGlobalLinksAndActions();
-                            space.enableItemGravity(true);
-                            proceedToItemList(false);
-                        }
-                        bShowOrbit = true;
-                        bShowLinks = false;
-                        break;
-                    case BLANKSPACE:
-                        duration = 200000;
-                        calculationStep = 0.001; // s
-                        refreshInterval = 200 * calculationStep;
-                        space.enableItemGravity(true);
-                        proceedToItemList(false);
-                        bShowOrbit = true;
-                        bShowLinks = false;
-                        break;
-                    case BLANK:
-                        duration = 200;
-                        calculationStep = 0.0002; // was 0.000002;
-                        refreshInterval = 200 * calculationStep; // was 20000
-                        space.enableItemGravity(false);
-                        proceedToItemList(false);
-                        bShowOrbit = false;
-                        bShowLinks = true;
-                        bRealTime = true;
-                        break;
-                    case DAILY:
-                        duration = 200;
-                        calculationStep = 0.0002; // was 0.000002;
-                        refreshInterval = 200 * calculationStep; // was 20000
-                        space.enableItemGravity(false);
-//                        if ((new ChainWithBall()).getScheme(mainF, space)) {
-//                        if ((new MultiPendulum()).getScheme(mainF, space))  {
-//                        if ((new BungeeJumping()).getScheme(mainF, space)) {
-//                        if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
+        duration = 200;
+        calculationStep = 0.0002; // was 0.000002;
+        refreshInterval = 200 * calculationStep; // was 20000
+        proceedToItemList(false);
+        space.enableItemGravity(false);
+        bShowOrbit = false;
+        bShowLinks = true;
+        bRealTime = true;
+
+//        cbSpaceSize.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                spSize = (SpaceSize) cbSpaceSize.getSelectedItem();
+//                switch (spSize) {
+//                    case ASTRONOMICAL:
+//                        duration = 200000;
+//                        calculationStep = 10; // s
+//                        refreshInterval = 100 * calculationStep;
+//                        DefaultScheme  scheme = new PlanetsAndMoons();
+//                        if (scheme.getScheme(mainF, space)) {
+//                            dateAndJDN = new DateAndJDN(scheme.startJDN());
+////                        if (getPlanetsFromDB()) {
+////                            space.setGlobalLinksAndActions();
+//                            space.enableItemGravity(true);
+//                            proceedToItemList(false);
+//                        }
+//                        bShowOrbit = true;
+//                        bShowLinks = false;
+//                        break;
+//                    case BLANKSPACE:
+//                        duration = 200000;
+//                        calculationStep = 0.001; // s
+//                        refreshInterval = 200 * calculationStep;
+//                        space.enableItemGravity(true);
+//                        proceedToItemList(false);
+//                        bShowOrbit = true;
+//                        bShowLinks = false;
+//                        break;
+//                    case BLANK:
+//                        duration = 200;
+//                        calculationStep = 0.0002; // was 0.000002;
+//                        refreshInterval = 200 * calculationStep; // was 20000
+//                        space.enableItemGravity(false);
+//                        proceedToItemList(false);
+//                        bShowOrbit = false;
+//                        bShowLinks = true;
+//                        bRealTime = true;
+//                        break;
+//                    case DAILY:
+//                        duration = 200;
+//                        calculationStep = 0.0002; // was 0.000002;
+//                        refreshInterval = 200 * calculationStep; // was 20000
+//                        space.enableItemGravity(false);
+////                        if ((new ChainWithBall()).getScheme(mainF, space)) {
+////                        if ((new MultiPendulum()).getScheme(mainF, space))  {
+////                        if ((new BungeeJumping()).getScheme(mainF, space)) {
+////                        if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
 //                        if ((new Mesh()).getScheme(mainF, space)) {
-                        if ((new BallAndFloor()).getScheme(mainF, space)) {
-                            proceedToItemList(false);
-                        }
-                        bShowOrbit = false;
-                        bShowLinks = true;
-                        bRealTime = true;
-                        break;
-                }
-            }
-        });
+////                        if ((new BallAndFloor()).getScheme(mainF, space)) {
+//                            proceedToItemList(false);
+//                        }
+//                        bShowOrbit = false;
+//                        bShowLinks = true;
+//                        bRealTime = true;
+//                        break;
+//                }
+//            }
+//        });
         mainF.pack();
         mainF.setVisible(true);
+    }
+
+    void setTimingValues(double calculationStep, double refreshInterval, double duration, boolean benableItemGravity,
+                         boolean bShowLinks, boolean bShowOrbit, boolean bRealTime)  {
+        this.calculationStep = calculationStep;
+        this.refreshInterval = refreshInterval;
+        this.duration = duration;
+        ntfDuration.setData(duration);
+        this.bShowLinks = bShowLinks;
+        this.bShowOrbit = bShowOrbit;
+        this.bRealTime = bRealTime;
+        space.enableItemGravity(benableItemGravity);
+    }
+
+    JMenuItem mITuning = new JMenuItem("Tune Calculations step");
+    JMenuItem mIReadData = new JMenuItem("Read Data From File");
+    JMenuItem mISaveData =new JMenuItem("Save Data to File");
+    JMenuItem mIExit = new JMenuItem("Exit");
+
+    JMenuItem mIDaily = new JMenuItem("Daily objects (m)");
+    JMenuItem mIEarth = new JMenuItem("Earth and Environment (m)");
+    JMenuItem mIAstronomical = new JMenuItem("Astronomical (km)");
+    JMenuItem mIMolecular = new JMenuItem("Molecular (micrometer)");
+
+    JRadioButtonMenuItem rIDaily = new JRadioButtonMenuItem("Daily objects (m)");
+    JRadioButtonMenuItem rIEarth = new JRadioButtonMenuItem("Earth and Environment (m)");
+    JRadioButtonMenuItem rIAstronomical = new JRadioButtonMenuItem("Astronomical (km)");
+    JRadioButtonMenuItem rIMolecular = new JRadioButtonMenuItem("Molecular (micrometer)");
+    JComboBox<DefaultScheme> cbSchemes;
+
+    JMenu mScheme;
+    JMenuItem mIScheme;
+
+
+
+/*
+       BLANKSPACE("Blank Set as Space Objects"),
+        ASTRONOMICAL("Astronomical (km)"),
+        GLOBAL("Earth and Environment (m)"),
+        DAILY("Daily objects (mm)"),
+        MOLECULAR("Molecular (micrometer)");
+
+ */
+
+    JMenuBar getMenuBar() {
+        MenuListener ml = new MenuListener();
+        mIExit.addActionListener(ml);
+        mIReadData.addActionListener(ml);
+        mISaveData.addActionListener(ml);
+        mIExit.addActionListener(ml);
+        mITuning.addActionListener(ml);
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        fileMenu.add(mITuning);
+        fileMenu.addSeparator();
+        fileMenu.add(mIReadData);
+        fileMenu.add(mISaveData);
+        fileMenu.addSeparator();
+        fileMenu.add(mIExit);
+        menuBar.add(fileMenu);
+        JMenu mSpaceSize = new JMenu("Space Size");
+        ButtonGroup rbGroup = new ButtonGroup();
+        rbGroup.add(rIAstronomical);
+        rIAstronomical.addActionListener(ml);
+        rIEarth.addActionListener(ml);
+        rIDaily.addActionListener(ml);
+        rIMolecular.addActionListener(ml);
+        rbGroup.add(rIEarth);
+        rbGroup.add(rIDaily);
+        rbGroup.add(rIMolecular);
+        rIEarth.setEnabled(false);
+        rIMolecular.setEnabled(false);
+        mSpaceSize.add(rIAstronomical);
+        mSpaceSize.add(rIEarth);
+        mSpaceSize.add(rIDaily);
+        mSpaceSize.add(rIMolecular);
+        menuBar.add(mSpaceSize);
+        loadDefaultSchemes();
+        mScheme = new JMenu("Select Scheme");
+        mIScheme = new JMenuItem("Select");
+        mIScheme.addActionListener(ml);
+        mScheme.add(mIScheme);
+        menuBar.add(mScheme);
+        return menuBar;
+    }
+
+    Vector<DefaultScheme> defaultSchemes;
+
+    void loadDefaultSchemes() {
+        defaultSchemes = new Vector<DefaultScheme>();
+        try {
+            for (String schemeName: schemesList)
+                defaultSchemes.add((DefaultScheme)Class.forName("schemes." + schemeName).newInstance());
+            cbSchemes = new JComboBox<DefaultScheme>(defaultSchemes);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void selectScheme() {
+        SchemeSelector selector = new SchemeSelector();
+        selector.setLocation(300, 300);
+        selector.setVisible(true);
+        int selIndex = cbSchemes.getSelectedIndex();
+        space.clearSpace();
+        DefaultScheme scheme = defaultSchemes.get(selIndex);
+        scheme.getScheme(mainF, space);
+        setSpaceSize(scheme.getSpaceSize());
+        proceedToItemList(true);
+    }
+
+    class SchemeSelector extends JDialog {
+        JButton jbProceed = new JButton("Proceed");
+        JButton jbCancel = new JButton("Cancel");
+        SchemeSelector() {
+            setModal(true);
+            setTitle("Selecting from Available Schemes");
+            jbProceed.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(false);
+                }
+            });
+            jbCancel.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(false);
+                }
+            });
+            MultiPairColPanel jp = new MultiPairColPanel(150, 150);
+            jp.addItemPair("Select Scheme", cbSchemes);
+            jp.addBlank();
+            jp.addItemPair(jbCancel, jbProceed);
+            add(jp);
+            pack();
+        }
     }
 
     JComponent jcItemList;
@@ -207,14 +366,14 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         JPanel jp = new JPanel();
         ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.######", "Duration");
         MyListener listener = new MyListener();
-        pbReadData.addActionListener(listener);
-        pbSaveData.addActionListener(listener);
+//        pbReadData.addActionListener(listener);
+//        pbSaveData.addActionListener(listener);
         pbStart.addActionListener(listener);
         JPanel durPanel = new JPanel(new BorderLayout());
         durPanel.add(new JLabel("Duration in h"), BorderLayout.WEST);
         durPanel.add(ntfDuration, BorderLayout.EAST);
-        jp.add(pbReadData);
-        jp.add(pbSaveData);
+//        jp.add(pbReadData);
+//        jp.add(pbSaveData);
         jp.add(durPanel);
         jp.add(pbStart);
         return jp;
@@ -267,7 +426,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         runIt = false;
     }
 
-    double refreshInterval = 60; // sec
+    public double refreshInterval = 60; // sec
 
     public void setRefreshInterval(double interval) {
 //        log.info("refreshInterval changed from "  + refreshInterval + " to " + interval);
@@ -675,19 +834,72 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     break aBlock;
                 }
 
-                if (src == pbSaveData) {
-                    saveDataToFile();
-                    break aBlock;
-                }
-
-                if (src == pbReadData) {
-                    if (getDataFromFile())
-                        proceedToItemList(true);
-                    break aBlock;
-                }
-
+//                if (src == pbSaveData) {
+//                    saveDataToFile();
+//                    break aBlock;
+//                }
+//
+//                if (src == pbReadData) {
+//                    if (getDataFromFile())
+//                        proceedToItemList(true);
+//                    break aBlock;
+//                }
             }
         }
+    }
+
+    class MenuListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Object src = e.getSource();
+            bBlock: {
+                if (src == mIScheme) {
+                    selectScheme();
+                    break bBlock;
+                }
+                if (src == mISaveData) {
+                    saveDataToFile();
+                    break bBlock;
+                }
+                if (src == mIReadData) {
+                    if (getDataFromFile())
+                        proceedToItemList(true);
+                    break bBlock;
+                }
+                if (src == mIExit) {
+                    mainF.setVisible(false);
+                    break bBlock;
+                }
+                if (src == rIAstronomical) {
+                    setSpaceSize(SpaceSize.ASTRONOMICAL);
+                    showMessage("Astronomical Selected");
+//                    setTimingValues(10, 10 * 200, 200000, true, false, true, false);
+//                    spSize = SpaceSize.ASTRONOMICAL;
+                    break bBlock;
+                }
+                if (src == rIDaily) {
+                    setSpaceSize(SpaceSize.DAILY);
+                    showMessage("Daily Selected");
+//                    setTimingValues(0.002, 0.002 * 200, 200, false, true, false, true);
+//                    spSize = SpaceSize.DAILY;
+                    break bBlock;
+                }
+            }
+        }
+    }
+
+    public void setSpaceSize(SpaceSize size) {
+        switch(size) {
+            case DAILY:
+                setTimingValues(0.002, 0.02, 200, false, true, false, true);
+                rIDaily.setSelected(true);
+                break;
+            case ASTRONOMICAL:
+                setTimingValues(10, 10 * 200, 200000, true, false, true, false);
+                rIAstronomical.setSelected(true);
+                break;
+        }
+        spSize = size;
     }
 
     void modifyJTextEdit() {

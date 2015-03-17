@@ -295,6 +295,11 @@ public class Surface extends Item {
         switch(colType) {
             case NAME:
                 return name;
+            case DETAILS:
+                return "Surface with P1: " + point1.dataInCSV() +
+                        ",    P2: " + point2.dataInCSV() +
+                        ",    P3: " + point3.dataInCSV() +
+                        ",  CollisionLossFactor: " + collisionLossFactor;
         }
         return "N/A";
     }
