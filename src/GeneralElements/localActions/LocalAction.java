@@ -129,6 +129,7 @@ public abstract class LocalAction implements Cloneable {
         this.item = item;
     }
 
+    // @TODO getLocalActions() for future. At present FluidResistance etc. are handled as Global
     static public LocalAction getLocalAction(DarkMatter item, String xmlStr) throws Exception{
         LocalAction action = null;
         ValAndPos vp;
@@ -136,15 +137,15 @@ public abstract class LocalAction implements Cloneable {
         Type nowType = Type.getEnum(vp.val);
         if (nowType != null) {
             switch (nowType) {
-                case FLUIDRESISTANCE:
-                    action = new V2Resistance(item, xmlStr);
-                    break;
-                case FLUIDFRICTION:
-                    action = new VResistance(item, xmlStr);
-                    break;
-                case FIXEDACCELERATION:
-                    action = new FixedAcceleration(item, xmlStr);
-                    break;
+//                case FLUIDRESISTANCE:
+//                    action = new V2Resistance(item, xmlStr);
+//                    break;
+//                case FLUIDFRICTION:
+//                    action = new VResistance(item, xmlStr);
+//                    break;
+//                case FIXEDACCELERATION:
+//                    action = new FixedAcceleration(item, xmlStr);
+//                    break;
             }
         }
         return action;

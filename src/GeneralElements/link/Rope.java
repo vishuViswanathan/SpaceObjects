@@ -15,23 +15,17 @@ public class Rope  extends LinkWithMass  {
     double ropeDia;
     static double defRopeDia = 0.0157079632679489;
 
-//    public Rope(DarkMatter item1, DarkMatter item2, double freeLen, double massPerM, double eExpansion, int nElements) {
-//        super(item1, item2, freeLen, massPerM, eExpansion, nElements);
-//    }
-//
-//    public Rope(DarkMatter item1, DarkMatter item2, double freeLen, double massPerM, double ropeDia,
-//                double eExpansion, int nElements) {
-//        super(item1, item2, freeLen, massPerM, eExpansion, nElements);
-//        this.ropeDia = ropeDia;
-//        setAreas();
-//    }
+    public Rope(DarkMatter item1, DarkMatter item2, double initialLenFactor, int nElements,
+                double ropeDia, double massPerM, double eExpansion) {
+        super(item1, item2, initialLenFactor, nElements, massPerM, eExpansion);
+        this.ropeDia = ropeDia;
+        setAreas();
+    }
 
     public Rope(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eExpansion) {
         super(item1, item2, initialLenFactor, eExpansion);
         this.ropeDia = defRopeDia;
         setAreas();
-//        addLocalAction(new FixedAcceleration());
-//        addLocalAction(new V2Resistance());
     }
 
     public Rope(DarkMatter item1, DarkMatter item2) {
@@ -68,23 +62,6 @@ public class Rope  extends LinkWithMass  {
         return outerP;
     }
 
-//    @Override
-//    public JPanel detailsPanel() {
-//        MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
-//        nteCompression = new NumberTextField(null, eCompression, 6, false, 1, 1e10, "#,##0", "Elasticity (Force in Newton for 100%)");
-//        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 02, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
-//        ntnElements = new NumberTextField(null, nElements, 6, true, 1, 100, "#,##0", "Subdivided Rope elements");
-//        ntRopeDia = new NumberTextField(null, ropeDia, 6, false, 0.001, 5, "#,##0.000", "Rope Diameter (m)");
-//        ntMassPerM = new NumberTextField(null, massPerM, 6, false, 0.001, 1000, "#,##0.000", "Mass per Unit Length (kg/m)");
-//        outerP.addItemPair(ntLenFactor);
-//        outerP.addItemPair(ntnElements);
-//        outerP.addItemPair(nteCompression);
-//        outerP.addItemPair(ntRopeDia);
-//        outerP.addItemPair(ntMassPerM);
-//        uiReady = true;
-//        return outerP;
-//    }
-
     @Override
     public boolean lwmTakeDataFromUI() {
         boolean  retVal = true;
@@ -99,7 +76,6 @@ public class Rope  extends LinkWithMass  {
             noteBasicData(massPerM, nElements);
             elementsSet = false;
             setAreas();
-//            setAllElements();
         }
         else
             retVal = false;
@@ -118,10 +94,10 @@ public class Rope  extends LinkWithMass  {
             ValAndPos vp;
             vp = XMLmv.getTag(xmlStr, "ropeDia", 0);
             ropeDia = Double.valueOf(vp.val);
+            setAreas(); // @TODO this was not there before 20150321
             retVal = true;
         }
          return retVal;
     }
-
 }
 

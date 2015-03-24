@@ -305,6 +305,20 @@ public class ItemSpace {
         }
     }
 
+    public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp,RenderingAttributes itemAttrib,
+                                  RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
+        for (Item it: allItems) {
+            if (!it.boundaryItem) {
+                ItemGraphic itemG = it.createItemGraphic(grp, orbitAttrib);
+                itemG.setItemDisplayAttribute(itemAttrib);
+                itemGraphics.add(itemG);
+            }
+        }
+        for (ItemLink inf: allItemLinks) {
+            inf.addLinksDisplay(grp, linkAttrib);
+//            inf.prepareEvaluator();
+        }
+    }
 
     public void initForces() {
         for (Item i: allItems)

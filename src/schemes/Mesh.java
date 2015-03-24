@@ -21,8 +21,8 @@ public class Mesh implements DefaultScheme {
     double zLen = 10;
     double ptMass = 0.1;
     double ptDia = 0.01;
-    double eX = 2000;
-    double eZ = 2000;
+    double eX = 20000;
+    double eZ = 20000;
     double resistance = 100;
     double initialLenFactor = 1.00;
 
@@ -78,11 +78,15 @@ public class Mesh implements DefaultScheme {
                     item2 = allNodes[x + 1][z];
                     // springs with free compression like a rope
                     link = new ItemLink(item1, item2, new Spring(item1, item2, initialLenFactor, 0, eX), space);
+//                    Rope r = new Rope(item1, item2, 1, 2, 0.001, 0.01, 200000);
+//                    link = new ItemLink(item1, item2, r, space);
                     space.addItemLink(link);
                 }
                 if (z < zPoints) {
                     item2 = allNodes[x][z + 1];
                     link = new ItemLink(item1, item2, new Spring(item1, item2, initialLenFactor, 0, eZ), space);
+//                    Rope r = new Rope(item1, item2, 1, 2, 0.001, 0.01, 200000);
+//                    link = new ItemLink(item1, item2, r, space);
                     space.addItemLink(link);
                 }
             }

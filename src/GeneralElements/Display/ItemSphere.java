@@ -5,10 +5,7 @@ import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.image.TextureLoader;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Material;
-import javax.media.j3d.Texture;
-import javax.media.j3d.TextureAttributes;
+import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Color4f;
 import java.awt.*;
@@ -18,11 +15,12 @@ import java.awt.*;
  */
 public class ItemSphere extends Sphere {
     public Item planet;
+    Appearance ap;
     public ItemSphere(Item object) {
         super(object.getDiaFloat() / 2,
                 (Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS), 48);
         this.planet = object;
-        Appearance ap = new Appearance();
+        ap = new Appearance();
         if (planet.imageName != null) {
             TextureLoader loader = new TextureLoader("images/" + planet.imageName,
                     "LUMINANCE", new Container());
@@ -54,6 +52,10 @@ public class ItemSphere extends Sphere {
         ap.setMaterial(blueMat);
         setAppearance(ap);
         setPickable(true);
+    }
+
+    public void setRenderingAttribute(RenderingAttributes renderingAttribute) {
+        ap.setRenderingAttributes(renderingAttribute);
     }
 
 }

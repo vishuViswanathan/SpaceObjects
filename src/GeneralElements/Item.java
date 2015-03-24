@@ -555,6 +555,10 @@ public class Item extends DarkMatter {
         return itemG;
     }
 
+    public void setItemDisplayAttribute(RenderingAttributes itemAttribute) {
+        itemGraphic.get().setItemDisplayAttribute(itemAttribute);
+    }
+
     public void attachPlatform(ViewingPlatform platform) {
         try {
             itemGraphic.get().attachPlatform(platform);

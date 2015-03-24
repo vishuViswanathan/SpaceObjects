@@ -40,6 +40,7 @@ public class ItemGraphic {
     }
 
 
+
     public void setScale (double scale) {
         Transform3D tr = new Transform3D();
         tgPlanet.getTransform(tr);
@@ -62,6 +63,8 @@ public class ItemGraphic {
             positionTrGrp.removeChild(attachedPlatform);
         bPlatformAttached = false;
     }
+
+    ItemSphere planet;
 
     private void createSphereAndOrbitPath(RenderingAttributes orbitAtrib) throws Exception {
         positionTrGrp = new TransformGroup();
@@ -88,7 +91,7 @@ public class ItemGraphic {
         trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         positionTrGrp.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        ItemSphere planet = new ItemSphere(item);
+        planet = new ItemSphere(item);
         tgPlanet.addChild(planet);
         trgRotation.addChild(tgPlanet);
         Light l = getLightIfEnabled();
@@ -109,6 +112,10 @@ public class ItemGraphic {
                 ptArr = onePtArr;
         }
         updateOrbitAndPos(0);
+    }
+
+    public void setItemDisplayAttribute(RenderingAttributes attribute) {
+        planet.setRenderingAttribute(attribute);
     }
 
     PointArrayFIFO onePointArray(int vertexCount, int onceIn, int vertexFormat, Color3f color) {

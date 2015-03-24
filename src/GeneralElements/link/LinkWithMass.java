@@ -31,34 +31,22 @@ public class LinkWithMass extends InfluenceDef  {
     Vector<LocalAction> localActions;
     boolean elementsSet = false;
 
-//    public LinkWithMass(DarkMatter item1, DarkMatter item2, double freeLen, double massPerM, double eExpansion, int nElements) {
-//        type = Type.ROPE;
-//        this.item1 = item1;
-//        this.item2 = item2;
-//        this.freeLen = freeLen;
-//        this.eExpansion = eExpansion;
-//        noteBasicData(massPerM, nElements);
-//        localActions = new Vector<LocalAction>();
-//    }
-//
-//    public LinkWithMass(DarkMatter item1, DarkMatter item2, double massPerM, double eExpansion, int nElements) {
-//        super(item1, item2, 1, eExpansion, eExpansion);
-//        noteBasicData(massPerM, nElements);
-//    }
-
     static int defElements = 50;
     static double defE = 1000;
     static double defMassPerM = 0.1;
+
+    public LinkWithMass(DarkMatter item1, DarkMatter item2, double initialLenFactor, int nElements,
+                        double massPerM, double eExpansion) {
+        super(item1, item2, initialLenFactor, eExpansion, eExpansion);
+        noteBasicData(defMassPerM, defElements);
+        elementsSet = false;
+    }
 
     public LinkWithMass(DarkMatter item1, DarkMatter item2, double initialLenFactor, double eExpansion) {
         super(item1, item2, initialLenFactor, eExpansion, eExpansion);
         noteBasicData(defMassPerM, defElements);
         elementsSet = false;
     }
-
-//    public LinkWithMass(DarkMatter item1, DarkMatter item2) {
-//        super(item1, item2, 1, defE, defElements);
-//    }
 
     void noteBasicData(double massPerM, int nElements) {
         type = Type.ROPE;
@@ -72,18 +60,7 @@ public class LinkWithMass extends InfluenceDef  {
 
     public void addLocalAction(LocalAction action) {
         localActions.add(action);
-//        for (DarkMatter mat:massElements)
-//            mat.addLocalAction((LocalAction)action.clone());
     }
-
-//    public void addLocalAction(String xmlStr) {
-//        try {
-//            for (DarkMatter mat:massElements)
-//                mat.addLocalAction(LocalAction.getLocalAction(mat, xmlStr));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public void setStartConditions() {
         for (DarkMatter mat:massElements)

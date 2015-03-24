@@ -159,6 +159,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     NumberLabel lUpdateSpeed;
     NumberLabel lSpeedSet;
     //    NumberLabel lCalculStep;
+    JCheckBox chkBShowItems;
     JCheckBox chkBshowOrbit;
     JCheckBox chkBshowLinks;
     JCheckBox chkBrealTime;
@@ -215,6 +216,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         menuP.add(nowTp, gbc);
         gbc.gridy++;
         menuP.add(getPlanetSizeBar(), gbc);
+        gbc.gridy++;
+        menuP.add(showItemsCB(), gbc);
         gbc.gridy++;
         menuP.add(getSpeedSelector(), gbc);
         gbc.gridy++;
@@ -365,6 +368,20 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return chkBshowLinks;
     }
 
+        JCheckBox showItemsCB() {
+        chkBShowItems = new JCheckBox("Show Items", true);
+        chkBShowItems.setSelected(controller.bShowItems);
+        chkBShowItems.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                boolean bSel = chkBShowItems.isSelected();
+                itemAttrib.setVisible(bSel);
+            }
+        });
+        return chkBShowItems;
+    }
+
+
     JCheckBox showRealTimeCB() {
         chkBrealTime = new JCheckBox("Real Time", true);
         chkBrealTime.setSelected(controller.bRealTime);
@@ -419,18 +436,22 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     RenderingAttributes orbitAttrib;
     RenderingAttributes linkAttrib;
+    RenderingAttributes itemAttrib;
 
     BranchGroup createSceneGraph() throws Exception{
         BranchGroup brGrpMain = new BranchGroup();
         tgMain = null;
         tgMain = new TransformGroup();
+        itemAttrib = new RenderingAttributes();
+        itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+        itemAttrib.setVisible(controller.bShowItems);
         orbitAttrib = new RenderingAttributes();
         orbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         orbitAttrib.setVisible(controller.bShowOrbit);
         linkAttrib = new RenderingAttributes();
         linkAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         linkAttrib.setVisible(controller.bShowLinks);
-        space.addObjectAndOrbit(itemGraphics, tgMain, orbitAttrib, linkAttrib);
+        space.addObjectAndOrbit(itemGraphics, tgMain, itemAttrib, orbitAttrib, linkAttrib);
         tgMain.addChild(oneAxis(1, 1e13, Color.red));
         tgMain.addChild(oneAxis(2, 1e13, Color.blue));
         tgMain.addChild(oneAxis(3, -1e13, Color.lightGray));

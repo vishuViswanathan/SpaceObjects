@@ -6,8 +6,6 @@ import GeneralElements.ItemSpace;
 import GeneralElements.Surface;
 import GeneralElements.link.ItemLink;
 import GeneralElements.link.Rod;
-import GeneralElements.localActions.FixedAcceleration;
-import GeneralElements.localActions.V2Resistance;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -43,8 +41,9 @@ public class BungeeJumping implements DefaultScheme{
 //                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
                 link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
                 space.addItemLink(link);
-                it.addLocalAction(new FixedAcceleration(it));
-                it.addLocalAction(new V2Resistance(it, resistFactor));            }
+//                it.addLocalAction(new FixedAcceleration(it));
+//                it.addLocalAction(new V2Resistance(it, resistFactor));
+            }
             else
                 it.setbFixedLocation(true);
             lastPos = linkNum;
@@ -53,8 +52,8 @@ public class BungeeJumping implements DefaultScheme{
         it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
         space.addItem(it);
         it.initPosEtc(new Point3d(xPos, -(lastPos + 1) * pitch, 0), new Vector3d(0, 0, 0));
-        it.addLocalAction(new FixedAcceleration(it));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
+//        it.addLocalAction(new FixedAcceleration(it));
+//        it.addLocalAction(new V2Resistance(it, resistFactor));
 //        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
         space.addItemLink(link);
@@ -69,8 +68,8 @@ public class BungeeJumping implements DefaultScheme{
 //            link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
             link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
             space.addItemLink(link);
-            it.addLocalAction(new FixedAcceleration(it));
-            it.addLocalAction(new V2Resistance(it, resistFactor));
+//            it.addLocalAction(new FixedAcceleration(it));
+//            it.addLocalAction(new V2Resistance(it, resistFactor));
 //            lastPos = linkNum;
             lastItem = it;
             yPos += pitch; // going up
@@ -84,8 +83,8 @@ public class BungeeJumping implements DefaultScheme{
         space.addItem(it);
 //        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-        it.addLocalAction(new FixedAcceleration(it));
-        it.addLocalAction(new V2Resistance(it, resistFactor));
+//        it.addLocalAction(new FixedAcceleration(it));
+//        it.addLocalAction(new V2Resistance(it, resistFactor));
         space.addItemLink(link);
         return true;
     }

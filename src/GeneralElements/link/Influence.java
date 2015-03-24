@@ -1,7 +1,6 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
-import GeneralElements.localActions.FixedAcceleration;
 import mvUtils.mvXML.XMLmv;
 
 import javax.media.j3d.Group;
@@ -126,7 +125,7 @@ public class Influence {
                 break;
             case ROPE:
                 Rope rope = new Rope(dm1, dm2);
-                rope.addLocalAction(new FixedAcceleration());
+//                rope.addLocalAction(new FixedAcceleration());
 //                rope.addLocalAction(new V2Resistance());
                 inf = rope;
                 break;

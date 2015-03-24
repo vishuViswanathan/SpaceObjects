@@ -5,8 +5,6 @@ import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.ItemLink;
 import GeneralElements.link.Rod;
-import GeneralElements.localActions.FixedAcceleration;
-import GeneralElements.localActions.V2Resistance;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -45,8 +43,8 @@ public class MultiPendulum implements DefaultScheme {
             space.addItem(itBall);
             y = - Math.sqrt(Math.pow(len, 2) - Math.pow(x, 2));
             itBall.initPosEtc(new Point3d(x, y, z), new Vector3d(0, 0, 0));
-            itBall.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), 9.81));
-            itBall.addLocalAction(new V2Resistance(resistance));
+//            itBall.addLocalAction(new FixedAcceleration(new Vector3d(0, -1, 0), 9.81));
+//            itBall.addLocalAction(new V2Resistance(resistance));
 
 //            link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, len, k, true) , space);
             link = new ItemLink(itHook, itBall, new Rod(itHook, itBall, 1, e) , space);

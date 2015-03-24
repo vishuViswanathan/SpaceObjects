@@ -76,6 +76,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                             "MultiPendulum",
                             "PlanetsAndMoons"
     };
+
+    ItemMovementsApp mainApp;
     public SpaceSize spSize;
     JComboBox cbSpaceSize = new JComboBox(SpaceSize.values());
     ItemSpace space;
@@ -90,9 +92,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public double calculationStep =2; //in seconds
     public boolean bShowOrbit = false;
     public boolean bShowLinks = false;
+    public boolean bShowItems = true;
     public static Logger log;
 
     public ItemMovementsApp() {
+        mainApp = this;
     }
 
     public ItemMovementsApp(boolean asApp) {
@@ -123,66 +127,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         bShowOrbit = false;
         bShowLinks = true;
         bRealTime = true;
-
-//        cbSpaceSize.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                spSize = (SpaceSize) cbSpaceSize.getSelectedItem();
-//                switch (spSize) {
-//                    case ASTRONOMICAL:
-//                        duration = 200000;
-//                        calculationStep = 10; // s
-//                        refreshInterval = 100 * calculationStep;
-//                        DefaultScheme  scheme = new PlanetsAndMoons();
-//                        if (scheme.getScheme(mainF, space)) {
-//                            dateAndJDN = new DateAndJDN(scheme.startJDN());
-////                        if (getPlanetsFromDB()) {
-////                            space.setGlobalLinksAndActions();
-//                            space.enableItemGravity(true);
-//                            proceedToItemList(false);
-//                        }
-//                        bShowOrbit = true;
-//                        bShowLinks = false;
-//                        break;
-//                    case BLANKSPACE:
-//                        duration = 200000;
-//                        calculationStep = 0.001; // s
-//                        refreshInterval = 200 * calculationStep;
-//                        space.enableItemGravity(true);
-//                        proceedToItemList(false);
-//                        bShowOrbit = true;
-//                        bShowLinks = false;
-//                        break;
-//                    case BLANK:
-//                        duration = 200;
-//                        calculationStep = 0.0002; // was 0.000002;
-//                        refreshInterval = 200 * calculationStep; // was 20000
-//                        space.enableItemGravity(false);
-//                        proceedToItemList(false);
-//                        bShowOrbit = false;
-//                        bShowLinks = true;
-//                        bRealTime = true;
-//                        break;
-//                    case DAILY:
-//                        duration = 200;
-//                        calculationStep = 0.0002; // was 0.000002;
-//                        refreshInterval = 200 * calculationStep; // was 20000
-//                        space.enableItemGravity(false);
-////                        if ((new ChainWithBall()).getScheme(mainF, space)) {
-////                        if ((new MultiPendulum()).getScheme(mainF, space))  {
-////                        if ((new BungeeJumping()).getScheme(mainF, space)) {
-////                        if ((new BungeeJumpingWithRope()).getScheme(mainF, space)) {
-//                        if ((new Mesh()).getScheme(mainF, space)) {
-////                        if ((new BallAndFloor()).getScheme(mainF, space)) {
-//                            proceedToItemList(false);
-//                        }
-//                        bShowOrbit = false;
-//                        bShowLinks = true;
-//                        bRealTime = true;
-//                        break;
-//                }
-//            }
-//        });
+        bShowItems = true;
         mainF.pack();
         mainF.setVisible(true);
     }
@@ -193,10 +138,63 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         this.refreshInterval = refreshInterval;
         this.duration = duration;
         ntfDuration.setData(duration);
+        bShowItems = true;
         this.bShowLinks = bShowLinks;
         this.bShowOrbit = bShowOrbit;
         this.bRealTime = bRealTime;
         space.enableItemGravity(benableItemGravity);
+    }
+
+    class TimingValuesDlg extends JDialog {
+        NumberTextField ntCalculStep;
+        NumberTextField ntUpdate; // multiplier on calculation step;
+        JButton jbOk = new JButton("Ok");
+        JButton jbCancel = new JButton("Cancel");
+        double upDateMultiplier;
+        TimingValuesDlg() {
+            setModal(true);
+            jbOk.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (noteValues())
+                        setVisible(false);
+                }
+            });
+            jbCancel.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(false);
+                }
+            });
+            upDateMultiplier = refreshInterval / calculationStep;
+            ntCalculStep = new NumberTextField(mainApp, calculationStep, 6, false, 0.0000001, 10000, "0.000E00",
+                    "Calculation step in seconds");
+            ntUpdate = new NumberTextField(mainApp, upDateMultiplier, 6, false, 1, 10000, "#,###",
+                    "Update once in this many steps");
+            MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
+            jp.addItemPair(ntCalculStep);
+            jp.addItemPair(ntUpdate);
+            jp.addBlank();
+            jp.addItemPair(jbCancel, jbOk);
+            add(jp);
+            pack();
+        }
+
+        boolean noteValues() {
+            boolean retVal = false;
+            if (ntCalculStep.dataOK() && ntUpdate.dataOK()) {
+                calculationStep = ntCalculStep.getData();
+                refreshInterval = calculationStep * ntUpdate.getData();
+                retVal = true;
+            }
+            return retVal;
+        }
+    }
+
+    void getTimingValues() {
+        TimingValuesDlg dlg = new TimingValuesDlg();
+        dlg.setLocation(300, 300);
+        dlg.setVisible(true);
     }
 
     JMenuItem mITuning = new JMenuItem("Tune Calculations step");
@@ -217,17 +215,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     JMenu mScheme;
     JMenuItem mIScheme;
-
-
-
-/*
-       BLANKSPACE("Blank Set as Space Objects"),
-        ASTRONOMICAL("Astronomical (km)"),
-        GLOBAL("Earth and Environment (m)"),
-        DAILY("Daily objects (mm)"),
-        MOLECULAR("Molecular (micrometer)");
-
- */
 
     JMenuBar getMenuBar() {
         MenuListener ml = new MenuListener();
@@ -882,6 +869,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     showMessage("Daily Selected");
 //                    setTimingValues(0.002, 0.002 * 200, 200, false, true, false, true);
 //                    spSize = SpaceSize.DAILY;
+                    break bBlock;
+                }
+                if (src == mITuning) {
+                    getTimingValues();
                     break bBlock;
                 }
             }
