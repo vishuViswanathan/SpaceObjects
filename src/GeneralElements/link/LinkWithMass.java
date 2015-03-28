@@ -38,7 +38,7 @@ public class LinkWithMass extends InfluenceDef  {
     public LinkWithMass(DarkMatter item1, DarkMatter item2, double initialLenFactor, int nElements,
                         double massPerM, double eExpansion) {
         super(item1, item2, initialLenFactor, eExpansion, eExpansion);
-        noteBasicData(defMassPerM, defElements);
+        noteBasicData(massPerM, nElements);
         elementsSet = false;
     }
 

@@ -4,7 +4,7 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.link.ItemLink;
-import GeneralElements.link.Spring;
+import GeneralElements.link.Rope;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -77,16 +77,16 @@ public class Mesh implements DefaultScheme {
                 if (x < xPoints) {
                     item2 = allNodes[x + 1][z];
                     // springs with free compression like a rope
-                    link = new ItemLink(item1, item2, new Spring(item1, item2, initialLenFactor, 0, eX), space);
-//                    Rope r = new Rope(item1, item2, 1, 2, 0.001, 0.01, 200000);
-//                    link = new ItemLink(item1, item2, r, space);
+//                    link = new ItemLink(item1, item2, new Spring(item1, item2, initialLenFactor, 0, eX), space);
+                    Rope r = new Rope(item1, item2, 1, 2, 0.001, 0.01, 200000);
+                    link = new ItemLink(item1, item2, r, space);
                     space.addItemLink(link);
                 }
                 if (z < zPoints) {
                     item2 = allNodes[x][z + 1];
-                    link = new ItemLink(item1, item2, new Spring(item1, item2, initialLenFactor, 0, eZ), space);
-//                    Rope r = new Rope(item1, item2, 1, 2, 0.001, 0.01, 200000);
-//                    link = new ItemLink(item1, item2, r, space);
+//                    link = new ItemLink(item1, item2, new Spring(item1, item2, initialLenFactor, 0, eZ), space);
+                    Rope r = new Rope(item1, item2, 1, 2, 0.001, 0.01, 200000);
+                    link = new ItemLink(item1, item2, r, space);
                     space.addItemLink(link);
                 }
             }
