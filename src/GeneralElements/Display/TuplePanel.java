@@ -13,17 +13,42 @@ import java.awt.*;
  */
 public class TuplePanel extends JPanel {
     InputControl control;
+    String title;
     Vector3d vec3d;
     NumberTextField ntX, ntY, ntZ;
     public TuplePanel (InputControl control,  Tuple3d val3d, int size, double min, double max, String fmtStr, String title) {
         super(new BorderLayout());
+        this.title = title;
+        this.control = control;
         vec3d = new Vector3d(val3d);
+        init(size, min, max, fmtStr);
+//        ntX = new NumberTextField(control, vec3d.x, size, false, min, max, fmtStr, "X " + title);
+//        ntY = new NumberTextField(control, vec3d.y, size, false, min, max, fmtStr, "Y " + title);
+//        ntZ = new NumberTextField(control, vec3d.z, size, false, min, max, fmtStr, "Z " + title);
+//        add(ntX, BorderLayout.WEST);
+//        add(ntY, BorderLayout.CENTER);
+//        add(ntZ, BorderLayout.EAST);
+    }
+
+    public TuplePanel (InputControl control, double min, double max, String fmtStr, String title) {
+        super(new BorderLayout());
+        this.title = title;
+        this.control = control;
+        vec3d = new Vector3d();
+        init(6, min, max, fmtStr);
+    }
+
+    void init(int size, double min, double max, String fmtStr) {
         ntX = new NumberTextField(control, vec3d.x, size, false, min, max, fmtStr, "X " + title);
         ntY = new NumberTextField(control, vec3d.y, size, false, min, max, fmtStr, "Y " + title);
         ntZ = new NumberTextField(control, vec3d.z, size, false, min, max, fmtStr, "Z " + title);
         add(ntX, BorderLayout.WEST);
         add(ntY, BorderLayout.CENTER);
         add(ntZ, BorderLayout.EAST);
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public Tuple3d getTuple3d() {

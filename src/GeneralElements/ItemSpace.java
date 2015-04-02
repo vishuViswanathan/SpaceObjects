@@ -327,11 +327,11 @@ public class ItemSpace {
             link.setLocalForces();
     }
 
-    void setItemStartConditions() {
+    void setItemStartConditions(double duration) {
         for (Item i: allItems)
-            i.setStartConditions();
+            i.setStartConditions(duration);
         for (ItemLink link:allItemLinks)
-            link.setStartConditions();
+            link.setStartConditions(duration);
     }
 
     void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
@@ -343,7 +343,7 @@ public class ItemSpace {
 
     boolean evalInfluence(double deltaT, double nowT) throws Exception  {
         boolean ok = true;
-        setItemStartConditions();
+        setItemStartConditions(deltaT);
         for (int t = 0; t < 5; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)

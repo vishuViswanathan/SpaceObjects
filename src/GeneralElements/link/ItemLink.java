@@ -123,7 +123,7 @@ public class ItemLink implements EvalOnce {
         inf.updatePosAndVel(deltaT, nowT, bFinal);
     }
 
-    public void setStartConditions() {
+    public void setStartConditions(double duration) {
         inf.setStartConditions();
     }
 

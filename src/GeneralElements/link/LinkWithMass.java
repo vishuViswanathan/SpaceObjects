@@ -62,9 +62,9 @@ public class LinkWithMass extends InfluenceDef  {
         localActions.add(action);
     }
 
-    public void setStartConditions() {
+    public void setStartConditions(double duration) {
         for (DarkMatter mat:massElements)
-            mat.setStartConditions();
+            mat.setStartConditions(duration);
     }
 
     public void initStartForces() {

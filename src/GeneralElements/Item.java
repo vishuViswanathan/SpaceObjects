@@ -11,6 +11,7 @@ import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
+import timePlan.FlightPlan;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -103,7 +104,10 @@ public class Item extends DarkMatter {
     double spinPeriod; // in hours
     public String imageName;
     public boolean isLightSrc = false;
-
+    FlightPlan flightPlan;
+    boolean bFlightPlan = false;
+    double rocketFuelLoss = 0;
+    Vector3d rocketForce = new Vector3d();
     JRadioButton rbFixedPos;
 
     public double reportInterval = 0; // sec?  144000;
@@ -133,6 +137,12 @@ public class Item extends DarkMatter {
         this(parent);
         setRadioButtons();
         takeFromXML(xmlStr);
+    }
+
+
+    public void setFlightPlan(FlightPlan flightPlan) { // TODO
+        this.flightPlan = flightPlan;
+        bFlightPlan = true;
     }
 
     static public Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
@@ -518,6 +528,21 @@ public class Item extends DarkMatter {
         zMin = Double.POSITIVE_INFINITY;
     }
 
+    public void evalForceFromBuiltInSource(double duration) { // TODO
+        if (bFlightPlan) {
+            if (flightPlan.isActive()) // TODO this must be done only once in each cycle
+                flightPlan.getForce(rocketForce, duration);
+            else
+                rocketForce.set(0, 0, 0);
+        }
+    }
+
+    @Override
+    public void setStartConditions(double duration) {
+        super.setStartConditions(duration);
+        evalForceFromBuiltInSource(duration);
+    }
+
     void evalMaxMinPos() {
         xMax = Math.max(xMax, status.pos.x);
         yMax = Math.max(yMax, status.pos.y);
@@ -531,6 +556,7 @@ public class Item extends DarkMatter {
     public void setImage(String imageName) {
         this.imageName = imageName;
     }
+
 
      public void initPosEtc(Point3d pos, Vector3d velocity) {
         super.initPosEtc(pos, velocity);
