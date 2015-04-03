@@ -540,7 +540,7 @@ public class Item extends DarkMatter {
     @Override
     public void setStartConditions(double duration) {
         super.setStartConditions(duration);
-        evalForceFromBuiltInSource(duration);
+//        evalForceFromBuiltInSource(duration);
     }
 
     void evalMaxMinPos() {
