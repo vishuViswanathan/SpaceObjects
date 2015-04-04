@@ -882,7 +882,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public void setSpaceSize(SpaceSize size) {
         switch(size) {
             case DAILY:
-                setTimingValues(0.002, 0.02, 200, false, true, false, true);
+                setTimingValues(0.0002, 0.02, 200, false, true, false, true);
                 rIDaily.setSelected(true);
                 break;
             case ASTRONOMICAL:

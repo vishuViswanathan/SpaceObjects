@@ -124,7 +124,7 @@ public class ItemLink implements EvalOnce {
     }
 
     public void setStartConditions(double duration) {
-        inf.setStartConditions();
+        inf.setStartConditions(duration);
     }
 
     static int cellHeight = 30;
@@ -456,7 +456,7 @@ public class ItemLink implements EvalOnce {
     }
 
     public String toString() {
-        return "" + inf + "between " + item1 + " and " + item2;
+        return "Link with " + inf + "between " + item1 + " and " + item2;
     }
 
 }

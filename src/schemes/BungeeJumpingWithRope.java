@@ -42,7 +42,7 @@ public class BungeeJumpingWithRope implements DefaultScheme{
         it.seteCompression(20000);
         space.addItem(it);
 //        LinkWithMass rope = new Rope(lastItem, it, 25, massPerM, ropeDia, e, 50);
-        LinkWithMass rope = new Rope(lastItem, it, 5, e);
+        LinkWithMass rope = new Rope(lastItem, it, (25.0/4), e);
 //       if (rope.setAllElements()) {
             ItemLink link = new ItemLink(lastItem, it, rope, space);
             space.addItemLink(link);
