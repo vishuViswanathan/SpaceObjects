@@ -886,7 +886,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 rIDaily.setSelected(true);
                 break;
             case ASTRONOMICAL:
-                setTimingValues(10, 10 * 200, 200000, true, false, true, false);
+                setTimingValues(10, 10 * 100, 200000, true, false, true, false);
                 rIAstronomical.setSelected(true);
                 break;
         }
