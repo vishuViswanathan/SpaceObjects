@@ -12,9 +12,13 @@ public class RocketEngine implements ForceSource {
     double force; // magnitude
     double fuelExhaustRate; // kg/s of fuel exhaust
 
-    public RocketEngine(double force, double fuelMass, double fuelExhaustRate) {
+    public RocketEngine(double force, double fuelExhaustRate) {
         this.force = force;
         this.fuelExhaustRate = fuelExhaustRate;
+    }
+
+    public RocketEngine clone() {
+        return new RocketEngine(force, fuelExhaustRate);
     }
 
     public double fuelLoss(double duration) {

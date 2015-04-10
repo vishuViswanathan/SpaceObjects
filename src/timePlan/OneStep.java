@@ -3,10 +3,11 @@ package timePlan;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.Item;
-import mvUtils.SmartFormatter;
-import mvUtils.Vector3dMV;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.NumberTextField;
+import mvUtils.display.SmartFormatter;
+import mvUtils.math.Vector3dMV;
 
 import javax.swing.*;
 import javax.vecmath.Vector3d;
@@ -17,15 +18,15 @@ import java.awt.event.ActionListener;
 /**
  * Created by M Viswanathan on 28 Mar 2015
  */
-public class OneStep {
+public class OneStep implements Cloneable {
     static InputControl inpC;
     static TuplePanel directionP;
     static JRadioButton rbRelativeToVelocity;
     static Vector3d direction;
-    boolean staticDataSet = false;
+    static boolean staticDataSet = false;
     FlightPlan flightPlan;
     double duration;
-    Vector3dMV forceDirection; // a unit Vector;
+    Vector3dMV forceDirection = new Vector3dMV(); // a unit Vector;
     boolean bRelativeToVelocity = false;
     Vector3d effectiveForce = new Vector3d();
     ForceSource forceSource;
@@ -65,24 +66,51 @@ public class OneStep {
         }
     }
 
-    public OneStep(double duration, Vector3d forceDirection, ForceSource forceSource, boolean bRelativeToVelocity) {
+    public OneStep(InputControl inpC, double duration, Vector3d forceDirection, ForceSource forceSource, boolean bRelativeToVelocity) {
+        initStatics(inpC);
         this.duration = duration;
-        this.forceDirection = new Vector3dMV(1.0 / forceDirection.length(), forceDirection);
         this.forceSource = forceSource;
         this.bRelativeToVelocity = bRelativeToVelocity;
         if (!bRelativeToVelocity)
             effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
     }
 
-    public OneStep(double duration, Vector3d forceDirection, ForceSource forceSource) {
-        this(duration, forceDirection, forceSource, false);
+    public OneStep(InputControl inpC, double duration, Vector3d forceDirection, ForceSource forceSource) {
+        this(inpC, duration, forceDirection, forceSource, false);
+    }
+
+    public OneStep(InputControl inpC, double duration) {
+        this(inpC, duration, new Vector3d(), new RocketEngine(440, 0));
+    }
+
+    public OneStep clone() {
+        return new OneStep(inpC, duration, new Vector3d(forceDirection), forceSource.clone(), bRelativeToVelocity);
+    }
+
+    public OneStep(OneStep cloneFrom) {
+        this.duration = cloneFrom.duration;
+        this.forceDirection = new Vector3dMV(cloneFrom.forceDirection);
+        this.forceSource = cloneFrom.forceSource;
+        this.bRelativeToVelocity = cloneFrom.bRelativeToVelocity;
+        this.effectiveForce = new Vector3d(cloneFrom.effectiveForce);
+
+    }
+
+    void setEffectiveForce() {
+        if (!bRelativeToVelocity && (forceDirection.length() > 0)) {
+            this.forceDirection = new Vector3dMV(1.0 / forceDirection.length(), forceDirection);
+            effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
+        }
     }
 
     static void initStatics(InputControl inpControl) {
-        inpC = inpControl;
-        direction = new Vector3d();
-        directionP = new TuplePanel(inpC, 10000, 1000, "#,##0.000", "Force Direction");
-        rbRelativeToVelocity = new JRadioButton("Relative to Velocity", true);
+        if (!staticDataSet) {
+            inpC = inpControl;
+            direction = new Vector3d();
+            directionP = new TuplePanel(inpC, -1000, 1000, "#,##0.000", "Force Direction");
+            rbRelativeToVelocity = new JRadioButton("Relative to Velocity", true);
+            staticDataSet = true;
+        }
     }
 
     public void setFlightPlan(FlightPlan flightPlan) {
@@ -108,8 +136,13 @@ public class OneStep {
 
     Item.EditResponse editStep(InputControl inpC, Component c) {
         StepDetails dlg = new StepDetails(inpC, c);
-            dlg.setVisible(true);
-            return dlg.getResponse();
+//        dlg.setSize(400, 400);
+        dlg.setVisible(true);
+        return dlg.getResponse();
+    }
+
+    Item.EditResponse editStep(InputControl inpC) {
+        return editStep(inpC, null);
     }
 
     class StepDetails extends JDialog {
@@ -118,12 +151,12 @@ public class OneStep {
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
         JButton delete = new JButton("Delete");
+        NumberTextField ntDuration;
 
         StepDetails(InputControl inpC, Component c) {
             setModal(true);
             setResizable(false);
             this.inpC = inpC;
-            dbInit();
             if (c == null)
                 setLocation(100, 100);
             else
@@ -132,10 +165,12 @@ public class OneStep {
         }
 
         void dbInit() {
-            directionP.updateTuple(direction);
+            ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
+            directionP.updateTuple(forceDirection);
             rbRelativeToVelocity.setSelected(bRelativeToVelocity);
             JPanel outerP = new JPanel(new BorderLayout());
             MultiPairColPanel jpBasic = new MultiPairColPanel("Flight Plan Step Details");
+            jpBasic.addItemPair(ntDuration);
             jpBasic.addItemPair(directionP.getTitle(), directionP);
             jpBasic.addItemPair("", rbRelativeToVelocity);
             jpBasic.addItem(forceSource.fsDetails());
@@ -150,8 +185,10 @@ public class OneStep {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
                     if (src == ok) {
-                        if (takeDataFromUI())
+                        if (takeDataFromUI()) {
+                            response = Item.EditResponse.CHANGED;
                             closeThisWindow();
+                        }
                     } else if (src == delete) {
                         if (ItemMovementsApp.decide("Deleting Plan Step  ", "Do you want to DELETE this Step?")) {
                             response = Item.EditResponse.DELETE;
@@ -177,9 +214,13 @@ public class OneStep {
 
         boolean takeDataFromUI() {
             boolean retVal = false;
-            direction.set(directionP.getTuple3d());
-            bRelativeToVelocity = rbRelativeToVelocity.isSelected();
-            retVal = forceSource.fsTakeDataFromUI();
+            if (ntDuration.dataOK()) {
+                duration = ntDuration.getData();
+                forceDirection.set(directionP.getTuple3d());
+                bRelativeToVelocity = rbRelativeToVelocity.isSelected();
+                retVal = forceSource.fsTakeDataFromUI();
+                setEffectiveForce();
+            }
             return retVal;
         }
         Item.EditResponse getResponse() {
@@ -226,7 +267,7 @@ public class OneStep {
         SmartFormatter fmt = new SmartFormatter(6);
         switch(colType) {
             case DETAILS:
-                return "Direction " + direction +
+                return "Direction " + forceDirection +
                         ", (" + ((bRelativeToVelocity) ? "Relative to Velocity" : "Absolute") + ")" +
                         ", " + forceSource.dataAsString();
         }

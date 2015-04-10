@@ -5,8 +5,8 @@ import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
-import mvUtils.Vector3dMV;
 import mvUtils.display.InputControl;
+import mvUtils.math.Vector3dMV;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;

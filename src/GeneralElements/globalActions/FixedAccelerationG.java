@@ -1,12 +1,13 @@
 package GeneralElements.globalActions;
+
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.Item;
-import mvUtils.Vector3dMV;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
+import mvUtils.math.Vector3dMV;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 

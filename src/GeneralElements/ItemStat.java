@@ -1,8 +1,9 @@
 package GeneralElements;
 
-import mvUtils.Point3dMV;
-import mvUtils.Vector3dMV;
-import mvUtils.mvXML.*;
+import mvUtils.math.Point3dMV;
+import mvUtils.math.Vector3dMV;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;

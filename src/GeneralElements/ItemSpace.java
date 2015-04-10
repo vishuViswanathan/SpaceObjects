@@ -153,7 +153,7 @@ public class ItemSpace {
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
         sP.setPreferredSize(new Dimension(800, 550));
-        itemTable  = new ItemTable(mainApp, this, allItems);
+        itemTable = new ItemTable(mainApp, this, allItems);
         sP.setViewportView(itemTable.getTable());
         outerP.add(sP, BorderLayout.CENTER);
         JPanel buttPan = new JPanel(new GridLayout(1, 2));

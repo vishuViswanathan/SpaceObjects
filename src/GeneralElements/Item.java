@@ -5,13 +5,14 @@ import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import mvUtils.SmartFormatter;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
+import mvUtils.display.SmartFormatter;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import timePlan.FlightPlan;
+import timePlan.FlightPlanEditor;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -109,13 +110,14 @@ public class Item extends DarkMatter {
     double rocketFuelLoss = 0;
     Vector3d rocketForce = new Vector3d();
     JRadioButton rbFixedPos;
-
+    Item thisItem;
     public double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
 
     public Item(Window parent) {
         super(parent);
         itemType = ItemType.ITEM;
+        thisItem = this;
     }
 
     public Item(Window theParent, String name) {
@@ -126,6 +128,7 @@ public class Item extends DarkMatter {
         super(name, mass, dia, color, parent);
         itemType = ItemType.ITEM;
         setRadioButtons();
+        thisItem = this;
     }
 
     public Item(ItemSpace space, String name, double mass, double dia, Color color, Window parent) {
@@ -139,10 +142,14 @@ public class Item extends DarkMatter {
         takeFromXML(xmlStr);
     }
 
-
     public void setFlightPlan(FlightPlan flightPlan) { // TODO
         this.flightPlan = flightPlan;
         bFlightPlan = true;
+    }
+
+    boolean anyFlightPlan() {
+        bFlightPlan = (flightPlan != null) && (flightPlan.isValid());
+        return bFlightPlan;
     }
 
     static public Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
@@ -353,6 +360,7 @@ public class Item extends DarkMatter {
     public EditResponse editItem(InputControl inpC, Component c) {
         ItemDialog dlg = new ItemDialog(inpC, c);
         dlg.setVisible(true);
+        anyFlightPlan();
         return dlg.getResponse();
     }
 
@@ -370,6 +378,9 @@ public class Item extends DarkMatter {
         JRadioButton rbItemFixedPos;
         TuplePanel itemVelTuplePan;
         JButton itemRelButton = new JButton("Set Relative Data");
+        boolean bFlightPlanCopy;
+        FlightPlan flightPlanCopy;
+        JButton jbFlightPlan = new JButton();
         JButton delete = new JButton("DELETE");
         JButton ok = new JButton("Save");
         JButton cancel = new JButton("Cancel");
@@ -388,6 +399,12 @@ public class Item extends DarkMatter {
                 setLocationRelativeTo(c);
         }
         void dbInit() {
+            bFlightPlanCopy = bFlightPlan;
+            if (bFlightPlanCopy)
+                flightPlanCopy = flightPlan.clone();
+            else
+                flightPlanCopy = new FlightPlan(thisItem, inpC);
+            setFlightPlanButton();
             JPanel outerPan = new JPanel(new BorderLayout());
             MultiPairColPanel jp = new MultiPairColPanel("Data of Item");
             tfItemName = new JTextField(name, 10);
@@ -434,6 +451,8 @@ public class Item extends DarkMatter {
             itemVelTuplePan = new TuplePanel(inpC, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
             jpVel.add(itemVelTuplePan, BorderLayout.CENTER);
             jp.addItemPair("Velocity in m/s", jpVel);
+            jp.addBlank();
+            jp.addItemPair("Flight Plan", jbFlightPlan);
             itemRelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -450,7 +469,10 @@ public class Item extends DarkMatter {
             ActionListener li = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
-                    if (src == ok) {
+                    if (src == jbFlightPlan) {
+                        getFlightPlan();
+                    }
+                    else if (src == ok) {
                         if (takeValuesFromUI())
                             closeThisWindow();
                     }
@@ -474,6 +496,7 @@ public class Item extends DarkMatter {
             delete.addActionListener(li);
             ok.addActionListener(li);
             cancel.addActionListener(li);
+            jbFlightPlan.addActionListener(li);
             JPanel buttPanel = new JPanel(new BorderLayout());
             buttPanel.add(delete, BorderLayout.WEST);
             buttPanel.add(cancel, BorderLayout.CENTER);
@@ -481,6 +504,15 @@ public class Item extends DarkMatter {
             outerPan.add(buttPanel, BorderLayout.SOUTH);
             add(outerPan);
             pack();
+        }
+
+        void getFlightPlan() {
+            FlightPlanEditor flightPlanEditor = new FlightPlanEditor(space);
+            flightPlanEditor.editPlan(flightPlanCopy);
+        }
+
+        void setFlightPlanButton() {
+            jbFlightPlan.setText((flightPlanCopy.isValid()) ? "Edit Flight Plan" : "Add Flight Plan");
         }
 
         EditResponse getResponse() {
@@ -497,6 +529,7 @@ public class Item extends DarkMatter {
                 status.pos.set(itemPosTuplePan.getTuple3d());
                 status.velocity.set(itemVelTuplePan.getTuple3d());
                 bFixedLocation = rbItemFixedPos.isSelected();
+                flightPlan = flightPlanCopy;
                 retVal = true;
             }
             else
@@ -537,10 +570,15 @@ public class Item extends DarkMatter {
         }
     }
 
-    @Override
+    public void setLocalForces() {
+        super.setLocalForces();
+        force.add(rocketForce);
+    }
+
+        @Override
     public void setStartConditions(double duration) {
         super.setStartConditions(duration);
-//        evalForceFromBuiltInSource(duration);
+        evalForceFromBuiltInSource(duration);
     }
 
     void evalMaxMinPos() {

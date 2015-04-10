@@ -2,12 +2,12 @@ package GeneralElements;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
-import mvUtils.Point3dMV;
-import mvUtils.SmartFormatter;
-import mvUtils.Vector3dMV;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
+import mvUtils.display.SmartFormatter;
+import mvUtils.math.Point3dMV;
+import mvUtils.math.Vector3dMV;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 

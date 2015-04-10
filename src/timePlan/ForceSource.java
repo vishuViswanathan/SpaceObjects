@@ -13,4 +13,5 @@ public interface ForceSource {
     public JPanel fsDetails();
     public boolean fsTakeDataFromUI();
     public String dataAsString();
+    public ForceSource clone();
 }

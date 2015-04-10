@@ -1,7 +1,6 @@
 package timePlan;
 
 import Applications.ItemMovementsApp;
-import GeneralElements.Item;
 import mvUtils.display.InputControl;
 
 import javax.swing.*;
@@ -10,7 +9,6 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Vector;
 
 /**
  * Created by M Viswanathan on 02 Apr 2015
@@ -19,19 +17,19 @@ public class PlanStepsTable {
     JTable table;
     InputControl inpC;
     FlightPlan flightPlan;
-    Vector<OneStep> thePlan;
+//    Vector<OneStep> thePlanSteps;
     int slNo = 0;
     PlanTableModel tableModel;
 
     public PlanStepsTable(InputControl inpC, FlightPlan flightPlan) {
         this.inpC = inpC;
         this.flightPlan = flightPlan;
-        thePlan = flightPlan.getThePlan();
+//        thePlanSteps = flightPlan.getTheSteps();
         tableModel = new PlanTableModel();
         table = new JTable(tableModel);
         table.addMouseListener(new TableListener());
         TableColumnModel colModel = table.getColumnModel();
-        int[] colWidth = Item.getColumnWidths();
+        int[] colWidth = OneStep.getColumnWidths();
         for (int c = 0; c < colModel.getColumnCount(); c++)
             colModel.getColumn(c).setPreferredWidth(colWidth[c]);
     }
@@ -44,7 +42,7 @@ public class PlanStepsTable {
         slNo++;
         Object[] data = step.getRowData(slNo);
         tableModel.addRow(data);
-        thePlan.add(step);
+        flightPlan.addStep(step);
     }
 
     public void updateUI() {
@@ -52,15 +50,13 @@ public class PlanStepsTable {
     }
 
     public void deleteRow(int row) {
-        if (row >= 0 && row < thePlan.size()) {
-            thePlan.remove(row);
-            updateUI();
-        }
+        flightPlan.removeOneStep(row);
+        updateUI();
     }
 
     public void setOneRow(int row) {
         if (row >= 0 && row < table.getRowCount()) {
-            Object[] data = thePlan.get(row).getRowData(row + 1);
+            Object[] data = flightPlan.getOneStep(row).getRowData(row + 1);
             int nCol = table.getColumnCount();
             for (int col = 0; col < nCol; col++)
                 tableModel.setValueAt(data[col], row, col);
@@ -69,14 +65,14 @@ public class PlanStepsTable {
 
     class PlanTableModel extends DefaultTableModel {
         PlanTableModel() {
-            super(Item.getColHeader(), 0);
+            super(OneStep.getColHeader(), 0);
             fillTable();
         }
 
         void fillTable() {
             clearTable();
-            for (int i = 0; i < thePlan.size(); i++)
-                addRow(thePlan.get(i).getRowData(slNo = (i + 1)));
+            for (int i = 0; i < flightPlan.getPlanSize(); i++)
+                addRow(flightPlan.getOneStep(i).getRowData(slNo = (i + 1)));
         }
 
         void clearTable() {
@@ -91,7 +87,7 @@ public class PlanStepsTable {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 int row = table.getSelectedRow();
-                OneStep step = thePlan.get(row);
+                OneStep step = flightPlan.getOneStep(row);
                 switch (step.editStep(inpC, (Component) e.getSource())) {
                     case CHANGED:
                         setOneRow(row);

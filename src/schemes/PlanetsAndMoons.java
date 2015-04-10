@@ -5,7 +5,7 @@ import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
-import mvUtils.StringOps;
+import mvUtils.strings.StringOps;
 
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
