@@ -170,8 +170,9 @@ public class ItemSpace {
     void addItem(Component c) {
 //        Item newItem = new Item(this, "## Enter Item Name ##", 1, 1, Color.RED,  mainApp.parent());
         Item newItem = Item.getNewItem(this, "## Enter Item Name ##",mainApp.parent());
+        newItem.setSpace(this);
         if (newItem.editItem(mainApp) == Item.EditResponse.CHANGED) {
-            newItem.setSpace(this);
+//            newItem.setSpace(this);
             itemTable.addOneRow(newItem);
         }
     }

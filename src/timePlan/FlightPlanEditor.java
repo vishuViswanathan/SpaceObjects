@@ -23,11 +23,11 @@ public class FlightPlanEditor {
         this.space = space;
     }
 
-    public Item.EditResponse editPlan(FlightPlan flightPlan) {
+    public Item.EditResponse editPlan(InputControl inpC, FlightPlan flightPlan) {
         Item.EditResponse response = Item.EditResponse.CANCEL;
         this.originalPlan = flightPlan;
         modifiedPlan = originalPlan.clone();
-        stepsTable = new PlanStepsTable(modifiedPlan.inpC, modifiedPlan);
+        stepsTable = new PlanStepsTable(inpC, modifiedPlan);
         DlgFlightPlanEditor dlg = new DlgFlightPlanEditor();
         dlg.setLocation(50, 50);
         dlg.setTitle("Preparing Flight Plan for " + modifiedPlan.item);
@@ -92,7 +92,7 @@ public class FlightPlanEditor {
         }
 
         boolean addNewStep() {
-            OneStep oneStep = new OneStep(inpC, 1);
+            OneStep oneStep = new OneStep(1);
             if (oneStep.editStep(inpC) == Item.EditResponse.CHANGED) {
                 stepsTable.addOneRow(oneStep);
                 return true;

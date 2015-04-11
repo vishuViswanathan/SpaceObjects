@@ -105,10 +105,10 @@ public class Item extends DarkMatter {
     double spinPeriod; // in hours
     public String imageName;
     public boolean isLightSrc = false;
-    FlightPlan flightPlan;
-    boolean bFlightPlan = false;
-    double rocketFuelLoss = 0;
-    Vector3d rocketForce = new Vector3d();
+//    FlightPlan flightPlan;
+//    boolean bFlightPlan = false;
+//    double rocketFuelLoss = 0;
+//    Vector3d rocketForce = new Vector3d();
     JRadioButton rbFixedPos;
     Item thisItem;
     public double reportInterval = 0; // sec?  144000;
@@ -403,7 +403,7 @@ public class Item extends DarkMatter {
             if (bFlightPlanCopy)
                 flightPlanCopy = flightPlan.clone();
             else
-                flightPlanCopy = new FlightPlan(thisItem, inpC);
+                flightPlanCopy = new FlightPlan(thisItem);
             setFlightPlanButton();
             JPanel outerPan = new JPanel(new BorderLayout());
             MultiPairColPanel jp = new MultiPairColPanel("Data of Item");
@@ -508,7 +508,7 @@ public class Item extends DarkMatter {
 
         void getFlightPlan() {
             FlightPlanEditor flightPlanEditor = new FlightPlanEditor(space);
-            flightPlanEditor.editPlan(flightPlanCopy);
+            flightPlanEditor.editPlan(inpC, flightPlanCopy);
         }
 
         void setFlightPlanButton() {
@@ -717,6 +717,9 @@ public class Item extends DarkMatter {
             xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
             a++;
         }
+        xmlStr.append(XMLmv.putTag("bFlightPlan", bFlightPlan));
+        if (bFlightPlan)
+            xmlStr.append(XMLmv.putTag("flightPlan", flightPlan.dataInXML()));
         return xmlStr;
     }
 
@@ -760,6 +763,13 @@ public class Item extends DarkMatter {
                 retVal = false;
                 e.printStackTrace();
             }
+        }
+        vp = XMLmv.getTag(xmlStr, "bFlightPlan", vp.endPos);
+        bFlightPlan = vp.val.equals("1");
+        if (bFlightPlan) {
+            vp = XMLmv.getTag(xmlStr, "flightPlan", vp.endPos);
+            flightPlan = new FlightPlan(this, vp.val);
+            retVal = flightPlan.isValid();
         }
         return retVal;
     }

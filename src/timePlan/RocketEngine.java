@@ -2,6 +2,8 @@ package timePlan;
 
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
 import javax.swing.*;
 
@@ -11,23 +13,19 @@ import javax.swing.*;
 public class RocketEngine implements ForceSource {
     double force; // magnitude
     double fuelExhaustRate; // kg/s of fuel exhaust
+    boolean bValid = true;
 
     public RocketEngine(double force, double fuelExhaustRate) {
         this.force = force;
         this.fuelExhaustRate = fuelExhaustRate;
     }
 
-    public RocketEngine clone() {
+    public RocketEngine(String xmlStr) {
+        bValid = takeFromXML(xmlStr);
+    }
+
+    public RocketEngine clone(){
         return new RocketEngine(force, fuelExhaustRate);
-    }
-
-    public double fuelLoss(double duration) {
-        return duration * fuelExhaustRate;
-    }
-
-    @Override
-    public boolean anyMassChange() {
-        return true;
     }
 
     @Override
@@ -37,7 +35,7 @@ public class RocketEngine implements ForceSource {
 
     @Override
     public double massChange(double duration) {
-        return fuelExhaustRate * duration;
+        return -fuelExhaustRate * duration;
     }
 
     NumberTextField ntForce;
@@ -65,14 +63,34 @@ public class RocketEngine implements ForceSource {
     }
 
     @Override
-    public boolean anyDetails() {
-        return true;
-    }
-
-    @Override
     public String dataAsString() {
         return "Force " + force + "N" +
                 ((fuelExhaustRate > 0) ? "Fuel Exhaust Rate " + fuelExhaustRate + " kg/s" : "");
+    }
+
+    @Override
+    public StringBuilder dataInXML() {
+        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", "" + this));
+        xmlStr.append(XMLmv.putTag("force", force));
+        xmlStr.append(XMLmv.putTag("fuelExhaustRate",  fuelExhaustRate));
+        return xmlStr;
+    }
+
+    @Override
+    public boolean takeFromXML(String xmlStr) throws NumberFormatException {
+        boolean retVal = false;
+        ValAndPos vp;
+        vp = XMLmv.getTag(xmlStr, "force", 0);
+        force = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "fuelExhaustRate", 0);
+        fuelExhaustRate = Double.valueOf(vp.val);
+        retVal = true;
+        return retVal;
+    }
+
+    @Override
+    public boolean isValid() {
+        return bValid;
     }
 
     public String toString() {

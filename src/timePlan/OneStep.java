@@ -8,6 +8,8 @@ import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
 import mvUtils.display.SmartFormatter;
 import mvUtils.math.Vector3dMV;
+import mvUtils.mvXML.ValAndPos;
+import mvUtils.mvXML.XMLmv;
 
 import javax.swing.*;
 import javax.vecmath.Vector3d;
@@ -19,11 +21,6 @@ import java.awt.event.ActionListener;
  * Created by M Viswanathan on 28 Mar 2015
  */
 public class OneStep implements Cloneable {
-    static InputControl inpC;
-    static TuplePanel directionP;
-    static JRadioButton rbRelativeToVelocity;
-    static Vector3d direction;
-    static boolean staticDataSet = false;
     FlightPlan flightPlan;
     double duration;
     Vector3dMV forceDirection = new Vector3dMV(); // a unit Vector;
@@ -32,6 +29,7 @@ public class OneStep implements Cloneable {
     ForceSource forceSource;
     double startTime; // these times are of the FlightPlan and not absolute
     double endTime;
+    boolean bValid = true;
 
     static public enum PlanColType {
         SLNO("SlNo."),
@@ -66,8 +64,7 @@ public class OneStep implements Cloneable {
         }
     }
 
-    public OneStep(InputControl inpC, double duration, Vector3d forceDirection, ForceSource forceSource, boolean bRelativeToVelocity) {
-        initStatics(inpC);
+    public OneStep(double duration, Vector3d forceDirection, ForceSource forceSource, boolean bRelativeToVelocity) {
         this.duration = duration;
         this.forceSource = forceSource;
         this.bRelativeToVelocity = bRelativeToVelocity;
@@ -75,16 +72,20 @@ public class OneStep implements Cloneable {
             effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
     }
 
-    public OneStep(InputControl inpC, double duration, Vector3d forceDirection, ForceSource forceSource) {
-        this(inpC, duration, forceDirection, forceSource, false);
+    public OneStep(double duration, Vector3d forceDirection, ForceSource forceSource) {
+        this(duration, forceDirection, forceSource, false);
     }
 
-    public OneStep(InputControl inpC, double duration) {
-        this(inpC, duration, new Vector3d(), new RocketEngine(440, 0));
+    public OneStep(double duration) {
+        this(duration, new Vector3d(), new RocketEngine(440, 0));
     }
 
-    public OneStep clone() {
-        return new OneStep(inpC, duration, new Vector3d(forceDirection), forceSource.clone(), bRelativeToVelocity);
+    public OneStep(String xmlStr) {
+        bValid = takeFromXML(xmlStr);
+    }
+
+    public OneStep clone(){
+        return new OneStep(duration, new Vector3d(forceDirection), forceSource.clone(), bRelativeToVelocity);
     }
 
     public OneStep(OneStep cloneFrom) {
@@ -103,14 +104,8 @@ public class OneStep implements Cloneable {
         }
     }
 
-    static void initStatics(InputControl inpControl) {
-        if (!staticDataSet) {
-            inpC = inpControl;
-            direction = new Vector3d();
-            directionP = new TuplePanel(inpC, -1000, 1000, "#,##0.000", "Force Direction");
-            rbRelativeToVelocity = new JRadioButton("Relative to Velocity", true);
-            staticDataSet = true;
-        }
+    double massChange(double duration) {
+        return forceSource.massChange(duration);
     }
 
     public void setFlightPlan(FlightPlan flightPlan) {
@@ -124,7 +119,11 @@ public class OneStep implements Cloneable {
 
     Vector3d getEffectiveForce() {
         if (bRelativeToVelocity) { // else effectiveForce is already set
-            effectiveForce.scale(forceSource.effectiveForce(), flightPlan.item.status.velocity);
+            double velMagnitude = flightPlan.item.status.velocity.length();
+            if (velMagnitude > 0)
+                effectiveForce.scale(forceSource.effectiveForce()/ velMagnitude, flightPlan.item.status.velocity);
+            else
+                effectiveForce.set(0, 0, 0);
         }
         return effectiveForce;
     }
@@ -148,6 +147,9 @@ public class OneStep implements Cloneable {
     class StepDetails extends JDialog {
         InputControl inpC;
         Item.EditResponse response;
+        TuplePanel directionP;
+        JRadioButton rbRelativeToVelocity;
+        Vector3d direction;
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
         JButton delete = new JButton("Delete");
@@ -165,6 +167,8 @@ public class OneStep implements Cloneable {
         }
 
         void dbInit() {
+            directionP = new TuplePanel(inpC, forceDirection, 6, -1000, 1000, "#,##0.000", "Force Direction");
+            rbRelativeToVelocity = new JRadioButton("Relative to Velocity", true);
             ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
             directionP.updateTuple(forceDirection);
             rbRelativeToVelocity.setSelected(bRelativeToVelocity);
@@ -274,5 +278,30 @@ public class OneStep implements Cloneable {
         return "";
     }
 
+    public StringBuilder dataInXML() {
+        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("duration", duration));
+        xmlStr.append(XMLmv.putTag("forceDirection", forceDirection.dataInCSV()));
+        xmlStr.append(XMLmv.putTag("bRelativeToVelocity",  bRelativeToVelocity));
+        xmlStr.append(XMLmv.putTag("forceSource", forceSource.dataInXML()));
+        return xmlStr;
+    }
 
+    public boolean takeFromXML(String xmlStr) {
+        boolean retVal = true;
+        ValAndPos vp;
+        try {
+            vp = XMLmv.getTag(xmlStr, "duration", 0);
+            duration = Double.valueOf(vp.val);
+            vp = XMLmv.getTag(xmlStr, "forceDirection", 0);
+            forceDirection.set(vp.val);
+            vp = XMLmv.getTag(xmlStr, "bRelativeToVelocity", 0);
+            bRelativeToVelocity = vp.val.equals("1");
+            vp = XMLmv.getTag(xmlStr, "forceSource", 0);
+            forceSource = new RocketEngine(vp.val);
+            retVal = forceSource.isValid();
+        } catch (NumberFormatException e) {
+            retVal = false;
+        }
+        return retVal;
+    }
 }

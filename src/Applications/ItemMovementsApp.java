@@ -128,6 +128,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         bShowLinks = true;
         bRealTime = true;
         bShowItems = true;
+        setSpaceSize(SpaceSize.DAILY);
         mainF.pack();
         mainF.setVisible(true);
     }
