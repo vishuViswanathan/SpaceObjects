@@ -60,12 +60,24 @@ public class FlightPlan implements Cloneable{
 
     public int addStep(OneStep oneStep) {
         oneStep.setFlightPlan(this);
-        oneStep.setStartTime(isValid() ? getTotalTime() : 0);
+//        oneStep.setStartTime(isValid() ? getTotalTime() : 0);
         if (theSteps.size() == 0)
             theLastStep = oneStep;
         theSteps.add(oneStep);
         planSize = theSteps.size();
         return theSteps.size();
+    }
+
+    public void initFlightPlan() {
+        setStepStartTimes();
+    }
+
+    void setStepStartTimes() {
+        double startT = 0;
+        for (OneStep oneStep: theSteps) {
+            oneStep.setStartTime(startT);
+            startT = oneStep.endTime;
+        }
     }
 
     public double getTotalTime() {

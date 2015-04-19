@@ -549,6 +549,8 @@ public class Item extends DarkMatter {
         status.time = 0;
         nextReport = 0;
         initStartForce();
+        if (bFlightPlan)
+            flightPlan.initFlightPlan();
 //        history.add(status);
     }
 

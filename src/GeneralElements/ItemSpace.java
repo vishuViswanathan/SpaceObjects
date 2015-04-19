@@ -375,11 +375,11 @@ public class ItemSpace {
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         initForces();
 
-        evaluator.resetForceBarrier();
+        evaluator.resetForceBarrier(); // TODO this is not required
 //        evaluator.startItemLinkGroups();
 //        System.out.println("ItemSpace before awaitStartBarrier");
         evaluator.awaitStartBarrier(); // this should start the force calculations
-        evaluator.resetStartBarrier();
+        evaluator.resetStartBarrier(); // TODO this is not required
 //        System.out.println("ItemSpace before awaitForceComplete");
         evaluator.awaitForceComplete();
 //        System.out.println("ItemSpace After awaitForceComplete");

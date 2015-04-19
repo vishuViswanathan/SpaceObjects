@@ -11,13 +11,24 @@ import javax.swing.*;
  * Created by M Viswanathan on 28 Mar 2015
  */
 public class RocketEngine implements ForceSource {
-    double force; // magnitude
+    // SaturnV First stage thrustInkN = 7000 kN
+    String engineName = "Engine";
+    double effExhVelocity;  // effective exhaust velocity of gases
+    double specificFuelConsumption = 300; // in g/kN.s
+    double thrustInkN;
+    double force; // in N
     double fuelExhaustRate; // kg/s of fuel exhaust
     boolean bValid = true;
 
-    public RocketEngine(double force, double fuelExhaustRate) {
-        this.force = force;
-        this.fuelExhaustRate = fuelExhaustRate;
+    /**
+     *
+     * @param thrustInkN in kN
+     * @param specificFuelConsumption in g/kN.s
+     */
+    public RocketEngine(String engineName, double thrustInkN, double specificFuelConsumption) {
+        this.engineName = new String(engineName);
+        this.thrustInkN = thrustInkN;
+        this.specificFuelConsumption = specificFuelConsumption;
     }
 
     public RocketEngine(String xmlStr) {
@@ -25,7 +36,7 @@ public class RocketEngine implements ForceSource {
     }
 
     public RocketEngine clone(){
-        return new RocketEngine(force, fuelExhaustRate);
+        return new RocketEngine(engineName, thrustInkN, specificFuelConsumption);
     }
 
     @Override
@@ -38,17 +49,26 @@ public class RocketEngine implements ForceSource {
         return -fuelExhaustRate * duration;
     }
 
+    void evalForceAndFuelExhRate() {
+        force = thrustInkN * 1000; // converted to N
+        fuelExhaustRate = thrustInkN * specificFuelConsumption / 1000; // converted to kg/s
+    }
+
+    JTextField tfName;
     NumberTextField ntForce;
-    NumberTextField ntFuelExhaustRate;
+    NumberTextField ntSpFuelConsumption;
     boolean uiReady = false;
 
     @Override
     public JPanel fsDetails() {
         MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
-        ntForce = new NumberTextField(null, force, 6, false, 0.001, 1e10, "#,##0.000", "Force (N)");
-        ntFuelExhaustRate = new NumberTextField(null, fuelExhaustRate, 6, false, 0.001, 10000, "#,##0.000", "Fuel Exhaust rate (kg/s)");
+        tfName = new JTextField(engineName, 20);
+        ntForce = new NumberTextField(null, thrustInkN, 6, false, 0.001, 1e10, "#,##0.000", "Force (kN)");
+        ntSpFuelConsumption = new NumberTextField(null, specificFuelConsumption, 6, false, 0, 10000, "#,##0.000",
+                "Specific Fuel Consumption(g/kN.s)");
+        outerP.addItemPair("Engine Name", tfName);
         outerP.addItemPair(ntForce);
-        outerP.addItemPair(ntFuelExhaustRate);
+        outerP.addItemPair(ntSpFuelConsumption);
         uiReady = true;
         return outerP;
     }
@@ -56,23 +76,25 @@ public class RocketEngine implements ForceSource {
     public boolean fsTakeDataFromUI() {
         boolean retVal = true;
         if (uiReady) {
-            force = ntForce.getData();
-            fuelExhaustRate = ntFuelExhaustRate.getData();
+            engineName = tfName.getText();
+            thrustInkN = ntForce.getData();
+            specificFuelConsumption = ntSpFuelConsumption.getData();
+            evalForceAndFuelExhRate();
         }
         return retVal;
     }
 
     @Override
     public String dataAsString() {
-        return "Force " + force + "N" +
-                ((fuelExhaustRate > 0) ? "Fuel Exhaust Rate " + fuelExhaustRate + " kg/s" : "");
+        return engineName + " with thrust "+ thrustInkN + "kN" +
+                ((specificFuelConsumption > 0) ? ", specificFuelConsumption " + specificFuelConsumption + " g/kN.s" : "");
     }
 
     @Override
     public StringBuilder dataInXML() {
-        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", "" + this));
-        xmlStr.append(XMLmv.putTag("force", force));
-        xmlStr.append(XMLmv.putTag("fuelExhaustRate",  fuelExhaustRate));
+        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("engineName", engineName));
+        xmlStr.append(XMLmv.putTag("thrustInkN", thrustInkN));
+        xmlStr.append(XMLmv.putTag("specificFuelConsumption",  specificFuelConsumption));
         return xmlStr;
     }
 
@@ -80,10 +102,13 @@ public class RocketEngine implements ForceSource {
     public boolean takeFromXML(String xmlStr) throws NumberFormatException {
         boolean retVal = false;
         ValAndPos vp;
-        vp = XMLmv.getTag(xmlStr, "force", 0);
-        force = Double.valueOf(vp.val);
-        vp = XMLmv.getTag(xmlStr, "fuelExhaustRate", 0);
-        fuelExhaustRate = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "engineName", 0);
+        engineName = vp.val;
+        vp = XMLmv.getTag(xmlStr, "thrustInkN", 0);
+        thrustInkN = Double.valueOf(vp.val);
+        vp = XMLmv.getTag(xmlStr, "specificFuelConsumption", 0);
+        specificFuelConsumption = Double.valueOf(vp.val);
+        evalForceAndFuelExhRate();
         retVal = true;
         return retVal;
     }

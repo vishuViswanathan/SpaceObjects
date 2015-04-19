@@ -67,9 +67,11 @@ public class OneStep implements Cloneable {
     public OneStep(double duration, Vector3d forceDirection, ForceSource forceSource, boolean bRelativeToVelocity) {
         this.duration = duration;
         this.forceSource = forceSource;
+        this.forceDirection.set(forceDirection);
         this.bRelativeToVelocity = bRelativeToVelocity;
-        if (!bRelativeToVelocity)
-            effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
+        setEffectiveForce();
+//        if (!bRelativeToVelocity)
+//            effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
     }
 
     public OneStep(double duration, Vector3d forceDirection, ForceSource forceSource) {
@@ -77,7 +79,7 @@ public class OneStep implements Cloneable {
     }
 
     public OneStep(double duration) {
-        this(duration, new Vector3d(), new RocketEngine(440, 0));
+        this(duration, new Vector3d(), new RocketEngine("Engine", 440, 0));
     }
 
     public OneStep(String xmlStr) {
@@ -299,6 +301,7 @@ public class OneStep implements Cloneable {
             vp = XMLmv.getTag(xmlStr, "forceSource", 0);
             forceSource = new RocketEngine(vp.val);
             retVal = forceSource.isValid();
+            if (retVal) setEffectiveForce();
         } catch (NumberFormatException e) {
             retVal = false;
         }
