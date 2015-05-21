@@ -85,12 +85,12 @@ public class ItemLink implements EvalOnce {
     }
 
     @Override
-    public void evalOnce() {
+    public synchronized void evalOnce() {
         evalForce();
     }
 
     // dummy not used
-    public void evalOnce(double detaT, double nowT){}
+    public void evalOnce(double deltaT, double nowT, boolean bFinal){}
 
 
     public boolean addLinksDisplay(Group grp, RenderingAttributes linkAttrib) {

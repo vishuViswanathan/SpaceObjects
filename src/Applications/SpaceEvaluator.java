@@ -6,60 +6,65 @@ import evaluations.CallableItemGroup;
 import java.util.Vector;
 import java.util.concurrent.*;
 
-
 /**
  * Created by M Viswanathan on 10 Aug 2014
  */
 public class SpaceEvaluator implements Runnable {
+    boolean useAllCPUs = true;
+    int numberOfCPUs;
+    int numberOfCPUsToUse;
     private volatile static SpaceEvaluator theEvaluator;
     private volatile Thread t;
     private String threadName = "Calculation Thread";
     boolean fresh = true;
-//    volatile boolean execute;
+    volatile boolean execute;
     ItemMovementsApp callerApp;
     static ExecutorService pool;
-    static int nThreads = 3;
     static CompletionService<Boolean> completionService;
     Vector<CallableGroup> linkCallables;
     Vector<CallableItemGroup> itemCallables;
-    private int eachCallableLen = 5;  // this many number of smaller tasks combined as one Callable task
-
 
     private SpaceEvaluator(ItemMovementsApp callerApp, boolean fresh) {
         super();
+        numberOfCPUs = Runtime.getRuntime().availableProcessors();
+        numberOfCPUsToUse = numberOfCPUs;
         this.callerApp = callerApp;
-        pool = Executors.newFixedThreadPool(nThreads);
-        completionService = new ExecutorCompletionService<Boolean>(pool);
+        useAllCPUs = callerApp.useAllCPUs();
+        initiateService();
         linkCallables = new Vector<CallableGroup>();
         itemCallables = new Vector<CallableItemGroup>();
-//        execute = true;
         this.fresh = fresh;
     }
 
+    private void initiateService() {
+        pool = Executors.newCachedThreadPool(); //newFixedThreadPool(numberOfCPUsToUse);
+        completionService = new ExecutorCompletionService<Boolean>(pool);
+    }
+
     static public SpaceEvaluator getSpaceEvaluator(ItemMovementsApp callerApp, boolean fresh) {
-        if (theEvaluator == null)
-            synchronized (SpaceEvaluator.class) {
-                theEvaluator = new SpaceEvaluator(callerApp, fresh);
-            }
+        synchronized (SpaceEvaluator.class) {
+            theEvaluator = new SpaceEvaluator(callerApp, fresh);
+        }
         theEvaluator.fresh = fresh;
-//        theEvaluator.execute = true;
-//        theEvaluator.prepareLinkCallables();
-//        theEvaluator.prepareItemCallables();
+        theEvaluator.execute = true;
         return theEvaluator;
     }
 
-    CyclicBarrier startOneRound;
+    CyclicBarrier startLinkCalculations;
     CyclicBarrier forcesReady;
-    CyclicBarrier roundComplete;
+    CyclicBarrier startUpdatePositions;
+    CyclicBarrier positionsReady;
 
     private void prepareLinkCallables() {
         linkCallables.clear();
         int count = 0;
         int id = 0;
+        int nLinks = callerApp.nItemLinks();
+        int eachCallableLen = nLinks / numberOfCPUsToUse + 1;
         CallableGroup group = new CallableGroup(id++);
         boolean bFirstTime = true;
-        for (int l = 0 ; l < callerApp.nItemLinks(); l++) {
-            if (count > eachCallableLen) {
+        for (int l = 0 ; l < nLinks; l++) {
+            if (count >= eachCallableLen) {
                 if (!bFirstTime)
                     linkCallables.add(group);
                 group = new CallableGroup(id++);
@@ -70,16 +75,16 @@ public class SpaceEvaluator implements Runnable {
             count++;
         }
         linkCallables.add(group);
-        taskCount = linkCallables.size();
-        startOneRound = new CyclicBarrier(taskCount + 1);
+        int taskCount = linkCallables.size();
+        startLinkCalculations = new CyclicBarrier(taskCount + 1);
         forcesReady = new CyclicBarrier(taskCount + 1); // one for the 'this' thread
         for (CallableGroup gr: linkCallables)
-            gr.setBarriers(startOneRound, forcesReady);
+            gr.setBarriers(startLinkCalculations, forcesReady);
         submitLinkTasks();
     }
 
-    public void resetStartBarrier() {
-        startOneRound.reset();
+    public void resetStartLinkBarrier() {
+        startLinkCalculations.reset();
     }
 
     public void resetForceBarrier() {
@@ -100,49 +105,99 @@ public class SpaceEvaluator implements Runnable {
         return retVal;
     }
 
-
-    public int awaitStartBarrier()  {
+    public int awaitPositionsReady()  {
         int retVal;
         try {
-            retVal = startOneRound.await();
+            retVal = positionsReady.await();
         } catch (InterruptedException e) {
-            ItemMovementsApp.log.error("In awaitStartBarrier in SpaceEvaluator: " + e.getMessage());
+            ItemMovementsApp.log.error("In awaitPositionsReady: " + e.getMessage());
             retVal = -2;
         } catch (BrokenBarrierException e) {
-            ItemMovementsApp.log.error("In awaitStartBarrier in SpaceEvaluator: " + e.getMessage());
+            ItemMovementsApp.log.error("In awaitPositionsReady: " + e.getMessage());
             retVal = -1;
         }
         return retVal;
     }
 
 
+    public int awaitStartLinkCalculations()  {
+        int retVal;
+        try {
+            retVal = startLinkCalculations.await();
+        } catch (InterruptedException e) {
+            ItemMovementsApp.log.error("InterruptedException StartLinkCalculations Barrier in SpaceEvaluator: " + e.getMessage());
+            retVal = -2;
+        } catch (BrokenBarrierException e) {
+            ItemMovementsApp.log.error("BrokenBarrierException StartLinkCalculations Barrier in SpaceEvaluator: " + e.getMessage());
+            retVal = -1;
+        }
+        return retVal;
+    }
+
+    public int awaitStartUpdatePositions()  {
+        int retVal;
+        try {
+            retVal = startUpdatePositions.await();
+        } catch (InterruptedException e) {
+            ItemMovementsApp.log.error("InterruptedException awaitStartUpdatePositions Barrier in SpaceEvaluator: " + e.getMessage());
+            retVal = -2;
+        } catch (BrokenBarrierException e) {
+            ItemMovementsApp.log.error("BrokenBarrierException awaitStartUpdatePositions Barrier in SpaceEvaluator: " + e.getMessage());
+            retVal = -1;
+        }
+        return retVal;
+    }
+
     private void prepareItemCallables() {
         itemCallables.clear();
         int count = 0;
-        int id = 100;
+        int id = 0;
+        int nItems = callerApp.nItems();
+        int eachCallableLen = nItems / numberOfCPUsToUse + 1;
         CallableItemGroup group = new CallableItemGroup(id++);
         boolean bFirstTime = true;
-//        boolean yetToSave = false;
-        for (int l = 0 ; l < callerApp.nItems(); l++) {
-            if (count > eachCallableLen) {
+        for (int l = 0 ; l < nItems; l++) {
+            if (count >= eachCallableLen) {
                 if (!bFirstTime)
                     itemCallables.add(group);
                 group = new CallableItemGroup(id++);
                 count = 0;
             }
             group.add(callerApp.getItemEvalOnce(l));
-            count++;
             bFirstTime = false;
+            count++;
         }
-//        if (yetToSave)
-            itemCallables.add(group);
+        itemCallables.add(group);
+        int taskCount = itemCallables.size();
+        startUpdatePositions = new CyclicBarrier(taskCount + 1);
+        positionsReady = new CyclicBarrier(taskCount + 1); // one for the 'this' thread
+        for (CallableGroup gr: itemCallables)
+            gr.setBarriers(startUpdatePositions, positionsReady);
+        submitItemTasks();
     }
+
 
     public void stopTasks() {
         for (CallableGroup group: linkCallables)
             group.stop();
+        startLinkCalculations.reset();
+        forcesReady.reset();
         for (CallableGroup group:itemCallables)
             group.stop();
+        startUpdatePositions.reset();
+        positionsReady.reset();
+    }
+
+    public void startTasks() {
+//        prepareLinkCallables();
+//        for (CallableGroup group: linkCallables)
+//            group.start();
+        prepareItemCallables();
+        for (CallableGroup group: itemCallables)
+            group.start();
+        prepareLinkCallables();
+        for (CallableGroup group: linkCallables)
+            group.start();
     }
 
     public static boolean closePool() {
@@ -156,6 +211,7 @@ public class SpaceEvaluator implements Runnable {
                     // Wait a while for tasks to respond to being cancelled
                     if (!pool.awaitTermination(60, TimeUnit.SECONDS))
                         retVal = false;
+
                 }
             } catch (InterruptedException ie) {
                 // (Re-)Cancel if current thread also interrupted
@@ -167,11 +223,8 @@ public class SpaceEvaluator implements Runnable {
         return retVal;
     }
 
-    int taskCount = 0;
-
     private void submit(CallableGroup callableGroup) {
         completionService.submit(callableGroup);
-        taskCount++;
     }
 
     public void submitLinkTasks() {
@@ -180,29 +233,25 @@ public class SpaceEvaluator implements Runnable {
 
     }
 
-    public void submitItemTasks(double deltaT, double nowT) {
+    public void submitItemTasks() {
         for (CallableItemGroup  group: itemCallables) {
-            group.setTimes(deltaT, nowT);
             submit(group);
         }
     }
 
-    public boolean isComplete() {
-        try {
-            for (int i = 0; i < taskCount; i++)
-                completionService.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
+    public void setTimes(double deltaT, double nowT, boolean bFinal) {
+        for (CallableItemGroup  group: itemCallables) {
+            group.setTimes(deltaT, nowT, bFinal);
         }
-        taskCount = 0;
-        return true;
     }
 
     public void run() {
-        callerApp.debug("SpaceEvaluator started");
-        callerApp.doCalculation(fresh);
-//        callerApp.doCalculationFast(fresh);
+        callerApp.debug("SpaceEvaluator started" +
+                ((useAllCPUs) ? " with " + numberOfCPUsToUse + " CPUs" : " One CPU"));
+        if (useAllCPUs)
+            callerApp.doCalculationPARELLEL(fresh);
+        else
+            callerApp.doCalculationSERIAL(fresh);
     }
 
     public void start() {

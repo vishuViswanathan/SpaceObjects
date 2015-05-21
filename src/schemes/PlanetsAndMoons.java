@@ -5,6 +5,7 @@ import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import SpaceElements.Constants;
 import SpaceElements.time.DateAndJDN;
+import mvUtils.mvXML.XMLmv;
 import mvUtils.strings.StringOps;
 
 import javax.swing.*;
@@ -40,12 +41,17 @@ public class PlanetsAndMoons implements DefaultScheme {
 //        String[] fileNames = {"sun.csv", "mercury.csv", "earth.csv", "saturn.csv"};
         Item item;
         Statement st = createDBConnection("jdbc:odbc:ODBCtoPlanetData");
+// Trial due to no jdbcodbc in Java 8       Statement st = createDBConnection("jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};" +
+//                        "DBQ=J:\\SpaceObjects\\planetData\\20141011\\PlanetAndMoonData1.mdb;DriverID=22;READONLY=true");
         String itemName;
+        StringBuilder xmlStr = new StringBuilder("#Base Data of Planets and Moons\n\n");
+        int itemCount = 0;
         if (st != null) {
             for (String oneFile:fileNames) {
                 if (oneFile.indexOf(".csv") > 0) {
                     itemName = oneFile.substring(0, oneFile.length() - 4);
-                    item = getObjectFromTextFile(st, folderName + "\\" + oneFile, itemName, colors[nowColor] );
+                    StringBuilder oneObjInXml = new StringBuilder();
+                    item = getObjectFromTextFile(st, folderName + "\\" + oneFile, itemName, colors[nowColor], oneObjInXml);
                     if (item == null)  {
                         showError("Unable to create object " + itemName);
                     }
@@ -55,15 +61,21 @@ public class PlanetsAndMoons implements DefaultScheme {
                         // recycle colors
                         if (nowColor >= nColors)
                             nowColor = 0;
+                        xmlStr.append(XMLmv.putTag("item" + ("" + itemCount++).trim(), oneObjInXml));
                     }
                 }
             }
             closeDBconnection();
+            saveBasePlaneData(xmlStr);
             bRetVal = true;
         }
         if (createInputSummary)
             closeInputFiles();
         return bRetVal;
+    }
+
+    boolean saveBasePlaneData(StringBuilder xmlStr) { // TODO Not Ready yet
+        return false;
     }
 
     public ItemMovementsApp.SpaceSize getSpaceSize() {
@@ -93,6 +105,18 @@ public class PlanetsAndMoons implements DefaultScheme {
         return  st;
     }
 
+    Statement createDBConnectionNEW(String connectTo) { // Trial due to no jdbcodbc in Java 8
+        Statement st = null;
+        try {
+            dbConnection = DriverManager.getConnection(connectTo, "", "");
+            st = dbConnection.createStatement();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return  st;
+    }
+
+
     void closeDBconnection() {
         if (dbConnection != null)
             try {
@@ -103,7 +127,7 @@ public class PlanetsAndMoons implements DefaultScheme {
         dbConnection = null;
     }
 
-    Item baseObjectFromDBdata(Statement st, String objName, Color color) {
+    Item baseObjectFromDBdata(Statement st, String objName, Color color, StringBuilder xmlStr) {
         Item obj = null;
         String name;
         String moonOf = "";
@@ -117,9 +141,9 @@ public class PlanetsAndMoons implements DefaultScheme {
             double radius;
             double mass;
             double gm;
-            double rotationPeriod;
-            double axisInclination;
-            boolean isLightSrc;
+            double rotationPeriod = 0;
+            double axisInclination = 0;
+            boolean isLightSrc = false;
             String imageName;
             ResultSet res;
             String queryStr1 = "SELECT Radius, Mass, GM, imageName, rotationPeriodH, axisInclinationDeg, isLightSrc FROM PhycialData WHERE ObjName = '" + name + "' AND ";
@@ -144,6 +168,7 @@ public class PlanetsAndMoons implements DefaultScheme {
                     } catch (SQLException e) {
                         mass = res.getDouble("Mass");
                     }
+                    imageName = "";
                     if (radius > 0 && mass > 0) {
                         obj = new Item(objName, mass, radius * 2 * 1000, color, mainF);
                         imageName = res.getString("imageName");
@@ -155,12 +180,18 @@ public class PlanetsAndMoons implements DefaultScheme {
                             obj.setSpin(new AxisAngle4d(0, 1, 0, Math.PI / 180 * axisInclination ), rotationPeriod * 3600);
                             obj.enableLightSrc(isLightSrc);
                         }
-                    }
+                     }
                     else {
                         showError("There is some problem is Mass or radius of " + objName + ", taking as 1kg and 1m");
                         obj = new Item(objName, 1, 1 * 2, color, mainF);
                     }
-
+                    xmlStr.append(XMLmv.putTag("name", objName));
+                    xmlStr.append(XMLmv.putTag("radius", radius));
+                    xmlStr.append(XMLmv.putTag("mass", mass));
+                    xmlStr.append(XMLmv.putTag("imageName", imageName));
+                    xmlStr.append(XMLmv.putTag("rotationPeriod", rotationPeriod));
+                    xmlStr.append(XMLmv.putTag("axisInclination", axisInclination));
+                    xmlStr.append(XMLmv.putTag("isLightSrc", isLightSrc));
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -169,9 +200,10 @@ public class PlanetsAndMoons implements DefaultScheme {
         return obj;
     }
 
-    Item getObjectFromTextFile(Statement st, String filePath, String objName, Color color) {
+
+    Item getObjectFromTextFile(Statement st, String filePath, String objName, Color color, StringBuilder xmlStr) {
         Item obj;
-        obj = baseObjectFromDBdata(st, objName, color);
+        obj = baseObjectFromDBdata(st, objName, color, xmlStr);
         if (obj == null) {
             showError("There is some problem is Mass or dia of " + objName);
         }

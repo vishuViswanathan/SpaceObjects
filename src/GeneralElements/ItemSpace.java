@@ -373,19 +373,29 @@ public class ItemSpace {
     }
 
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
-        initForces();
+        boolean ok = true;
+        setItemStartConditions(deltaT);
+        for (int t = 0; t < 5; t++) {
+            initForces();
+            evaluator.awaitStartLinkCalculations(); // this should start the force calculations
+            evaluator.awaitForceComplete(); // now all force calculations are ready
+            updatePosAndVel(evaluator, deltaT, nowT, false);
 
-        evaluator.resetForceBarrier(); // TODO this is not required
-//        evaluator.startItemLinkGroups();
-//        System.out.println("ItemSpace before awaitStartBarrier");
-        evaluator.awaitStartBarrier(); // this should start the force calculations
-        evaluator.resetStartBarrier(); // TODO this is not required
-//        System.out.println("ItemSpace before awaitForceComplete");
-        evaluator.awaitForceComplete();
-//        System.out.println("ItemSpace After awaitForceComplete");
-//        evaluator.resetStartBarrier();
-        updatePosAndVel(deltaT, nowT, true);
-        return false;
+        }
+        // now finalise it
+        if (ok) {
+            initForces();
+            evaluator.awaitStartLinkCalculations(); // this should start the force calculations
+            evaluator.awaitForceComplete(); // now all force calculations are ready
+            updatePosAndVel(evaluator, deltaT, nowT, true);
+        }
+        return ok;
+    }
+
+    void updatePosAndVel(SpaceEvaluator evaluator , double deltaT, double nowT, boolean bFinal) throws Exception  {
+        evaluator.setTimes(deltaT, nowT, bFinal);
+        evaluator.awaitStartUpdatePositions(); // this should start the upatePosVelocity calculations
+        evaluator.awaitPositionsReady(); // now all Positions are ready
     }
 
     public void updateLinkDisplay() {

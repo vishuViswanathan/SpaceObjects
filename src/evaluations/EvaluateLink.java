@@ -12,12 +12,12 @@ public class EvaluateLink implements EvalOnce {
         this.link = link;
     }
 
-    public void  evalOnce() {
+    public synchronized void evalOnce() {
         link.evalForce();
     }
 
     @Override
-    public void evalOnce(double deltaT, double nowT) {
+    public void evalOnce(double deltaT, double nowT, boolean bFinal) {
 
     }
 }

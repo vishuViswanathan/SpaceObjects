@@ -205,11 +205,11 @@ public class DarkMatter implements InputControl, EvalOnce {
             force.add(gAction.getForce(this));
     }
 
-    public void addToForce(Vector3d addForce) {
+    public synchronized void addToForce(Vector3d addForce)  {
         force.add(addForce);
     }
 
-    public void subtractFromForce(Vector3d subtractForce) {
+    public synchronized void subtractFromForce(Vector3d subtractForce) {
         force.sub(subtractForce);
     }
 
@@ -226,13 +226,13 @@ public class DarkMatter implements InputControl, EvalOnce {
 
         // dummy not used
     @Override
-    public void evalOnce() {
+    public synchronized void evalOnce() {
     }
 
     @Override
-    public void evalOnce(double deltaT, double nowT) {
+    public void evalOnce(double deltaT, double nowT, boolean bFinal) {
         try {
-            updatePosAndVel(deltaT, nowT, true);
+            updatePosAndVel(deltaT, nowT, bFinal);
         } catch (Exception e) {
             ItemMovementsApp.log.error("In Item evalOnce for " + name + ":" + e.getMessage());
             e.printStackTrace();

@@ -5,5 +5,5 @@ package evaluations;
  */
 public interface EvalOnce {
     public void evalOnce();
-    public void evalOnce(double deltaT, double nowT);
+    public void evalOnce(double deltaT, double nowT, boolean bFinal);
 }
