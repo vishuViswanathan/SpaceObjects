@@ -184,6 +184,7 @@ public class PlanetsAndMoons implements DefaultScheme {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
         dbConnection = null;
     }
 
