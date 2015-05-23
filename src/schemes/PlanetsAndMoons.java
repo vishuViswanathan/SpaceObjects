@@ -265,8 +265,10 @@ public class PlanetsAndMoons implements DefaultScheme {
                         mass = gm / Constants.G;
 //                        debug("got from GM for " + objName);
                     }
-                    else
+                    else {
+                        vp = XMLmv.getTag(xmlStr, "mass", 0);
                         mass = Double.valueOf(vp.val);
+                    }
                     if (radius > 0 && mass > 0) {
                         item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
                         vp = XMLmv.getTag(xmlStr, "imageName", 0);

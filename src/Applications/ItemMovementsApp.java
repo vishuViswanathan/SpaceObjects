@@ -403,6 +403,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             runIt = true;
             SpaceEvaluator.closePool();
             evaluator = SpaceEvaluator.getSpaceEvaluator(this, true);
+//            handleDisplay();
             evaluator.start();
         }
 
@@ -514,6 +515,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 }
             }
         }
+        continueIt = false;
         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
@@ -597,8 +599,88 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(true);
     }
 
+    void doCalculationPARELLELNEW(boolean fresh)   {
+        double step = calculationStep;
+        double hrsPerSec = 0;
+//        continueIt = true;
+        double endT;
+        if (fresh) {
+            space.setGlobalLinksAndActions();
+            nowT = 0;
+            setRefreshInterval(refreshInterval);
+            nextRefresh = 0;
+            endT = ntfDuration.getData() * 3600;
+            lastTnano = System.nanoTime(); // new Date()).getTime();
+            nowDate = new DateAndJDN(dateAndJDN);
+//            continueIt = true;
+        }
+        else {
+            endT = nowT + ntfDuration.getData() * 3600;
+        }
+        boolean bLive = false;
+
+        runIt = true;
+        evaluator.startTasks();
+        while (runIt && nowT < endT) {
+            if (continueIt) {
+                try {
+                    if (!doOneStepPARELLEL(step, nowT)) {
+                        showError("Error in doOneStepPARELLEL one step at " + nowT + "\nSuggest restart program");
+                        break;
+                    }
+                    step = calculationStep;
+                    nowT += step;
+                } catch (Exception e) {
+                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
+                    runIt = false;
+                }
+            }
+        }
+        evaluator.stopTasks();
+    }
+
     boolean doOneStepPARELLEL(double deltaT, double nowT) throws Exception {
         return space.doCalculation(evaluator, deltaT, nowT);
+    }
+
+    long sleepTime = 100; // ms
+
+    void handleDisplay() {
+        boolean bLive = false;
+        double hrsPerSec = 0;
+        double nowCalculationTime;
+        double realDeltaT = 0;
+        double calculationDeltaT; //h
+        double lastCalculationTime = 0;
+        boolean bFirstTime = true;
+        enableButtons(false);
+        while (runIt) {
+            while (continueIt) {
+                nowTnano = System.nanoTime(); //new Date().getTime();
+                nowCalculationTime = evaluator.getNowT();
+                if (!bFirstTime) {
+                    calculationDeltaT = nowCalculationTime - lastCalculationTime;
+                    realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
+                    hrsPerSec = (refreshInterval / 3600) / calculationDeltaT;
+                }
+                nowDate.add(Calendar.SECOND, (int) (realDeltaT));
+                orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
+                lastCalculationTime = nowCalculationTime;
+                lastTnano = System.nanoTime(); //nowTnano;
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        nowCalculationTime = evaluator.getNowT();
+        realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
+        nowDate.add(Calendar.SECOND, (int) (realDeltaT));
+        orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
+        orbitDisplay.resultsReady();
+//        SpaceEvaluator.closePool();
+        enableButtons(true);
     }
 
     MotionDisplay orbitDisplay;

@@ -239,7 +239,14 @@ public class SpaceEvaluator implements Runnable {
         }
     }
 
+    double nowT = 0;
+
+    public double getNowT() {
+        return nowT;
+    }
+
     public void setTimes(double deltaT, double nowT, boolean bFinal) {
+        this.nowT = nowT;
         for (CallableItemGroup  group: itemCallables) {
             group.setTimes(deltaT, nowT, bFinal);
         }
