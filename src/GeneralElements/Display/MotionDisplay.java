@@ -298,21 +298,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JPanel getSpeedSelector() {
         minInterval = controller.calculationStep;
         maxInterval = controller.refreshInterval * 10;
-//        switch (controller.spSize) {
-//            case ASTRONOMICAL:
-//                minInterval = 10;
-//                maxInterval = 14400;
-//                break;
-//            case DAILY:
-//                minInterval = 0.0001;
-//                maxInterval = 10;
-//                break;
-//            default:
-//                minInterval = 1;
-//                maxInterval = 3600;
-//                break;
-//        }
-
         sbUpdateSpeed = new JScrollBar(JScrollBar.HORIZONTAL,
                 getIntervalScrPos(nowInterval), scrollExt, scrollBarMin, scrollbarMax);
         sbUpdateSpeed.setPreferredSize(new Dimension(100, 25));
@@ -637,58 +622,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     public void showLocalView(Item item) {
-//        jlItemName.setText(item.name);
-//        attachPlatformToItem(item);
-//        viewPosFromPlanet = 4 * item.dia;
-//        localVp.setNominalViewingTransform();
-//        Transform3D defaultTr = new Transform3D();
-//        localVp.getViewPlatformTransform().getTransform(defaultTr);
-//        defaultTr.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
-//        localVp.getViewPlatformTransform().setTransform(defaultTr);
-//        updateViewDistanceUI(1.0);
-//
         localViewFrame.showLocalView(item);
         showLocalViewFrame(item.name);
     }
 
     public void showLocalView(Item item, int atX, int atY) {
-//        jlItemName.setText(item.name);
-//        attachPlatformToItem(item);
-//        viewPosFromPlanet = 4 * item.dia;
-//        Transform3D mainVTr = new Transform3D();
-//        mainViewPlatform.getViewPlatformTransform().getTransform(mainVTr);
-//
-//        Point3d eyePosINViewPlate= new Point3d();
-//        Viewer[] viewers = mainViewPlatform.getViewers();
-//        Canvas3D canvas = viewers[0].getCanvas3D();
-//        canvas.getCenterEyeInImagePlate(eyePosINViewPlate);
-//        double midX = eyePosINViewPlate.x;
-//        double midY = eyePosINViewPlate.y;
-//
-//        Point3d planetPosOnPlate = new Point3d();
-//        canvas.getPixelLocationInImagePlate(atX, atY, planetPosOnPlate);
-//
-//        double angleY = Math.atan2((midX - planetPosOnPlate.x), eyePosINViewPlate.z);
-//        double angleX = Math.atan2((midY - planetPosOnPlate.y), eyePosINViewPlate.z);
-//        Transform3D rotX = new Transform3D();
-//        rotX.rotX(-angleX);
-//        Transform3D rotY = new Transform3D();
-//        rotY.rotY(angleY);
-//        mainVTr.mul(rotY);
-//        mainVTr.mul(rotX);
-//
-//        Vector3d eye = new Vector3d();
-//        mainVTr.get(eye);
-//
-//        Vector3d diff = new Vector3d(eye);
-//        diff.sub(item.status.pos);
-//        double planetFromEye = diff.length();
-//        double factor = viewPosFromPlanet / planetFromEye;
-//        diff.scale(factor);
-//        Transform3D localVpt = new Transform3D(mainVTr);
-//        localVpt.setTranslation(diff);
-//        localVp.getViewPlatformTransform().setTransform(localVpt);
-//        updateViewDistanceUI(1.0);
         localViewFrame.showLocalView(item, atX, atY);
         showLocalViewFrame(item.name);
     }
