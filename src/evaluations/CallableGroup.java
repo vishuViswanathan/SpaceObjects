@@ -77,9 +77,9 @@ public class CallableGroup implements Callable<Boolean> {
         try {
             startBarrier.await();
         } catch (InterruptedException e) {
-            ItemMovementsApp.log.info("In CallableGroup call - before run Loop: " + e.getMessage());
+            ItemMovementsApp.log.info("InterruptedException in CallableGroup call - before run Loop: " + e.getMessage());
         } catch (BrokenBarrierException e) {
-            ItemMovementsApp.log.info("In CallableGroup call - before run Loop: " + e.getMessage());
+            ItemMovementsApp.log.info("BrokenBarrierException in CallableGroup call - before run Loop: " + e.getMessage());
         }
         while(run) {
             try {
