@@ -91,6 +91,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     NumberTextField ntfDuration;  // , ntfStep;
     double duration = 2000; // in h
     public double calculationStep =2; //in seconds
+    public int repeats = 5; // number of times each step is repeated for position-force accuracy
     public boolean bShowOrbit = false;
     public boolean bShowLinks = false;
     public boolean bShowItems = true;
@@ -154,6 +155,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     class TimingValuesDlg extends JDialog {
         NumberTextField ntCalculStep;
         NumberTextField ntUpdate; // multiplier on calculation step;
+        NumberTextField ntRepeats;
         JButton jbOk = new JButton("Ok");
         JButton jbCancel = new JButton("Cancel");
         double upDateMultiplier;
@@ -177,9 +179,13 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     "Calculation step in seconds");
             ntUpdate = new NumberTextField(mainApp, upDateMultiplier, 6, false, 1, 10000, "#,###",
                     "Update once in this many steps");
+            ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 1, 10, "#0",
+                    "Number of times each step is repeated for Position/Force accuracy");
             MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
             jp.addItemPair(ntCalculStep);
             jp.addItemPair(ntUpdate);
+            jp.addBlank();
+            jp.addItemPair(ntRepeats);
             jp.addBlank();
             jp.addItemPair(jbCancel, jbOk);
             add(jp);
@@ -188,12 +194,17 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
         boolean noteValues() {
             boolean retVal = false;
-            if (ntCalculStep.dataOK() && ntUpdate.dataOK()) {
+            if (dataOK()) {
                 calculationStep = ntCalculStep.getData();
                 refreshInterval = calculationStep * ntUpdate.getData();
+                repeats = (int)ntRepeats.getData();
                 retVal = true;
             }
             return retVal;
+        }
+
+        boolean dataOK() {
+            return ntCalculStep.dataOK() && ntUpdate.dataOK() &&ntRepeats.dataOK();
         }
     }
 
@@ -611,7 +622,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             nextRefresh = 0;
             endT = ntfDuration.getData() * 3600;
             lastTnano = System.nanoTime(); // new Date()).getTime();
-            nowDate = new DateAndJDN(dateAndJDN);
+//            nowDate = new DateAndJDN(dateAndJDN);
 //            continueIt = true;
         }
         else {
@@ -654,15 +665,18 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         double lastCalculationTime = 0;
         boolean bFirstTime = true;
         enableButtons(false);
+        nowDate = new DateAndJDN(dateAndJDN);
         while (runIt) {
-            while (continueIt) {
+//            while (continueIt) {
                 nowTnano = System.nanoTime(); //new Date().getTime();
                 nowCalculationTime = evaluator.getNowT();
                 if (!bFirstTime) {
                     calculationDeltaT = nowCalculationTime - lastCalculationTime;
                     realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
                     hrsPerSec = (refreshInterval / 3600) / calculationDeltaT;
+                    bFirstTime = false;
                 }
+//                space.updateLinkDisplay();
                 nowDate.add(Calendar.SECOND, (int) (realDeltaT));
                 orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
                 lastCalculationTime = nowCalculationTime;
@@ -672,7 +686,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
+//            }
         }
         nowCalculationTime = evaluator.getNowT();
         realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
