@@ -345,7 +345,7 @@ public class ItemSpace {
     boolean evalInfluence(double deltaT, double nowT) throws Exception  {
         boolean ok = true;
         setItemStartConditions(deltaT);
-        for (int t = 0; t < 5; t++) {
+        for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
                 if (!inf.evalForce()) {
@@ -375,7 +375,7 @@ public class ItemSpace {
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         boolean ok = true;
         setItemStartConditions(deltaT);
-        for (int t = 0; t < 5; t++) {
+        for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             evaluator.awaitStartLinkCalculations(); // this should start the force calculations
             evaluator.awaitForceComplete(); // now all force calculations are ready
