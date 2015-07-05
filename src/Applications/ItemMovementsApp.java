@@ -78,7 +78,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     };
 
     ItemMovementsApp mainApp;
-    boolean useAllCPUs = true;
+    boolean useAllCPUs = false;
     public SpaceSize spSize;
     JComboBox cbSpaceSize = new JComboBox(SpaceSize.values());
     ItemSpace space;
@@ -306,6 +306,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         DefaultScheme scheme = defaultSchemes.get(selIndex);
         scheme.getScheme(mainF, space);
         setSpaceSize(scheme.getSpaceSize());
+        setCalculationDate(scheme.startJDN());
         proceedToItemList(true);
     }
 
@@ -529,7 +530,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         continueIt = false;
         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
+//        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
         enableButtons(true);
     }
@@ -604,13 +605,13 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         evaluator.stopTasks();
         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
+//        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
 //        SpaceEvaluator.closePool();
         enableButtons(true);
     }
 
-    void doCalculationPARELLELNEW(boolean fresh)   {
+    void doCalculationPARELLELNEW(boolean fresh)   { // TODO remove?
         double step = calculationStep;
         double hrsPerSec = 0;
 //        continueIt = true;
@@ -656,7 +657,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     long sleepTime = 100; // ms
 
-    void handleDisplay() {
+    void handleDisplay() { // TODO remove?
         boolean bLive = false;
         double hrsPerSec = 0;
         double nowCalculationTime;
@@ -1001,6 +1002,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 break;
         }
         spSize = size;
+    }
+
+    void setCalculationDate(double jdn) {
+        if (jdn > 0)
+            dateAndJDN = new DateAndJDN(jdn);
     }
 
     void modifyJTextEdit() {

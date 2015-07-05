@@ -95,7 +95,7 @@ public class ItemTable {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 int row = table.getSelectedRow();
                 Item thisItem = allItems.get(row);
-                switch (thisItem.editItem(inpC, (Component)e.getSource())) {
+                switch (thisItem.editItem("", inpC, (Component)e.getSource())) {
                     case CHANGED:
                         setOneRow(row);
                         break;

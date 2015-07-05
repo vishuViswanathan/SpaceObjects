@@ -357,15 +357,27 @@ public class Item extends DarkMatter {
         }
     }
 
-    public EditResponse editItem(InputControl inpC, Component c) {
-        ItemDialog dlg = new ItemDialog(inpC, c);
+    public EditResponse editItem(String title, InputControl inpC, Component c) {
+        ItemDialog dlg = new ItemDialog(title, inpC, c);
         dlg.setVisible(true);
         anyFlightPlan();
         return dlg.getResponse();
     }
 
+    public void showItem(String title, InputControl inpC, Component c) {
+        ItemDialog dlg = new ItemDialog(title, false, inpC, c);
+        dlg.setVisible(true);
+        anyFlightPlan();
+    }
+
+    public void editItemKeepingPosition(String title, InputControl inpC, Component c) {
+        ItemDialog dlg = new ItemDialog(title, true, true, inpC, c);
+        dlg.setVisible(true);
+        anyFlightPlan();
+    }
+
     public EditResponse editItem(InputControl inpC) {
-        return editItem(inpC, null);
+        return editItem("", inpC, null);
     }
 
     class ItemDialog extends JDialog {
@@ -386,18 +398,32 @@ public class Item extends DarkMatter {
         JButton cancel = new JButton("Cancel");
         InputControl inpC;
         EditResponse response = EditResponse.CHANGED;
+        boolean allowEdit = false;
+        boolean freezePosition = false;
 //        LocalActionsTable localActionTable;
 
-        ItemDialog(InputControl inpC, Component c) {
+        ItemDialog(String title, boolean allowEdit, boolean freezePosition, InputControl inpC, Component c) {
             setModal(true);
             setResizable(false);
             this.inpC = inpC;
+            this.allowEdit = allowEdit;
+            if (allowEdit)
+                this.freezePosition = freezePosition;
+            setTitle(title);
             dbInit();
             if (c == null)
                 setLocation(100, 100);
             else
                 setLocationRelativeTo(c);
         }
+
+        ItemDialog(String title, boolean allowEdit, InputControl inpC, Component c) {
+            this(title, allowEdit, false, inpC, c);
+        }
+        ItemDialog(String title, InputControl inpC, Component c) {
+            this(title, true, false, inpC, c);
+        }
+
         void dbInit() {
             bFlightPlanCopy = bFlightPlan;
             if (bFlightPlanCopy)
@@ -503,7 +529,33 @@ public class Item extends DarkMatter {
             buttPanel.add(ok, BorderLayout.EAST);
             outerPan.add(buttPanel, BorderLayout.SOUTH);
             add(outerPan);
+            setAllowEdit();
             pack();
+        }
+
+        void setAllowEdit() {
+            if (!allowEdit) {
+                tfItemName.setEditable(false);
+                colorButton.setEnabled(false);
+                ntItemMass.setEditable(false);
+                ntItemDia.setEditable(false);
+                ntElasticity.setEditable(false);
+                itemPosTuplePan.setEditable(false);;
+                rbItemFixedPos.setEnabled(false);;
+                itemVelTuplePan.setEditable(false);;
+                itemRelButton.setEnabled(false);
+//                boolean bFlightPlanCopy;
+//                FlightPlan flightPlanCopy;
+                jbFlightPlan.setEnabled(false);
+                delete.setEnabled(false);
+                ok.setEnabled(false);
+            }
+            if (freezePosition) {
+                itemRelButton.setEnabled(false);
+                itemPosTuplePan.setEditable(false);
+                delete.setEnabled(false);
+            }
+
         }
 
         void getFlightPlan() {

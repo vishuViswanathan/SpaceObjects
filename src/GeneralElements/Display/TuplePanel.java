@@ -47,6 +47,12 @@ public class TuplePanel extends JPanel {
         add(ntZ, BorderLayout.EAST);
     }
 
+    public void setEditable(boolean ena) {
+        ntX.setEditable(ena);
+        ntY.setEditable(ena);
+        ntZ.setEditable(ena);
+    }
+
     public String getTitle() {
         return title;
     }

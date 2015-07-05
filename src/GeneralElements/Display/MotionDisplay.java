@@ -63,13 +63,26 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     void jbInit() throws Exception {
         itemGraphics = new Vector<ItemGraphic>();
-        this.setSize(1300, 700);
+        this.setSize(1100, 700);
         addWindowListener(new WindowAdapter() {
-             public void windowClosing(WindowEvent e) {
+            public void windowClosing(WindowEvent e) {
                 localViewFrame.setVisible(false);
                 controller.stopIt();
             }
-         });
+        });
+        addWindowFocusListener(new WindowAdapter() {
+             @Override
+            public void windowGainedFocus(WindowEvent e) {
+                super.windowGainedFocus(e);
+                showCommonMenu(true);
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                super.windowLostFocus(e);
+                showCommonMenu(false);
+            }
+        });
         setLayout(new BorderLayout());
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
         mainCanvas = new Canvas3D(config);
@@ -99,14 +112,20 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         addMouseAction(mainViewPlatform, mainCanvas);  //.getViewPlatformTransform());
         BranchGroup scene;
         scene = createSceneGraph();
-        localViewFrame = new LocalViewFrame(mainViewPlatform, "Local View", controller);
+        localViewFrame = new LocalViewFrame(commonMenuPanel, mainViewPlatform, "Local View", controller, this);
 //        prepareLocalViewPanel();
         univ.addBranchGraph(scene);
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
     }
 
-
+    void showCommonMenu(boolean show) {
+        if (show)
+            commonMenuPanelHolder.add(commonMenuPanel);
+        else
+            commonMenuPanelHolder.remove(commonMenuPanel);
+        pack();
+    }
     OrbitBehavior mainVpOrbitBehavior;
     MouseRotate vpRotateBehavior;
     MouseTranslate vpTransBehavior;
@@ -164,34 +183,26 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JCheckBox chkBshowLinks;
     JCheckBox chkBrealTime;
 
+    JPanel commonMenuPanel;
+    JPanel commonMenuPanelHolder;
+
     JPanel menuPanel() {
-        JPanel menuP = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 0, 5, 0);
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        JPanel outerP = new JPanel(new GridBagLayout());
+        GridBagConstraints outerGbc = new GridBagConstraints();
+        outerGbc.insets = new Insets(5, 0, 5, 0);
+        outerGbc.gridx = 0;
+        outerGbc.gridy = 0;
         ActionListener l = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Object src = e.getSource();
                 if (src == resetViewB)
                     resetView();
-                if (src == pauseRunB) {
-                    if (isPauseInResume()) {
-                        controller.continueOrbit(true);
-                        tunePauseButt(false);
-                    }
-                    else {
-                        controller.continueOrbit(false);
-                        tunePauseButt(true);
-                    }
-                }
                 if (src == stopB) {
                     if (isStopButtInContinue()) {
                         controller.oneMoreTime();
                         tuneStopButt(false);
-                    }
-                    else {
+                    } else {
                         controller.stopIt();
                         tuneStopButt(true);
                     }
@@ -201,12 +212,70 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             }
         };
         resetViewB.addActionListener(l);
+        outerP.add(resetViewB, outerGbc);
+        outerGbc.gridy++;
+        commonMenuPanelHolder = new JPanel();
+        commonMenuPanelHolder.add(commonMenuPanel());
+        outerP.add(commonMenuPanelHolder, outerGbc);
+        outerGbc.gridy++;
+        stopB.addActionListener(l);
+        outerP.add(stopB, outerGbc);
+        outerGbc.gridy++;
+        resultsB.setEnabled(false);
+        resultsB.addActionListener(l);
+        outerP.add(resultsB, outerGbc);
+        return outerP;
+    }
 
-        menuP.add(resetViewB, gbc);
-        gbc.gridy++;
+    boolean wasInPause = false;
+
+    /**
+     * returns true if this caused the pause
+     */
+    public boolean pauseIfRunning() {
+        if (isPauseInResume())
+            return false;  // nothing to do since already inpause
+        else {
+            pauseIt();
+            return true; // yes the caller caused it
+        }
+    }
+
+    void pauseIt() {
+        controller.continueOrbit(false);
+        tunePauseButt(true);
+    }
+
+    public void unPauseIt() {
+        controller.continueOrbit(true);
+        tunePauseButt(false);
+    }
+
+    public String nowTime() {
+        return timeLabel.getText() + ":" + nowTime.getText();
+    }
+
+    JPanel commonMenuPanel() {
+        JPanel menuP = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 0, 5, 0);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        ActionListener l = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object src = e.getSource();
+                if (src == pauseRunB) {
+                    if (isPauseInResume())
+                        unPauseIt();
+                    else
+                        pauseIt();
+                }
+            }
+        };
         FramedPanel nowTp = new FramedPanel();
         nowTp.setLayout(new BoxLayout(nowTp, BoxLayout.Y_AXIS));
-         if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
             timeLabel = new JLabel("Time of Display ");
         else
             timeLabel = new JLabel("Elapsed Time (s) ");
@@ -232,13 +301,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         pauseRunB.addActionListener(l);
         menuP.add(pauseRunB, gbc);
         gbc.gridy++;
-        stopB.addActionListener(l);
-        menuP.add(stopB, gbc);
-        gbc.gridy++;
-        resultsB.setEnabled(false);
-        resultsB.addActionListener(l);
-        menuP.add(resultsB, gbc);
-        return menuP;
+        commonMenuPanel = menuP;
+        return commonMenuPanel;
     }
 
     void tuneStopButt(boolean toContinue) {

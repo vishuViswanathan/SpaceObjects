@@ -6,8 +6,8 @@ import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import mvUtils.display.NumberLabel;
 import mvUtils.display.FramedPanel;
+import mvUtils.display.NumberLabel;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Canvas3D;
@@ -24,6 +24,9 @@ import java.awt.event.*;
  * Created by M Viswanathan on 04 Oct 2014
  */
 public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
+    JPanel commonMenuPanel;
+    MotionDisplay motionDisplay;
+    Item itemInView;
     ItemMovementsApp controller;
     ViewingPlatform mainViewPlatform;
     JPanel localViewPanel;
@@ -37,20 +40,61 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     double viewPosFromPlanet;
     boolean bPlatformWasAttached = false;
     JCheckBox slowRevolveCB;  // slowing down MouseOrbit
+    JButton jbItemData;
+    JButton jbItemEdit;
 
-    LocalViewFrame(ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller) {
+    LocalViewFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
+                   MotionDisplay motionDisplay) {
         super(name);
         setLayout(new BorderLayout());
         this.mainViewPlatform = mainViewPlatform;
         this.controller = controller;
+        this.commonMenuPanel = commonMenuPanel;
+        this.motionDisplay = motionDisplay;
         jbInit();
     }
 
+    JPanel commonMenuPanelHolder;
+
     void jbInit() {
-        this.setSize(1300, 700);
         prepareLocalViewPanel();
+        addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                super.windowGainedFocus(e);
+                showCommonMenu(true);
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                super.windowLostFocus(e);
+                showCommonMenu(false);
+            }
+        });
+
+
+
         add(localViewPanel, BorderLayout.CENTER);
-        add(menuPanel(), BorderLayout.EAST);
+        JPanel menuP = new JPanel(new GridBagLayout());
+        GridBagConstraints outerGbc = new GridBagConstraints();
+        outerGbc.insets = new Insets(5, 0, 5, 0);
+        outerGbc.gridx = 0;
+        outerGbc.gridy = 0;
+        commonMenuPanelHolder = new JPanel();
+        commonMenuPanelHolder.add(commonMenuPanel);
+        menuP.add(commonMenuPanelHolder, outerGbc);
+        outerGbc.gridy++;
+        menuP.add(menuPanel(), outerGbc);
+        add(menuP, BorderLayout.EAST);
+        pack();
+//        this.setSize(1100, 600);
+    }
+
+    public void showCommonMenu(boolean show) {
+        if (show)
+            commonMenuPanelHolder.add(commonMenuPanel);
+        else
+            commonMenuPanelHolder.remove(commonMenuPanel);
         pack();
     }
 
@@ -98,7 +142,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
 
     void prepareLocalViewPanel() {
         localViewPanel = new FramedPanel(new BorderLayout());
-        localViewPanel.setPreferredSize(new Dimension(700, 700));
+        localViewPanel.setPreferredSize(new Dimension(700, 600));
         addLocalViewingPlatform();
     }
 
@@ -166,6 +210,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         item.attachPlatform(localVp);
         lastItemWithLocalPlatform = item;
         bPlatformWasAttached = true;
+        this.itemInView = item;
     }
 
     void updateViewDistanceUI(double factor) {
@@ -179,11 +224,15 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         gbc.insets = new Insets(5, 0, 5, 0);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        menuP.add(showLinksCB(), gbc);
+        menuP.add(createSlowRevolveCB(), gbc);
+        gbc.gridy++;
+        menuP.add(createItemEditButton(), gbc);
+        gbc.gridy++;
+        menuP.add(createItemDataButton(), gbc);
         return menuP;
     }
 
-    JCheckBox showLinksCB() {
+    JCheckBox createSlowRevolveCB() {
         slowRevolveCB = new JCheckBox("Slow Revolve", true);
         slowRevolveCB.addChangeListener(new ChangeListener() {
             @Override
@@ -202,7 +251,38 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         return slowRevolveCB;
     }
 
+    JComponent createItemDataButton() {
+        jbItemData = new JButton("View Data");
+        jbItemData.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (bPlatformWasAttached) {
+                    boolean iPassedIt = motionDisplay.pauseIfRunning();
+                    itemInView.showItem(((iPassedIt) ?  "Paused (" + motionDisplay.nowTime() + ")" :""), controller, jbItemData);
+                    if (iPassedIt)
+                        motionDisplay.unPauseIt();
+                }
+            }
+        });
+        return jbItemData;
+    }
 
+    JComponent createItemEditButton() {
+        jbItemEdit = new JButton("Edit Data");
+        jbItemEdit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (bPlatformWasAttached) {
+                    boolean iPassedIt = motionDisplay.pauseIfRunning();
+                    itemInView.editItemKeepingPosition(((iPassedIt) ? "Paused (" + motionDisplay.nowTime() + ")" :""),
+                            controller, jbItemData);
+                    if (iPassedIt)
+                        motionDisplay.unPauseIt();
+                }
+            }
+        });
+        return jbItemEdit;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
