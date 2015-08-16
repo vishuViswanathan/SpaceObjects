@@ -45,7 +45,7 @@ public class Surface extends Item {
     }
 
     public Surface(String name, Point3d p1, Point3d p2, Point3d p3, double collisionLossFactor, Window parent) {
-        super(name, 1, 1, Color.GREEN, parent);
+        super(name, 1, 0, Color.GREEN, parent);
         itemType = ItemType.SURFACE;
         bFixedLocation = true;
         boundaryItem = true;

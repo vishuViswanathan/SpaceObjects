@@ -3,6 +3,7 @@ package GeneralElements.Display;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
+import GeneralElements.utils.ThreeDSize;
 import SpaceElements.time.DateAndJDN;
 import com.sun.j3d.utils.behaviors.mouse.MouseBehavior;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
@@ -19,7 +20,6 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.NumberLabel;
 import mvUtils.display.NumberTextField;
-import mvUtils.math.DoubleMaxMin;
 
 import javax.media.j3d.*;
 import javax.swing.*;
@@ -39,8 +39,10 @@ import java.util.Vector;
  * Created by M Viswanathan on 23 May 2014
  */
 public class MotionDisplay  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
+    enum ViewDirection {XMinus, YMinus, ZMinus};
     ItemSpace space;
     Transform3D defVPFTransform = new Transform3D();
+    boolean bViewSaved = false;
     Transform3D defTGMainTransform = new Transform3D();
     ViewingPlatform mainViewPlatform;
     TransformGroup tgMain;
@@ -61,7 +63,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
      SimpleUniverse univ;
 
-    void jbInit() throws Exception {
+    void jbInitOLD() throws Exception {
         itemGraphics = new Vector<ItemGraphic>();
         this.setSize(1100, 700);
         addWindowListener(new WindowAdapter() {
@@ -71,7 +73,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             }
         });
         addWindowFocusListener(new WindowAdapter() {
-             @Override
+            @Override
             public void windowGainedFocus(WindowEvent e) {
                 super.windowGainedFocus(e);
                 showCommonMenu(true);
@@ -88,9 +90,19 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         mainCanvas = new Canvas3D(config);
         add(mainCanvas, BorderLayout.CENTER);
         add(menuPanel(), BorderLayout.EAST);
-        DoubleMaxMin xMaxMin = space.xMaxMin();
-        DoubleMaxMin yMaxMin = space.yMaxMin();
-        maxOnOneSide = Math.max(Math.max(xMaxMin.max, -xMaxMin.min), Math.max(yMaxMin.max, -yMaxMin.min));
+        ThreeDSize spaceSize = space.getSize();
+//        DoubleMaxMin xMaxMin = space.xMaxMin();
+//        DoubleMaxMin yMaxMin = space.yMaxMin();
+        Point3d volumeCenter = spaceSize.midPoint();
+        Vector3d volumeRange = spaceSize.range();
+        // Considering the default view in -z direction
+//        int canvasXsize = mainCanvas.getWidth();
+//        int canvasYsize = mainCanvas.getHeight();
+//        double xByY = (double)canvasXsize / (double)canvasYsize;
+        double xByY = 1.3;
+        // assuming xByY is > 1
+        maxOnOneSide = Math.max(volumeRange.x, volumeRange.y * xByY) / 2;
+//        maxOnOneSide = Math.max(Math.max(xMaxMin.max, -xMaxMin.min), Math.max(yMaxMin.max, -yMaxMin.min));
         mainViewPlatform = new ViewingPlatform();
         mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -99,10 +111,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         Transform3D t3 = new Transform3D();
         mainViewPlatform.getViewPlatformTransform().getTransform(t3);
         double viewPosFromOrigin = 3 * maxOnOneSide;
-        t3.setTranslation(new Vector3d(0, 0, viewPosFromOrigin));
+//        t3.setTranslation(new Vector3d(0, 0, viewPosFromOrigin));
+        t3.setTranslation(new Vector3d(volumeCenter.x, volumeCenter.y, volumeCenter.z + viewPosFromOrigin));
         TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
         vTg.setTransform(t3);
-        vTg.getTransform(defVPFTransform);
+//        vTg.getTransform(defVPFTransform);
         addMouseAction(vTg);
         Viewer viewer = new Viewer( mainCanvas );
         viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
@@ -117,6 +130,145 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         univ.addBranchGraph(scene);
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
+    }
+
+    void jbInit() throws Exception {
+        itemGraphics = new Vector<ItemGraphic>();
+        this.setSize(1100, 700);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                localViewFrame.setVisible(false);
+                controller.stopIt();
+            }
+        });
+        addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                super.windowGainedFocus(e);
+                showCommonMenu(true);
+            }
+
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                super.windowLostFocus(e);
+                showCommonMenu(false);
+            }
+        });
+        setLayout(new BorderLayout());
+        GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
+        mainCanvas = new Canvas3D(config);
+        add(mainCanvas, BorderLayout.CENTER);
+        add(menuPanel(), BorderLayout.EAST);
+        mainViewPlatform = new ViewingPlatform();
+        mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        mainViewPlatform.setNominalViewingTransform();
+        Viewer viewer = new Viewer( mainCanvas );
+//        setViewAll(new Vector3d(0, 0, -1), viewer);
+        TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
+//        vTg.getTransform(defVPFTransform);
+        addMouseAction(vTg);
+        univ = new SimpleUniverse(mainViewPlatform, viewer );
+        setViewAll(ViewDirection.ZMinus);
+//        setViewAll(ViewDirection.XMinus);
+//        setViewAll(ViewDirection.YMinus);
+//        TransformGroup vTgFinal = mainViewPlatform.getViewPlatformTransform();
+//        vTgFinal.getTransform(defVPFTransform);
+//        addMouseAction(vTg);
+        addMouseAction(mainViewPlatform, mainCanvas);  //.getViewPlatformTransform());
+        BranchGroup scene;
+        scene = createSceneGraph();
+        localViewFrame = new LocalViewFrame(commonMenuPanel, mainViewPlatform, "Local View", controller, this);
+        univ.addBranchGraph(scene);
+        setPick(mainCanvas, scene);
+        pauseRunB.doClick();
+    }
+
+    ViewDirection lastViewDirection = ViewDirection.ZMinus;
+
+    void setViewAll(ViewDirection direction) {
+        ThreeDSize spaceSize = space.getSize();
+        Point3d volumeCenter = spaceSize.midPoint();
+        debug("" + volumeCenter);
+        Vector3d volumeRange = spaceSize.range();
+//        int canvasXsize = mainCanvas.getWidth();
+//        int canvasYsize = mainCanvas.getHeight();
+//        double xByY = (double)canvasXsize / (double)canvasYsize;
+        double xByY = 1.3;
+        // assuming xByY is > 1
+
+        double maxOnSide;
+        double viewPosFromVolumeCenter;
+        Vector3d translateBy;
+        Transform3D rot = new Transform3D();
+        mainViewPlatform.setNominalViewingTransform();
+        switch (direction) {
+            case XMinus:
+                maxOnSide = Math.max(volumeRange.z, volumeRange.y * xByY) / 2;
+                viewPosFromVolumeCenter = 3 * maxOnSide;
+                translateBy = new Vector3d(volumeCenter.x + viewPosFromVolumeCenter, volumeCenter.y, volumeCenter.z);
+                rot.rotY(Math.PI / 2);
+                break;
+            case YMinus:
+                maxOnSide = Math.max(volumeRange.x, volumeRange.z * xByY) / 2;
+                viewPosFromVolumeCenter = 3 * maxOnSide;
+                translateBy = new Vector3d(volumeCenter.x, volumeCenter.y + viewPosFromVolumeCenter, volumeCenter.z);
+                rot.rotX(-Math.PI / 2);
+                break;
+            default:
+                maxOnSide = Math.max(volumeRange.x, volumeRange.y * xByY) / 2;
+                viewPosFromVolumeCenter = 3 * maxOnSide;
+                translateBy = new Vector3d(volumeCenter.x, volumeCenter.y, volumeCenter.z + viewPosFromVolumeCenter);
+                break;
+        }
+        Transform3D t3 = new Transform3D();
+        mainViewPlatform.getViewPlatformTransform().getTransform(t3);
+        Viewer viewer = univ.getViewer();
+        viewer.getView().setBackClipDistance(2 * viewPosFromVolumeCenter);
+        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+            viewer.getView().setFrontClipDistance(0.00001);
+        t3.mul(rot);
+        t3.setTranslation(translateBy);
+        TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
+        vTg.setTransform(t3);
+        // TODO to adjust bounds for Orbit behaviour and Rotate Behaviour
+//        defVPFTransform.set(t3);
+        lastViewDirection = direction;
+    }
+
+    void setViewAllOLD(ViewDirection direction) {
+        ThreeDSize spaceSize = space.getSize();
+        Point3d volumeCenter = spaceSize.midPoint();
+        Vector3d volumeRange = spaceSize.range();
+//        int canvasXsize = mainCanvas.getWidth();
+//        int canvasYsize = mainCanvas.getHeight();
+//        double xByY = (double)canvasXsize / (double)canvasYsize;
+        double xByY = 1.3;
+        // assuming xByY is > 1
+
+        double maxOnSide;
+        switch (direction) {
+            case XMinus:
+                maxOnSide = Math.max(volumeRange.z, volumeRange.y * xByY) / 2;
+                break;
+            case YMinus:
+                maxOnSide = Math.max(volumeRange.x, volumeRange.z * xByY) / 2;
+                break;
+            default:
+                maxOnSide = Math.max(volumeRange.x, volumeRange.y * xByY) / 2;
+                break;
+        }
+        Transform3D t3 = new Transform3D();
+        mainViewPlatform.getViewPlatformTransform().getTransform(t3);
+        double viewPosFromOrigin = 3 * maxOnSide;
+        Viewer viewer = univ.getViewer();
+        viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
+        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+            viewer.getView().setFrontClipDistance(0.00001);
+        t3.setTranslation(new Vector3d(volumeCenter.x, volumeCenter.y, volumeCenter.z + viewPosFromOrigin));
+        TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
+        vTg.setTransform(t3);
+        // TODO to adjust bounds for Orbit behaviour and Rotate Behaviour
     }
 
     void showCommonMenu(boolean show) {
@@ -171,7 +323,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     String continueStr = "Continue";
     String stopItStr = "Stop Action";
     JButton pauseRunB = new JButton(pauseStr);
-    JButton resetViewB = new JButton("Reset View");
+    JButton saveViewB = new JButton("Save View");
+    JButton resetViewB = new JButton("Show Saved View");
+    JButton viewAllZX = new JButton("View All in ZX plane");
+    JButton viewAllXY = new JButton("View All in XY plane");
+    JButton viewAllYZ = new JButton("View All in YZ plane");
     JButton stopB = new JButton(stopItStr);
     JButton resultsB = new JButton("Save Vectors");
     JScrollBar sbUpdateSpeed;
@@ -196,21 +352,57 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             @Override
             public void actionPerformed(ActionEvent e) {
                 Object src = e.getSource();
-                if (src == resetViewB)
-                    resetView();
-                if (src == stopB) {
-                    if (isStopButtInContinue()) {
-                        controller.oneMoreTime();
-                        tuneStopButt(false);
-                    } else {
-                        controller.stopIt();
-                        tuneStopButt(true);
-                    }
-                }
-                if (src == resultsB)
-                    controller.writeCurrentVectorsToFile();
+               block:
+               {
+                   if (src == saveViewB) {
+                       saveView();
+                       break block;
+                   }
+                   if (src == resetViewB) {
+                       resetView();
+                       break block;
+                   }
+                   if (src == viewAllXY) {
+                       setViewAll(ViewDirection.ZMinus);
+                       break block;
+                   }
+                   if (src == viewAllYZ) {
+                       setViewAll(ViewDirection.XMinus);
+                       break block;
+                   }
+                   if (src == viewAllZX) {
+                       setViewAll(ViewDirection.YMinus);
+                       break block;
+                   }
+                   if (src == stopB) {
+                       if (isStopButtInContinue()) {
+                           controller.oneMoreTime();
+                           tuneStopButt(false);
+                       } else {
+                           controller.stopIt();
+                           tuneStopButt(true);
+                       }
+                       break block;
+                   }
+                   if (src == resultsB) {
+                       controller.writeCurrentVectorsToFile();
+                       break block;
+                   }
+               }
             }
         };
+        viewAllXY.addActionListener(l);
+        outerP.add(viewAllXY, outerGbc);
+        outerGbc.gridy++;
+        viewAllYZ.addActionListener(l);
+        outerP.add(viewAllYZ, outerGbc);
+        outerGbc.gridy++;
+        viewAllZX.addActionListener(l);
+        outerP.add(viewAllZX, outerGbc);
+        outerGbc.gridy++;
+        saveViewB.addActionListener(l);
+        outerP.add(saveViewB, outerGbc);
+        outerGbc.gridy++;
         resetViewB.addActionListener(l);
         outerP.add(resetViewB, outerGbc);
         outerGbc.gridy++;
@@ -475,8 +667,17 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     void resetView() {
-        mainViewPlatform.getViewPlatformTransform().setTransform(defVPFTransform);
-        setDefaultPan();
+//        setViewAll(lastViewDirection);
+        if (bViewSaved) {
+            mainViewPlatform.getViewPlatformTransform().setTransform(defVPFTransform);
+            setDefaultPan();
+        }
+    }
+
+    void saveView() {
+        TransformGroup vTgLast = mainViewPlatform.getViewPlatformTransform();
+        vTgLast.getTransform(defVPFTransform);
+        bViewSaved = true;
     }
 
     void setDefaultPan() {
@@ -503,7 +704,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         space.addObjectAndOrbit(itemGraphics, tgMain, itemAttrib, orbitAttrib, linkAttrib);
         tgMain.addChild(oneAxis(1, 1e13, Color.red));
         tgMain.addChild(oneAxis(2, 1e13, Color.blue));
-        tgMain.addChild(oneAxis(3, -1e13, Color.lightGray));
+        tgMain.addChild(oneAxis(3, 1e13, Color.lightGray));
         tgMain.getTransform(defTGMainTransform);
         brGrpMain.addChild(tgMain);
         return brGrpMain;

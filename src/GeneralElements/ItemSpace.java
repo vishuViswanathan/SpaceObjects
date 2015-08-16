@@ -8,6 +8,7 @@ import GeneralElements.Display.LinkTable;
 import GeneralElements.globalActions.AllGlobalActions;
 import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.ItemLink;
+import GeneralElements.utils.ThreeDSize;
 import mvUtils.display.InputControl;
 import mvUtils.math.DoubleMaxMin;
 import mvUtils.mvXML.ValAndPos;
@@ -74,6 +75,10 @@ public class ItemSpace {
         allItems.add(oneItem);
         oneItem.setSpace(this);
         return allItems.size();
+    }
+
+    public ThreeDSize getSize() {
+        return new ThreeDSize(xMaxMin(), yMaxMin(), zMaxMin());
     }
 
     public InputControl getInputControl() {
@@ -404,23 +409,47 @@ public class ItemSpace {
     }
 
     public DoubleMaxMin xMaxMin() {
-        DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
-        for (Item i: allItems)
-            maxMin.takeMaxValue(i.getPositionX());
+        DoubleMaxMin maxMin = new DoubleMaxMin();
+        double objectRadius;
+        double pos;
+        for (Item i: allItems) {
+            objectRadius = i.dia / 2;
+            if (objectRadius > 0) {
+                pos = i.getPositionX();
+                maxMin.takeNewValue(pos + objectRadius);
+                maxMin.takeNewValue(pos - objectRadius);
+            }
+        }
         return maxMin;
     }
 
     public DoubleMaxMin yMaxMin() {
-        DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
-        for (Item i: allItems)
-            maxMin.takeMaxValue(i.getPositionY());
+        DoubleMaxMin maxMin = new DoubleMaxMin();
+        double objectRadius;
+        double pos;
+        for (Item i: allItems) {
+            objectRadius = i.dia / 2;
+            if (objectRadius > 0) {
+                pos = i.getPositionY();
+                maxMin.takeNewValue(pos + objectRadius);
+                maxMin.takeNewValue(pos - objectRadius);
+            }
+        }
         return maxMin;
     }
 
     public DoubleMaxMin zMaxMin() {
-        DoubleMaxMin maxMin = new DoubleMaxMin(0, 0);
-        for (Item i: allItems)
-            maxMin.takeMaxValue(i.getPositionZ());
+        DoubleMaxMin maxMin = new DoubleMaxMin();
+        double objectRadius;
+        double pos;
+        for (Item i: allItems) {
+            objectRadius = i.dia / 2;
+            if (objectRadius > 0) {
+                pos = i.getPositionZ();
+                maxMin.takeNewValue(pos + objectRadius);
+                maxMin.takeNewValue(pos - objectRadius);
+            }
+        }
         return maxMin;
     }
 
