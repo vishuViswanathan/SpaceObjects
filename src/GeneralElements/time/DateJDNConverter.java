@@ -1,4 +1,4 @@
-package SpaceElements.time;
+package GeneralElements.time;
 
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * Created by M Viswanathan on 27 Jan 2014

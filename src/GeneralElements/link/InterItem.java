@@ -1,7 +1,7 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
-import SpaceElements.Constants;
+import GeneralElements.Constants;
 
 import javax.vecmath.Vector3d;
 

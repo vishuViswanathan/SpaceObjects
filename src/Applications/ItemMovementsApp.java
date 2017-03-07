@@ -2,8 +2,8 @@ package Applications;
 
 import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemSpace;
-import SpaceElements.Constants;
-import SpaceElements.time.DateAndJDN;
+import GeneralElements.Constants;
+import GeneralElements.time.DateAndJDN;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;

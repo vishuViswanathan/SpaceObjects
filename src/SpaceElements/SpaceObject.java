@@ -1,6 +1,7 @@
 package SpaceElements;
 
-import SpaceElements.collection.PointArrayFIFO;
+import GeneralElements.Constants;
+import GeneralElements.collection.PointArrayFIFO;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;

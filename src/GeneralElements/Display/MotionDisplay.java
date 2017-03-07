@@ -4,7 +4,7 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.utils.ThreeDSize;
-import SpaceElements.time.DateAndJDN;
+import GeneralElements.time.DateAndJDN;
 import com.sun.j3d.utils.behaviors.mouse.MouseBehavior;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;

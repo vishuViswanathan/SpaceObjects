@@ -1,4 +1,4 @@
-package SpaceElements;
+package GeneralElements;
 
 /**
  * Created by IntelliJ IDEA.

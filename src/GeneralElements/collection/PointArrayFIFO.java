@@ -1,4 +1,4 @@
-package SpaceElements.collection;
+package GeneralElements.collection;
 
 import javax.media.j3d.PointArray;
 import javax.vecmath.Color3f;
