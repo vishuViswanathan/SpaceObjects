@@ -49,7 +49,7 @@ public class Rope  extends LinkWithMass  {
     public JPanel lwmDetailsPanel() {
         MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
         nteCompression = new NumberTextField(null, eCompression, 6, false, 1, 1e10, "#,##0", "Elasticity (Force in Newton for 100%)");
-        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 02, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
+        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 0.2, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
         ntnElements = new NumberTextField(null, nElements, 6, true, 1, 100, "#,##0", "Subdivided Rope elements");
         ntRopeDia = new NumberTextField(null, ropeDia, 6, false, 0.001, 5, "#,##0.000", "Rope Diameter (m)");
         ntMassPerM = new NumberTextField(null, massPerM, 6, false, 0.001, 1000, "#,##0.000", "Mass per Unit Length (kg/m)");

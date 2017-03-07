@@ -6,8 +6,8 @@ import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
 import mvUtils.display.SmartFormatter;
-import mvUtils.math.Point3dMV;
-import mvUtils.math.Vector3dMV;
+import mvUtils.physics.Point3dMV;
+import mvUtils.physics.Vector3dMV;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 
@@ -98,7 +98,7 @@ public class Surface extends Item {
         JButton cancel = new JButton("Cancel");
         TuplePanel relPosPan, relVelPan;
         InputControl inpC;
-        JComboBox<Object> othersCB;
+        JComboBox othersCB;
 
         RelativeDlg(InputControl inpC) {
             setModal(true);
@@ -110,7 +110,7 @@ public class Surface extends Item {
             tupRelPos = new Vector3d();
             tupRelVel = new Vector3d();
             MultiPairColPanel jp = new MultiPairColPanel("Relative Data of SpaceObject");
-            othersCB = new JComboBox<Object>(space.getAllItems().toArray());
+            othersCB = new JComboBox(space.getAllItems().toArray());
             jp.addItemPair(new JLabel("Relative to "), othersCB);
             relPosPan = new TuplePanel(inpC, tupRelPos, 8, -1e20, 1e20, "##0.#####E00", "Relative position in m");
             jp.addItemPair("position in m", relPosPan);

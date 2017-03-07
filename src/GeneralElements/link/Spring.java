@@ -97,7 +97,7 @@ public class Spring extends InfluenceDef  {
         MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
         nteCompression = new NumberTextField(null, eCompression, 6, false, 1, 1e10, "#,##0", "Elasticity - Compression (Force in Newton for 100%)");
         nteExpansion = new NumberTextField(null, eExpansion, 6, false, 1, 1e10, "#,##0", "Elasticity - Expansion (Force in Newton for 100%)");
-        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 02, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
+        ntLenFactor = new NumberTextField(null, initialLenFactor, 6, false, 0.2, 10000, "#,##0.000", "Free Length Factor (Free Length/ distance");
         outerP.addItemPair(ntLenFactor);
         outerP.addItemPair(nteCompression);
         outerP.addItemPair(nteExpansion);

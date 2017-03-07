@@ -95,7 +95,7 @@ public class PlanetsAndMoons implements DefaultScheme {
             StringBuilder xmlStr = new StringBuilder();
             int itemCount = 0;
                 for (String oneFile : fileNames) {
-                    if (oneFile.indexOf(".csv") > 0) {
+                    if (oneFile.endsWith(".csv")) {
                         itemName = oneFile.substring(0, oneFile.length() - 4);
                         StringBuilder oneObjInXml = new StringBuilder();
                         item = getObjectFromTextFile(folderName + "\\" + oneFile, itemName, colors[nowColor]);

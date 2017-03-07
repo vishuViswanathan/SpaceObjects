@@ -1,9 +1,5 @@
 package SpaceElements.collection;
 
-import Applications.ItemMovementsApp;
-import SpaceElements.Planet;
-
-import javax.media.j3d.GeometryArray;
 import javax.media.j3d.PointArray;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;

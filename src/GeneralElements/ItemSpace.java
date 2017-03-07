@@ -137,6 +137,7 @@ public class ItemSpace {
     }
 
     JButton buttAddItem;
+    JToggleButton cloneItem;
     JButton buttAddLink;
     ButtonListener bl;
     ItemTable itemTable;
@@ -161,12 +162,20 @@ public class ItemSpace {
         itemTable = new ItemTable(mainApp, this, allItems);
         sP.setViewportView(itemTable.getTable());
         outerP.add(sP, BorderLayout.CENTER);
-        JPanel buttPan = new JPanel(new GridLayout(1, 2));
-        buttPan.add(buttAddItem);
-        outerP.add(buttPan, BorderLayout.SOUTH);
+//        JPanel buttPan = new JPanel(new GridLayout(1, 2));
+//        buttPan.add(buttAddItem);
+//        outerP.add(buttPan, BorderLayout.SOUTH);
+        cloneItem = new JToggleButton("Clone Item");
+        outerP.add(itemListBottomPanel(), BorderLayout.SOUTH);
         return outerP;
     }
 
+    JPanel itemListBottomPanel() {
+        JPanel buttPan = new JPanel(new GridLayout(1, 2));
+        buttPan.add(buttAddItem);
+        buttPan.add(cloneItem);
+        return buttPan;
+    }
     public void updateItemTable() {
         if (itemTable != null)
             itemTable.updateUI();

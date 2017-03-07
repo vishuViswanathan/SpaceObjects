@@ -111,7 +111,6 @@ public Pick()
     canvas.addMouseListener(this);
 
     frame.pack();
-
     frame.show();
 
 }

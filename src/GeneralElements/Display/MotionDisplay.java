@@ -39,7 +39,7 @@ import java.util.Vector;
  * Created by M Viswanathan on 23 May 2014
  */
 public class MotionDisplay  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
-    enum ViewDirection {XMinus, YMinus, ZMinus};
+    enum ViewDirection {XMinus, YMinus, ZMinus}
     ItemSpace space;
     Transform3D defVPFTransform = new Transform3D();
     boolean bViewSaved = false;
@@ -63,76 +63,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
      SimpleUniverse univ;
 
-    void jbInitOLD() throws Exception {
-        itemGraphics = new Vector<ItemGraphic>();
-        this.setSize(1100, 700);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                localViewFrame.setVisible(false);
-                controller.stopIt();
-            }
-        });
-        addWindowFocusListener(new WindowAdapter() {
-            @Override
-            public void windowGainedFocus(WindowEvent e) {
-                super.windowGainedFocus(e);
-                showCommonMenu(true);
-            }
-
-            @Override
-            public void windowLostFocus(WindowEvent e) {
-                super.windowLostFocus(e);
-                showCommonMenu(false);
-            }
-        });
-        setLayout(new BorderLayout());
-        GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
-        mainCanvas = new Canvas3D(config);
-        add(mainCanvas, BorderLayout.CENTER);
-        add(menuPanel(), BorderLayout.EAST);
-        ThreeDSize spaceSize = space.getSize();
-//        DoubleMaxMin xMaxMin = space.xMaxMin();
-//        DoubleMaxMin yMaxMin = space.yMaxMin();
-        Point3d volumeCenter = spaceSize.midPoint();
-        Vector3d volumeRange = spaceSize.range();
-        // Considering the default view in -z direction
-//        int canvasXsize = mainCanvas.getWidth();
-//        int canvasYsize = mainCanvas.getHeight();
-//        double xByY = (double)canvasXsize / (double)canvasYsize;
-        double xByY = 1.3;
-        // assuming xByY is > 1
-        maxOnOneSide = Math.max(volumeRange.x, volumeRange.y * xByY) / 2;
-//        maxOnOneSide = Math.max(Math.max(xMaxMin.max, -xMaxMin.min), Math.max(yMaxMin.max, -yMaxMin.min));
-        mainViewPlatform = new ViewingPlatform();
-        mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-
-        mainViewPlatform.setNominalViewingTransform();
-        Transform3D t3 = new Transform3D();
-        mainViewPlatform.getViewPlatformTransform().getTransform(t3);
-        double viewPosFromOrigin = 3 * maxOnOneSide;
-//        t3.setTranslation(new Vector3d(0, 0, viewPosFromOrigin));
-        t3.setTranslation(new Vector3d(volumeCenter.x, volumeCenter.y, volumeCenter.z + viewPosFromOrigin));
-        TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
-        vTg.setTransform(t3);
-//        vTg.getTransform(defVPFTransform);
-        addMouseAction(vTg);
-        Viewer viewer = new Viewer( mainCanvas );
-        viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
-        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            viewer.getView().setFrontClipDistance(0.00001);
-        univ = new SimpleUniverse(mainViewPlatform, viewer );
-        addMouseAction(mainViewPlatform, mainCanvas);  //.getViewPlatformTransform());
-        BranchGroup scene;
-        scene = createSceneGraph();
-        localViewFrame = new LocalViewFrame(commonMenuPanel, mainViewPlatform, "Local View", controller, this);
-//        prepareLocalViewPanel();
-        univ.addBranchGraph(scene);
-        setPick(mainCanvas, scene);
-        pauseRunB.doClick();
-    }
-
-    void jbInit() throws Exception {
+     void jbInit() throws Exception {
         itemGraphics = new Vector<ItemGraphic>();
         this.setSize(1100, 700);
         addWindowListener(new WindowAdapter() {
@@ -234,41 +165,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         // TODO to adjust bounds for Orbit behaviour and Rotate Behaviour
 //        defVPFTransform.set(t3);
         lastViewDirection = direction;
-    }
-
-    void setViewAllOLD(ViewDirection direction) {
-        ThreeDSize spaceSize = space.getSize();
-        Point3d volumeCenter = spaceSize.midPoint();
-        Vector3d volumeRange = spaceSize.range();
-//        int canvasXsize = mainCanvas.getWidth();
-//        int canvasYsize = mainCanvas.getHeight();
-//        double xByY = (double)canvasXsize / (double)canvasYsize;
-        double xByY = 1.3;
-        // assuming xByY is > 1
-
-        double maxOnSide;
-        switch (direction) {
-            case XMinus:
-                maxOnSide = Math.max(volumeRange.z, volumeRange.y * xByY) / 2;
-                break;
-            case YMinus:
-                maxOnSide = Math.max(volumeRange.x, volumeRange.z * xByY) / 2;
-                break;
-            default:
-                maxOnSide = Math.max(volumeRange.x, volumeRange.y * xByY) / 2;
-                break;
-        }
-        Transform3D t3 = new Transform3D();
-        mainViewPlatform.getViewPlatformTransform().getTransform(t3);
-        double viewPosFromOrigin = 3 * maxOnSide;
-        Viewer viewer = univ.getViewer();
-        viewer.getView().setBackClipDistance(2 * viewPosFromOrigin);
-        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            viewer.getView().setFrontClipDistance(0.00001);
-        t3.setTranslation(new Vector3d(volumeCenter.x, volumeCenter.y, volumeCenter.z + viewPosFromOrigin));
-        TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
-        vTg.setTransform(t3);
-        // TODO to adjust bounds for Orbit behaviour and Rotate Behaviour
     }
 
     void showCommonMenu(boolean show) {
@@ -419,9 +315,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return outerP;
     }
 
-    boolean wasInPause = false;
-
-    /**
+     /**
      * returns true if this caused the pause
      */
     public boolean pauseIfRunning() {

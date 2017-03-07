@@ -7,7 +7,7 @@ import GeneralElements.Item;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
-import mvUtils.math.Vector3dMV;
+import mvUtils.physics.Vector3dMV;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 

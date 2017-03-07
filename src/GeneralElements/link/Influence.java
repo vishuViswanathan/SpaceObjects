@@ -70,6 +70,7 @@ public class Influence {
     }
 //    enum Types {GRAVITY, SPRING, ATTRACTION, REPULSION, CSPRING, ESPRING};
     public boolean evalForce() {return false;}
+
     public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
     }
 

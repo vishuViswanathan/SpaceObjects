@@ -142,6 +142,21 @@ public class Item extends DarkMatter {
         takeFromXML(xmlStr);
     }
 
+    @Override
+    public boolean takeBasicFrom(DarkMatter fromItem) {
+        if (super.takeBasicFrom(fromItem)) {
+            if (fromItem instanceof Item) {
+                Item fromItem1 = (Item) fromItem;
+                itemType = fromItem1.itemType;
+                imageName = fromItem1.imageName;
+                isLightSrc = fromItem1.isLightSrc;
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
     public void setFlightPlan(FlightPlan flightPlan) { // TODO
         this.flightPlan = flightPlan;
         bFlightPlan = true;
@@ -170,7 +185,7 @@ public class Item extends DarkMatter {
     }
 
     static class  ItemBasic extends JDialog {
-        JComboBox<ItemType> jcItem = new JComboBox<ItemType>(ItemType.values());
+        JComboBox jcItem = new JComboBox(ItemType.values());
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
         ItemSpace theSpace;
@@ -201,7 +216,7 @@ public class Item extends DarkMatter {
         }
 
         ItemType getSelectedType() {
-            return jcItem.getItemAt(jcItem.getSelectedIndex());
+            return (ItemType)jcItem.getItemAt(jcItem.getSelectedIndex());
         }
     }
 
@@ -276,7 +291,6 @@ public class Item extends DarkMatter {
         }
         return "";
     }
-
      void setRadioButtons() {
         rbFixedPos = new JRadioButton("Fixed Position");
         rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
@@ -302,7 +316,7 @@ public class Item extends DarkMatter {
         JButton cancel = new JButton("Cancel");
         TuplePanel relPosPan, relVelPan;
         InputControl inpC;
-        JComboBox<Object> othersCB;
+        JComboBox othersCB;
 
         RelativeDlg(InputControl inpC) {
             setModal(true);
@@ -314,7 +328,7 @@ public class Item extends DarkMatter {
             tupRelPos = new Vector3d();
             tupRelVel = new Vector3d();
             MultiPairColPanel jp = new MultiPairColPanel("Relative Data of SpaceObject");
-            othersCB = new JComboBox<Object>(space.getAllItems().toArray());
+            othersCB = new JComboBox(space.getAllItems().toArray());
             jp.addItemPair(new JLabel("Relative to "), othersCB);
             relPosPan = new TuplePanel(inpC, tupRelPos, 8, -1e20, 1e20, "##0.#####E00", "Relative position in m");
             jp.addItemPair("position in m", relPosPan);
@@ -540,9 +554,9 @@ public class Item extends DarkMatter {
                 ntItemMass.setEditable(false);
                 ntItemDia.setEditable(false);
                 ntElasticity.setEditable(false);
-                itemPosTuplePan.setEditable(false);;
-                rbItemFixedPos.setEnabled(false);;
-                itemVelTuplePan.setEditable(false);;
+                itemPosTuplePan.setEditable(false);
+                rbItemFixedPos.setEnabled(false);
+                itemVelTuplePan.setEditable(false);
                 itemRelButton.setEnabled(false);
 //                boolean bFlightPlanCopy;
 //                FlightPlan flightPlanCopy;

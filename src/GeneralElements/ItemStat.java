@@ -1,7 +1,7 @@
 package GeneralElements;
 
-import mvUtils.math.Point3dMV;
-import mvUtils.math.Vector3dMV;
+import mvUtils.physics.Point3dMV;
+import mvUtils.physics.Vector3dMV;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 

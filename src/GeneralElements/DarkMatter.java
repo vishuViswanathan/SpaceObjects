@@ -6,7 +6,7 @@ import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
-import mvUtils.math.Vector3dMV;
+import mvUtils.physics.Vector3dMV;
 import timePlan.FlightPlan;
 
 import javax.swing.*;
@@ -59,6 +59,18 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.color = color;
         status = new ItemStat();
         calculateAreas();
+    }
+
+    public boolean takeBasicFrom(DarkMatter fromMatter) {
+        if (fromMatter.getClass().equals(getClass())){
+            mass = fromMatter.mass;
+            dia = fromMatter.dia;
+            radius = dia / 2;
+            eCompression = fromMatter.eCompression;
+            return true;
+        }
+        else
+            return false;
     }
 
     boolean isElastic() {

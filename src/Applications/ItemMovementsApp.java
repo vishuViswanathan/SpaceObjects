@@ -133,13 +133,14 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         setSpaceSize(SpaceSize.DAILY);
         mainF.pack();
         mainF.setVisible(true);
+
     }
 
     public boolean useAllCPUs() {
         return useAllCPUs;
     }
 
-    void setTimingValues(double calculationStep, double refreshInterval, double duration, boolean benableItemGravity,
+    void setTimingValues(double calculationStep, double refreshInterval, double duration, boolean bEnableItemGravity,
                          boolean bShowLinks, boolean bShowOrbit, boolean bRealTime)  {
         this.calculationStep = calculationStep;
         this.refreshInterval = refreshInterval;
@@ -149,7 +150,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         this.bShowLinks = bShowLinks;
         this.bShowOrbit = bShowOrbit;
         this.bRealTime = bRealTime;
-        space.enableItemGravity(benableItemGravity);
+        space.enableItemGravity(bEnableItemGravity);
     }
 
     class TimingValuesDlg extends JDialog {
@@ -228,7 +229,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     JRadioButtonMenuItem rIEarth = new JRadioButtonMenuItem("Earth and Environment (m)");
     JRadioButtonMenuItem rIAstronomical = new JRadioButtonMenuItem("Astronomical (km)");
     JRadioButtonMenuItem rIMolecular = new JRadioButtonMenuItem("Molecular (micrometer)");
-    JComboBox<DefaultScheme> cbSchemes;
+    JComboBox cbSchemes;
     JCheckBoxMenuItem ckAllCPU;
 
     JMenu mScheme;
@@ -287,7 +288,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         try {
             for (String schemeName: schemesList)
                 defaultSchemes.add((DefaultScheme)Class.forName("schemes." + schemeName).newInstance());
-            cbSchemes = new JComboBox<DefaultScheme>(defaultSchemes);
+            cbSchemes = new JComboBox(defaultSchemes);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

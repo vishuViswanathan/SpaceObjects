@@ -6,8 +6,7 @@ import GeneralElements.ItemSpace;
 import mvUtils.display.InputControl;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,23 +17,32 @@ import java.util.LinkedList;
  */
 public class ItemTable {
     JTable table;
+    ItemMovementsApp mainApp;
     InputControl inpC;
     LinkedList<Item> allItems;
     int slNo = 0;
     ItemSpace space;
     ItemTableModel tableModel;
+    int markedRow = -1;
 
-    public ItemTable(InputControl inpC, ItemSpace space, LinkedList<Item> allItems) {
+    public ItemTable(ItemMovementsApp mainApp, ItemSpace space, LinkedList<Item> allItems) {
+        this.mainApp = mainApp;
         this.inpC = inpC;
         this.space = space;
         this.allItems = allItems;
         tableModel = new ItemTableModel();
         table = new JTable(tableModel);
+//        table.setDefaultRenderer(new ItemRenderer());
         table.addMouseListener(new TableListener());
         TableColumnModel colModel = table.getColumnModel();
         int[] colWidth = Item.getColumnWidths();
-        for (int c = 0; c < colModel.getColumnCount(); c++)
-            colModel.getColumn(c).setPreferredWidth(colWidth[c]);
+        TableColumn col;
+        TableCellRenderer  renderer = new ItemRenderer();
+        for (int c = 0; c < colModel.getColumnCount(); c++) {
+            col = colModel.getColumn(c);
+            col.setPreferredWidth(colWidth[c]);
+            col.setCellRenderer(renderer);
+        }
     }
 
     public JTable getTable() {
@@ -71,6 +79,7 @@ public class ItemTable {
      class ItemTableModel extends DefaultTableModel {
          ItemTableModel() {
              super(Item.getColHeader(), 0);
+
              fillTable();
 //             for (int i = 0; i < allItems.size(); i++)
 //                 addRow(allItems.get(i).getRowData(slNo = (i + 1)));
@@ -86,28 +95,83 @@ public class ItemTable {
              int nRow = getRowCount();
              for (int r = nRow - 1;  r >= 0; r--)
                  tableModel.removeRow(r);
+
          }
+    }
+
+    Color defSelectedBgColor = Color.GRAY;
+    Color markColor = Color.RED;
+    Color normalBG = Color.WHITE;
+
+    class ItemRenderer extends DefaultTableCellRenderer {
+        public ItemRenderer() { super(); }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column);
+            if (isSelected) {
+                if (row == markedRow)
+                    c.setBackground(markColor);
+                else
+                    c.setBackground(defSelectedBgColor);
+            }
+            else
+                c.setBackground(normalBG);
+            return c;
+        }
     }
 
     class TableListener extends MouseAdapter {
         @Override
+        public void mouseReleased(MouseEvent e) {
+            int r = table.rowAtPoint(e.getPoint());
+            if (r >= 0 && r < table.getRowCount()) {
+                table.setRowSelectionInterval(r, r);
+            } else {
+                table.clearSelection();
+            }
+        }
+
+        @Override
         public void mouseClicked(MouseEvent e) {
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                int row = table.getSelectedRow();
-                Item thisItem = allItems.get(row);
-                switch (thisItem.editItem("", inpC, (Component)e.getSource())) {
-                    case CHANGED:
-                        setOneRow(row);
-                        break;
-                    case NOTCHANGED:
-                        ItemMovementsApp.showMessage("no Change");
-                        break;
-                    case DELETE:
-                        ItemMovementsApp.showMessage("DELETE WHAT ABOUT LINKS?");
-                        space.removeLinksOf(thisItem);
-                        deleteRow(row);
-                        break;
-                }
+            int event = e.getButton();
+            switch (event) {
+                case MouseEvent.BUTTON3:
+                    markedRow = table.getSelectedRow();
+                    break;
+                 case MouseEvent.BUTTON1:
+                    int row = table.getSelectedRow();
+                    Item thisItem = allItems.get(row);
+                    if (markedRow >= 0){
+                        if (markedRow == row)
+                            mainApp.showError("Copy on to itself! " + markedRow);
+                        else {
+                            if (thisItem.takeBasicFrom(allItems.get(markedRow))) {
+                                setOneRow(row);
+                            }
+                            else
+                                mainApp.showError("They are not similar objects");
+                            markedRow = -1;
+                        }
+                    }
+                    else {
+                        switch (thisItem.editItem("", inpC, (Component) e.getSource())) {
+                            case CHANGED:
+                                setOneRow(row);
+                                break;
+                            case NOTCHANGED:
+//                                ItemMovementsApp.showMessage("no Change");
+                                break;
+                            case DELETE:
+                                ItemMovementsApp.showMessage("DELETE WHAT ABOUT LINKS?");
+                                space.removeLinksOf(thisItem);
+                                deleteRow(row);
+                                break;
+                        }
+                    }
+                    markedRow = -1;
+                    break;
             }
         }
     }

@@ -16,17 +16,17 @@ import javax.vecmath.Vector3d;
  * Created as a separate class and a WeakReference to the Item
  */
 public class ItemGraphic {
-    TransformGroup positionTrGrp;
-    TransformGroup tgPlanet;
-    TransformGroup trgAxis;
-    TransformGroup trgRotation;
-    PathShape[] orbitShapes;
-    PointArrayFIFO ptArr;
-    int nShapeSets = 4;
-    int nPos = 2000; // number of positions
-    Color3f color3f;
+    private TransformGroup positionTrGrp;
+    private TransformGroup tgPlanet;
+    private TransformGroup trgAxis;
+    private TransformGroup trgRotation;
+    private PathShape[] orbitShapes;
+    private PointArrayFIFO ptArr;
+    private int nShapeSets = 4;
+    private int nPos = 2000; // number of positions
+    private Color3f color3f;
     double viewScale = 1;
-    Item item;
+    private Item item;
 
     public ItemGraphic(Item item) {
         this.item = item;
