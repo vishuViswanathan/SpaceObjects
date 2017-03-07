@@ -3,7 +3,7 @@ package Applications;
 import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemSpace;
 import GeneralElements.Constants;
-import GeneralElements.time.DateAndJDN;
+import time.DateAndJDN;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;

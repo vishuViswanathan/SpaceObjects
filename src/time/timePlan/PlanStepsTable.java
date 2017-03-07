@@ -1,4 +1,4 @@
-package timePlan;
+package time.timePlan;
 
 import Applications.ItemMovementsApp;
 import mvUtils.display.InputControl;

@@ -1,4 +1,4 @@
-package timePlan;
+package time.timePlan;
 
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;

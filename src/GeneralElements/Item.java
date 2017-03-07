@@ -11,8 +11,8 @@ import mvUtils.display.NumberTextField;
 import mvUtils.display.SmartFormatter;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
-import timePlan.FlightPlan;
-import timePlan.FlightPlanEditor;
+import time.timePlan.FlightPlan;
+import time.timePlan.FlightPlanEditor;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;

@@ -1,4 +1,4 @@
-package timePlan;
+package time.timePlan;
 
 import GeneralElements.DarkMatter;
 import mvUtils.mvXML.ValAndPos;

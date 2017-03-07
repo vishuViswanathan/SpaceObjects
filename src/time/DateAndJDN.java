@@ -1,4 +1,4 @@
-package GeneralElements.time;
+package time;
 
 import mvUtils.display.NumberLabel;
 

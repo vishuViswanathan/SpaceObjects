@@ -7,7 +7,7 @@ import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
 import mvUtils.physics.Vector3dMV;
-import timePlan.FlightPlan;
+import time.timePlan.FlightPlan;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;

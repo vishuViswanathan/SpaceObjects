@@ -1,7 +1,7 @@
 package GeneralElements.Display;
 
 import GeneralElements.Item;
-import GeneralElements.collection.PointArrayFIFO;
+import collection.PointArrayFIFO;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
 import javax.media.j3d.*;
