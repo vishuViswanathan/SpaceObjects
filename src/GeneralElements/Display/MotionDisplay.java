@@ -703,18 +703,18 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             Object s = result.getNode(PickResult.SHAPE3D);
             if (s != null) {
                 if (s instanceof PathShape) {
-                    showLocalView(((PathShape) s).planet.planet);
-                    debug("Selected via Path " + ((PathShape) s).planet.planet.name);
+                    showLocalView(((PathShape) s).planet.getItem());
+                    debug("Selected via Path " + ((PathShape) s).planet.getItem().name);
                     done = true;
                 }
             }
             if (!done) {
                 Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
                 if (p != null) {
-                    if (p instanceof ItemSphere) {
-                        showLocalView(((ItemSphere) p).planet, e.getX(), e.getY());
+                    if (p instanceof ObjectDisplay) {
+                        showLocalView(((ObjectDisplay) p).getItem(), e.getX(), e.getY());
 //                                    showPlanet((ItemSphere) p, e.getX(), e.getY());
-                        debug("Selected " + ((ItemSphere) p).planet.name);
+                        debug("Selected " + ((ObjectDisplay) p).getItem().name);
                     }
                 }
             }

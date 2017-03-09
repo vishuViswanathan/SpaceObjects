@@ -13,7 +13,7 @@ import java.awt.*;
 /**
  * Created by M Viswanathan on 23 May 2014
  */
-public class ItemSphere extends Sphere {
+public class ItemSphere extends Sphere implements ObjectDisplay {
     public Item planet;
     Appearance ap;
     public ItemSphere(Item object) {
@@ -52,6 +52,10 @@ public class ItemSphere extends Sphere {
         ap.setMaterial(blueMat);
         setAppearance(ap);
         setPickable(true);
+    }
+
+    public Item getItem() {
+        return planet;
     }
 
     public void setRenderingAttribute(RenderingAttributes renderingAttribute) {

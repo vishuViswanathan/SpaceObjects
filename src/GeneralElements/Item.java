@@ -31,7 +31,8 @@ import java.lang.ref.WeakReference;
 public class Item extends DarkMatter {
     static public enum ItemType {
         ITEM("Item"), // default spherical object
-        SURFACE("Surface");
+        SURFACE("Surface"),
+        VMRL("from VMRL file");
 
         private final String typeName;
 
@@ -114,6 +115,7 @@ public class Item extends DarkMatter {
     public double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
 
+
     public Item(Window parent) {
         super(parent);
         itemType = ItemType.ITEM;
@@ -177,6 +179,9 @@ public class Item extends DarkMatter {
             case SURFACE:
                 theItem = new Surface(theParent, theName);
                 break;
+            case VMRL:
+                ItemMovementsApp.showError("Item.182:getNewItem: Not Ready for VRML");
+                break;
             default:
                 theItem = new Item(theParent, theName);
                 break;
@@ -232,6 +237,9 @@ public class Item extends DarkMatter {
                     case SURFACE:
                         theItem = new Surface(xmlStr, parent);
                         done = true;
+                        break;
+                    case VMRL:
+                        ItemMovementsApp.showError("Item.338: getItemFromXML:Not Ready for VRML ");
                         break;
                 }
             }
