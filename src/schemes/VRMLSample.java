@@ -25,11 +25,20 @@ public class VRMLSample implements DefaultScheme{
         Item it;
         it =  new Item("Rocket", mass2, vrmlFile, mainF);
         it.initPosEtc(new Point3d(0,0, 0), new Vector3d(0, 0, 0));
-        Vector3d f = new Vector3d(0, 0, 1000);
-        Point3d actingPt = new Point3d(0.000, 0, -2.5);
-        it.setMomentsOfInertia(50, 50, 50);
+        it.setbFixedLocation(true);
+        try {
+            it.setMomentsOfInertia(50, 50, 10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Vector3d f = new Vector3d(10, 0, 0);
+        Point3d actingPt = new Point3d(0.0, 0.1, 0);
         it.addJet(f, actingPt);
 
+//        f = new Vector3d(0, 0, 1000);
+//        actingPt = new Point3d(0.002, 0, -2.5);
+//        it.addJet(f, actingPt);
         space.addItem(it);
 
         return true;

@@ -23,6 +23,7 @@ import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -122,7 +123,10 @@ public class Item extends DarkMatter {
     double nextReport; // sec
     Vector<ForceElement> jets = new Vector<ForceElement>();
     Point3d centerOfMass = new Point3d(0, 0, 0);
-    double[] mI = new double[3];
+    double[] mI = new double[3]; // about xx, yy and zz
+    Vector3d oneByMI = new Vector3d();
+    Vector3d jetForce = new Vector3d();
+    Torque jetTorque = new Torque();
 
 
     public Item(Window parent) {
@@ -146,6 +150,7 @@ public class Item extends DarkMatter {
         super(name, mass, 10, Color.green, parent);
         itemType = ItemType.VMRL;
         this.vrmlFile = vrmlFile;
+        setRadioButtons();
         thisItem = this;
     }
 
@@ -156,10 +161,15 @@ public class Item extends DarkMatter {
         takeFromXML(xmlStr);
     }
 
-    public void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) {
-        mI[Torque.AboutX] = mIxx;
-        mI[Torque.AboutY] = mIyy;
-        mI[Torque.AboutZ] = mIzz;
+    public void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) throws Exception{
+        if (mIxx > 0 && mIyy > 0 && mIzz > 0) {
+            mI[Torque.AboutX] = mIxx;
+            mI[Torque.AboutY] = mIyy;
+            mI[Torque.AboutZ] = mIzz;
+            oneByMI.set(1 / mIxx, 1 / mIyy, 1 / mIzz);
+        }
+        else
+            throw new Exception("Some Moment of Inertial parameters are not acceptable");
     }
 
     @Override
@@ -803,8 +813,6 @@ public class Item extends DarkMatter {
         status.angularVelocity.set(newAngularVelocity);
         status.angularAcceleration.set(thisAngularAcc);
     }
-    Vector3d jetForce = new Vector3d();
-    Torque jetTorque = new Torque();
     Vector3d lastTorque = new Torque();
     Vector3d lastAngularVelocity = new Vector3d();
     Vector3dMV effectiveTorque = new Vector3dMV();
@@ -817,6 +825,29 @@ public class Item extends DarkMatter {
     Vector3dMV newAngle = new Vector3dMV();
 
     boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
+        boolean changed = false;
+        if (nowT > 7.5) {
+            debug("#820: jets stopped");
+            jetTorque.set(0, 0, 0);
+            jetForce.set(0, 0, 0);
+        }
+        if (bFinal) {
+            effectiveTorque.setMean(jetTorque, lastTorque);
+            thisAngularAcc.scale(oneByMI, effectiveTorque);
+            deltaAngularV.scale(deltaT, thisAngularAcc);
+            newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
+            averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
+            deltaAngle.scale(deltaT, averageAngularV);
+            newAngle.add(lastAngle, deltaAngle);
+//            if (bFlightPlan)
+//                mass += flightPlan.massChange(deltaT);
+            itemGraphic.get().updateAngularPosition(deltaAngle);
+            changed = true;
+        }
+        return changed;
+    }
+
+    boolean updateAngularPosAndVelocityOLD(double deltaT, double nowT, boolean bFinal) { // TODO to be removed
         boolean changed = false;
         if (nowT > 7.5) {
             debug("#820: jets stopped");

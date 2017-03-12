@@ -178,6 +178,28 @@ public class ItemGraphic {
     public void updateAngularPosition(Vector3d angle ) {
         Transform3D tr = new Transform3D();
         trgRotation.getTransform(tr);
+        if (angle.x != 0) {
+            Transform3D rotTrX = new Transform3D();
+            rotTrX.rotX(angle.x);
+            tr.mul(rotTrX);
+        }
+        if (angle.y != 0) {
+            Transform3D rotTrY = new Transform3D();
+            rotTrY.rotY(angle.y);
+            tr.mul(rotTrY);
+        }
+        if (angle.z != 0) {
+            Transform3D rotTrZ = new Transform3D();
+            rotTrZ.rotZ(angle.z);
+            tr.mul(rotTrZ);
+        }
+        rotTransform.set(tr);
+        trgRotation.setTransform(rotTransform);
+    }
+
+    public void updateAngularPositionOLD(Vector3d angle ) { // TODO to be removed
+        Transform3D tr = new Transform3D();
+        trgRotation.getTransform(tr);
         Transform3D rotTr = new Transform3D();
         double a = angle.length();
         rotTr.rotY(a);
