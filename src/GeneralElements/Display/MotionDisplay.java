@@ -120,7 +120,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     void setViewAll(ViewDirection direction) {
         ThreeDSize spaceSize = space.getSize();
         Point3d volumeCenter = spaceSize.midPoint();
-        debug("" + volumeCenter);
+        debug("MotionDisplay.123: Volume Center " + volumeCenter);
         Vector3d volumeRange = spaceSize.range();
 //        int canvasXsize = mainCanvas.getWidth();
 //        int canvasYsize = mainCanvas.getHeight();
@@ -709,12 +709,15 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                 }
             }
             if (!done) {
-                Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
+//                Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
+                Object p = result.getNode(PickResult.GROUP);
+                if (p == null)
+                    p = result.getNode(PickResult.BRANCH_GROUP);
                 if (p != null) {
-                    if (p instanceof ObjectDisplay) {
-                        showLocalView(((ObjectDisplay) p).getItem(), e.getX(), e.getY());
+                    if (p instanceof AttributeSetter) {
+                        showLocalView(((AttributeSetter) p).getItem(), e.getX(), e.getY());
 //                                    showPlanet((ItemSphere) p, e.getX(), e.getY());
-                        debug("Selected " + ((ObjectDisplay) p).getItem().name);
+                        debug("Selected " + ((AttributeSetter) p).getItem().name);
                     }
                 }
             }

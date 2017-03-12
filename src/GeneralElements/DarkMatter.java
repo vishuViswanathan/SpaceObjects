@@ -6,6 +6,7 @@ import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
+import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.FlightPlan;
 
@@ -26,7 +27,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean bFixedLocation = false;
     Vector<LocalAction> localActions;
     public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
-    Vector3d force = new Vector3d();
+    Vector3d netForce = new Vector3d();
     public String name;
     public double mass;
     public double dia;
@@ -42,7 +43,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     FlightPlan flightPlan;
     boolean bFlightPlan = false;
     double rocketFuelLoss = 0;
-    Vector3d rocketForce = new Vector3d();
+    Vector3d rocketForce = new Vector3d(); // TODO this may be removed
+
 
     public DarkMatter(Window parent) {
         this.parentW = parent;
@@ -198,31 +200,31 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3dMV newPos = new Vector3dMV();
 
     public void initStartForce() {
-        force.set(0, 0, 0); // this may not be correct
+        netForce.set(0, 0, 0); // this may not be correct
     }
 
     public void setStartConditions(double duration) {
         if (!bFixedLocation) {
             lastPosition.set(status.pos);
             lastVelocity.set(status.velocity);
-            lastForce.set(force);
+            lastForce.set(netForce);
         }
     }
 
     public void setLocalForces() {
-        force.set(0, 0, 0);
+        netForce.set(0, 0, 0);
         for (LocalAction action : localActions)
-            force.add(action.getForce());
+            netForce.add(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
-            force.add(gAction.getForce(this));
+            netForce.add(gAction.getForce(this));
     }
 
     public synchronized void addToForce(Vector3d addForce)  {
-        force.add(addForce);
+        netForce.add(addForce);
     }
 
     public synchronized void subtractFromForce(Vector3d subtractForce) {
-        force.sub(subtractForce);
+        netForce.sub(subtractForce);
     }
 
     /**
@@ -256,9 +258,9 @@ public class DarkMatter implements InputControl, EvalOnce {
         if (bFixedLocation)
             changed = false;
         else {
-            effectiveForce.setMean(force, lastForce);
+            effectiveForce.setMean(netForce, lastForce);
             thisAcc.scale((1.0/ mass), effectiveForce);
-            // calculate from force
+            // calculate from netForce
             deltaV.scale(deltaT, thisAcc);
             newVelocity.add(lastVelocity, deltaV);
             averageV.setMean(lastVelocity, newVelocity);

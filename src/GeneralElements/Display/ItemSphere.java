@@ -13,7 +13,7 @@ import java.awt.*;
 /**
  * Created by M Viswanathan on 23 May 2014
  */
-public class ItemSphere extends Sphere implements ObjectDisplay {
+public class ItemSphere extends Sphere implements AttributeSetter {
     public Item planet;
     Appearance ap;
     public ItemSphere(Item object) {

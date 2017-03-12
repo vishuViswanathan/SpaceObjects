@@ -17,9 +17,13 @@ import javax.vecmath.Vector3d;
  */
 public class ItemGraphic {
     TransformGroup positionTrGrp;
+    Transform3D positionTransform = new Transform3D();
     TransformGroup tgPlanet;
+    Transform3D scaleTransform = new Transform3D();
     TransformGroup trgAxis;
+    Transform3D axisTransform = new Transform3D();
     TransformGroup trgRotation;
+    Transform3D rotTransform = new Transform3D();
     PathShape[] orbitShapes;
     PointArrayFIFO ptArr;
     int nShapeSets = 4;
@@ -40,12 +44,11 @@ public class ItemGraphic {
     }
 
 
-
     public void setScale (double scale) {
-        Transform3D tr = new Transform3D();
-        tgPlanet.getTransform(tr);
-        tr.setScale(scale);
-        tgPlanet.setTransform(tr);
+//        Transform3D scaleTransform = new Transform3D();
+        tgPlanet.getTransform(scaleTransform);
+        scaleTransform.setScale(scale);
+        tgPlanet.setTransform(scaleTransform);
         viewScale = scale;
     }
 
@@ -64,7 +67,7 @@ public class ItemGraphic {
         bPlatformAttached = false;
     }
 
-    ItemSphere planet;
+    ItemDisplay planet;
 
     private void createSphereAndOrbitPath(RenderingAttributes orbitAtrib) throws Exception {
         positionTrGrp = new TransformGroup();
@@ -82,16 +85,16 @@ public class ItemGraphic {
 
         tgPlanet.setTransform(alignPlanet);
         if (item.spinAxis != null) {
-            Transform3D axisT = new Transform3D();
-            trgAxis.getTransform(axisT);
-            axisT.set(item.spinAxis);
-            trgAxis.setTransform(axisT);
+//            axisTransform = new Transform3D();
+            trgAxis.getTransform(axisTransform);
+            axisTransform.set(item.spinAxis);
+            trgAxis.setTransform(axisTransform);
         }
         trgRotation = new TransformGroup();
         trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         positionTrGrp.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        planet = new ItemSphere(item);
+        planet = new ItemDisplay(item);
         tgPlanet.addChild(planet);
         trgRotation.addChild(tgPlanet);
         Light l = getLightIfEnabled();
@@ -147,13 +150,13 @@ public class ItemGraphic {
 
     private void updateObjectPosition() throws Exception {
         // position the planet
-        Transform3D tr = new Transform3D();
-        positionTrGrp.getTransform(tr);
+//        Transform3D positionTransform = new Transform3D();
+        positionTrGrp.getTransform(positionTransform);
         Vector3d posVector = new Vector3d(item.status.pos);
-        tr.setTranslation(posVector);
+        positionTransform.setTranslation(posVector);
 //        posVector = null;
         try {
-            positionTrGrp.setTransform(tr);
+            positionTrGrp.setTransform(positionTransform);
         } catch (Exception e) {
             String msg = e.getMessage();
             item.showError(e.getMessage());
@@ -163,13 +166,31 @@ public class ItemGraphic {
 
     void updateSpin(double spinIncrement) {
         if (spinIncrement != 0) {
-            Transform3D rotTr = new Transform3D();
-            trgRotation.getTransform(rotTr);
+//            rotTransform = new Transform3D();
+            trgRotation.getTransform(rotTransform);
             Transform3D rotZ = new Transform3D();
             rotZ.rotZ(spinIncrement);
-            rotTr.mul(rotZ);
-            trgRotation.setTransform(rotTr);
+            rotTransform.mul(rotZ);
+            trgRotation.setTransform(rotTransform);
         }
     }
 
+    public void updateAngularPosition(Vector3d angle ) {
+        Transform3D tr = new Transform3D();
+        trgRotation.getTransform(tr);
+        Transform3D rotTr = new Transform3D();
+        double a = angle.length();
+        rotTr.rotY(a);
+        tr.mul(rotTr);
+        rotTransform.set(tr);
+        trgRotation.setTransform(rotTransform);
+    }
+
+    public Transform3D getTotalTransform(Transform3D transform) {
+        transform.set(rotTransform);
+        transform.mul(axisTransform);
+        transform.mul(scaleTransform);
+        transform.mul(positionTransform);
+        return transform;
+    }
 }

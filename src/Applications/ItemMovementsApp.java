@@ -74,7 +74,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                             "ChainWithBall",
                             "Mesh",
                             "MultiPendulum",
-                            "PlanetsAndMoons"
+                            "PlanetsAndMoons",
+                            "VRMLSample"
     };
 
     ItemMovementsApp mainApp;

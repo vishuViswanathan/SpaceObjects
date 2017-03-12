@@ -17,6 +17,8 @@ public class ItemStat {
         POSITION("Position"),
         VELOCITY("VELOCITY"),
         ACCELERATION("Acceleration"),
+        OMEGA("Angular Velocity"),
+        ALPHA("Angular Acceleration"),
         TIME("Time");
 
         private final String statusName;
@@ -54,12 +56,16 @@ public class ItemStat {
     double distFromPrimary;
     public Point3dMV pos;
     public Vector3dMV velocity;
+    public Vector3dMV angularVelocity;
     Vector3dMV acc;
+    public Vector3dMV angularAcceleration;
 
     public ItemStat () {
         velocity = new Vector3dMV();
         pos = new Point3dMV();
         acc = new Vector3dMV();
+        angularVelocity = new Vector3dMV();
+        angularAcceleration = new Vector3dMV();
     }
 
     public ItemStat(String xmlStr) throws NumberFormatException {
@@ -71,12 +77,24 @@ public class ItemStat {
         this.pos.set(pos);
         this.velocity.set(velocity);
         acc.set(0, 0, 0);
+        angularVelocity.set(0, 0, 0);
+        angularAcceleration.set(0, 0, 0);
+    }
+
+    public void initPos(Point3d pos, Vector3d velocity, Vector3d angularVelocity) {
+        this.pos.set(pos);
+        this.velocity.set(velocity);
+        acc.set(0, 0, 0);
+        angularVelocity.set(angularVelocity);
+        angularAcceleration.set(0, 0, 0);
     }
 
     public void add(ItemStat withStat) {
         pos.add(withStat.pos);
         velocity.add(withStat.velocity);
         acc.add(withStat.acc);
+        angularVelocity.add(withStat.angularVelocity);
+        angularAcceleration.add(withStat.angularAcceleration);
         distFromPrimary = 0;
     }
 
@@ -91,12 +109,23 @@ public class ItemStat {
         csvStr.append("" + (factor * velocity.x));
         csvStr.append(", " + (factor * velocity.y));
         csvStr.append(", " + (factor * velocity.z));
+        csvStr.append(", " + (factor * velocity.z));
+        return csvStr;
+    }
+
+    public StringBuilder angularVelocityStringForCSV(double factor) {
+        StringBuilder csvStr = new StringBuilder();
+        csvStr.append("" + (factor * angularVelocity.x));
+        csvStr.append(", " + (factor * angularVelocity.y));
+        csvStr.append(", " + (factor * angularVelocity.z));
         return csvStr;
     }
 
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("pos", pos.dataInCSV())).
                                     append(XMLmv.putTag("vel", velocity.dataInCSV()));
+        if (angularVelocity.isNonZero())
+            xmlStr.append(XMLmv.putTag("angularVel", angularVelocity.dataInCSV()));
         return xmlStr;
     }
 
@@ -107,6 +136,9 @@ public class ItemStat {
         pos.set(vp.val);
         vp = XMLmv.getTag(xmlStr, "vel", 0);
         velocity.set(vp.val);
+        vp = XMLmv.getTag(xmlStr, "angularVel", 0);
+        if (vp.val.length() > 0)
+            angularVelocity.set(vp.val);
         return retVal;
     }
 
@@ -121,6 +153,12 @@ public class ItemStat {
                 break;
             case ACCELERATION:
                 vector = new Vector3d(acc);
+                break;
+            case OMEGA:
+                vector = new Vector3d(angularVelocity);
+                break;
+            case ALPHA:
+                vector = new Vector3d(angularAcceleration);
                 break;
         }
         return vector;
@@ -137,6 +175,12 @@ public class ItemStat {
             case ACCELERATION:
                 acc.set(newVal);
                 break;
+            case OMEGA:
+                angularVelocity.set(newVal);
+                break;
+            case ALPHA:
+                angularAcceleration.set(newVal);
+                break;
         }
     }
 
@@ -151,6 +195,12 @@ public class ItemStat {
                 break;
             case ACCELERATION:
                 csv = acc.dataInCSV();
+                break;
+            case OMEGA:
+                csv = angularVelocity.dataInCSV();
+                break;
+            case ALPHA:
+                csv = angularAcceleration.dataInCSV();
                 break;
         }
         return csv;
@@ -168,6 +218,12 @@ public class ItemStat {
             case ACCELERATION:
                 csv = acc.dataInCSV(fmtStr);
                 break;
+            case OMEGA:
+                csv = angularVelocity.dataInCSV(fmtStr);
+                break;
+            case ALPHA:
+                csv = angularAcceleration.dataInCSV(fmtStr);
+                break;
         }
         return csv;
     }
@@ -180,6 +236,10 @@ public class ItemStat {
                 return velocity.dataInCSV(significantDigits);
             case ACCELERATION:
                 return acc.dataInCSV(significantDigits);
+            case OMEGA:
+                return angularVelocity.dataInCSV(significantDigits);
+            case ALPHA:
+                return angularAcceleration.dataInCSV(significantDigits);
          }
         return "";
     }

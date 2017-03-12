@@ -11,11 +11,15 @@ import mvUtils.display.NumberTextField;
 import mvUtils.display.SmartFormatter;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
+import mvUtils.physics.ForceElement;
+import mvUtils.physics.Torque;
+import mvUtils.physics.Vector3dMV;
 import time.timePlan.FlightPlan;
 import time.timePlan.FlightPlanEditor;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
+import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
@@ -24,13 +28,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
+import java.util.Vector;
 
 /**
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
     static public enum ItemType {
-        ITEM("Item"), // default spherical object
+        SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
         VMRL("from VMRL file");
 
@@ -98,7 +103,8 @@ public class Item extends DarkMatter {
             return retVal;
         }
     }
-    ItemType itemType;
+    public ItemType itemType;
+    public String vrmlFile;
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
     double xMin, yMin, zMin;
@@ -114,11 +120,14 @@ public class Item extends DarkMatter {
     Item thisItem;
     public double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
+    Vector<ForceElement> jets = new Vector<ForceElement>();
+    Point3d centerOfMass = new Point3d(0, 0, 0);
+    double[] mI = new double[3];
 
 
     public Item(Window parent) {
         super(parent);
-        itemType = ItemType.ITEM;
+        itemType = ItemType.SPHERE;
         thisItem = this;
     }
 
@@ -128,20 +137,29 @@ public class Item extends DarkMatter {
 
     public Item(String name, double mass, double dia, Color color, Window parent) {
         super(name, mass, dia, color, parent);
-        itemType = ItemType.ITEM;
+        itemType = ItemType.SPHERE;
         setRadioButtons();
         thisItem = this;
     }
 
-    public Item(ItemSpace space, String name, double mass, double dia, Color color, Window parent) {
-        this(name, mass, dia, color, parent);
-        this.space = space;
+    public Item(String name, double mass, String vrmlFile, Window parent) {
+        super(name, mass, 10, Color.green, parent);
+        itemType = ItemType.VMRL;
+        this.vrmlFile = vrmlFile;
+        thisItem = this;
     }
 
-    public Item(String xmlStr, Window parent) {
+
+     public Item(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
         takeFromXML(xmlStr);
+    }
+
+    public void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) {
+        mI[Torque.AboutX] = mIxx;
+        mI[Torque.AboutY] = mIyy;
+        mI[Torque.AboutZ] = mIzz;
     }
 
     @Override
@@ -157,6 +175,12 @@ public class Item extends DarkMatter {
         }
         else
             return false;
+    }
+
+     public int addJet(Vector3d force, Point3d actingPoint) {
+        ForceElement fe = new ForceElement(force, actingPoint, centerOfMass, null);
+        jets.add(fe);
+        return jets.size();
     }
 
     public void setFlightPlan(FlightPlan flightPlan) { // TODO
@@ -182,7 +206,7 @@ public class Item extends DarkMatter {
             case VMRL:
                 ItemMovementsApp.showError("Item.182:getNewItem: Not Ready for VRML");
                 break;
-            default:
+            case SPHERE:
                 theItem = new Item(theParent, theName);
                 break;
         }
@@ -199,7 +223,7 @@ public class Item extends DarkMatter {
             setModal(true);
             this.theSpace = theSpace;
             this.theName = theName;
-            jcItem.setSelectedItem(ItemType.ITEM);
+            jcItem.setSelectedItem(ItemType.SPHERE);
             setTitle("Selection Object Type");
             MultiPairColPanel jp = new MultiPairColPanel("Selection Object Type");
             jp.addItemPair("Selected Type", jcItem);
@@ -240,6 +264,10 @@ public class Item extends DarkMatter {
                         break;
                     case VMRL:
                         ItemMovementsApp.showError("Item.338: getItemFromXML:Not Ready for VRML ");
+                        break;
+                    case SPHERE:
+                        theItem = new Item(xmlStr, parent);
+                        done = true;
                         break;
                 }
             }
@@ -295,7 +323,10 @@ public class Item extends DarkMatter {
                 return "Sphere with Mass:" + fmt.format(mass) +
                         ",    Dia:" + fmt.format(dia) +
                         ",    Pos:" + status.dataInCSV(ItemStat.Param.POSITION, 4) +
-                        ((bFixedLocation) ? " Static"  : ",    Vel:" + status.dataInCSV(ItemStat.Param.VELOCITY, 4));
+                        ((bFixedLocation) ?
+                                " Static"  : ",    Vel:" + status.dataInCSV(ItemStat.Param.VELOCITY, 4)) +
+                        ((status.angularAcceleration.isNonZero())?
+                            ", angVel:" + status.dataInCSV(ItemStat.Param.OMEGA, 4) : "");
         }
         return "";
     }
@@ -644,15 +675,28 @@ public class Item extends DarkMatter {
             else
                 rocketForce.set(0, 0, 0);
         }
+        // get Jet Force and torque
+        jetForce.set(0, 0, 0);
+        jetTorque.set(0, 0, 0);
+        for (ForceElement fE: jets) {
+            jetForce.add(fE.getForce());
+            jetTorque.add(fE.getTorque());
+        }
+        Transform3D tr = new Transform3D();
+        itemGraphic.get().getTotalTransform(tr);
+        tr.transform(jetForce);
     }
 
     public void setLocalForces() {
         super.setLocalForces();
-        force.add(rocketForce);
+        netForce.add(rocketForce);
+        netForce.add(jetForce);
     }
 
         @Override
     public void setStartConditions(double duration) {
+        lastTorque.set(jetTorque);
+        lastAngularVelocity.set(newAngularVelocity);
         super.setStartConditions(duration);
         evalForceFromBuiltInSource(duration);
     }
@@ -740,17 +784,62 @@ public class Item extends DarkMatter {
     //    =========================== calculations ======================
 
     public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
-        if (super.updatePosAndVel(deltaT, nowT, bFinal)) {
+        updateAngularPosAndVelocity(deltaT, nowT, bFinal);
+        super.updatePosAndVel(deltaT, nowT, bFinal);
+
+//        if (super.updatePosAndVel(deltaT, nowT, bFinal)) {
             evalMaxMinPos();
             if (nowT > nextReport) {
+                updateAngularPosData();
                 updateOrbitAndPos();
                 nextReport += reportInterval;
             }
-        }
+
+//        }
         return true;
     }
 
-        double lastTime = 0;
+    void updateAngularPosData() {
+        status.angularVelocity.set(newAngularVelocity);
+        status.angularAcceleration.set(thisAngularAcc);
+    }
+    Vector3d jetForce = new Vector3d();
+    Torque jetTorque = new Torque();
+    Vector3d lastTorque = new Torque();
+    Vector3d lastAngularVelocity = new Vector3d();
+    Vector3dMV effectiveTorque = new Vector3dMV();
+    Vector3dMV thisAngularAcc = new Vector3dMV();
+    Vector3dMV deltaAngularV = new Vector3dMV();
+    Vector3dMV newAngularVelocity = new Vector3dMV();
+    Vector3dMV averageAngularV = new Vector3dMV();
+    Vector3dMV deltaAngle= new Vector3dMV();
+    Vector3d lastAngle = new Vector3d();
+    Vector3dMV newAngle = new Vector3dMV();
+
+    boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
+        boolean changed = false;
+        if (nowT > 7.5) {
+            debug("#820: jets stopped");
+            jetTorque.set(0, 0, 0);
+            jetForce.set(0, 0, 0);
+        }
+        if (bFinal) {
+            effectiveTorque.setMean(jetTorque, lastTorque);
+            thisAngularAcc.scale((1.0 / mI[0]), effectiveTorque);
+            deltaAngularV.scale(deltaT, thisAngularAcc);
+            newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
+            averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
+            deltaAngle.scale(deltaT, averageAngularV);
+            newAngle.add(lastAngle, deltaAngle);
+//            if (bFlightPlan)
+//                mass += flightPlan.massChange(deltaT);
+            itemGraphic.get().updateAngularPosition(deltaAngle);
+            changed = true;
+        }
+    return changed;
+    }
+
+    double lastTime = 0;
     double radPerSec = 0;
 
     double getSpinIncrement() {
@@ -770,6 +859,8 @@ public class Item extends DarkMatter {
         StringBuilder csvStr = new StringBuilder(name + "\n");
         csvStr.append("Position , " + status.positionStringForCSV(posFactor) + "\n");
         csvStr.append("Velocity , ").append(status.velocityStringForCSV(velFactor)).append("\n");
+//        if (status.angularVelocity.isNonZero())
+            csvStr.append("AngVel , ").append(status.angularVelocityStringForCSV(1)).append("\n");
         return csvStr;
     }
 
@@ -849,4 +940,9 @@ public class Item extends DarkMatter {
         }
         return retVal;
     }
+
+    void debug(String msg) {
+        System.out.println("Item: " + msg);
+    }
+
 }

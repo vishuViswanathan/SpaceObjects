@@ -90,20 +90,12 @@ public class OneStep implements Cloneable {
         return new OneStep(duration, new Vector3d(forceDirection), forceSource.clone(), bRelativeToVelocity);
     }
 
-    public OneStep(OneStep cloneFrom) {
-        this.duration = cloneFrom.duration;
-        this.forceDirection = new Vector3dMV(cloneFrom.forceDirection);
-        this.forceSource = cloneFrom.forceSource;
-        this.bRelativeToVelocity = cloneFrom.bRelativeToVelocity;
-        this.effectiveForce = new Vector3d(cloneFrom.effectiveForce);
-
-    }
-
-    void setEffectiveForce() {
+     void setEffectiveForce() {
         if (!bRelativeToVelocity && (forceDirection.length() > 0)) {
             this.forceDirection = new Vector3dMV(1.0 / forceDirection.length(), forceDirection);
-            effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
         }
+        effectiveForce.scale(forceSource.effectiveForce(), forceDirection);
+
     }
 
     double massChange(double duration) {

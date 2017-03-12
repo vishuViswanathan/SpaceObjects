@@ -391,16 +391,16 @@ public class ItemSpace {
         setItemStartConditions(deltaT);
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
-            evaluator.awaitStartLinkCalculations(); // this should start the force calculations
-            evaluator.awaitForceComplete(); // now all force calculations are ready
+            evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
+            evaluator.awaitForceComplete(); // now all netForce calculations are ready
             updatePosAndVel(evaluator, deltaT, nowT, false);
 
         }
         // now finalise it
         if (ok) {
             initForces();
-            evaluator.awaitStartLinkCalculations(); // this should start the force calculations
-            evaluator.awaitForceComplete(); // now all force calculations are ready
+            evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
+            evaluator.awaitForceComplete(); // now all netForce calculations are ready
             updatePosAndVel(evaluator, deltaT, nowT, true);
         }
         return ok;
