@@ -5,17 +5,17 @@ import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import mvUtils.display.InputControl;
-import mvUtils.display.MultiPairColPanel;
-import mvUtils.display.NumberTextField;
-import mvUtils.display.SmartFormatter;
+import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.ForceElement;
+import mvUtils.physics.Point3dMV;
 import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.FlightPlan;
 import time.timePlan.FlightPlanEditor;
+import time.timePlan.JetController;
+import time.timePlan.JetTimeController;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -23,7 +23,6 @@ import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -35,7 +34,7 @@ import java.util.Vector;
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
-    static public enum ItemType {
+     public enum ItemType {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
         VMRL("from VMRL file");
@@ -69,9 +68,9 @@ public class Item extends DarkMatter {
         }
     }
 
-    static public enum EditResponse{CHANGED, NOTCHANGED, DELETE, CANCEL, OK}
+    public enum EditResponse{CHANGED, NOTCHANGED, DELETE, CANCEL, OK}
 
-    static public enum ColType {
+    public enum ColType {
         SLNO("SlNo."),
         NAME("Name"),
         DETAILS("Details");
@@ -121,12 +120,15 @@ public class Item extends DarkMatter {
     Item thisItem;
     public double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
-    Vector<ForceElement> jets = new Vector<ForceElement>();
+    Vector<ForceElement> forceElements = new Vector<ForceElement>();
     Point3d centerOfMass = new Point3d(0, 0, 0);
     double[] mI = new double[3]; // about xx, yy and zz
     Vector3d oneByMI = new Vector3d();
     Vector3d jetForce = new Vector3d();
     Torque jetTorque = new Torque();
+
+    JetTimeController jetController;
+    Vector<Jet> jets = new Vector<Jet>();
 
 
     public Item(Window parent) {
@@ -161,6 +163,10 @@ public class Item extends DarkMatter {
         takeFromXML(xmlStr);
     }
 
+    public void setJetController(JetTimeController jetController) {
+        this.jetController = jetController;
+    }
+
     public void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) throws Exception{
         if (mIxx > 0 && mIyy > 0 && mIzz > 0) {
             mI[Torque.AboutX] = mIxx;
@@ -187,10 +193,70 @@ public class Item extends DarkMatter {
             return false;
     }
 
-     public int addJet(Vector3d force, Point3d actingPoint) {
+    public Jet addOneJet(Jet jet) {
+        jetController.addOneJet(jet);
+        jets.add(jet);
+        return jet;
+    }
+
+    public void removeJet(Jet jet) {
+        jets.remove(jet);
+        jetController.removeOneJet(jet);
+
+    }
+
+    public Jet addOneJet(String name, Vector3d force, Point3d actingPt) {
+        Jet jet = new Jet(name, new ForceElement(force, actingPt, new Point3d(), null));
+        jetController.addOneJet(jet);
+        jets.add(jet);
+        return jet;
+    }
+
+    public boolean addOneJetPlanStep(Jet jet, double startTime, double duration) {
+        boolean retVal = false;
+        if (jets.contains(jet)) {
+            retVal = jetController.addOneJetPlanStep(jet, startTime, duration);
+        }
+        return retVal;
+    }
+
+    public DataWithStatus<Jet> addOneJet(String jetName, Vector3d force, Point3d actingPoint, double startTime, double duration) {
+        DataWithStatus<Jet> response = new DataWithStatus<Jet>();
+        Jet j = addOneJet(name,force, actingPoint);
+        if (addOneJetPlanStep(j, startTime, duration)) {
+            response.setValue(j);
+        }
+        else {
+            removeJet(j);
+            response.setErrorMsg("Some error in Jet time definition");
+        }
+        return response;
+    }
+
+    public DataWithStatus<Boolean> addJetCouple(String baseName, Vector3d force, Point3d actingPoint,
+                                                Vector3dMV.Axis aboutAxis, double startTime, double duration) {
+        DataWithStatus<Boolean> response = new DataWithStatus<Boolean>();
+        String j1Name = baseName + "1";
+        Jet j1 = addOneJet(j1Name, force, actingPoint);
+        if (addOneJetPlanStep(j1, startTime, duration)) {
+            String j2Name = baseName + "2";
+            Vector3d oppForce = new Vector3d(force);
+            oppForce.negate();
+            Point3dMV oppPoint = new Point3dMV(actingPoint);
+            oppPoint.negateOneAxis(aboutAxis);
+            Jet j2 = addOneJet(baseName + "2", oppForce, oppPoint);
+            if (!addOneJetPlanStep(j2, startTime, duration))
+                response.setErrorMsg("Some Error in timing of " + j2Name);
+        }
+        else
+            response.setErrorMsg("Some Error in timing of " + j1Name);
+        return response;
+    }
+
+    public int addForceElements(Vector3d force, Point3d actingPoint) {
         ForceElement fe = new ForceElement(force, actingPoint, centerOfMass, null);
-        jets.add(fe);
-        return jets.size();
+        forceElements.add(fe);
+        return forceElements.size();
     }
 
     public void setFlightPlan(FlightPlan flightPlan) { // TODO
@@ -678,7 +744,7 @@ public class Item extends DarkMatter {
         zMin = Double.POSITIVE_INFINITY;
     }
 
-    public void evalForceFromBuiltInSource(double duration) { // TODO
+    public void evalForceFromBuiltInSource(double duration, double nowT) { // TODO
         if (bFlightPlan) {
             if (flightPlan.isActive()) // TODO this must be done only once in each cycle
                 flightPlan.getForce(rocketForce, duration);
@@ -688,9 +754,12 @@ public class Item extends DarkMatter {
         // get Jet Force and torque
         jetForce.set(0, 0, 0);
         jetTorque.set(0, 0, 0);
-        for (ForceElement fE: jets) {
-            jetForce.add(fE.getForce());
-            jetTorque.add(fE.getTorque());
+        if (jetController != null) {
+            jetController.upDateAllJetStatus(duration, nowT);
+            for (Jet oneJet : jets) {
+                jetForce.add(oneJet.getForce());
+                jetTorque.add(oneJet.getTorque());
+            }
         }
         Transform3D tr = new Transform3D();
         itemGraphic.get().getTotalTransform(tr);
@@ -704,11 +773,11 @@ public class Item extends DarkMatter {
     }
 
         @Override
-    public void setStartConditions(double duration) {
+    public void setStartConditions(double duration, double nowT) {
         lastTorque.set(jetTorque);
         lastAngularVelocity.set(newAngularVelocity);
-        super.setStartConditions(duration);
-        evalForceFromBuiltInSource(duration);
+        super.setStartConditions(duration, nowT);
+        evalForceFromBuiltInSource(duration, nowT);
     }
 
     void evalMaxMinPos() {
@@ -794,6 +863,7 @@ public class Item extends DarkMatter {
     //    =========================== calculations ======================
 
     public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+
         updateAngularPosAndVelocity(deltaT, nowT, bFinal);
         super.updatePosAndVel(deltaT, nowT, bFinal);
 
@@ -826,11 +896,11 @@ public class Item extends DarkMatter {
 
     boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
         boolean changed = false;
-        if (nowT > 7.5) {
-            debug("#820: jets stopped");
-            jetTorque.set(0, 0, 0);
-            jetForce.set(0, 0, 0);
-        }
+//        if (nowT > 7.5) {
+//            debug("#820: forceElements stopped");
+//            jetTorque.set(0, 0, 0);
+//            jetForce.set(0, 0, 0);
+//        }
         if (bFinal) {
             effectiveTorque.setMean(jetTorque, lastTorque);
             thisAngularAcc.scale(oneByMI, effectiveTorque);
@@ -850,7 +920,7 @@ public class Item extends DarkMatter {
     boolean updateAngularPosAndVelocityOLD(double deltaT, double nowT, boolean bFinal) { // TODO to be removed
         boolean changed = false;
         if (nowT > 7.5) {
-            debug("#820: jets stopped");
+            debug("#820: forceElements stopped");
             jetTorque.set(0, 0, 0);
             jetForce.set(0, 0, 0);
         }

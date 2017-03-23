@@ -123,8 +123,8 @@ public class ItemLink implements EvalOnce {
         inf.updatePosAndVel(deltaT, nowT, bFinal);
     }
 
-    public void setStartConditions(double duration) {
-        inf.setStartConditions(duration);
+    public void setStartConditions(double duration, double nowT) {
+        inf.setStartConditions(duration, nowT);
     }
 
     static int cellHeight = 30;

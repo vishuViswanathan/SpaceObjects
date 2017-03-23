@@ -342,11 +342,11 @@ public class ItemSpace {
             link.setLocalForces();
     }
 
-    void setItemStartConditions(double duration) {
+    void setItemStartConditions(double duration, double nowT) {
         for (Item i: allItems)
-            i.setStartConditions(duration);
+            i.setStartConditions(duration, nowT);
         for (ItemLink link:allItemLinks)
-            link.setStartConditions(duration);
+            link.setStartConditions(duration, nowT);
     }
 
     void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
@@ -358,7 +358,7 @@ public class ItemSpace {
 
     boolean evalInfluence(double deltaT, double nowT) throws Exception  {
         boolean ok = true;
-        setItemStartConditions(deltaT);
+        setItemStartConditions(deltaT, nowT);
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
@@ -388,7 +388,7 @@ public class ItemSpace {
 
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         boolean ok = true;
-        setItemStartConditions(deltaT);
+        setItemStartConditions(deltaT, nowT);
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations

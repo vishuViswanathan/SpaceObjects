@@ -86,7 +86,7 @@ public class Influence {
     public boolean addLinksDisplay(Group grp, RenderingAttributes linkAtrib) {
         return false;
     }
-    public void setStartConditions(double duration) {}
+    public void setStartConditions(double duration, double nowT) {}
     public void initStartForces(){}
     public void setGravityLinks(boolean bSet) {}
     public void setLocalForces() {}

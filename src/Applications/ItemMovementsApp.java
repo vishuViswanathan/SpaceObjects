@@ -181,7 +181,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     "Calculation step in seconds");
             ntUpdate = new NumberTextField(mainApp, upDateMultiplier, 6, false, 1, 10000, "#,###",
                     "Update once in this many steps");
-            ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 1, 10, "#0",
+            ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 0, 10, "#0",
                     "Number of times each step is repeated for Position/Force accuracy");
             MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
             jp.addItemPair(ntCalculStep);

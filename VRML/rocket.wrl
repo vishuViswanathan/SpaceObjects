@@ -7,8 +7,8 @@ DEF PayLoad Transform {
     appearance	Appearance {
       material	Material {
 	ambientIntensity	0.238636
-	diffuseColor	0.0 0.8 0.00
-	specularColor	0.0 0.8 0.00
+	diffuseColor	0.8 0.8 0.80
+	specularColor	0.5 0.5 0.00
 	emissiveColor	0 0 0
 	shininess	0.08
 	transparency	0
@@ -30,10 +30,10 @@ DEF Body Transform {
   children	Shape {
     appearance	Appearance {
        texture ImageTexture {
-                    url "bodyImage.jpg"
-                    repeatS TRUE
-                    repeatT TRUE
-                }
+            url "bodyImage.jpg"
+            repeatS TRUE
+            repeatT TRUE
+        }
 
       material	Material {
 	ambientIntensity	0.25

@@ -203,7 +203,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         netForce.set(0, 0, 0); // this may not be correct
     }
 
-    public void setStartConditions(double duration) {
+    public void setStartConditions(double duration, double nowT) {
         if (!bFixedLocation) {
             lastPosition.set(status.pos);
             lastVelocity.set(status.velocity);

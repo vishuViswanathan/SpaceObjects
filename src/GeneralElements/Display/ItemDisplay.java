@@ -19,6 +19,7 @@ public class ItemDisplay extends Group {
     AttributeSetter attributeSetter;
 
     public ItemDisplay(Item theItem) {
+        this.theItem = theItem;
         switch (theItem.itemType) {
             case SPHERE:
                 ItemSphere theDisplay = new ItemSphere(theItem);
