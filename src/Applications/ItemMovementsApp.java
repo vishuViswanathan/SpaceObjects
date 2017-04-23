@@ -885,7 +885,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     @Override
     public Window parent() {
-        return mainF;  //To change body of implemented methods use File | Settings | File Templates.
+        return mainF;
     }
 
     public static void showError(String msg) {

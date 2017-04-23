@@ -711,8 +711,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             if (!done) {
 //                Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
                 Object p = result.getNode(PickResult.GROUP);
-                if (p == null)
-                    p = result.getNode(PickResult.BRANCH_GROUP);
+//                if (p == null)
+//                    p = result.getNode(PickResult.BRANCH_GROUP);
                 if (p != null) {
                     if (p instanceof AttributeSetter) {
                         showLocalView(((AttributeSetter) p).getItem(), e.getX(), e.getY());

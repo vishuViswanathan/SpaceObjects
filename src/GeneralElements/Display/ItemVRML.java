@@ -48,21 +48,11 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
         if (scene != null) {
             // get the scene group
             BranchGroup sceneGrp = scene.getSceneGroup();
-//            sceneGrp.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-//            sceneGrp.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-//            sceneGrp.setCapability(Shape3D.ALLOW_COLLISION_BOUNDS_READ);
-//            sceneGrp.setCapability(Shape3D.ALLOW_APPEARANCE_OVERRIDE_READ);
-//            sceneGrp.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
             addChild(sceneGrp);
 
             setCapability(BranchGroup.ALLOW_BOUNDS_READ);
             setCapability(BranchGroup.ALLOW_CHILDREN_READ);
-
-//            setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-//            setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-//            setCapability(Shape3D.ALLOW_COLLISION_BOUNDS_READ);
-//            setCapability(Shape3D.ALLOW_APPEARANCE_OVERRIDE_READ);
-
+            setCapability(BranchGroup.ENABLE_PICK_REPORTING);
         }
 
         Bounds lightBounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);

@@ -35,7 +35,7 @@ public class VRMLSample implements DefaultScheme{
 
         JetTimeController jetController = new JetTimeController(it);
         it.setJetController(jetController);
-        it.addOneJet("Main", new Vector3d(0, 0, 100), new Point3d(0.000, 0.000, -2.5), 2.0, 100000);
+        it.addOneJet("Main", new Vector3d(0, 0, 100), new Point3d(0.000, 0.000, -2.5), 2.0, 10);
         it.addJetCouple("ctrl", new Vector3d(0, 100, 0), new Point3d(0.00, 0.000, -0.002),
                 Vector3dMV.Axis.Z, 5, 4);
         it.addJetCouple("ctrl2", new Vector3d(0, -100, 0), new Point3d(0.00, 0.000, -0.002),

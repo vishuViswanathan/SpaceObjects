@@ -3,6 +3,7 @@ package GeneralElements;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
+import GeneralElements.globalActions.VResistanceG;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.*;
@@ -14,7 +15,7 @@ import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.FlightPlan;
 import time.timePlan.FlightPlanEditor;
-import time.timePlan.JetController;
+import time.timePlan.JetTable;
 import time.timePlan.JetTimeController;
 
 import javax.media.j3d.Group;
@@ -23,6 +24,7 @@ import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -128,11 +130,16 @@ public class Item extends DarkMatter {
     Torque jetTorque = new Torque();
 
     JetTimeController jetController;
-    Vector<Jet> jets = new Vector<Jet>();
 
 
-    public Item(Window parent) {
+    protected Item(Window parent) {
         super(parent);
+        itemType = ItemType.SPHERE;
+        thisItem = this;
+    }
+
+    public Item(Window theParent, String name, ItemType type) {
+        super(theParent);
         itemType = ItemType.SPHERE;
         thisItem = this;
     }
@@ -152,6 +159,7 @@ public class Item extends DarkMatter {
         super(name, mass, 10, Color.green, parent);
         itemType = ItemType.VMRL;
         this.vrmlFile = vrmlFile;
+        jetController = new JetTimeController(this);
         setRadioButtons();
         thisItem = this;
     }
@@ -178,6 +186,20 @@ public class Item extends DarkMatter {
             throw new Exception("Some Moment of Inertial parameters are not acceptable");
     }
 
+    private boolean setMomentsOfInertia(String csv) {
+        boolean retVal = false;
+        String[] mIset = csv.split(",");
+        try {
+            if (mIset.length == 3) {
+                setMomentsOfInertia(Double.valueOf(mIset[0]), Double.valueOf(mIset[1]), Double.valueOf(mIset[2]));
+                retVal = true;
+            }
+        } catch (Exception e) {
+            retVal = false;
+        }
+        return retVal;
+    }
+
     @Override
     public boolean takeBasicFrom(DarkMatter fromItem) {
         if (super.takeBasicFrom(fromItem)) {
@@ -195,12 +217,10 @@ public class Item extends DarkMatter {
 
     public Jet addOneJet(Jet jet) {
         jetController.addOneJet(jet);
-        jets.add(jet);
         return jet;
     }
 
     public void removeJet(Jet jet) {
-        jets.remove(jet);
         jetController.removeOneJet(jet);
 
     }
@@ -208,16 +228,11 @@ public class Item extends DarkMatter {
     public Jet addOneJet(String name, Vector3d force, Point3d actingPt) {
         Jet jet = new Jet(name, new ForceElement(force, actingPt, new Point3d(), null));
         jetController.addOneJet(jet);
-        jets.add(jet);
         return jet;
     }
 
     public boolean addOneJetPlanStep(Jet jet, double startTime, double duration) {
-        boolean retVal = false;
-        if (jets.contains(jet)) {
-            retVal = jetController.addOneJetPlanStep(jet, startTime, duration);
-        }
-        return retVal;
+        return jetController.addOneJetPlanStep(jet, startTime, duration);
     }
 
     public DataWithStatus<Jet> addOneJet(String jetName, Vector3d force, Point3d actingPoint, double startTime, double duration) {
@@ -253,16 +268,16 @@ public class Item extends DarkMatter {
         return response;
     }
 
-    public int addForceElements(Vector3d force, Point3d actingPoint) {
-        ForceElement fe = new ForceElement(force, actingPoint, centerOfMass, null);
-        forceElements.add(fe);
-        return forceElements.size();
-    }
-
-    public void setFlightPlan(FlightPlan flightPlan) { // TODO
-        this.flightPlan = flightPlan;
-        bFlightPlan = true;
-    }
+//    public int addForceElements(Vector3d force, Point3d actingPoint) { // TODO-remove
+//        ForceElement fe = new ForceElement(force, actingPoint, centerOfMass, null);
+//        forceElements.add(fe);
+//        return forceElements.size();
+//    }
+//
+//    public void setFlightPlan(FlightPlan flightPlan) { // TODO-remove
+//        this.flightPlan = flightPlan;
+//        bFlightPlan = true;
+//    }
 
     boolean anyFlightPlan() {
         bFlightPlan = (flightPlan != null) && (flightPlan.isValid());
@@ -272,19 +287,21 @@ public class Item extends DarkMatter {
     static public Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
         Item theItem = null;
         ItemBasic dlg = new ItemBasic(theSpace, theName);
-        dlg.setLocation(600, 400);
+        dlg.setLocationRelativeTo(theParent);
         dlg.setVisible(true);
-        ItemType selectedType = dlg.getSelectedType();
-        switch (selectedType) {
-            case SURFACE:
-                theItem = new Surface(theParent, theName);
-                break;
-            case VMRL:
-                ItemMovementsApp.showError("Item.182:getNewItem: Not Ready for VRML");
-                break;
-            case SPHERE:
-                theItem = new Item(theParent, theName);
-                break;
+        if (dlg.getResponse() == EditResponse.OK) {
+            ItemType selectedType = dlg.getSelectedType();
+            switch (selectedType) {
+                case SURFACE:
+                    theItem = new Surface(theParent, theName);
+                    break;
+                case VMRL:
+                    theItem = new Item(theName, 10000, "C:\\Java Programs\\SpaceObjects\\VRML\\rocket.wrl", theParent);
+                    break;
+                case SPHERE:
+                    theItem = new Item(theParent, theName);
+                    break;
+            }
         }
         return theItem;
     }
@@ -295,6 +312,7 @@ public class Item extends DarkMatter {
         JButton cancel = new JButton("Cancel");
         ItemSpace theSpace;
         String theName;
+        EditResponse response = EditResponse.CANCEL;
         ItemBasic(ItemSpace theSpace, String theName) {
             setModal(true);
             this.theSpace = theSpace;
@@ -307,12 +325,13 @@ public class Item extends DarkMatter {
             jp.addItemPair(cancel, ok);
             add(jp);
             pack();
-            ok.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    closeThisWindow();
-                }
-            });
+            ActionListener li = e-> {
+                Object src = e.getSource();
+                if (src == ok)
+                    response = EditResponse.OK;
+                closeThisWindow();};
+            ok.addActionListener(li);
+            cancel.addActionListener(li);
         }
 
         void closeThisWindow() {
@@ -322,6 +341,10 @@ public class Item extends DarkMatter {
 
         ItemType getSelectedType() {
             return (ItemType)jcItem.getItemAt(jcItem.getSelectedIndex());
+        }
+
+        EditResponse getResponse() {
+            return response;
         }
     }
 
@@ -339,8 +362,9 @@ public class Item extends DarkMatter {
                         done = true;
                         break;
                     case VMRL:
-                        ItemMovementsApp.showError("Item.338: getItemFromXML:Not Ready for VRML ");
-                        break;
+//                        th
+//                        ItemMovementsApp.showError("Item.338: getItemFromXML:Not Ready for VRML ");
+//                        break;
                     case SPHERE:
                         theItem = new Item(xmlStr, parent);
                         done = true;
@@ -424,7 +448,7 @@ public class Item extends DarkMatter {
 
     RelativeDlg relDlg;
 
-    class RelativeDlg extends JDialog {
+    public class RelativeDlg extends JDialog {
         Item parent;
         Vector3d tupRelPos, tupRelVel;
         JButton ok = new JButton("OK");
@@ -505,15 +529,17 @@ public class Item extends DarkMatter {
         anyFlightPlan();
     }
 
-    public EditResponse editItem(InputControl inpC) {
-        return editItem("", inpC, null);
+    public EditResponse editItem(InputControl inpC, Component c) {
+        return editItem("", inpC, c);
     }
 
     class ItemDialog extends JDialog {
         JTextField tfItemName;
+        JTextField tfVRMLflePath;
         JButton colorButton = new JButton("Object Color");
         JLabel banner = new JLabel("");
         NumberTextField ntItemMass, ntItemDia;
+        TuplePanel tpMI;
         NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
         JRadioButton rbItemFixedPos;
@@ -521,7 +547,7 @@ public class Item extends DarkMatter {
         JButton itemRelButton = new JButton("Set Relative Data");
         boolean bFlightPlanCopy;
         FlightPlan flightPlanCopy;
-        JButton jbFlightPlan = new JButton();
+        JButton jbManageJets = new JButton("Manage Jets");
         JButton delete = new JButton("DELETE");
         JButton ok = new JButton("Save");
         JButton cancel = new JButton("Cancel");
@@ -529,11 +555,13 @@ public class Item extends DarkMatter {
         EditResponse response = EditResponse.CHANGED;
         boolean allowEdit = false;
         boolean freezePosition = false;
+        JDialog thisDlg;
 //        LocalActionsTable localActionTable;
 
         ItemDialog(String title, boolean allowEdit, boolean freezePosition, InputControl inpC, Component c) {
             setModal(true);
             setResizable(false);
+            thisDlg = this;
             this.inpC = inpC;
             this.allowEdit = allowEdit;
             if (allowEdit)
@@ -549,6 +577,7 @@ public class Item extends DarkMatter {
         ItemDialog(String title, boolean allowEdit, InputControl inpC, Component c) {
             this(title, allowEdit, false, inpC, c);
         }
+
         ItemDialog(String title, InputControl inpC, Component c) {
             this(title, true, false, inpC, c);
         }
@@ -559,33 +588,43 @@ public class Item extends DarkMatter {
                 flightPlanCopy = flightPlan.clone();
             else
                 flightPlanCopy = new FlightPlan(thisItem);
-            setFlightPlanButton();
+//            setFlightPlanButton();
             JPanel outerPan = new JPanel(new BorderLayout());
             MultiPairColPanel jp = new MultiPairColPanel("Data of Item");
             tfItemName = new JTextField(name, 10);
             jp.addItemPair("Object Name", tfItemName);
-            banner.setPreferredSize(new Dimension(100, 20));
-            banner.setBackground(color);
-            banner.setOpaque(true);
-            colorButton.addActionListener(new ActionListener() {
-                                              @Override
-                                              public void actionPerformed(ActionEvent e) {
-                                                  Color newColor = JColorChooser.showDialog(
-                                                          ItemDialog.this,
-                                                          "Choose Item Color",
-                                                          banner.getBackground());
-                                                  if (newColor != null) {
-                                                      color = newColor;
-                                                      banner.setBackground(newColor);
-                                                  }
-                                              }
+            if (itemType == ItemType.VMRL) {
+                tfVRMLflePath = new JTextField(vrmlFile, 30);
+                jp.addItemPair("VRML File Path", tfVRMLflePath);
+            }
+            else {
+                banner.setPreferredSize(new Dimension(100, 20));
+                banner.setBackground(color);
+                banner.setOpaque(true);
+                colorButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Color newColor = JColorChooser.showDialog(
+                                ItemDialog.this,
+                                "Choose Item Color",
+                                banner.getBackground());
+                        if (newColor != null) {
+                            color = newColor;
+                            banner.setBackground(newColor);
+                        }
+                    }
 
-                                          });
-            jp.addItemPair(colorButton, banner);
+                });
+                jp.addItemPair(colorButton, banner);
+                ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
+                jp.addItemPair(ntItemDia);
+            }
             ntItemMass = new NumberTextField(inpC, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
             jp.addItemPair(ntItemMass);
-            ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
-            jp.addItemPair(ntItemDia);
+            if (itemType == ItemType.VMRL) {
+                tpMI = new TuplePanel(inpC, new Vector3d(mI), 6, 0, 1e20, "#,###.000", "Mass Moment of Inertia (kg.m2)");
+                jp.addItemPair(tpMI.getTitle(), tpMI);
+            }
             ntElasticity = new NumberTextField(inpC, eCompression, 6, false, 0, 1e20, "##0.####E00", "Elasticity N/100%");
             jp.addItemPair(ntElasticity);
             jp.addItemPair("", itemRelButton);
@@ -607,7 +646,7 @@ public class Item extends DarkMatter {
             jpVel.add(itemVelTuplePan, BorderLayout.CENTER);
             jp.addItemPair("Velocity in m/s", jpVel);
             jp.addBlank();
-            jp.addItemPair("Flight Plan", jbFlightPlan);
+            jp.addItemPair("Jets", jbManageJets);
             itemRelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -619,13 +658,11 @@ public class Item extends DarkMatter {
                 }
             });
             outerPan.add(jp, BorderLayout.CENTER);
-//            localActionTable = new LocalActionsTable(getThisItem(), inpC);
-//            outerPan.add(localActionTable.getLocalActionPanel(), BorderLayout.EAST);
             ActionListener li = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
-                    if (src == jbFlightPlan) {
-                        getFlightPlan();
+                    if (src == jbManageJets) {
+                        editJetList(thisDlg);
                     }
                     else if (src == ok) {
                         if (takeValuesFromUI())
@@ -638,12 +675,7 @@ public class Item extends DarkMatter {
                         }
                     }
                     else {
-//                        if (localActionTable.getEditResponse() == EditResponse.CHANGED) {
-//                            ItemMovementsApp.showMessage("Some Local Responses have changed and Saved");
-//                            response = EditResponse.CHANGED;
-//                        }
-//                        else
-                            response = EditResponse.NOTCHANGED;
+                        response = EditResponse.NOTCHANGED;
                         closeThisWindow();
                      }
                 }
@@ -651,7 +683,7 @@ public class Item extends DarkMatter {
             delete.addActionListener(li);
             ok.addActionListener(li);
             cancel.addActionListener(li);
-            jbFlightPlan.addActionListener(li);
+            jbManageJets.addActionListener(li);
             JPanel buttPanel = new JPanel(new BorderLayout());
             buttPanel.add(delete, BorderLayout.WEST);
             buttPanel.add(cancel, BorderLayout.CENTER);
@@ -673,9 +705,7 @@ public class Item extends DarkMatter {
                 rbItemFixedPos.setEnabled(false);
                 itemVelTuplePan.setEditable(false);
                 itemRelButton.setEnabled(false);
-//                boolean bFlightPlanCopy;
-//                FlightPlan flightPlanCopy;
-                jbFlightPlan.setEnabled(false);
+                jbManageJets.setEnabled(false);
                 delete.setEnabled(false);
                 ok.setEnabled(false);
             }
@@ -687,13 +717,17 @@ public class Item extends DarkMatter {
 
         }
 
+        void editJetList(Component c) {
+            jetController.editJetController(inpC, c);
+        }
+
         void getFlightPlan() {
             FlightPlanEditor flightPlanEditor = new FlightPlanEditor(space);
             flightPlanEditor.editPlan(inpC, flightPlanCopy);
         }
 
         void setFlightPlanButton() {
-            jbFlightPlan.setText((flightPlanCopy.isValid()) ? "Edit Flight Plan" : "Add Flight Plan");
+            jbManageJets.setText((flightPlanCopy.isValid()) ? "Edit Flight Plan" : "Add Flight Plan");
         }
 
         EditResponse getResponse() {
@@ -704,14 +738,25 @@ public class Item extends DarkMatter {
             boolean retVal = false;
             name = tfItemName.getText();
             if (name.length() > 1 && (!name.substring(0,2).equals("##"))) {
-                mass = ntItemMass.getData();
-                dia = ntItemDia.getData();
-                eCompression = ntElasticity.getData();
-                status.pos.set(itemPosTuplePan.getTuple3d());
-                status.velocity.set(itemVelTuplePan.getTuple3d());
-                bFixedLocation = rbItemFixedPos.isSelected();
-                flightPlan = flightPlanCopy;
-                retVal = true;
+                try {
+                    mass = ntItemMass.getData();
+                    if (itemType != ItemType.VMRL) {
+                        dia = ntItemDia.getData();
+                    } else {
+                        vrmlFile = tfVRMLflePath.getText().trim();
+                        Vector3d  mIxyz = new Vector3d(tpMI.getTuple3d());
+                        setMomentsOfInertia(mIxyz.x, mIxyz.y, mIxyz.z);
+                    }
+                    eCompression = ntElasticity.getData();
+                    status.pos.set(itemPosTuplePan.getTuple3d());
+                    status.velocity.set(itemVelTuplePan.getTuple3d());
+                    bFixedLocation = rbItemFixedPos.isSelected();
+                    flightPlan = flightPlanCopy;
+                    retVal = true;
+                } catch (Exception e) {
+                    showError("Some parameter is not acceptable");
+                    retVal = false;
+                }
             }
             else
                 showError("Enter Item Name");
@@ -756,7 +801,7 @@ public class Item extends DarkMatter {
         jetTorque.set(0, 0, 0);
         if (jetController != null) {
             jetController.upDateAllJetStatus(duration, nowT);
-            for (Jet oneJet : jets) {
+            for (Jet oneJet : jetController.jets) {
                 jetForce.add(oneJet.getForce());
                 jetTorque.add(oneJet.getTorque());
             }
@@ -775,7 +820,9 @@ public class Item extends DarkMatter {
         @Override
     public void setStartConditions(double duration, double nowT) {
         lastTorque.set(jetTorque);
-        lastAngularVelocity.set(newAngularVelocity);
+//        lastAngularVelocity.set(newAngularVelocity);
+        lastAngularVelocity.set(status.angularVelocity);
+        lastAngle.set(status.angularPos);
         super.setStartConditions(duration, nowT);
         evalForceFromBuiltInSource(duration, nowT);
     }
@@ -870,7 +917,7 @@ public class Item extends DarkMatter {
 //        if (super.updatePosAndVel(deltaT, nowT, bFinal)) {
             evalMaxMinPos();
             if (nowT > nextReport) {
-                updateAngularPosData();
+//                updateAngularPosData();
                 updateOrbitAndPos();
                 nextReport += reportInterval;
             }
@@ -879,10 +926,13 @@ public class Item extends DarkMatter {
         return true;
     }
 
-    void updateAngularPosData() {
+    void updateAngularStatus() {
+        status.angularPos.set(newAngle);
         status.angularVelocity.set(newAngularVelocity);
         status.angularAcceleration.set(thisAngularAcc);
     }
+
+
     Vector3d lastTorque = new Torque();
     Vector3d lastAngularVelocity = new Vector3d();
     Vector3dMV effectiveTorque = new Vector3dMV();
@@ -912,32 +962,13 @@ public class Item extends DarkMatter {
 //            if (bFlightPlan)
 //                mass += flightPlan.massChange(deltaT);
             itemGraphic.get().updateAngularPosition(deltaAngle);
+            updateAngularStatus();
+//            status.angularPos.set(newAngle);
+//            status.angularVelocity.set(newAngularVelocity);
+//            status.angularAcceleration.set(thisAngularAcc);
             changed = true;
         }
         return changed;
-    }
-
-    boolean updateAngularPosAndVelocityOLD(double deltaT, double nowT, boolean bFinal) { // TODO to be removed
-        boolean changed = false;
-        if (nowT > 7.5) {
-            debug("#820: forceElements stopped");
-            jetTorque.set(0, 0, 0);
-            jetForce.set(0, 0, 0);
-        }
-        if (bFinal) {
-            effectiveTorque.setMean(jetTorque, lastTorque);
-            thisAngularAcc.scale((1.0 / mI[0]), effectiveTorque);
-            deltaAngularV.scale(deltaT, thisAngularAcc);
-            newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
-            averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
-            deltaAngle.scale(deltaT, averageAngularV);
-            newAngle.add(lastAngle, deltaAngle);
-//            if (bFlightPlan)
-//                mass += flightPlan.massChange(deltaT);
-            itemGraphic.get().updateAngularPosition(deltaAngle);
-            changed = true;
-        }
-    return changed;
     }
 
     double lastTime = 0;
@@ -974,7 +1005,11 @@ public class Item extends DarkMatter {
     public StringBuilder dataInXML() {
 //        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         StringBuilder xmlStr = defaultDataInXML();
+        if (itemType == ItemType.VMRL)
+            xmlStr.append(XMLmv.putTag("vrmlFile", vrmlFile));
         xmlStr.append(XMLmv.putTag("mass", mass)).append(XMLmv.putTag("dia", dia));
+        if (itemType == ItemType.VMRL)
+            xmlStr.append(XMLmv.putTag("mI", Vector3dMV.dataInCSV(mI)));
         xmlStr.append(XMLmv.putTag("eCompression", eCompression));
         xmlStr.append(XMLmv.putTag("color", ("" + color.getRGB())));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
@@ -985,9 +1020,11 @@ public class Item extends DarkMatter {
             xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
             a++;
         }
-        xmlStr.append(XMLmv.putTag("bFlightPlan", bFlightPlan));
-        if (bFlightPlan)
-            xmlStr.append(XMLmv.putTag("flightPlan", flightPlan.dataInXML()));
+        if (jetController != null)
+            xmlStr.append(XMLmv.putTag("jetController", jetController.dataInXML()));
+//        xmlStr.append(XMLmv.putTag("bFlightPlan", bFlightPlan));
+//        if (bFlightPlan)
+//            xmlStr.append(XMLmv.putTag("flightPlan", flightPlan.dataInXML()));
         return xmlStr;
     }
 
@@ -996,8 +1033,20 @@ public class Item extends DarkMatter {
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "name", 0);
         name = vp.val;
+
+        vp = XMLmv.getTag(xmlStr, "itemType", vp.endPos);
+        if (vp.val.length() > 0)
+            itemType = ItemType.getEnum(vp.val);
+        if (itemType == ItemType.VMRL) {
+            vp = XMLmv.getTag(xmlStr, "vrmlFile", vp.endPos);
+            vrmlFile = vp.val;
+        }
         vp = XMLmv.getTag(xmlStr, "mass", 0);
         mass = Double.valueOf(vp.val);
+        if (itemType == ItemType.VMRL) {
+            vp = XMLmv.getTag(xmlStr, "mI", vp.endPos);
+            setMomentsOfInertia(vp.val);
+        }
         vp = XMLmv.getTag(xmlStr, "dia", 0);
         dia = Double.valueOf(vp.val);
         radius = dia / 2;
@@ -1032,13 +1081,17 @@ public class Item extends DarkMatter {
                 e.printStackTrace();
             }
         }
-        vp = XMLmv.getTag(xmlStr, "bFlightPlan", vp.endPos);
-        bFlightPlan = vp.val.equals("1");
-        if (bFlightPlan) {
-            vp = XMLmv.getTag(xmlStr, "flightPlan", vp.endPos);
-            flightPlan = new FlightPlan(this, vp.val);
-            retVal = flightPlan.isValid();
-        }
+        vp = XMLmv.getTag(xmlStr, "jetController", vp.endPos);
+        if (vp.val.length() > 2)
+            jetController = new JetTimeController(this, vp.val);
+
+//        vp = XMLmv.getTag(xmlStr, "bFlightPlan", vp.endPos);
+//        bFlightPlan = vp.val.equals("1");
+//        if (bFlightPlan) {
+//            vp = XMLmv.getTag(xmlStr, "flightPlan", vp.endPos);
+//            flightPlan = new FlightPlan(this, vp.val);
+//            retVal = flightPlan.isValid();
+//        }
         return retVal;
     }
 

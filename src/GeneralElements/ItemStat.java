@@ -55,15 +55,17 @@ public class ItemStat {
     double time;
     double distFromPrimary;
     public Point3dMV pos;
+    public Vector3dMV angularPos;  // on object's local coordinates
     public Vector3dMV velocity;
-    public Vector3dMV angularVelocity;
+    public Vector3dMV angularVelocity; // on object's local coordinates
     Vector3dMV acc;
-    public Vector3dMV angularAcceleration;
+    public Vector3dMV angularAcceleration; // on object's local coordinates
 
     public ItemStat () {
         velocity = new Vector3dMV();
         pos = new Point3dMV();
         acc = new Vector3dMV();
+        angularPos = new Vector3dMV();
         angularVelocity = new Vector3dMV();
         angularAcceleration = new Vector3dMV();
     }
@@ -77,6 +79,7 @@ public class ItemStat {
         this.pos.set(pos);
         this.velocity.set(velocity);
         acc.set(0, 0, 0);
+        angularPos.set(0,0,0);
         angularVelocity.set(0, 0, 0);
         angularAcceleration.set(0, 0, 0);
     }
@@ -124,8 +127,8 @@ public class ItemStat {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("pos", pos.dataInCSV())).
                                     append(XMLmv.putTag("vel", velocity.dataInCSV()));
-        if (angularVelocity.isNonZero())
-            xmlStr.append(XMLmv.putTag("angularVel", angularVelocity.dataInCSV()));
+//        if (angularVelocity.isNonZero())
+//            xmlStr.append(XMLmv.putTag("angularVel", angularVelocity.dataInCSV()));
         return xmlStr;
     }
 
@@ -136,9 +139,9 @@ public class ItemStat {
         pos.set(vp.val);
         vp = XMLmv.getTag(xmlStr, "vel", 0);
         velocity.set(vp.val);
-        vp = XMLmv.getTag(xmlStr, "angularVel", 0);
-        if (vp.val.length() > 0)
-            angularVelocity.set(vp.val);
+//        vp = XMLmv.getTag(xmlStr, "angularVel", 0);
+//        if (vp.val.length() > 0)
+//            angularVelocity.set(vp.val);
         return retVal;
     }
 
