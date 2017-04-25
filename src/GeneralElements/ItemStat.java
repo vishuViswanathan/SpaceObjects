@@ -84,6 +84,11 @@ public class ItemStat {
         angularAcceleration.set(0, 0, 0);
     }
 
+    public void intAngularPos(Vector3d angularPos, Vector3d angularVelocity) {
+        this.angularPos.set(angularPos);
+        this.angularVelocity.set(angularVelocity);
+    }
+
     public void initPos(Point3d pos, Vector3d velocity, Vector3d angularVelocity) {
         this.pos.set(pos);
         this.velocity.set(velocity);
@@ -127,6 +132,7 @@ public class ItemStat {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("pos", pos.dataInCSV())).
                                     append(XMLmv.putTag("vel", velocity.dataInCSV()));
+        xmlStr.append(XMLmv.putTag("angularPos", angularPos.dataInCSV()));
 //        if (angularVelocity.isNonZero())
 //            xmlStr.append(XMLmv.putTag("angularVel", angularVelocity.dataInCSV()));
         return xmlStr;
@@ -139,6 +145,9 @@ public class ItemStat {
         pos.set(vp.val);
         vp = XMLmv.getTag(xmlStr, "vel", 0);
         velocity.set(vp.val);
+        vp = XMLmv.getTag(xmlStr, "angularPos", 0);
+        if (vp.val.length() > 0)
+            angularPos.set(vp.val);
 //        vp = XMLmv.getTag(xmlStr, "angularVel", 0);
 //        if (vp.val.length() > 0)
 //            angularVelocity.set(vp.val);

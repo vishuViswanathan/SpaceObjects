@@ -132,19 +132,24 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         double viewPosFromVolumeCenter;
         Vector3d translateBy;
         Transform3D rot = new Transform3D();
+        Transform3D rot1 = new Transform3D();
         mainViewPlatform.setNominalViewingTransform();
         switch (direction) {
             case XMinus:
                 maxOnSide = Math.max(volumeRange.z, volumeRange.y * xByY) / 2;
                 viewPosFromVolumeCenter = 3 * maxOnSide;
                 translateBy = new Vector3d(volumeCenter.x + viewPosFromVolumeCenter, volumeCenter.y, volumeCenter.z);
-                rot.rotY(Math.PI / 2);
+                rot.rotX(Math.PI / 2);
+                rot1.rotY(Math.PI / 2);
+                rot.mul(rot1);
                 break;
             case YMinus:
                 maxOnSide = Math.max(volumeRange.x, volumeRange.z * xByY) / 2;
                 viewPosFromVolumeCenter = 3 * maxOnSide;
                 translateBy = new Vector3d(volumeCenter.x, volumeCenter.y + viewPosFromVolumeCenter, volumeCenter.z);
-                rot.rotX(-Math.PI / 2);
+                rot.rotY(-Math.PI / 2);
+                rot1.rotX(-Math.PI / 2);
+                rot.mul(rot1);
                 break;
             default:
                 maxOnSide = Math.max(volumeRange.x, volumeRange.y * xByY) / 2;

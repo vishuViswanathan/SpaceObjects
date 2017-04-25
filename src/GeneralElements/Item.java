@@ -3,7 +3,6 @@ package GeneralElements;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
-import GeneralElements.globalActions.VResistanceG;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.*;
@@ -15,7 +14,6 @@ import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.FlightPlan;
 import time.timePlan.FlightPlanEditor;
-import time.timePlan.JetTable;
 import time.timePlan.JetTimeController;
 
 import javax.media.j3d.Group;
@@ -24,7 +22,6 @@ import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -114,10 +111,6 @@ public class Item extends DarkMatter {
     double spinPeriod; // in hours
     public String imageName;
     public boolean isLightSrc = false;
-//    FlightPlan flightPlan;
-//    boolean bFlightPlan = false;
-//    double rocketFuelLoss = 0;
-//    Vector3d rocketForce = new Vector3d();
     JRadioButton rbFixedPos;
     Item thisItem;
     public double reportInterval = 0; // sec?  144000;
@@ -156,7 +149,7 @@ public class Item extends DarkMatter {
     }
 
     public Item(String name, double mass, String vrmlFile, Window parent) {
-        super(name, mass, 10, Color.green, parent);
+        super(name, mass, 1, Color.green, parent);
         itemType = ItemType.VMRL;
         this.vrmlFile = vrmlFile;
         jetController = new JetTimeController(this);
@@ -542,6 +535,7 @@ public class Item extends DarkMatter {
         TuplePanel tpMI;
         NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
+        TuplePanel angularPosTuplePan;
         JRadioButton rbItemFixedPos;
         TuplePanel itemVelTuplePan;
         JButton itemRelButton = new JButton("Set Relative Data");
@@ -627,6 +621,11 @@ public class Item extends DarkMatter {
             }
             ntElasticity = new NumberTextField(inpC, eCompression, 6, false, 0, 1e20, "##0.####E00", "Elasticity N/100%");
             jp.addItemPair(ntElasticity);
+            JPanel jpAngularPos = new JPanel(new BorderLayout());
+            angularPosTuplePan = new TuplePanel(inpC, status.angularPos, 8, -10, +10, "##0.####", "Angular Orientation (on local axis) rad");
+            jpAngularPos.add(angularPosTuplePan, BorderLayout.CENTER);
+            jp.addItemPair("Angular Position in rad(local)", jpAngularPos);
+            jp.addBlank();
             jp.addItemPair("", itemRelButton);
 
             JPanel jpPos = new JPanel(new BorderLayout());
@@ -641,6 +640,7 @@ public class Item extends DarkMatter {
             jpPos.add(itemPosTuplePan, BorderLayout.CENTER);
             jp.addItemPair("Position in m", jpPos);
             jp.addItemPair("", rbItemFixedPos);
+
             JPanel jpVel = new JPanel(new BorderLayout());
             itemVelTuplePan = new TuplePanel(inpC, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
             jpVel.add(itemVelTuplePan, BorderLayout.CENTER);
@@ -654,6 +654,7 @@ public class Item extends DarkMatter {
                     relDlg.setLocationRelativeTo(itemRelButton);
                     relDlg.setVisible(true);
                     itemPosTuplePan.updateTuple(status.pos);
+                    angularPosTuplePan.updateTuple(status.angularPos);
                     itemVelTuplePan.updateTuple(status.velocity);
                 }
             });
@@ -702,6 +703,7 @@ public class Item extends DarkMatter {
                 ntItemDia.setEditable(false);
                 ntElasticity.setEditable(false);
                 itemPosTuplePan.setEditable(false);
+                angularPosTuplePan.setEditable(false);
                 rbItemFixedPos.setEnabled(false);
                 itemVelTuplePan.setEditable(false);
                 itemRelButton.setEnabled(false);
@@ -749,6 +751,7 @@ public class Item extends DarkMatter {
                     }
                     eCompression = ntElasticity.getData();
                     status.pos.set(itemPosTuplePan.getTuple3d());
+                    status.angularPos.set(angularPosTuplePan.getTuple3d());
                     status.velocity.set(itemVelTuplePan.getTuple3d());
                     bFixedLocation = rbItemFixedPos.isSelected();
                     flightPlan = flightPlanCopy;
@@ -847,6 +850,10 @@ public class Item extends DarkMatter {
         nextReport = reportInterval;
     }
 
+    public void initAngularPosEtc(Vector3d angularPos, Vector3d angularVelocity) {
+        status.intAngularPos(angularPos, angularVelocity);
+    }
+
     public void setSpin(AxisAngle4d spinAxis, double spinPeriod) {
         this.spinAxis = spinAxis;
         this.spinPeriod = spinPeriod;
@@ -862,6 +869,7 @@ public class Item extends DarkMatter {
         ItemGraphic itemG = new ItemGraphic(this);
         itemG.addObjectAndOrbit(grp, orbitAtrib);
         itemGraphic = new WeakReference<ItemGraphic>(itemG);
+        itemGraphic.get().updateAngularPosition(status.angularPos);
         return itemG;
     }
 
@@ -926,7 +934,7 @@ public class Item extends DarkMatter {
         return true;
     }
 
-    void updateAngularStatus() {
+    void noteAngularStatus() {
         status.angularPos.set(newAngle);
         status.angularVelocity.set(newAngularVelocity);
         status.angularAcceleration.set(thisAngularAcc);
@@ -946,11 +954,6 @@ public class Item extends DarkMatter {
 
     boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
         boolean changed = false;
-//        if (nowT > 7.5) {
-//            debug("#820: forceElements stopped");
-//            jetTorque.set(0, 0, 0);
-//            jetForce.set(0, 0, 0);
-//        }
         if (bFinal) {
             effectiveTorque.setMean(jetTorque, lastTorque);
             thisAngularAcc.scale(oneByMI, effectiveTorque);
@@ -959,13 +962,8 @@ public class Item extends DarkMatter {
             averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
             deltaAngle.scale(deltaT, averageAngularV);
             newAngle.add(lastAngle, deltaAngle);
-//            if (bFlightPlan)
-//                mass += flightPlan.massChange(deltaT);
             itemGraphic.get().updateAngularPosition(deltaAngle);
-            updateAngularStatus();
-//            status.angularPos.set(newAngle);
-//            status.angularVelocity.set(newAngularVelocity);
-//            status.angularAcceleration.set(thisAngularAcc);
+            noteAngularStatus();
             changed = true;
         }
         return changed;
@@ -1084,14 +1082,6 @@ public class Item extends DarkMatter {
         vp = XMLmv.getTag(xmlStr, "jetController", vp.endPos);
         if (vp.val.length() > 2)
             jetController = new JetTimeController(this, vp.val);
-
-//        vp = XMLmv.getTag(xmlStr, "bFlightPlan", vp.endPos);
-//        bFlightPlan = vp.val.equals("1");
-//        if (bFlightPlan) {
-//            vp = XMLmv.getTag(xmlStr, "flightPlan", vp.endPos);
-//            flightPlan = new FlightPlan(this, vp.val);
-//            retVal = flightPlan.isValid();
-//        }
         return retVal;
     }
 

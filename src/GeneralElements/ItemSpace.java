@@ -310,16 +310,16 @@ public class ItemSpace {
         }
     }
 
-      public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
-        for (Item it: allItems) {
-            if (!it.boundaryItem)
-                itemGraphics.add(it.createItemGraphic(grp, orbitAttrib));
-        }
-        for (ItemLink inf: allItemLinks) {
-            inf.addLinksDisplay(grp, linkAttrib);
-//            inf.prepareEvaluator();
-        }
-    }
+//      public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp, RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
+//        for (Item it: allItems) {
+//            if (!it.boundaryItem)
+//                itemGraphics.add(it.createItemGraphic(grp, orbitAttrib));
+//        }
+//        for (ItemLink inf: allItemLinks) {
+//            inf.addLinksDisplay(grp, linkAttrib);
+////            inf.prepareEvaluator();
+//        }
+//    }
 
     public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp,RenderingAttributes itemAttrib,
                                   RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {

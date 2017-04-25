@@ -61,9 +61,9 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
         ambLight.setInfluencingBounds(lightBounds);
         addChild(ambLight);
 
-        DirectionalLight headLight = new DirectionalLight();
-        headLight.setInfluencingBounds(lightBounds);
-        addChild(headLight);
+//        DirectionalLight headLight = new DirectionalLight();
+//        headLight.setInfluencingBounds(lightBounds);
+//        addChild(headLight);
      }
 
 
