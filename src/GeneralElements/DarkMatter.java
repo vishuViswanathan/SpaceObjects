@@ -6,9 +6,8 @@ import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
-import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
-import time.timePlan.FlightPlan;
+//import time.timePlan.FlightPlan;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -40,9 +39,9 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean canStick = false;
     public Color color;
     public boolean boundaryItem = false;
-    FlightPlan flightPlan;
-    boolean bFlightPlan = false;
-    double rocketFuelLoss = 0;
+//    FlightPlan flightPlan;
+//    boolean bFlightPlan = false;
+//    double rocketFuelLoss = 0;
     Vector3d rocketForce = new Vector3d(); // TODO this may be removed
 
 
@@ -276,8 +275,8 @@ public class DarkMatter implements InputControl, EvalOnce {
                 status.velocity.set(newVelocity);
                 status.acc.set(thisAcc);
                 status.time = nowT;
-                if (bFlightPlan)
-                    mass += flightPlan.massChange(deltaT);
+//                if (bFlightPlan)
+//                    mass += flightPlan.massChange(deltaT);
             }
         }
         return changed;
