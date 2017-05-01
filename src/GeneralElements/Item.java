@@ -109,7 +109,7 @@ public class Item extends DarkMatter {
     double xMin, yMin, zMin;
     public AxisAngle4d spinAxis; // absolute
     double spinPeriod; // in hours
-    public String imageName;
+    public String imageName = "";
     public boolean isLightSrc = false;
     JRadioButton rbFixedPos;
     Item thisItem;
@@ -289,7 +289,8 @@ public class Item extends DarkMatter {
                     theItem = new Surface(theParent, theName);
                     break;
                 case VMRL:
-                    theItem = new Item(theName, 10000, "C:\\Java Programs\\SpaceObjects\\VRML\\rocket.wrl", theParent);
+//                    theItem = new Item(theName, 10000, "C:\\Java Programs\\SpaceObjects\\VRML\\rocket.wrl", theParent);
+                    theItem = new Item(theName, 10000, "VRML\\rocket.wrl", theParent);
                     break;
                 case SPHERE:
                     theItem = new Item(theParent, theName);
@@ -529,6 +530,7 @@ public class Item extends DarkMatter {
     class ItemDialog extends JDialog {
         JTextField tfItemName;
         JTextField tfVRMLflePath;
+        JTextField tfImageFilePath;
         JButton colorButton = new JButton("Object Color");
         JLabel banner = new JLabel("");
         NumberTextField ntItemMass, ntItemDia;
@@ -592,6 +594,11 @@ public class Item extends DarkMatter {
                 jp.addItemPair("VRML File Path", tfVRMLflePath);
             }
             else {
+                if (itemType == ItemType.SPHERE) {
+                    tfImageFilePath = new JTextField(imageName, 30);
+                    jp.addItemPair("Image File Path", tfImageFilePath);
+                    jp.addItem("The base path 'images/'");
+                }
                 banner.setPreferredSize(new Dimension(100, 20));
                 banner.setBackground(color);
                 banner.setOpaque(true);
@@ -610,16 +617,18 @@ public class Item extends DarkMatter {
 
                 });
                 jp.addItemPair(colorButton, banner);
-                ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
-                jp.addItemPair(ntItemDia);
             }
+            ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
+            jp.addItemPair(ntItemDia);
+            if (itemType == ItemType.VMRL)
+                jp.addItem("(Dia is for collision check)");
             ntItemMass = new NumberTextField(inpC, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
             jp.addItemPair(ntItemMass);
             if (itemType == ItemType.VMRL) {
                 tpMI = new TuplePanel(inpC, new Vector3d(mI), 6, 0, 1e20, "#,###.000", "Mass Moment of Inertia (kg.m2)");
                 jp.addItemPair(tpMI.getTitle(), tpMI);
             }
-            ntElasticity = new NumberTextField(inpC, eCompression, 6, false, 0, 1e20, "##0.####E00", "Elasticity N/100%");
+            ntElasticity = new NumberTextField(inpC, eCompression, 6, false, -1, 1e20, "##0.####E00", "Elasticity N/100% ('-1' is sticky)");
             jp.addItemPair(ntElasticity);
             JPanel jpAngularPos = new JPanel(new BorderLayout());
             angularPosTuplePan = new TuplePanel(inpC, status.angularPos, 8, -10, +10, "##0.####", "Angular Orientation (on local axis) rad");
@@ -742,6 +751,8 @@ public class Item extends DarkMatter {
             if (name.length() > 1 && (!name.substring(0,2).equals("##"))) {
                 try {
                     mass = ntItemMass.getData();
+                    if (itemType == ItemType.SPHERE)
+                        imageName = tfImageFilePath.getText().trim();
                     if (itemType != ItemType.VMRL) {
                         dia = ntItemDia.getData();
                     } else {
@@ -867,9 +878,12 @@ public class Item extends DarkMatter {
 
     public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
         ItemGraphic itemG = new ItemGraphic(this);
-        itemG.addObjectAndOrbit(grp, orbitAtrib);
-        itemGraphic = new WeakReference<ItemGraphic>(itemG);
-        itemGraphic.get().updateAngularPosition(status.angularPos);
+        if (itemG.addObjectAndOrbit(grp, orbitAtrib)) {
+            itemGraphic = new WeakReference<ItemGraphic>(itemG);
+            itemGraphic.get().updateAngularPosition(status.angularPos);
+        }
+        else
+            itemG = null;
         return itemG;
     }
 

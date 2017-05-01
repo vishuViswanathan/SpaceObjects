@@ -306,12 +306,12 @@ public class LinkWithMass extends InfluenceDef  {
     }
 
     @Override
-    public boolean evalForce() {
+    public boolean evalForce(double deltaT, boolean bFinal) {
 //        if (!elementsSet)
 //            setAllElements();
         boolean retVal = true;
         for (ItemLink l: allLinks)
-            if (!l.evalForce()) {
+            if (!l.evalForce(deltaT, bFinal)) {
                 retVal = false;
                 break;
             }

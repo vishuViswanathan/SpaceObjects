@@ -311,6 +311,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         commonMenuPanelHolder.add(commonMenuPanel());
         outerP.add(commonMenuPanelHolder, outerGbc);
         outerGbc.gridy++;
+        stopB.setEnabled(false);
         stopB.addActionListener(l);
         outerP.add(stopB, outerGbc);
         outerGbc.gridy++;

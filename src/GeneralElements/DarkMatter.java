@@ -76,7 +76,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     boolean isElastic() {
-        return (eCompression > 0);
+        return (eCompression > -2);
     }
 
     public void seteCompression(double eCompression) {
@@ -241,6 +241,9 @@ public class DarkMatter implements InputControl, EvalOnce {
         // dummy not used
     @Override
     public synchronized void evalOnce() {
+    }
+
+    public void evalOnce(double deltaT, boolean bFInal) {
     }
 
     @Override

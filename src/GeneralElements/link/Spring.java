@@ -41,7 +41,7 @@ public class Spring extends InfluenceDef  {
     }
 
     @Override
-    public boolean evalForce() {
+    public boolean evalForce(double deltaT, boolean bFinal) {
         boolean retVal = true;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);

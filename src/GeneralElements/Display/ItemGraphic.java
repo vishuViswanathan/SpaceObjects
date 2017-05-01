@@ -1,5 +1,6 @@
 package GeneralElements.Display;
 
+import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import collection.PointArrayFIFO;
 import com.sun.j3d.utils.universe.ViewingPlatform;
@@ -36,11 +37,15 @@ public class ItemGraphic {
         this.item = item;
     }
 
-     public void addObjectAndOrbit(Group grp, RenderingAttributes orbitAtrib) throws Exception{
-        createSphereAndOrbitPath(orbitAtrib);
-        for (PathShape os: orbitShapes)
-            grp.addChild(os);
-        grp.addChild(positionTrGrp);
+     public boolean addObjectAndOrbit(Group grp, RenderingAttributes orbitAtrib) throws Exception{
+        boolean retVal = false;
+        if (createSphereAndOrbitPath(orbitAtrib)) {
+            for (PathShape os : orbitShapes)
+                grp.addChild(os);
+            grp.addChild(positionTrGrp);
+            retVal = true;
+        }
+        return retVal;
     }
 
 
@@ -69,52 +74,58 @@ public class ItemGraphic {
 
     ItemDisplay planet;
 
-    private void createSphereAndOrbitPath(RenderingAttributes orbitAtrib) throws Exception {
-        positionTrGrp = new TransformGroup();
-        positionTrGrp.setCapability(Group.ALLOW_CHILDREN_WRITE);
-        positionTrGrp.setCapability(Group.ALLOW_CHILDREN_EXTEND);
-        trgAxis  = new TransformGroup();
-        tgPlanet = new TransformGroup();
-        tgPlanet.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        tgPlanet.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        Transform3D alignPlanet = new Transform3D();
-        tgPlanet.getTransform(alignPlanet);
-        Transform3D turnNinetyX = new Transform3D();
-        turnNinetyX.rotX(Math.PI / 2);
-        alignPlanet.mul(turnNinetyX);
-
-        tgPlanet.setTransform(alignPlanet);
-        if (item.spinAxis != null) {
-//            axisTransform = new Transform3D();
-            trgAxis.getTransform(axisTransform);
-            axisTransform.set(item.spinAxis);
-            trgAxis.setTransform(axisTransform);
-        }
-        trgRotation = new TransformGroup();
-        trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        positionTrGrp.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+    private boolean createSphereAndOrbitPath(RenderingAttributes orbitAtrib) throws Exception {
+        boolean retVal = false;
         planet = new ItemDisplay(item);
-        tgPlanet.addChild(planet);
-        trgRotation.addChild(tgPlanet);
-        Light l = getLightIfEnabled();
-        if (l != null)
-            trgRotation.addChild(l);
+        if (planet.valid) {
+            positionTrGrp = new TransformGroup();
+            positionTrGrp.setCapability(Group.ALLOW_CHILDREN_WRITE);
+            positionTrGrp.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+            trgAxis = new TransformGroup();
+            tgPlanet = new TransformGroup();
+            tgPlanet.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+            tgPlanet.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+            Transform3D alignPlanet = new Transform3D();
+            tgPlanet.getTransform(alignPlanet);
+            Transform3D turnNinetyX = new Transform3D();
+            turnNinetyX.rotX(Math.PI / 2);
+            alignPlanet.mul(turnNinetyX);
 
-        trgAxis.addChild(trgRotation);
-        positionTrGrp.addChild(trgAxis);
-        color3f = new Color3f(item.color);
-        PointArrayFIFO onePtArr, lastOne = null;
-        orbitShapes = new PathShape[nShapeSets];
-        for (int os = 0; os < orbitShapes.length; os++) {
-            onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1) ) ? 1: 4), GeometryArray.COORDINATES|GeometryArray.COLOR_3, color3f);
-            onePtArr.noteNextArray(lastOne);
-            orbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
-            lastOne = onePtArr;
-            if (os == (orbitShapes.length - 1))
-                ptArr = onePtArr;
-        }
-        updateOrbitAndPos(0);
+            tgPlanet.setTransform(alignPlanet);
+            if (item.spinAxis != null) {
+//            axisTransform = new Transform3D();
+                trgAxis.getTransform(axisTransform);
+                axisTransform.set(item.spinAxis);
+                trgAxis.setTransform(axisTransform);
+            }
+            trgRotation = new TransformGroup();
+            trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+            trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+            positionTrGrp.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+            tgPlanet.addChild(planet);
+            trgRotation.addChild(tgPlanet);
+            Light l = getLightIfEnabled();
+            if (l != null)
+                trgRotation.addChild(l);
+
+            trgAxis.addChild(trgRotation);
+            positionTrGrp.addChild(trgAxis);
+            color3f = new Color3f(item.color);
+            PointArrayFIFO onePtArr, lastOne = null;
+            orbitShapes = new PathShape[nShapeSets];
+            for (int os = 0; os < orbitShapes.length; os++) {
+                onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1)) ? 1 : 4), GeometryArray.COORDINATES | GeometryArray.COLOR_3, color3f);
+                onePtArr.noteNextArray(lastOne);
+                orbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
+                lastOne = onePtArr;
+                if (os == (orbitShapes.length - 1))
+                    ptArr = onePtArr;
+            }
+            updateOrbitAndPos(0);
+            retVal = true;
+        } else
+            ItemMovementsApp.showError("ItemGraphic.212: Facing some problem in creating graphics for '" + item.name + "'");
+        return retVal;
     }
 
     public void setItemDisplayAttribute(RenderingAttributes attribute) {

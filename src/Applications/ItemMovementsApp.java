@@ -231,7 +231,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     JRadioButtonMenuItem rIAstronomical = new JRadioButtonMenuItem("Astronomical (km)");
     JRadioButtonMenuItem rIMolecular = new JRadioButtonMenuItem("Molecular (micrometer)");
     JComboBox cbSchemes;
-    JCheckBoxMenuItem ckAllCPU;
+//    JCheckBoxMenuItem ckAllCPU;
 
     JMenu mScheme;
     JMenuItem mIScheme;
@@ -268,10 +268,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         mSpaceSize.add(rIEarth);
         mSpaceSize.add(rIDaily);
         mSpaceSize.add(rIMolecular);
-        ckAllCPU = new JCheckBoxMenuItem("Use Multi CPU", useAllCPUs);
-        ckAllCPU.addActionListener(ml);
-        mSpaceSize.addSeparator();
-        mSpaceSize.add(ckAllCPU);
+//        ckAllCPU = new JCheckBoxMenuItem("Use Multi CPU", useAllCPUs);
+//        ckAllCPU.addActionListener(ml);
+//        mSpaceSize.addSeparator();
+//        mSpaceSize.add(ckAllCPU);
         menuBar.add(mSpaceSize);
         loadDefaultSchemes();
         mScheme = new JMenu("Select Scheme");
@@ -721,8 +721,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             orbitDisplay.setVisible(true);
             return true;
         } catch (Exception e) {
-            showError("In showOrbitMap : " + e.getMessage());
-            e.printStackTrace();
+            showError("ItemMovementsApp.724: In showOrbitMap : " + e.getMessage());
+//            e.printStackTrace();
             return false;
         }
     }
@@ -914,33 +914,15 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             Object src = e.getSource();
             aBlock: {
                 if (src == pbStart) {
-//                    boolean proceed = true;
-//                    if (space.anyUnsavedLink()) {
-//                        proceed = decide("Unsaved Item/link", "Do you want to proceed abandoning the changes made?");
-//                        if (proceed)
-//                            space.resetLinkList();
-//                    }
-//                    if (proceed) {
                     duration = ntfDuration.getData();
                     if (duration > 0) {
                         space.saveInfluenceList();
                         startRunThread();
                     }
                     pbStart.setEnabled(false);
-//                    }
                     break aBlock;
                 }
 
-//                if (src == pbSaveData) {
-//                    saveDataToFile();
-//                    break aBlock;
-//                }
-//
-//                if (src == pbReadData) {
-//                    if (getDataFromFile())
-//                        proceedToItemList(true);
-//                    break aBlock;
-//                }
             }
         }
     }
@@ -985,9 +967,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     getTimingValues();
                     break bBlock;
                 }
-                if (src == ckAllCPU) {
-                    useAllCPUs = ckAllCPU.getState();
-                }
+//                if (src == ckAllCPU) {
+//                    useAllCPUs = ckAllCPU.getState();
+//                }
             }
         }
     }

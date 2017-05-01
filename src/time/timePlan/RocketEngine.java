@@ -63,7 +63,7 @@ public class RocketEngine implements ForceSource {
     public JPanel fsDetails() {
         MultiPairColPanel outerP = new MultiPairColPanel("Details of " + this);
         tfName = new JTextField(engineName, 20);
-        ntForce = new NumberTextField(null, thrustInkN, 6, false, 0, 1e10, "#,##0.000", "Force (kN)");
+        ntForce = new NumberTextField(null, thrustInkN, 6, false, 0, 1e10, "#,##0.000000", "Force (kN)");
         ntSpFuelConsumption = new NumberTextField(null, specificFuelConsumption, 6, false, 0, 10000, "#,##0.000",
                 "Specific Fuel Consumption(g/kN.s)");
         outerP.addItemPair("Engine Name", tfName);

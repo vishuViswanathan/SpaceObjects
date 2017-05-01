@@ -17,19 +17,23 @@ import java.net.URL;
 public class ItemDisplay extends Group {
     Item theItem;
     AttributeSetter attributeSetter;
-
+    boolean valid = false;
     public ItemDisplay(Item theItem) {
         this.theItem = theItem;
         switch (theItem.itemType) {
             case SPHERE:
                 ItemSphere theDisplay = new ItemSphere(theItem);
-                addChild(theDisplay);
-                attributeSetter = theDisplay;
+                if (theDisplay.valid) {
+                    addChild(theDisplay);
+                    attributeSetter = theDisplay;
+                    valid = true;
+                }
                 break;
             case VMRL:
 //                BranchGroup grp = loadVrmlFile(theItem.vrmlFile);
                 BranchGroup grp = new ItemVRML(theItem);
                 addChild(grp);
+                valid = true;
                 break;
         }
     }

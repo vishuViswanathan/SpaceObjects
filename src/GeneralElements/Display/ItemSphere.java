@@ -16,42 +16,47 @@ import java.awt.*;
 public class ItemSphere extends Sphere implements AttributeSetter {
     public Item planet;
     Appearance ap;
+    public boolean valid = true;
     public ItemSphere(Item object) {
         super(object.getDiaFloat() / 2,
                 (Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS), 48);
         this.planet = object;
         ap = new Appearance();
-        if (planet.imageName != null) {
-            TextureLoader loader = new TextureLoader("images/" + planet.imageName,
-                    "LUMINANCE", new Container());
-            Texture texture = loader.getTexture();
-            texture.setBoundaryModeS(Texture.WRAP);
-            texture.setBoundaryModeT(Texture.WRAP);
-            texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
+        try {
+            if (planet.imageName.length() > 3) {
+                TextureLoader loader = new TextureLoader("images/" + planet.imageName,
+                        "LUMINANCE", new Container());
+                Texture texture = loader.getTexture();
+                texture.setBoundaryModeS(Texture.WRAP);
+                texture.setBoundaryModeT(Texture.WRAP);
+                texture.setBoundaryColor(new Color4f(0.0f, 1.0f, 0.0f, 0.0f));
 
-            TextureAttributes texAttr = new TextureAttributes();
-            texAttr.setTextureMode(TextureAttributes.MODULATE);
-//            Appearance ap = new Appearance();
-            ap.setTexture(texture);
-            ap.setTextureAttributes(texAttr);
-        }
+                TextureAttributes texAttr = new TextureAttributes();
+                texAttr.setTextureMode(TextureAttributes.MODULATE);
+    //            Appearance ap = new Appearance();
+                ap.setTexture(texture);
+                ap.setTextureAttributes(texAttr);
+            }
 
 //            Color3f emissC = new Color3f(planet.color);
-        Color3f emissC = new Color3f(planet.color); //0.5f, 0.5f, 0.5f);
+            Color3f emissC = new Color3f(planet.color); //0.5f, 0.5f, 0.5f);
 //            Color3f diffuse = new Color3f(1.0f, 1.0f, 1.0f);
-        Color3f diffuse = new Color3f(planet.color);
+            Color3f diffuse = new Color3f(planet.color);
 //            Color3f ambient = new Color3f(1.0f, 1.0f, 1.0f);
-        Color3f ambient = new Color3f(0.001f, 0.00f, 0.00f);
-        Color3f specular = new Color3f(0.9f, 0.9f, 0.9f);
+            Color3f ambient = new Color3f(0.001f, 0.00f, 0.00f);
+            Color3f specular = new Color3f(0.9f, 0.9f, 0.9f);
 
-        Material blueMat = new Material(ambient, emissC, diffuse, specular, 1f);
-        // sets ambient, emissive, diffuse, specular, shininess
-        blueMat.setLightingEnable(true);
+            Material blueMat = new Material(ambient, emissC, diffuse, specular, 1f);
+            // sets ambient, emissive, diffuse, specular, shininess
+            blueMat.setLightingEnable(true);
 
-        //           Appearance blueApp = new Appearance();
-        ap.setMaterial(blueMat);
-        setAppearance(ap);
-        setPickable(true);
+            //           Appearance blueApp = new Appearance();
+            ap.setMaterial(blueMat);
+            setAppearance(ap);
+            setPickable(true);
+        } catch (Exception e) {
+            valid = false;
+        }
     }
 
     public Item getItem() {

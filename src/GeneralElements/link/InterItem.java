@@ -2,6 +2,7 @@ package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
 import GeneralElements.Constants;
+import mvUtils.physics.Vector3dMV;
 
 import javax.vecmath.Vector3d;
 
@@ -12,6 +13,10 @@ import javax.vecmath.Vector3d;
 public class InterItem extends Influence {
     boolean gravityON = false;
     boolean elasticityON = false;
+    boolean isSticky = false;
+    double totalMass;
+    boolean theyAreStuck = false;
+//    double lastVelocityI1, lastVelocityI2;  // approaching velocities
     double limitDistance;
     double factorLbyR;
     double diffE; // e1 - e2
@@ -66,13 +71,17 @@ public class InterItem extends Influence {
                     } else
                         factorLbyR = 1 / (r1 / e1 + r2 / e2);
                     elasticityON = true;
-                } else factorLbyR = 0;
+                } else  {
+                    if (e1 == -1 || e2 == -1) {
+                        totalMass = item1.mass + item2.mass;
+                        isSticky = true;
+                    }
+                    else
+                        factorLbyR = 0;
+                }
             }
         }
     }
-
-
-
 
     /**
      * for inter-item elastic forces the following sre considered
@@ -84,37 +93,43 @@ public class InterItem extends Influence {
      * @return
      */
     @Override
-    public boolean evalForce() {
+    public boolean evalForce(double deltaT, boolean bFinal) {
         if (oneIsASurface)
             return getBoundaryForce();
         boolean retVal = true;
+        Vector3d nowForce = null;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos); // vector item1 towards item2
         double distance = distVect.length();
-//        double compression = distance - limitDistance;
         double compression = limitDistance - distance;
-        Vector3d nowForce = new Vector3d();
-//        if (elasticityON && (compression < 0)) {
-        if (elasticityON && (compression > 0)) {
-            double force;
-            nowForce.set(distVect);
-            if (equalE) {
-                double compFraction = 1 - compression / limitDistance;
-//                double force = compression * factorLbyR;
-                force = - compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
-            }
-            else {
-                double a = r1xE1LessE1;
-                double b = r2E1PLusR1E2 - compression * diffE;
-                double c = - e2 * compression;
-                double m1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
-                force = - m1 * e1 / (1 - m1); // negated since it is a repulsion
-            }
-            double ratio = force / distance;
-            if (Double.isNaN(ratio)) {
-                retVal = false;
-            } else {
-                nowForce.scale(ratio);
+        if (isSticky)
+            nowForce = getStickingForce(distVect, distance, compression, deltaT, bFinal);
+        else {
+            distVect = new Vector3d();
+            distVect.sub(item2.status.pos, item1.status.pos); // vector item1 towards item2
+            distance = distVect.length();
+            nowForce = new Vector3d();
+            if (compression > 0) {
+                if (elasticityON) {
+                    double force;
+                    nowForce.set(distVect);
+                    if (equalE) {
+                        double compFraction = 1 - compression / limitDistance;
+                        force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
+                    } else {
+                        double a = r1xE1LessE1;
+                        double b = r2E1PLusR1E2 - compression * diffE;
+                        double c = -e2 * compression;
+                        double m1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+                        force = -m1 * e1 / (1 - m1); // negated since it is a repulsion
+                    }
+                    double ratio = force / distance;
+                    if (Double.isNaN(ratio)) {
+                        retVal = false;
+                    } else {
+                        nowForce.scale(ratio);
+                    }
+                }
             }
         }
         if (gravityON) {
@@ -130,11 +145,35 @@ public class InterItem extends Influence {
         }
         if (retVal) {
             item1.addToForce(nowForce);
-//            nowForce.negate();
-//            item2.addToForce(nowForce);
             item2.subtractFromForce(nowForce);
         }
         return retVal;
+    }
+
+    /**
+     *
+     * @param distVect
+     * @param distance // vector item1 towards item2
+     * @param compression
+     * @return
+     */
+
+    Vector3d getStickingForce(Vector3d distVect, double distance, double compression, double deltaT, boolean bFinal) {
+        Vector3d nowForce = new Vector3dMV();
+        if ((compression > 0 && distance > 0) || theyAreStuck) {
+            Vector3d uDistanceVect = new Vector3dMV(1/distance, distVect);
+            double nowApproachVelI1 = uDistanceVect.dot(item1.status.velocity);
+            double nowApproachVelI2 = uDistanceVect.dot(item2.status.velocity);
+            double netVelocity = (nowApproachVelI1 * item1.mass + nowApproachVelI2 * item2.mass) / totalMass;
+            if (theyAreStuck) {
+                double accI1 = (nowApproachVelI1 - netVelocity) / deltaT;
+                nowForce = new Vector3dMV(- item1.mass * accI1, uDistanceVect);
+                // this works out to be exact opposite when nowForce is evaluated with accI2 and item2.mass
+            }
+            else
+                theyAreStuck = bFinal; // once stuck, always stuck
+        }
+        return nowForce;
     }
 
     boolean getBoundaryForce() {
@@ -158,5 +197,9 @@ public class InterItem extends Influence {
             retVal = true;
         }
         return retVal;
+    }
+
+    void trace(String msg) {
+        System.out.println("InterItem:" + msg);
     }
 }

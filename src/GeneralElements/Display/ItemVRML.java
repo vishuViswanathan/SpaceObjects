@@ -20,30 +20,30 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
         loadVrmlFile(theItem.vrmlFile);
     }
 
-    private void loadVrmlFile(String location) {
+    private void loadVrmlFile(String fileName) {
         Scene scene = null;
 
         VrmlLoader loader = new VrmlLoader();
 
-        try {
-            URL loadUrl = new URL("file:/" + location);
+//        try {
+//            URL loadUrl = new URL("file:/" + location);
+//            try {
+//                // load the scene
+//                scene = loader.load(loadUrl);
+//            } catch (Exception e) {
+//                System.out.println("Exception loading URL:" + e);
+//                e.printStackTrace();
+//            }
+//        } catch (MalformedURLException badUrl) {
+//            // location may be a path name
             try {
                 // load the scene
-                scene = loader.load(loadUrl);
-            } catch (Exception e) {
-                System.out.println("Exception loading URL:" + e);
-                e.printStackTrace();
-            }
-        } catch (MalformedURLException badUrl) {
-            // location may be a path name
-            try {
-                // load the scene
-                scene = loader.load(location);
+                scene = loader.load(fileName);
             } catch (Exception e) {
                 System.out.println("Exception loading file from path:" + e);
                 e.printStackTrace();
             }
-        }
+//        }
 
         if (scene != null) {
             // get the scene group

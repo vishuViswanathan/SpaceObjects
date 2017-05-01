@@ -326,8 +326,10 @@ public class ItemSpace {
         for (Item it: allItems) {
             if (!it.boundaryItem) {
                 ItemGraphic itemG = it.createItemGraphic(grp, orbitAttrib);
-                itemG.setItemDisplayAttribute(itemAttrib);
-                itemGraphics.add(itemG);
+                if (itemG != null) {
+                    itemG.setItemDisplayAttribute(itemAttrib);
+                    itemGraphics.add(itemG);
+                }
             }
         }
         for (ItemLink inf: allItemLinks) {
@@ -363,7 +365,7 @@ public class ItemSpace {
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                if (!inf.evalForce()) {
+                if (!inf.evalForce(deltaT, false)) {
                     showError("in evalInfluence: evalForce is false for Link " + inf);
                     ok = false;
                     break;
@@ -376,7 +378,7 @@ public class ItemSpace {
         if (ok) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                if (!inf.evalForce()) {
+                if (!inf.evalForce(deltaT, true)) {
                     showError("In evalInfluence: evalForce-final is false for Link " + inf);
                     ok = false;
                     break;

@@ -16,6 +16,11 @@ public class LinkEvaluator implements EvalOnce {
         itemLink.evalForce();
     }
 
+    @Override
+    public void evalOnce(double deltaT, boolean bFinal) {
+        itemLink.evalForce(deltaT, bFinal);
+    }
+
     //dummy
     @Override
     public void evalOnce(double deltaT, double nowT, boolean bFinal) {
