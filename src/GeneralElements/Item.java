@@ -753,9 +753,8 @@ public class Item extends DarkMatter {
                     mass = ntItemMass.getData();
                     if (itemType == ItemType.SPHERE)
                         imageName = tfImageFilePath.getText().trim();
-                    if (itemType != ItemType.VMRL) {
-                        dia = ntItemDia.getData();
-                    } else {
+                    dia = ntItemDia.getData();
+                    if (itemType == ItemType.VMRL) {
                         vrmlFile = tfVRMLflePath.getText().trim();
                         Vector3d  mIxyz = new Vector3d(tpMI.getTuple3d());
                         setMomentsOfInertia(mIxyz.x, mIxyz.y, mIxyz.z);
