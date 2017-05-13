@@ -30,7 +30,7 @@ public class JetTable {
         table = new JTable(tableModel);
         table.addMouseListener(new TableListener());
         TableColumnModel colModel = table.getColumnModel();
-        int[] colWidth = OneStep.getColumnWidths();
+        int[] colWidth = OneTimeStep.getColumnWidths();
         for (int c = 0; c < colModel.getColumnCount(); c++)
             colModel.getColumn(c).setPreferredWidth(colWidth[c]);
     }
@@ -67,7 +67,7 @@ public class JetTable {
 
     class JetTableModel extends DefaultTableModel {
         JetTableModel() {
-            super(OneStep.getColHeader(), 0);
+            super(OneTimeStep.getColHeader(), 0);
             fillTable();
         }
 

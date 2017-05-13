@@ -212,57 +212,6 @@ public class Item extends DarkMatter {
             return false;
     }
 
-    public Jet addOneJet(Jet jet) {
-        jetController.addOneJet(jet);
-        return jet;
-    }
-
-    public void removeJet(Jet jet) {
-        jetController.removeOneJet(jet);
-
-    }
-
-    public Jet addOneJet(String name, Vector3d force, Point3d actingPt) {
-        Jet jet = new Jet(name, new ForceElement(force, actingPt, new Point3d(), null));
-        jetController.addOneJet(jet);
-        return jet;
-    }
-
-    public boolean addOneJetPlanStep(Jet jet, double startTime, double duration) {
-        return jetController.addOneJetPlanStep(jet, startTime, duration);
-    }
-
-    public DataWithStatus<Jet> addOneJet(String jetName, Vector3d force, Point3d actingPoint, double startTime, double duration) {
-        DataWithStatus<Jet> response = new DataWithStatus<Jet>();
-        Jet j = addOneJet(name, force, actingPoint);
-        if (addOneJetPlanStep(j, startTime, duration)) {
-            response.setValue(j);
-        } else {
-            removeJet(j);
-            response.setErrorMsg("Some error in Jet time definition");
-        }
-        return response;
-    }
-
-    public DataWithStatus<Boolean> addJetCouple(String baseName, Vector3d force, Point3d actingPoint,
-                                                Vector3dMV.Axis aboutAxis, double startTime, double duration) {
-        DataWithStatus<Boolean> response = new DataWithStatus<Boolean>();
-        String j1Name = baseName + "1";
-        Jet j1 = addOneJet(j1Name, force, actingPoint);
-        if (addOneJetPlanStep(j1, startTime, duration)) {
-            String j2Name = baseName + "2";
-            Vector3d oppForce = new Vector3d(force);
-            oppForce.negate();
-            Point3dMV oppPoint = new Point3dMV(actingPoint);
-            oppPoint.negateOneAxis(aboutAxis);
-            Jet j2 = addOneJet(baseName + "2", oppForce, oppPoint);
-            if (!addOneJetPlanStep(j2, startTime, duration))
-                response.setErrorMsg("Some Error in timing of " + j2Name);
-        } else
-            response.setErrorMsg("Some Error in timing of " + j1Name);
-        return response;
-    }
-
     static public Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
         Item theItem = null;
         ItemBasic dlg = new ItemBasic(theSpace, theName);
@@ -963,7 +912,7 @@ public class Item extends DarkMatter {
             newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
 //            newAngularVelocity.add(additionalAngularVel);
             averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
-//            averageAngularV.add(additionalAngularVel);
+            averageAngularV.add(additionalAngularVel);
             deltaAngle.scale(deltaT, averageAngularV);
             newAngle.add(lastAngle, deltaAngle);
             itemGraphic.get().updateAngularPosition(deltaAngle);
