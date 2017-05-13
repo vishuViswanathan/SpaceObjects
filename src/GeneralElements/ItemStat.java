@@ -84,9 +84,10 @@ public class ItemStat {
         angularAcceleration.set(0, 0, 0);
     }
 
-    public void intAngularPos(Vector3d angularPos, Vector3d angularVelocity) {
+    public void initAngularPos(Vector3d angularPos, Vector3d angularVelocity) {
         this.angularPos.set(angularPos);
         this.angularVelocity.set(angularVelocity);
+        angularAcceleration.set(0, 0, 0);
     }
 
     public void initPos(Point3d pos, Vector3d velocity, Vector3d angularVelocity) {

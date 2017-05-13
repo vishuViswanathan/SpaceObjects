@@ -30,7 +30,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     public String name;
     public double mass;
     public double dia;
-    double radius;
+    public double radius;
     double projectedArea;
     double surfaceArea;
     double eCompression; // for elastic material
@@ -42,7 +42,7 @@ public class DarkMatter implements InputControl, EvalOnce {
 //    FlightPlan flightPlan;
 //    boolean bFlightPlan = false;
 //    double rocketFuelLoss = 0;
-    Vector3d rocketForce = new Vector3d(); // TODO this may be removed
+//    Vector3d rocketForce = new Vector3d(); // TODO this may be removed
 
 
     public DarkMatter(Window parent) {
@@ -226,6 +226,19 @@ public class DarkMatter implements InputControl, EvalOnce {
         netForce.sub(subtractForce);
     }
 
+    public synchronized void addToTorque(Vector3d angularAcceleration)  {
+    }
+
+    public synchronized void addToAngularVel(Vector3d angularVel) {
+
+    }
+
+    public synchronized void subtractFromTorque(Vector3d angularAcceleratioon)  {
+    }
+
+    public synchronized void subtractFromVel(Vector3d angularVel) {
+
+    }
     /**
      * This is generally overridden in the subclass
      * @param fromPoint

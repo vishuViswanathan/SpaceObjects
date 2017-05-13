@@ -31,7 +31,7 @@ import java.util.Vector;
  * Created by M Viswanathan on 31 Mar 2014
  */
 public class Item extends DarkMatter {
-     public enum ItemType {
+    public enum ItemType {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
         VMRL("from VMRL file");
@@ -65,7 +65,7 @@ public class Item extends DarkMatter {
         }
     }
 
-    public enum EditResponse{CHANGED, NOTCHANGED, DELETE, CANCEL, OK}
+    public enum EditResponse {CHANGED, NOTCHANGED, DELETE, CANCEL, OK}
 
     public enum ColType {
         SLNO("SlNo."),
@@ -100,6 +100,7 @@ public class Item extends DarkMatter {
             return retVal;
         }
     }
+
     public ItemType itemType;
     public String vrmlFile;
     JRadioButton rbFixedAccOn;
@@ -115,11 +116,13 @@ public class Item extends DarkMatter {
     double nextReport; // sec
     Vector<ForceElement> forceElements = new Vector<ForceElement>();
     Point3d centerOfMass = new Point3d(0, 0, 0);
-    double[] mI = new double[3]; // about xx, yy and zz
+    double[] mI = {1.0, 1.0, 1.0}; // about xx, yy and zz
+    Vector3d miAsVector = new Vector3d();
     Vector3d oneByMI = new Vector3d();
+    Vector3d netTorque = new Vector3d();
     Vector3d jetForce = new Vector3d();
     Torque jetTorque = new Torque();
-
+    Vector3d additionalAngularVel = new Vector3d();
     JetTimeController jetController;
 
 
@@ -156,7 +159,7 @@ public class Item extends DarkMatter {
     }
 
 
-     public Item(String xmlStr, Window parent) {
+    public Item(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
         takeFromXML(xmlStr);
@@ -166,14 +169,18 @@ public class Item extends DarkMatter {
         this.jetController = jetController;
     }
 
-    public void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) throws Exception{
+    public void setMomentsOfInertia(double commonMI) throws Exception {
+        setMomentsOfInertia(commonMI, commonMI, commonMI);
+    }
+
+    public void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) throws Exception {
         if (mIxx > 0 && mIyy > 0 && mIzz > 0) {
             mI[Torque.AboutX] = mIxx;
             mI[Torque.AboutY] = mIyy;
             mI[Torque.AboutZ] = mIzz;
+            miAsVector.set(mIxx, mIyy, mIzz);
             oneByMI.set(1 / mIxx, 1 / mIyy, 1 / mIzz);
-        }
-        else
+        } else
             throw new Exception("Some Moment of Inertial parameters are not acceptable");
     }
 
@@ -201,8 +208,7 @@ public class Item extends DarkMatter {
                 isLightSrc = fromItem1.isLightSrc;
             }
             return true;
-        }
-        else
+        } else
             return false;
     }
 
@@ -228,11 +234,10 @@ public class Item extends DarkMatter {
 
     public DataWithStatus<Jet> addOneJet(String jetName, Vector3d force, Point3d actingPoint, double startTime, double duration) {
         DataWithStatus<Jet> response = new DataWithStatus<Jet>();
-        Jet j = addOneJet(name,force, actingPoint);
+        Jet j = addOneJet(name, force, actingPoint);
         if (addOneJetPlanStep(j, startTime, duration)) {
             response.setValue(j);
-        }
-        else {
+        } else {
             removeJet(j);
             response.setErrorMsg("Some error in Jet time definition");
         }
@@ -253,8 +258,7 @@ public class Item extends DarkMatter {
             Jet j2 = addOneJet(baseName + "2", oppForce, oppPoint);
             if (!addOneJetPlanStep(j2, startTime, duration))
                 response.setErrorMsg("Some Error in timing of " + j2Name);
-        }
-        else
+        } else
             response.setErrorMsg("Some Error in timing of " + j1Name);
         return response;
     }
@@ -281,13 +285,14 @@ public class Item extends DarkMatter {
         return theItem;
     }
 
-    static class  ItemBasic extends JDialog {
+    static class ItemBasic extends JDialog {
         JComboBox jcItem = new JComboBox(ItemType.values());
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
         ItemSpace theSpace;
         String theName;
         EditResponse response = EditResponse.CANCEL;
+
         ItemBasic(ItemSpace theSpace, String theName) {
             setModal(true);
             this.theSpace = theSpace;
@@ -300,11 +305,12 @@ public class Item extends DarkMatter {
             jp.addItemPair(cancel, ok);
             add(jp);
             pack();
-            ActionListener li = e-> {
+            ActionListener li = e -> {
                 Object src = e.getSource();
                 if (src == ok)
                     response = EditResponse.OK;
-                closeThisWindow();};
+                closeThisWindow();
+            };
             ok.addActionListener(li);
             cancel.addActionListener(li);
         }
@@ -315,7 +321,7 @@ public class Item extends DarkMatter {
         }
 
         ItemType getSelectedType() {
-            return (ItemType)jcItem.getItemAt(jcItem.getSelectedIndex());
+            return (ItemType) jcItem.getItemAt(jcItem.getSelectedIndex());
         }
 
         EditResponse getResponse() {
@@ -331,7 +337,7 @@ public class Item extends DarkMatter {
         if (vp.val.length() > 2) {
             ItemType nowType = ItemType.getEnum(vp.val);
             if (nowType != null) {
-                switch(nowType) {
+                switch (nowType) {
                     case SURFACE:
                         theItem = new Surface(xmlStr, parent);
                         done = true;
@@ -361,19 +367,19 @@ public class Item extends DarkMatter {
         ColType[] values = ColType.values();
         int[] colWidths = new int[values.length];
         for (int i = 0; i < colWidths.length; i++)
-           colWidths[i] = oneColWidth(values[i]);
+            colWidths[i] = oneColWidth(values[i]);
         return colWidths;
     }
 
     static int oneColWidth(ColType colType) {
-        switch(colType) {
+        switch (colType) {
             case SLNO:
                 return 30;
             case NAME:
                 return 100;
             case DETAILS:
                 return 630;
-           }
+        }
         return 0;
     }
 
@@ -388,7 +394,7 @@ public class Item extends DarkMatter {
 
     Object getOneColData(ColType colType) {
         SmartFormatter fmt = new SmartFormatter(6);
-        switch(colType) {
+        switch (colType) {
             case NAME:
                 return name;
             case DETAILS:
@@ -396,13 +402,14 @@ public class Item extends DarkMatter {
                         ",    Dia:" + fmt.format(dia) +
                         ",    Pos:" + status.dataInCSV(ItemStat.Param.POSITION, 4) +
                         ((bFixedLocation) ?
-                                " Static"  : ",    Vel:" + status.dataInCSV(ItemStat.Param.VELOCITY, 4)) +
-                        ((status.angularAcceleration.isNonZero())?
-                            ", angVel:" + status.dataInCSV(ItemStat.Param.OMEGA, 4) : "");
+                                " Static" : ",    Vel:" + status.dataInCSV(ItemStat.Param.VELOCITY, 4)) +
+                        ((status.angularAcceleration.isNonZero()) ?
+                                ", angVel:" + status.dataInCSV(ItemStat.Param.OMEGA, 4) : "");
         }
         return "";
     }
-     void setRadioButtons() {
+
+    void setRadioButtons() {
         rbFixedPos = new JRadioButton("Fixed Position");
         rbFixedAccOn = new JRadioButton("Directional Acceleration ON");
 
@@ -510,6 +517,7 @@ public class Item extends DarkMatter {
         JLabel banner = new JLabel("");
         NumberTextField ntItemMass, ntItemDia;
         TuplePanel tpMI;
+        NumberTextField ntCommonMI;
         NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
         TuplePanel angularPosTuplePan;
@@ -525,6 +533,7 @@ public class Item extends DarkMatter {
         boolean allowEdit = false;
         boolean freezePosition = false;
         JDialog thisDlg;
+        double commonMI;
 
         ItemDialog(String title, boolean allowEdit, boolean freezePosition, InputControl inpC, Component c) {
             setModal(true);
@@ -558,8 +567,7 @@ public class Item extends DarkMatter {
             if (itemType == ItemType.VMRL) {
                 tfVRMLflePath = new JTextField(vrmlFile, 30);
                 jp.addItemPair("VRML File Path", tfVRMLflePath);
-            }
-            else {
+            } else {
                 if (itemType == ItemType.SPHERE) {
                     tfImageFilePath = new JTextField(imageName, 30);
                     jp.addItemPair("Image File Path", tfImageFilePath);
@@ -591,11 +599,17 @@ public class Item extends DarkMatter {
             ntItemMass = new NumberTextField(inpC, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
             jp.addItemPair(ntItemMass);
             if (itemType == ItemType.VMRL) {
-                tpMI = new TuplePanel(inpC, new Vector3d(mI), 6, 0, 1e20, "#,###.000", "Mass Moment of Inertia (kg.m2)");
+                tpMI = new TuplePanel(inpC, new Vector3d(mI), 6, 1e-20, 1e20, "#,###.000", "Mass Moment of Inertia (kg.m2)");
                 jp.addItemPair(tpMI.getTitle(), tpMI);
+            }
+            else if (itemType == ItemType.SPHERE) {
+                commonMI = mI[0];
+                ntCommonMI = new NumberTextField(inpC, commonMI, 6, false, 1e-20, 1e20, "#,###.000", "Mass Moment of Inertia (kg.m2)");
+                jp.addItemPair(ntCommonMI);
             }
             ntElasticity = new NumberTextField(inpC, eCompression, 6, false, -1, 1e20, "##0.####E00", "Elasticity N/100% ('-1' is sticky)");
             jp.addItemPair(ntElasticity);
+            jp.addItem("<html><font color='red'>WARNING: <font color='black'> Sticky is still in trial stage</html>");
             JPanel jpAngularPos = new JPanel(new BorderLayout());
             angularPosTuplePan = new TuplePanel(inpC, status.angularPos, 8, -10, +10, "##0.####", "Angular Orientation (on local axis) rad");
             jpAngularPos.add(angularPosTuplePan, BorderLayout.CENTER);
@@ -639,21 +653,18 @@ public class Item extends DarkMatter {
                     Object src = e.getSource();
                     if (src == jbManageJets) {
                         editJetList(thisDlg);
-                    }
-                    else if (src == ok) {
+                    } else if (src == ok) {
                         if (takeValuesFromUI())
                             closeThisWindow();
-                    }
-                    else if (src == delete) {
+                    } else if (src == delete) {
                         if (ItemMovementsApp.decide("Deleting Object ", "Do you want to DELETE this Object?")) {
                             response = EditResponse.DELETE;
                             closeThisWindow();
                         }
-                    }
-                    else {
+                    } else {
                         response = EditResponse.NOTCHANGED;
                         closeThisWindow();
-                     }
+                    }
                 }
             };
             delete.addActionListener(li);
@@ -705,15 +716,18 @@ public class Item extends DarkMatter {
         boolean takeValuesFromUI() {
             boolean retVal = false;
             name = tfItemName.getText();
-            if (name.length() > 1 && (!name.substring(0,2).equals("##"))) {
+            if (name.length() > 1 && (!name.substring(0, 2).equals("##"))) {
                 try {
                     mass = ntItemMass.getData();
-                    if (itemType == ItemType.SPHERE)
+                    if (itemType == ItemType.SPHERE) {
                         imageName = tfImageFilePath.getText().trim();
+                        commonMI = ntCommonMI.getData();
+                        setMomentsOfInertia(commonMI);
+                    }
                     dia = ntItemDia.getData();
                     if (itemType == ItemType.VMRL) {
                         vrmlFile = tfVRMLflePath.getText().trim();
-                        Vector3d  mIxyz = new Vector3d(tpMI.getTuple3d());
+                        Vector3d mIxyz = new Vector3d(tpMI.getTuple3d());
                         setMomentsOfInertia(mIxyz.x, mIxyz.y, mIxyz.z);
                     }
                     eCompression = ntElasticity.getData();
@@ -726,8 +740,7 @@ public class Item extends DarkMatter {
                     showError("Some parameter is not acceptable");
                     retVal = false;
                 }
-            }
-            else
+            } else
                 showError("Enter Item Name");
             return retVal;
         }
@@ -757,34 +770,65 @@ public class Item extends DarkMatter {
 
     public void evalForceFromBuiltInSource(double duration, double nowT) { // TODO
         // get Jet Force and torque
-        jetForce.set(0, 0, 0);
-        jetTorque.set(0, 0, 0);
         if (jetController != null) {
+            jetForce.set(0, 0, 0);
+            jetTorque.set(0, 0, 0);
             jetController.upDateAllJetStatus(duration, nowT);
             for (Jet oneJet : jetController.jets) {
                 jetForce.add(oneJet.getForce());
                 jetTorque.add(oneJet.getTorque());
             }
+            Transform3D tr = new Transform3D();
+            itemGraphic.get().getTotalTransform(tr);
+            tr.transform(jetForce);
+            tr.transform(jetTorque);// this has to be revered for angular pos calculations
         }
-        Transform3D tr = new Transform3D();
-        itemGraphic.get().getTotalTransform(tr);
-        tr.transform(jetForce);
     }
 
     public void setLocalForces() {
+        netTorque.set(0, 0, 0);
         super.setLocalForces();
-        netForce.add(rocketForce);
         netForce.add(jetForce);
+        netTorque.add(jetTorque);
     }
 
-        @Override
+    public void initStartForce() {
+        super.initStartForce();
+        additionalAngularVel.set(0, 0, 0);
+        netTorque.set(0, 0, 0);
+    }
+
+    public synchronized void addToTorque(Vector3d angularAcceleration)  {
+        Vector3dMV effectiveTorque = new Vector3dMV();
+        effectiveTorque.scale(miAsVector, angularAcceleration);
+        netTorque.add(effectiveTorque);
+    }
+
+    public synchronized void subtractFromTorque(Vector3d angularAcceleration) {
+        Vector3dMV effectiveTorque = new Vector3dMV();
+        effectiveTorque.scale(miAsVector, angularAcceleration);
+        netTorque.sub(effectiveTorque);
+    }
+
+    @Override
     public void setStartConditions(double duration, double nowT) {
-        lastTorque.set(jetTorque);
+//        lastTorque.set(jetTorque);
+        additionalAngularVel.set(0, 0, 0);
+        lastTorque.set(netTorque);
         lastAngularVelocity.set(status.angularVelocity);
         lastAngle.set(status.angularPos);
         super.setStartConditions(duration, nowT);
         evalForceFromBuiltInSource(duration, nowT);
     }
+
+    public synchronized void addToAngularVel(Vector3d angularVel) {
+        additionalAngularVel.add(angularVel);
+    }
+
+    public synchronized void subtractFromVel(Vector3d angularVel) {
+        additionalAngularVel.sub(angularVel);
+    }
+
 
     void evalMaxMinPos() {
         xMax = Math.max(xMax, status.pos.x);
@@ -801,13 +845,13 @@ public class Item extends DarkMatter {
     }
 
 
-     public void initPosEtc(Point3d pos, Vector3d velocity) {
+    public void initPosEtc(Point3d pos, Vector3d velocity) {
         super.initPosEtc(pos, velocity);
         nextReport = reportInterval;
     }
 
     public void initAngularPosEtc(Vector3d angularPos, Vector3d angularVelocity) {
-        status.intAngularPos(angularPos, angularVelocity);
+        status.initAngularPos(angularPos, angularVelocity);
     }
 
     public void setSpin(AxisAngle4d spinAxis, double spinPeriod) {
@@ -817,7 +861,7 @@ public class Item extends DarkMatter {
             radPerSec = Math.PI * 2 / spinPeriod;
     }
 
-      // The new methods with ItemGraphic
+    // The new methods with ItemGraphic
 
     WeakReference<ItemGraphic> itemGraphic;
 
@@ -826,8 +870,7 @@ public class Item extends DarkMatter {
         if (itemG.addObjectAndOrbit(grp, orbitAtrib)) {
             itemGraphic = new WeakReference<ItemGraphic>(itemG);
             itemGraphic.get().updateAngularPosition(status.angularPos);
-        }
-        else
+        } else
             itemG = null;
         return itemG;
     }
@@ -903,18 +946,24 @@ public class Item extends DarkMatter {
     Vector3dMV deltaAngularV = new Vector3dMV();
     Vector3dMV newAngularVelocity = new Vector3dMV();
     Vector3dMV averageAngularV = new Vector3dMV();
-    Vector3dMV deltaAngle= new Vector3dMV();
+    Vector3dMV deltaAngle = new Vector3dMV();
     Vector3d lastAngle = new Vector3d();
     Vector3dMV newAngle = new Vector3dMV();
 
     boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
         boolean changed = false;
         if (bFinal) {
-            effectiveTorque.setMean(jetTorque, lastTorque);
+            Transform3D tr = new Transform3D();
+            itemGraphic.get().getTotalTransform(tr);
+            tr.invert();
+            tr.transform(netTorque);
+            effectiveTorque.setMean(netTorque, lastTorque);
             thisAngularAcc.scale(oneByMI, effectiveTorque);
             deltaAngularV.scale(deltaT, thisAngularAcc);
             newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
+//            newAngularVelocity.add(additionalAngularVel);
             averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
+//            averageAngularV.add(additionalAngularVel);
             deltaAngle.scale(deltaT, averageAngularV);
             newAngle.add(lastAngle, deltaAngle);
             itemGraphic.get().updateAngularPosition(deltaAngle);
@@ -958,16 +1007,17 @@ public class Item extends DarkMatter {
         StringBuilder xmlStr = defaultDataInXML();
         if (itemType == ItemType.VMRL)
             xmlStr.append(XMLmv.putTag("vrmlFile", vrmlFile));
+        else if (itemType == ItemType.SPHERE)
+            xmlStr.append(XMLmv.putTag("imageName", imageName));
         xmlStr.append(XMLmv.putTag("mass", mass)).append(XMLmv.putTag("dia", dia));
-        if (itemType == ItemType.VMRL)
-            xmlStr.append(XMLmv.putTag("mI", Vector3dMV.dataInCSV(mI)));
+        xmlStr.append(XMLmv.putTag("mI", Vector3dMV.dataInCSV(mI)));
         xmlStr.append(XMLmv.putTag("eCompression", eCompression));
         xmlStr.append(XMLmv.putTag("color", ("" + color.getRGB())));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
         xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation));
         xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
         int a = 0;
-        for (LocalAction action: localActions) {
+        for (LocalAction action : localActions) {
             xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
             a++;
         }
@@ -989,12 +1039,13 @@ public class Item extends DarkMatter {
             vp = XMLmv.getTag(xmlStr, "vrmlFile", vp.endPos);
             vrmlFile = vp.val;
         }
+        vp = XMLmv.getTag(xmlStr,"imageName", vp.endPos);
+        imageName = vp.val;
         vp = XMLmv.getTag(xmlStr, "mass", 0);
         mass = Double.valueOf(vp.val);
-        if (itemType == ItemType.VMRL) {
-            vp = XMLmv.getTag(xmlStr, "mI", vp.endPos);
+        vp = XMLmv.getTag(xmlStr, "mI", vp.endPos);
+        if (vp.val.length() > 0)
             setMomentsOfInertia(vp.val);
-        }
         vp = XMLmv.getTag(xmlStr, "dia", 0);
         dia = Double.valueOf(vp.val);
         radius = dia / 2;

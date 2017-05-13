@@ -1,0 +1,10 @@
+Align to/opp direction of velocity. (with some duration)
+VELDIRECTION, OPPVELDIRECTION
+Align with duration will align based on align-start instance
+This is for a Jet.
+
+Or align and fire in time plan
+
+Jet pair
+
+
