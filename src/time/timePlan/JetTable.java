@@ -1,11 +1,14 @@
 package time.timePlan;
 
 import Applications.ItemMovementsApp;
-import GeneralElements.Jet;
+import GeneralElements.accessories.Jet;
+import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -29,17 +32,22 @@ public class JetTable {
         tableModel = new JetTableModel();
         table = new JTable(tableModel);
         table.addMouseListener(new TableListener());
+        JetItemRenderer renderer = new JetItemRenderer();
         TableColumnModel colModel = table.getColumnModel();
-        int[] colWidth = OneTimeStep.getColumnWidths();
-        for (int c = 0; c < colModel.getColumnCount(); c++)
-            colModel.getColumn(c).setPreferredWidth(colWidth[c]);
+        int[] colWidth = JetsAndSeekers.getColumnWidths(); //OneTimeStep.getColumnWidths();
+        TableColumn col;
+        for (int c = 0; c < colModel.getColumnCount(); c++) {
+            col = colModel.getColumn(c);
+            col.setPreferredWidth(colWidth[c]);
+            col.setCellRenderer(renderer);
+        }
     }
 
     public JTable getTable() {
         return table;
     }
 
-    public void addOneRow(Jet theJet) {
+    public void addOneRow(JetsAndSeekers theJet) {
         slNo++;
         Object[] data = theJet.getRowData(slNo);
         tableModel.addRow(data);
@@ -56,7 +64,7 @@ public class JetTable {
     }
 
     public void setOneRow(int row) {
-        Vector<Jet> jets = jtController.jets;
+        Vector<JetsAndSeekers> jets = jtController.jets;
         if (row >= 0 && row < table.getRowCount()) {
             Object[] data = jets.get(row).getRowData(row + 1);
             int nCol = table.getColumnCount();
@@ -67,13 +75,13 @@ public class JetTable {
 
     class JetTableModel extends DefaultTableModel {
         JetTableModel() {
-            super(OneTimeStep.getColHeader(), 0);
+            super(JetsAndSeekers.getColHeader(), 0);
             fillTable();
         }
 
         void fillTable() {
             clearTable();
-            Vector<Jet> jets = jtController.jets;
+            Vector<JetsAndSeekers> jets = jtController.jets;
             for (int i = 0; i < jets.size(); i++)
                 addRow(jets.get(i).getRowData(slNo = (i + 1)));
         }
@@ -85,18 +93,39 @@ public class JetTable {
         }
     }
 
+    class JetItemRenderer extends DefaultTableCellRenderer {
+        public JetItemRenderer() { super(); }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column);
+//            if (isSelected) {
+//                if (row == markedRow)
+//                    c.setBackground(markColor);
+//                else
+//                    c.setBackground(defSelectedBgColor);
+//            }
+//            else
+//                c.setBackground(normalBG);
+            return c;
+        }
+    }
+
+
     class TableListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 int row = table.getSelectedRow();
-                Jet theJet = jtController.jets.get(row);
-                switch (theJet.editJet(inpC, inpC.parent())) {
+                JetsAndSeekers theJet = jtController.jets.get(row);
+                switch (JetsAndSeekers.editData(theJet, inpC, table)) {
                     case CHANGED:
                         setOneRow(row);
                         break;
                     case NOTCHANGED:
-                        ItemMovementsApp.showMessage("no Change");
+                    case CANCEL:
+                        ItemMovementsApp.showMessage("no Change", table);
                         break;
                     case DELETE:
                         deleteRow(row);

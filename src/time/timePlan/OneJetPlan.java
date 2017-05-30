@@ -2,7 +2,7 @@ package time.timePlan;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
-import GeneralElements.Jet;
+import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.InputControl;
 import mvUtils.mvXML.ValAndPos;
@@ -22,7 +22,7 @@ import java.util.Vector;
  * Created by M Viswanathan on 18 Mar 2017
  */
 public class OneJetPlan {
-    Jet theJet;
+    JetsAndSeekers theJet;
     JetController theController;
     Vector<OneTimeStep> theSteps;
     int planSize;
@@ -30,14 +30,14 @@ public class OneJetPlan {
     double nowStepTime = 0;
     int stepPos = 0;
     OneTimeStep nowStep;
-    boolean bValid = true;
+    boolean bValid = false;
 
-    public OneJetPlan(Jet theJet, String xmlStr) throws Exception {
+    public OneJetPlan(JetsAndSeekers theJet, String xmlStr) throws Exception {
         this(theJet);
         takeFromXML(xmlStr);
     }
 
-    public OneJetPlan(Jet theJet) {
+    public OneJetPlan(JetsAndSeekers theJet) {
         this.theJet = theJet;
         theSteps = new Vector<OneTimeStep>();
         theJet.noteTimePlan(this);
@@ -66,7 +66,7 @@ public class OneJetPlan {
                         bValid = false;
                 }
             }
-            theJet.setActive(makeActive);
+            theJet.setActive(makeActive, nowStep, duration);
         }
     }
 
@@ -97,7 +97,7 @@ public class OneJetPlan {
 
     public Item.EditResponse editPlan(InputControl inpC, Component c) {
         Item.EditResponse response = Item.EditResponse.CANCEL;
-        DlgTimePlanEditor dlg = new DlgTimePlanEditor(inpC);
+        DlgTimePlanEditor dlg = new DlgTimePlanEditor(inpC, c);
         if (c == null)
             dlg.setLocation(50, 50);
         else
@@ -120,6 +120,7 @@ public class OneJetPlan {
 
 
     class DlgTimePlanEditor extends JDialog {
+        Component caller;
         InputControl inpC;
         JButton jbSave = new JButton("Save Time Steps");
         JButton jbCancel = new JButton("Cancel");
@@ -127,15 +128,16 @@ public class OneJetPlan {
         Item.EditResponse response = Item.EditResponse.CANCEL;
         TimePlanTable timePlanTable;
         JDialog thisDlg;
-        DlgTimePlanEditor(InputControl inpC) {
+        DlgTimePlanEditor(InputControl inpC, Component caller) {
             setModal(true);
+            this.caller = caller;
             this.inpC = inpC;
             thisDlg = this;
             init();
         }
 
         void init() {
-            timePlanTable = new TimePlanTable(inpC);
+            timePlanTable = new TimePlanTable(inpC, caller);
             FramedPanel fP = new FramedPanel(new BorderLayout());
             JScrollPane sP = new JScrollPane();
             sP.setPreferredSize(new Dimension(800, 550));
@@ -214,13 +216,15 @@ public class OneJetPlan {
     }
 
     class TimePlanTable {
+        Component caller;
         JTable table;
         InputControl inpC;
         int slNo = 0;
         PlanTableModel tableModel;
 
-        public TimePlanTable(InputControl inpC) {
+        public TimePlanTable(InputControl inpC, Component caller) {
             this.inpC = inpC;
+            this.caller = caller;
             tableModel = new PlanTableModel();
             table = new JTable(tableModel);
             table.addMouseListener(new TableListener());
@@ -289,12 +293,12 @@ public class OneJetPlan {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     int row = table.getSelectedRow();
                     OneTimeStep step = getOneStep(row);
-                    switch (step.editStep(inpC, (Component) e.getSource())) {
+                    switch (step.editStep(inpC, caller)) {
                         case CHANGED:
                             setOneRow(row);
                             break;
                         case NOTCHANGED:
-                            ItemMovementsApp.showMessage("no Change");
+                            ItemMovementsApp.showMessage("no Change", caller);
                             break;
                         case DELETE:
                             deleteRow(row);

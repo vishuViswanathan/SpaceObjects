@@ -888,22 +888,33 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         return mainF;
     }
 
-    public static void showError(String msg) {
+    public static void showError(String msg, Component caller) {
         log.info(msg);
-        JOptionPane.showMessageDialog(mainF, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(caller, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
+        mainF.toFront();
+    }
+
+    public static void showError(String msg) {
+        showError(msg, mainF);
+    }
+
+    public static void showMessage(String msg, Component caller) {
+        JOptionPane.showMessageDialog(caller, msg, "FOR INFORMATION", JOptionPane.INFORMATION_MESSAGE);
         mainF.toFront();
     }
 
     public static void showMessage(String msg) {
-        JOptionPane.showMessageDialog(mainF, msg, "FOR INFORMATION", JOptionPane.INFORMATION_MESSAGE);
-        mainF.toFront();
+        showMessage(msg, mainF);
     }
 
-    public static boolean decide(String title, String msg) {
-        int resp = JOptionPane.showConfirmDialog(mainF, msg, title, JOptionPane.YES_NO_OPTION);
+     public static boolean decide(String title, String msg, Component caller) {
+        int resp = JOptionPane.showConfirmDialog(caller, msg, title, JOptionPane.YES_NO_OPTION);
         return resp == JOptionPane.YES_OPTION;
     }
 
+    public static boolean decide(String title, String msg) {
+        return decide(title, msg, mainF);
+    }
 
     class MyListener implements ActionListener {
         MyListener() {
@@ -1025,7 +1036,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 });
     }
 
-    void debug(String msg) {
+    static public void debug(String msg) {
         log.debug(msg);
     }
 

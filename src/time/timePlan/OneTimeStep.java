@@ -98,6 +98,10 @@ public class OneTimeStep {
         setValues(startTime, duration);
     }
 
+    public double duration() {
+        return endTime - startTime;
+    }
+
     private void setValues(double startTime, double duration) {
         this.startTime = startTime;
         this.endTime = startTime + duration;
@@ -156,7 +160,7 @@ public class OneTimeStep {
     }
 
     Item.EditResponse editStep(InputControl inpC, Component c) {
-        StepDetails dlg = new StepDetails(inpC);
+        StepDetails dlg = new StepDetails(inpC, c);
 //        dlg.setSize(400, 400);
         if (c == null)
             dlg.setLocation(100, 100);
@@ -171,6 +175,7 @@ public class OneTimeStep {
     }
 
     class StepDetails extends JDialog {
+        Component caller;
         InputControl inpC;
         double duration;
         Item.EditResponse response;
@@ -181,8 +186,9 @@ public class OneTimeStep {
         JButton cancel = new JButton("Cancel");
         JButton delete = new JButton("Delete");
 
-        StepDetails(InputControl inpC) {
+        StepDetails(InputControl inpC, Component caller) {
             setModal(true);
+            this.caller = caller;
             setResizable(false);
             this.inpC = inpC;
 //            if (c == null)
@@ -218,7 +224,7 @@ public class OneTimeStep {
                         closeThisWindow();
                     }
                 } else if (src == delete) {
-                    if (ItemMovementsApp.decide("Deleting Time Step  ", "Do you want to DELETE this Step?")) {
+                    if (ItemMovementsApp.decide("Deleting Time Step  ", "Do you want to DELETE this Step?", caller)) {
                         response = Item.EditResponse.DELETE;
                         closeThisWindow();
                     }

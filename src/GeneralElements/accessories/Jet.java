@@ -1,7 +1,9 @@
-package GeneralElements;
+package GeneralElements.accessories;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
+import GeneralElements.Item;
+import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
@@ -22,117 +24,61 @@ import java.awt.event.ActionListener;
 /**
  * Created by M Viswanathan on 12 Mar 2017
  */
-public class Jet {
-    static public enum JetTableColType {
-        SLNO("SlNo."),
-        DETAILS("Details");
-
-        private final String typeName;
-
-        JetTableColType(String typeName) {
-            this.typeName = typeName;
-        }
-
-        public String getValue() {
-            return typeName;
-        }
-
-        @Override
-        public String toString() {
-            return typeName;
-        }
-
-        public static JetTableColType getEnum(String text) {
-            JetTableColType retVal = null;
-            if (text != null) {
-                for (JetTableColType b : JetTableColType.values()) {
-                    if (text.equalsIgnoreCase(b.typeName)) {
-                        retVal = b;
-                        break;
-                    }
-                }
-            }
-            return retVal;
-        }
-    }
-    String name;
+public class Jet extends JetsAndSeekers {
+//    String name;
     ForceSource forceSource;
-    public OneJetPlan thePlan;
+//    public OneJetPlan thePlan;
     ForceElement jetData;
-    boolean active;
+//    boolean active;
 
-    public Jet() {
-        this("??Jet", new ForceElement(1, new Vector3d(), new Point3d()));
+    public Jet(Item item) {
+        this(item, "??Jet", new ForceElement(1, new Vector3d(), new Point3d()));
     }
 
-    public Jet(String xmlStr)  {
+    public Jet(Item item, String xmlStr) {
+        super(item, ElementType.JET);
         takeFromXML(xmlStr);
     }
 
-    public Jet(String name, ForceElement jetData) {
-        this.name = name;
+    public Jet(Item item, String name, ForceElement jetData) {
+        super(item, name, ElementType.JET);
         this.jetData = jetData;
-        forceSource = new RocketEngine("Test Jet", jetData.getForce().length()/ 1000, 10);
-        thePlan = new OneJetPlan(this);
+        forceSource = new RocketEngine("Test Jet", jetData.getForce().length() / 1000, 10);
+//        thePlan = new OneJetPlan(this);
     }
 
-    public Jet(String name, ForceSource forceSource, Vector3d direction, Point3d location) {
-        this.name = name;
+    public Jet(Item item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
+        super(item, name, ElementType.JET);
         setJetData(forceSource, direction, location);
-        thePlan = new OneJetPlan(this);
+//        thePlan = new OneJetPlan(this);
     }
 
     private void setJetData(ForceSource forceSource, Vector3d direction, Point3d location) {
-        jetData = new ForceElement(forceSource.effectiveForce() , direction, location);
+        jetData = new ForceElement(forceSource.effectiveForce(), direction, location);
     }
 
     public void noteTimePlan(OneJetPlan thePlan) {
         this.thePlan = thePlan;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public boolean isActive() {
         return active;
     }
 
-    Vector3d getForce() {
-//        System.out.println("active " + active);
-        if (active)
-            return jetData.getForce();
-        else
-            return new Vector3d();
-    }
-
-    Vector3d getTorque() {
-        if (active)
-            return jetData.getTorque();
-        else
-            return new Vector3d();
-    }
-
-    public Object[] getRowData(int slNo) {
-        JetTableColType[] values = JetTableColType.values();
-        Object[] rowData = new Object[values.length];
-        rowData[0] = "" + slNo;
-        for (int i = 1; i < rowData.length; i++)
-            rowData[i] = getOneColData(values[i]);
-        return rowData;
-    }
-
-    Object getOneColData(JetTableColType colType) {
-        SmartFormatter fmt = new SmartFormatter(6);
-        switch(colType) {
-            case DETAILS:
-                return name + " : " + forceSource.dataAsString();
+    public void addEffect() {
+        if (active) {
+            item.addTojetForce(jetData.getForce());
+            item.addToJetTorque(jetData.getTorque());
         }
-        return "";
+    }
+
+    protected String detailsString() {
+        return forceSource.dataAsString();
     }
 
     public StringBuilder dataInXML() {
-        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
+        StringBuilder xmlStr = super.dataInXML();
+        xmlStr.append(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("forceSource", forceSource.dataInXML()));
         xmlStr.append(XMLmv.putTag("jetData", jetData.dataInXML()));
         xmlStr.append(XMLmv.putTag("thePlan", thePlan.dataInXML()));
@@ -156,12 +102,13 @@ public class Jet {
         } catch (Exception e) {
             showError(".153 takeFromXML: Some mess in Time Plan");
             retVal = false;
+            retVal = false;
         }
         return retVal;
     }
 
-    public Item.EditResponse editJet(InputControl inpC, Component c) {
-        JetDetails dlg = new JetDetails(inpC);
+    public Item.EditResponse editData(InputControl inpC, Component c) {
+        JetDetails dlg = new JetDetails(inpC, c);
         if (c == null)
             dlg.setLocation(100, 100);
         else
@@ -171,6 +118,7 @@ public class Jet {
     }
 
     class JetDetails extends JDialog {
+        Component caller;
         InputControl inpC;
         Item.EditResponse response;
         TextField tName;
@@ -183,8 +131,10 @@ public class Jet {
         JButton cancel = new JButton("Cancel");
         JButton delete = new JButton("Delete");
         JDialog thisDlg;
-        JetDetails(InputControl inpC) {
+
+        JetDetails(InputControl inpC, Component caller) {
             setModal(true);
+            this.caller = caller;
             setResizable(false);
             this.inpC = inpC;
             thisDlg = this;
@@ -209,10 +159,11 @@ public class Jet {
             jpBasic.addItem("Direction and Location are in Item's local coordinates");
             jpBasic.addItem(forceSource.fsDetails());
             jbTimePlan = new JButton("Edit Time Plan");
-            jbTimePlan.addActionListener(e->
-                {Item.EditResponse response = thePlan.editPlan(inpC, thisDlg);
-                    System.out.println("response from TimePlan is " + response);
-                });
+            jbTimePlan.addActionListener(e ->
+            {
+                Item.EditResponse response = thePlan.editPlan(inpC, thisDlg);
+                System.out.println("response from TimePlan is " + response);
+            });
             JPanel p = new JPanel();
             p.add(jbTimePlan);
             jpBasic.addItem(p);
@@ -232,7 +183,7 @@ public class Jet {
                             closeThisWindow();
                         }
                     } else if (src == delete) {
-                        if (ItemMovementsApp.decide("Deleting Plan Step  ", "Do you want to DELETE this Step?")) {
+                        if (ItemMovementsApp.decide("Deleting Jet  ", "Do you want to DELETE this Jet?", caller)) {
                             response = Item.EditResponse.DELETE;
                             closeThisWindow();
                         }
@@ -266,6 +217,7 @@ public class Jet {
             }
             return retVal;
         }
+
         Item.EditResponse getResponse() {
             return response;
         }
@@ -274,5 +226,5 @@ public class Jet {
     void showError(String msg) {
         ItemMovementsApp.showError("Jet: " + msg);
     }
-
 }
+

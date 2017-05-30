@@ -1,6 +1,6 @@
 package time.timePlan;
 
-import GeneralElements.Jet;
+import GeneralElements.accessories.Jet;
 
 import java.util.Vector;
 

@@ -2,8 +2,10 @@ package time.timePlan;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
-import GeneralElements.Jet;
-import jdk.nashorn.internal.scripts.JD;
+import GeneralElements.accessories.Jet;
+import GeneralElements.accessories.JetsAndSeekers;
+import mvUtils.display.DataStat;
+import mvUtils.display.DataWithStatus;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.InputControl;
 import mvUtils.mvXML.ValAndPos;
@@ -22,15 +24,15 @@ import java.util.Vector;
  */
 public class JetTimeController extends JetController{
     Item item;
-    Hashtable<Jet, OneJetPlan> jetAndPlan;
-    public Vector<Jet> jets = new Vector<>();
+    Hashtable<JetsAndSeekers, OneJetPlan> jetAndPlan;
+    public Vector<JetsAndSeekers> jets = new Vector<>();
     JetTimeController mainThis;
 
 //    Vector<OneJetPlan> controlTable;
 
     public JetTimeController(Item item) {
         this.item = item;
-        jetAndPlan = new Hashtable<Jet, OneJetPlan>();
+        jetAndPlan = new Hashtable<JetsAndSeekers, OneJetPlan>();
         jets = new Vector<>();
         mainThis = this;
     }
@@ -40,7 +42,7 @@ public class JetTimeController extends JetController{
         takeFromXML(xmlStr);
     }
 
-    public boolean addOneJet(Jet jet) {
+    public boolean addOneJet(JetsAndSeekers jet) {
         boolean retVal = false;
         if (!jetAndPlan.containsKey(jet)) {
             OneJetPlan onePlan = jet.thePlan;
@@ -81,7 +83,7 @@ public class JetTimeController extends JetController{
 
     void updateJetList() {
         jets.removeAllElements();
-        for (Jet jet : jetAndPlan.keySet()) {
+        for (JetsAndSeekers jet : jetAndPlan.keySet()) {
             jets.add(jet);
         }
     }
@@ -106,7 +108,7 @@ public class JetTimeController extends JetController{
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("nJet", jets.size()));
         int iJ = 0;
-        for (Jet oneJet: jets) {
+        for (JetsAndSeekers oneJet: jets) {
             xmlStr.append(XMLmv.putTag("iJ" + ("" + iJ).trim(), oneJet.dataInXML()));
             xmlStr.append(XMLmv.putTag("iJplan" + ("" + iJ).trim(),
                     jetAndPlan.get(oneJet).dataInXML()));
@@ -124,16 +126,19 @@ public class JetTimeController extends JetController{
         int nJet = Integer.valueOf(vp.val);
         for (int iJ = 0; iJ < nJet; iJ++) {
             vp = XMLmv.getTag(xmlStr, "iJ" + ("" + iJ).trim(), vp.endPos);
-            Jet oneJet = new Jet(vp.val);
-            vp = XMLmv.getTag(xmlStr, "iJplan" + ("" + iJ).trim(), vp.endPos);
-            try {
-                OneJetPlan onePlan = new OneJetPlan(oneJet, vp.val);
-                jets.add(oneJet);
-                jetAndPlan.put(oneJet, onePlan);
-            } catch (Exception e) {
-                retVal = false;
-                showError("Error in JetPlan: " + e.getMessage());
-                break;
+            DataWithStatus<JetsAndSeekers> resp = JetsAndSeekers.getJetsAndSeekers(item, vp.val);
+            if (resp.getStatus() == DataStat.Status.OK) {
+                JetsAndSeekers oneJet = resp.getValue();
+                vp = XMLmv.getTag(xmlStr, "iJplan" + ("" + iJ).trim(), vp.endPos);
+                try {
+                    OneJetPlan onePlan = new OneJetPlan(oneJet, vp.val);
+                    jets.add(oneJet);
+                    jetAndPlan.put(oneJet, onePlan);
+                } catch (Exception e) {
+                    retVal = false;
+                    showError("Error in JetPlan: " + e.getMessage());
+                    break;
+                }
             }
         }
         return retVal;
@@ -194,10 +199,12 @@ public class JetTimeController extends JetController{
         }
 
         boolean addNewJet(Component c) {
-            Jet theJet = new Jet();
-            if (theJet.editJet(inpC, c) == Item.EditResponse.CHANGED) {
-                jetTable.addOneRow(theJet);
-                return true;
+            JetsAndSeekers theAccessory = JetsAndSeekers.getNewAccessory(item, c);
+            if (theAccessory != null) {
+                if (JetsAndSeekers.editData(theAccessory, inpC, c) == Item.EditResponse.CHANGED) {
+                    jetTable.addOneRow(theAccessory);
+                    return true;
+                }
             }
             return false;
         }

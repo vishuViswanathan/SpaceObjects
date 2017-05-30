@@ -3,8 +3,6 @@ package schemes;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
-import GeneralElements.Jet;
-import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
 import javax.swing.*;

@@ -3,6 +3,7 @@ package GeneralElements;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
+import GeneralElements.accessories.JetsAndSeekers;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.*;
@@ -117,8 +118,8 @@ public class Item extends DarkMatter {
     Vector<ForceElement> forceElements = new Vector<ForceElement>();
     Point3d centerOfMass = new Point3d(0, 0, 0);
     double[] mI = {1.0, 1.0, 1.0}; // about xx, yy and zz
-    Vector3d miAsVector = new Vector3d();
-    Vector3d oneByMI = new Vector3d();
+    public Vector3d miAsVector = new Vector3d();
+    public Vector3d oneByMI = new Vector3d();
     Vector3d netTorque = new Vector3d();
     Vector3d jetForce = new Vector3d();
     Torque jetTorque = new Torque();
@@ -723,12 +724,12 @@ public class Item extends DarkMatter {
             jetForce.set(0, 0, 0);
             jetTorque.set(0, 0, 0);
             jetController.upDateAllJetStatus(duration, nowT);
-            for (Jet oneJet : jetController.jets) {
-                jetForce.add(oneJet.getForce());
-                jetTorque.add(oneJet.getTorque());
+            for (JetsAndSeekers oneJet : jetController.jets) {
+                oneJet.addEffect();
             }
-            Transform3D tr = new Transform3D();
-            itemGraphic.get().getTotalTransform(tr);
+//            Transform3D tr = new Transform3D();
+//            itemGraphic.get().getTotalTransform(tr);
+            Transform3D tr = itemToGlobal();
             tr.transform(jetForce);
             tr.transform(jetTorque);// this has to be revered for angular pos calculations
         }
@@ -745,6 +746,14 @@ public class Item extends DarkMatter {
         super.initStartForce();
         additionalAngularVel.set(0, 0, 0);
         netTorque.set(0, 0, 0);
+    }
+
+    public void addTojetForce(Vector3d addForce) {
+        jetForce.add(addForce);
+    }
+
+    public void addToJetTorque(Vector3d addTorque) {
+        jetTorque.add(addTorque);
     }
 
     public synchronized void addToTorque(Vector3d angularAcceleration)  {
@@ -887,6 +896,18 @@ public class Item extends DarkMatter {
         status.angularAcceleration.set(thisAngularAcc);
     }
 
+    public Transform3D globalToItem() {
+        Transform3D tr = new Transform3D();
+        itemGraphic.get().getTotalTransform(tr);
+        tr.invert();
+        return tr;
+    }
+
+    public Transform3D itemToGlobal() {
+        Transform3D tr = new Transform3D();
+        itemGraphic.get().getTotalTransform(tr);
+        return tr;
+    }
 
     Vector3d lastTorque = new Torque();
     Vector3d lastAngularVelocity = new Vector3d();
@@ -902,17 +923,18 @@ public class Item extends DarkMatter {
     boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
         boolean changed = false;
         if (bFinal) {
-            Transform3D tr = new Transform3D();
-            itemGraphic.get().getTotalTransform(tr);
-            tr.invert();
-            tr.transform(netTorque);
+//            Transform3D tr = new Transform3D();
+//            itemGraphic.get().getTotalTransform(tr);
+//            tr.invert();
+//            tr.transform(netTorque);
+            globalToItem().transform(netTorque);
             effectiveTorque.setMean(netTorque, lastTorque);
             thisAngularAcc.scale(oneByMI, effectiveTorque);
             deltaAngularV.scale(deltaT, thisAngularAcc);
             newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
 //            newAngularVelocity.add(additionalAngularVel);
             averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
-            averageAngularV.add(additionalAngularVel);
+//            averageAngularV.add(additionalAngularVel);
             deltaAngle.scale(deltaT, averageAngularV);
             newAngle.add(lastAngle, deltaAngle);
             itemGraphic.get().updateAngularPosition(deltaAngle);

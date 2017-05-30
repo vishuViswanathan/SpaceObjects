@@ -3,6 +3,7 @@ package GeneralElements.Display;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
+import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
 
 import javax.swing.*;
