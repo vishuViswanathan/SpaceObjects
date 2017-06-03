@@ -25,6 +25,9 @@ public class OneJetPlan {
     JetsAndSeekers theJet;
     JetController theController;
     Vector<OneTimeStep> theSteps;
+    OneTimeStep manualStep;
+    boolean manualStepOn = false;
+
     int planSize;
     // while running the flightPlan
     double nowStepTime = 0;
@@ -41,6 +44,8 @@ public class OneJetPlan {
         this.theJet = theJet;
         theSteps = new Vector<OneTimeStep>();
         theJet.noteTimePlan(this);
+        manualStep = new OneTimeStep(theJet, 0, 5);
+        manualStepOn = false;
     }
 
     public void noteController(JetController theController) {
@@ -51,10 +56,62 @@ public class OneJetPlan {
         return (theSteps.size() > 0) && bValid;
     }
 
-    public void updateJetStatus(double duration, double nowT) {
+    public boolean activateManual(double nowT, double deltaT) {
+        boolean retVal = false;
+        if (!manualStepOn && manualStep != null)   {
+            ItemMovementsApp.debug("Present active Step is not checked and will be interrupted, if ON");
+            manualStep.startTime = nowT;
+            manualStep.endTime = nowT + manualStep.duration;
+            nowStep = manualStep;
+            manualStepOn = true;
+            nowStepTime = nowT - deltaT;
+            retVal = true;
+        }
+        return retVal;
+    }
+
+    public void updateJetStatus(double deltaT, double nowT) {
+        if (manualStepOn) {
+            boolean makeActive = false;
+            nowStepTime += deltaT;
+            if (nowStepTime >= nowStep.startTime) {
+                if (nowStepTime < nowStep.endTime)
+                    makeActive = true;
+                else {
+                    manualStepOn = false;
+                    nowStepTime = nowT;
+                }
+            }
+            theJet.setActive(makeActive, nowStep, deltaT);
+            if (!makeActive) {
+                if (bValid)
+                    nowStep = theSteps.get(stepPos);
+            }
+        }
+        else {
+            if (bValid) {
+                boolean makeActive = false;
+                nowStepTime += deltaT;
+                if (nowStepTime >= nowStep.startTime) {
+                    if (nowStepTime < nowStep.endTime)
+                        makeActive = true;
+                    else {
+                        stepPos++;
+                        if (stepPos < planSize)
+                            nowStep = theSteps.get(stepPos);
+                        else
+                            bValid = false;
+                    }
+                }
+                theJet.setActive(makeActive, nowStep, deltaT);
+            }
+        }
+    }
+
+    public void updateJetStatusOLD(double deltaT, double nowT) {
         if (bValid) {
             boolean makeActive = false;
-            nowStepTime += duration;
+            nowStepTime += deltaT;
             if (nowStepTime >= nowStep.startTime) {
                 if (nowStepTime < nowStep.endTime)
                     makeActive = true;
@@ -66,7 +123,7 @@ public class OneJetPlan {
                         bValid = false;
                 }
             }
-            theJet.setActive(makeActive, nowStep, duration);
+            theJet.setActive(makeActive, nowStep, deltaT);
         }
     }
 
@@ -117,7 +174,6 @@ public class OneJetPlan {
     int getPlanSize() {
         return theSteps.size();
     }
-
 
     class DlgTimePlanEditor extends JDialog {
         Component caller;
@@ -175,7 +231,7 @@ public class OneJetPlan {
         }
 
         boolean addNewStep(Component c) {
-            OneTimeStep oneStep = new OneTimeStep(0, 0);
+            OneTimeStep oneStep = new OneTimeStep(theJet,0, 0);
             if (oneStep.editStep(inpC, c) == Item.EditResponse.CHANGED) {
                 try {
 //                    addOneStep(oneStep);
@@ -210,9 +266,13 @@ public class OneJetPlan {
         int nSteps = Integer.valueOf(vp.val);
         for (int step = 0; step < nSteps; step++) {
             vp = XMLmv.getTag(xmlStr, "iStep" + ("" + step).trim(), vp.endPos);
-            addOneStep(new OneTimeStep(vp.val));
+            addOneStep(new OneTimeStep(theJet, vp.val));
         }
         return retVal;
+    }
+
+    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ActionListener activationListener) {
+        return manualStep.controlPanel(jetName, parent, inpC, activationListener);
     }
 
     class TimePlanTable {

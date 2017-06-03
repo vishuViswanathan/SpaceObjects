@@ -1,6 +1,7 @@
 package GeneralElements.accessories;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -65,11 +66,8 @@ public class Aligner extends JetsAndSeekers {
     double halfTime; // when acceleration/ deceleration switch is to take place
     double quarter1Time;
     double quarter3Time;
-    boolean switched = false;
+    boolean opposite = false; // to take care NEGX, NEGY and NEGZ
     TimePos nowTimePos = NOTSTARTED;
-    double xTorque;
-    double yTorque;
-    double zTorque;
 
     AlignTo alignBaseZ;
     AlignTo alignBaseX;
@@ -95,17 +93,22 @@ public class Aligner extends JetsAndSeekers {
             alignBaseZ.setNeighbours(alignBaseY, alignBaseX);
             alignBaseX.setNeighbours(alignBaseZ, alignBaseY);
             alignBaseY.setNeighbours(alignBaseX, alignBaseZ);
+
+            opposite = false;
             switch (direction) {
-                case POSZ:
                 case NEGZ:
+                    opposite = true;
+                case POSZ:
                     myAlignBase = alignBaseZ;
                     break;
-                case POSX:
                 case NEGX:
+                    opposite = true;
+                case POSX:
                     myAlignBase = alignBaseX;
                     break;
-                case POSY:
                 case NEGY:
+                    opposite = true;
+                case POSY:
                     myAlignBase = alignBaseY;
                     break;
 
@@ -125,6 +128,7 @@ public class Aligner extends JetsAndSeekers {
             updateTorque(duration);
         }
         else {
+            this.theStep = null;
             basicsSet = false;
             nowTimePos = NOTSTARTED;
         }
@@ -174,14 +178,17 @@ public class Aligner extends JetsAndSeekers {
             next.torque = 0;
             switch (direction) {
                 case POSZ:
+                case NEGZ:
                     numerator = (second) ? alignTo.x : alignTo.y;
                     denominator = alignTo.z;
                     break;
                 case POSX:
+                case NEGX:
                     numerator = (second) ? alignTo.y : alignTo.z;
                     denominator = alignTo.x;
                     break;
                 case POSY:
+                case NEGY:
                     numerator = (second) ? alignTo.z : alignTo.x;
                     denominator = alignTo.y;
                     break;
@@ -200,7 +207,12 @@ public class Aligner extends JetsAndSeekers {
                     theta += Math.PI;
                 if (theta > Math.PI)
                     theta -= (2 * Math.PI);
-
+                if (opposite) { // case of NEGX etc.
+                    if (theta <= 0)
+                        theta += Math.PI;
+                    else
+                        theta -= Math.PI;
+                }
                 prev.torque = theta / tRefSq * prev.mI;
 
             } else {
@@ -212,7 +224,12 @@ public class Aligner extends JetsAndSeekers {
                     theta -= Math.PI;
                 if (theta < -Math.PI)
                     theta += (2 * Math.PI);
-
+                if (opposite) { // case of NEGX etc.
+                    if (theta <= 0)
+                        theta += Math.PI;
+                    else
+                        theta -= Math.PI;
+                }
                 next.torque = theta / tRefSq * next.mI;
             }
         }
@@ -317,7 +334,6 @@ public class Aligner extends JetsAndSeekers {
             item.addToJetTorque(nowTorque);
     }
 
-
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = super.dataInXML();
         xmlStr.append(XMLmv.putTag("name", name));
@@ -343,6 +359,12 @@ public class Aligner extends JetsAndSeekers {
         }
         return retVal;
     }
+
+    public OneTimeStep.StepAction[] actions() {
+        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.ALIGNTOVELOCITY, OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY};
+    }
+
+
 
     public Item.EditResponse editData(InputControl inpC, Component c) {
         AlignerDetails dlg = new AlignerDetails(inpC, c);

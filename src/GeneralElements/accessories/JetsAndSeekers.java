@@ -90,7 +90,7 @@ public abstract class JetsAndSeekers {
     }
     Item item;
     ElementType elementType;
-    String name;
+    public String name;
     boolean active = false;
     OneTimeStep theStep;
     public OneJetPlan thePlan;
@@ -203,6 +203,10 @@ public abstract class JetsAndSeekers {
                 break;
         }
         return retVal;
+    }
+
+    public OneTimeStep.StepAction[] actions() {
+        return OneTimeStep.StepAction.values();
     }
 
     static public JetsAndSeekers getNewAccessory(Item item, Component theParent) {

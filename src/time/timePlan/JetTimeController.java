@@ -4,10 +4,7 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.accessories.Jet;
 import GeneralElements.accessories.JetsAndSeekers;
-import mvUtils.display.DataStat;
-import mvUtils.display.DataWithStatus;
-import mvUtils.display.FramedPanel;
-import mvUtils.display.InputControl;
+import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 
@@ -65,7 +62,7 @@ public class JetTimeController extends JetController{
         boolean retVal = false;
         if (jetAndPlan.containsKey(jet)) {
             try {
-                jetAndPlan.get(jet).addOneStep(new OneTimeStep(startTime, duration));
+                jetAndPlan.get(jet).addOneStep(new OneTimeStep(jet, startTime, duration));
                 retVal = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -74,11 +71,15 @@ public class JetTimeController extends JetController{
         return retVal;
     }
 
+    double lastT;
+    double deltaT;
     @Override
-    public void upDateAllJetStatus(double duration, double nowTime) {
+    public void upDateAllJetStatus(double deltaT, double nowTime) {
         Collection<OneJetPlan> plans = jetAndPlan.values();
-        for (OneJetPlan j: plans)
-            j.updateJetStatus(duration, nowTime);
+        this.lastT = nowTime;
+        this.deltaT = deltaT;
+        for (OneJetPlan onePlan: plans)
+            onePlan.updateJetStatus(deltaT, nowTime);
     }
 
     void updateJetList() {
@@ -144,6 +145,27 @@ public class JetTimeController extends JetController{
         return retVal;
     }
 
+    public JPanel controlPanel(Component parent, InputControl inpC) {
+        ManualControlListener li;
+        MultiPairColPanel mp = new MultiPairColPanel(item.name + " Control Panel");
+        for (JetsAndSeekers oneJet: jets) {
+            OneJetPlan onePlan = jetAndPlan.get(oneJet);
+            li = new ManualControlListener(onePlan);
+            mp.addItem(jetAndPlan.get(oneJet).controlPanel(oneJet.name, parent, inpC, li));
+        }
+        return mp;
+    }
+
+    class ManualControlListener implements ActionListener {
+        OneJetPlan thePlan;
+        ManualControlListener(OneJetPlan thePlan) {
+            this.thePlan = thePlan;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            thePlan.activateManual(lastT, deltaT);
+        }
+    }
     class JetListEditor extends JDialog {
         JetTable jetTable;
         InputControl inpC;

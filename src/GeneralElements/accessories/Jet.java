@@ -107,6 +107,10 @@ public class Jet extends JetsAndSeekers {
         return retVal;
     }
 
+    public OneTimeStep.StepAction[] actions() {
+        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.FIREJET};
+    }
+
     public Item.EditResponse editData(InputControl inpC, Component c) {
         JetDetails dlg = new JetDetails(inpC, c);
         if (c == null)

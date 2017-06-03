@@ -40,6 +40,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     double viewPosFromPlanet;
     boolean bPlatformWasAttached = false;
     JCheckBox slowRevolveCB;  // slowing down MouseOrbit
+    JButton jbControlPanel;
     JButton jbItemData;
     JButton jbItemEdit;
 
@@ -226,6 +227,8 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         gbc.gridy = 0;
         menuP.add(createSlowRevolveCB(), gbc);
         gbc.gridy++;
+        menuP.add(createControlPanelButton(), gbc);
+        gbc.gridy++;
         menuP.add(createItemEditButton(), gbc);
         gbc.gridy++;
         menuP.add(createItemDataButton(), gbc);
@@ -249,6 +252,14 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
             }
         });
         return slowRevolveCB;
+    }
+
+    JComponent createControlPanelButton() {
+        jbControlPanel = new JButton("Control Panel");
+        jbControlPanel.addActionListener(e -> {
+            itemInView.showControlPanel(controller, jbControlPanel);
+        });
+        return jbControlPanel;
     }
 
     JComponent createItemDataButton() {

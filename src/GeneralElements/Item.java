@@ -6,6 +6,7 @@ import GeneralElements.Display.TuplePanel;
 import GeneralElements.accessories.JetsAndSeekers;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
+import jdk.nashorn.internal.scripts.JD;
 import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
@@ -460,6 +461,7 @@ public class Item extends DarkMatter {
     }
 
     class ItemDialog extends JDialog {
+        Component parent;
         JTextField tfItemName;
         JTextField tfVRMLflePath;
         JTextField tfImageFilePath;
@@ -490,6 +492,7 @@ public class Item extends DarkMatter {
             setResizable(false);
             thisDlg = this;
             this.inpC = inpC;
+            this.parent = c;
             this.allowEdit = allowEdit;
             if (allowEdit)
                 this.freezePosition = freezePosition;
@@ -707,6 +710,47 @@ public class Item extends DarkMatter {
         status.time = 0;
         nextReport = 0;
         initStartForce();
+    }
+
+    public void showControlPanel(InputControl inpC, Component parent) {
+        ControlPanelDialog dlg = new ControlPanelDialog(inpC, parent);
+        dlg.setVisible(true);
+    }
+
+    class ControlPanelDialog extends JDialog {
+        Component parent;
+        InputControl inpC;
+        JButton close = new JButton("Close");
+
+        ControlPanelDialog(InputControl inpC, Component parent) {
+//            setModal(true);
+            setResizable(false);
+            this.inpC = inpC;
+            this.parent = parent;
+            setTitle("Control Panel");
+            dbInit();
+            if (parent == null)
+                setLocation(100, 100);
+            else
+                setLocationRelativeTo(parent);
+        }
+
+        void dbInit() {
+            JPanel outerPan = new JPanel(new BorderLayout());
+            outerPan.add(jetController.controlPanel(parent, inpC), BorderLayout.CENTER);
+            JPanel buttonP = new JPanel();
+            close.addActionListener(e -> {
+                closeIt();
+            });
+            buttonP.add(close);
+            outerPan.add(buttonP, BorderLayout.SOUTH);
+            add(outerPan);
+            pack();
+        }
+
+        void closeIt() {
+            setVisible(false);
+        }
     }
 
     void resetLimits() {

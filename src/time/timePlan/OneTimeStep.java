@@ -1,7 +1,9 @@
 package time.timePlan;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
+import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
@@ -85,16 +87,22 @@ public class OneTimeStep {
             return retVal;
         }
     }
-
-    public StepAction stepAction = StepAction.FIREJET;
+    JetsAndSeekers forElement;
+    public StepAction stepAction;
     public double startTime;
+    public double duration;
     public double endTime;
 
-    public OneTimeStep(String xmlStr) {
-       takeFromXML(xmlStr);
+    public OneTimeStep(JetsAndSeekers element, String xmlStr) {
+        this.forElement = element;
+        stepAction = element.actions()[0];
+        takeFromXML(xmlStr);
     }
 
-    public OneTimeStep(double startTime, double duration) {
+    public OneTimeStep(JetsAndSeekers element, double startTime, double duration) {
+        forElement = element;
+        this.duration = duration;
+        stepAction = element.actions()[0];
         setValues(startTime, duration);
     }
 
@@ -104,6 +112,7 @@ public class OneTimeStep {
 
     private void setValues(double startTime, double duration) {
         this.startTime = startTime;
+        this.duration = duration;
         this.endTime = startTime + duration;
     }
 
@@ -177,7 +186,7 @@ public class OneTimeStep {
     class StepDetails extends JDialog {
         Component caller;
         InputControl inpC;
-        double duration;
+//        double duration;
         Item.EditResponse response;
         JComboBox<StepAction> cbStepAction;
         NumberTextField ntStartTime;
@@ -191,16 +200,12 @@ public class OneTimeStep {
             this.caller = caller;
             setResizable(false);
             this.inpC = inpC;
-//            if (c == null)
-//                setLocation(100, 100);
-//            else
-//                setLocationRelativeTo(c);
             dbInit();
         }
 
         void dbInit() {
-            duration = endTime - startTime;
-            cbStepAction = new JComboBox<>(StepAction.values());
+//            duration = endTime - startTime;
+            cbStepAction = new JComboBox<>(forElement.actions()); //StepAction.values());
             cbStepAction.setSelectedItem(stepAction);
             ntStartTime = new NumberTextField(inpC, startTime, 6, false, 0, Double.MAX_VALUE, "#,##0.000", "Start Time (s)");
             ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
@@ -261,7 +266,6 @@ public class OneTimeStep {
             }
             return retVal;
         }
-
         Item.EditResponse getResponse() {
             return response;
         }
@@ -285,4 +289,26 @@ public class OneTimeStep {
         setValues(stTime, duration);
         return true;
     }
+
+    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ActionListener activationListener) {
+        JPanel jp = new JPanel();
+        JComboBox<StepAction> cbStepAction;
+        cbStepAction = new JComboBox<>(forElement.actions());
+        cbStepAction.setSelectedItem(stepAction);
+        NumberTextField ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
+        Indicator bulb = new Indicator(10, Color.red, Color.blue);
+        JButton onButton = new JButton("Activate");
+        onButton.addActionListener(e -> {
+            stepAction = (StepAction)cbStepAction.getSelectedItem();
+            duration = ntDuration.getData();
+            activationListener.actionPerformed(e);});
+        jp.add(new JLabel(jetName));
+        jp.add(cbStepAction);
+        jp.add(ntDuration);
+        jp.add(bulb.displayUnit());
+        jp.add(onButton);
+
+        return jp;
+    }
+
 }
