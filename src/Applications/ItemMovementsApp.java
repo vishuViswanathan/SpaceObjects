@@ -363,10 +363,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         }
         dataEntryPanel = space.dataEntryPanel();
         mainF.add(dataEntryPanel, BorderLayout.CENTER);
-//        jcItemList = space.itemListPanel();
-//        mainF.add(jcItemList, BorderLayout.WEST);
-//        jcInfluenceList = space.influenceListPanel();
-//        mainF.add(jcInfluenceList, BorderLayout.EAST);
         if (!reDo) {
             mainF.add(buttonPanel(), BorderLayout.SOUTH);
         }

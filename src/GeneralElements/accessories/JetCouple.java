@@ -8,7 +8,8 @@ import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.ForceElement;
-import time.timePlan.*;
+import mvUtils.physics.Vector3dMV;
+import time.timePlan.OneJetPlan;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -18,72 +19,36 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by M Viswanathan on 12 Mar 2017
+ * Created by mviswanathan on 03-06-2017.
  */
-public class Jet extends JetsAndSeekers {
-//    String name;
-    ForceSource forceSource;
-//    public OneJetPlan thePlan;
-    ForceElement jetData;
-//    boolean active;
+public class JetCouple extends Jet {
 
-    public Jet(Item item) {
+
+    public JetCouple(Item item) {
         this(item, "??Jet", new ForceElement(1, new Vector3d(), new Point3d()));
     }
 
-    protected Jet(Item item, ElementType type) {
-        super(item, type);
-    }
-
-    public Jet(Item item, String xmlStr) {
-        this(item, ElementType.JET);
+    public JetCouple(Item item, String xmlStr) {
+        super(item, ElementType.JETCOUPLE);
         takeFromXML(xmlStr);
     }
 
-    public Jet(Item item, String name, ForceElement jetData) {
-        super(item, name, ElementType.JET);
+    public JetCouple(Item item, String name, ForceElement jetData) {
+        super(item, ElementType.JETCOUPLE);
+        this.name = name;
         this.jetData = jetData;
         forceSource = new RocketEngine("Test Jet", jetData.getForce().length() / 1000, 10);
 //        thePlan = new OneJetPlan(this);
     }
 
-    public Jet(Item item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
-        super(item, name, ElementType.JET);
+    public JetCouple(Item item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
+        super(item, ElementType.JETCOUPLE);
+        this.name = name;
         setJetData(forceSource, direction, location);
-//        thePlan = new OneJetPlan(this);
     }
 
-    private void setJetData(ForceSource forceSource, Vector3d direction, Point3d location) {
+    protected void setJetData(ForceSource forceSource, Vector3d direction, Point3d location) {
         jetData = new ForceElement(forceSource.effectiveForce(), direction, location);
-    }
-
-    public void noteTimePlan(OneJetPlan thePlan) {
-        this.thePlan = thePlan;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void addEffect() {
-        if (active) {
-            item.addTojetForce(jetData.getForce());
-            item.addToJetTorque(jetData.getTorque());
-        }
-    }
-
-    protected String detailsString() {
-        return forceSource.dataAsString();
-    }
-
-    public StringBuilder dataInXML() {
-        StringBuilder xmlStr = super.dataInXML();
-        xmlStr.append(XMLmv.putTag("name", name));
-        xmlStr.append(XMLmv.putTag("forceSource", forceSource.dataInXML()));
-        xmlStr.append(XMLmv.putTag("jetData", jetData.dataInXML()));
-        xmlStr.append(XMLmv.putTag("thePlan", thePlan.dataInXML()));
-//        xmlStr.append(XMLmv.putTag("active", active));
-        return xmlStr;
     }
 
     protected boolean takeFromXML(String xmlStr) {
@@ -100,19 +65,24 @@ public class Jet extends JetsAndSeekers {
             thePlan = new OneJetPlan(this, vp.val);
             active = false;
         } catch (Exception e) {
-            showError(".153 takeFromXML: Some mess in Time Plan");
-            retVal = false;
+            showError(".62 takeFromXML: Some mess in Time Plan");
             retVal = false;
         }
         return retVal;
     }
 
-    public OneTimeStep.StepAction[] actions() {
-        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.FIREJET};
+    public void addEffect() {
+        if (active) {
+            item.addToJetTorque(getTorque());
+        }
+    }
+
+    Vector3d getTorque() {
+        return new Vector3dMV(2, jetData.getTorque());
     }
 
     public Item.EditResponse editData(InputControl inpC, Component c) {
-        JetDetails dlg = new JetDetails(inpC, c);
+        JetCoupleDetails dlg = new JetCoupleDetails(inpC, c);
         if (c == null)
             dlg.setLocation(100, 100);
         else
@@ -121,7 +91,7 @@ public class Jet extends JetsAndSeekers {
         return dlg.getResponse();
     }
 
-    class JetDetails extends JDialog {
+    class JetCoupleDetails extends JDialog {
         Component caller;
         InputControl inpC;
         Item.EditResponse response;
@@ -136,7 +106,7 @@ public class Jet extends JetsAndSeekers {
         JButton delete = new JButton("Delete");
         JDialog thisDlg;
 
-        JetDetails(InputControl inpC, Component caller) {
+        JetCoupleDetails(InputControl inpC, Component caller) {
             setModal(true);
             this.caller = caller;
             setResizable(false);
@@ -156,13 +126,14 @@ public class Jet extends JetsAndSeekers {
             directionP = new TuplePanel(inpC, direction, 6, -1000, 1000, "#,##0.000", "Jet Direction");
             locationP = new TuplePanel(inpC, location, 6, -1000, 1000, "#,##0.000", "Jet Location");
             JPanel outerP = new JPanel(new BorderLayout());
-            MultiPairColPanel jpBasic = new MultiPairColPanel("Jet Details");
+            MultiPairColPanel jpBasic = new MultiPairColPanel("Jet Couple Details");
 //            jpBasic.addItemPair(ntDuration);
             jpBasic.addItemPair("Jet ID", tName);
             jpBasic.addItemPair("Jet Direction Vector (m)", directionP);
             jpBasic.addItemPair("Jet Location Vector (m)", locationP);
             jpBasic.addItem("Direction and Location are in Item's local coordinates");
             jpBasic.addItem(forceSource.fsDetails());
+            jpBasic.addItem("The Jet Details for each Jet of the pair");
             jbTimePlan = new JButton("Edit Time Plan");
             jbTimePlan.addActionListener(e ->
             {
@@ -188,8 +159,8 @@ public class Jet extends JetsAndSeekers {
                             closeThisWindow();
                         }
                     } else if (src == delete) {
-                        if (ItemMovementsApp.decide("Deleting Jet  ", "Do you want to DELETE this Jet?" +
-                                "DELETE to be checked", caller)) {
+                        if (ItemMovementsApp.decide("Deleting Jet  ", "Do you want to DELETE this Jet Couple?\n" +
+                                "  DELETE to be checked", caller)) {
                             response = Item.EditResponse.DELETE;
                             closeThisWindow();
                         }
@@ -229,8 +200,9 @@ public class Jet extends JetsAndSeekers {
         }
     }
 
-    void showError(String msg) {
-        ItemMovementsApp.showError("Jet: " + msg);
-    }
-}
 
+    void showError(String msg) {
+        ItemMovementsApp.showError("JetCouple: " + msg);
+    }
+
+}

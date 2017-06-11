@@ -1,5 +1,6 @@
 package GeneralElements.globalActions;
 
+import GeneralElements.ItemSpace;
 import mvUtils.display.InputControl;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
@@ -14,9 +15,11 @@ import java.util.Vector;
  * Created by M Viswanathan on 01 Feb 2015
  */
 public class AllGlobalActions {
+    ItemSpace theSpace;
     LinkedHashMap<GlobalAction.Type, GlobalAction> allActions;
 
-    public AllGlobalActions() {
+    public AllGlobalActions(ItemSpace theSpace) {
+        this.theSpace = theSpace;
         allActions = new LinkedHashMap<GlobalAction.Type, GlobalAction>();
         for (GlobalAction.Type type:GlobalAction.Type.values())
             allActions.put(type, GlobalAction.getGlobalAction(type));
@@ -70,6 +73,8 @@ public class AllGlobalActions {
                 if (!retVal)
                     break;
             }
+            vp = XMLmv.getTag(xmlStr, "bItemGravityOn", vp.endPos);
+            theSpace.bItemGravityOn = vp.val.equals("1");
         } catch (Exception e) {
             retVal = false;
         }
@@ -81,6 +86,7 @@ public class AllGlobalActions {
         int i = 0;
         for (GlobalAction gA: allActions.values())
             xmlStr.append(XMLmv.putTag("gA#" + ("" + i++).trim(), gA.dataInXML().toString()));
+        xmlStr.append(XMLmv.putTag("bItemGravityOn", theSpace.bItemGravityOn));
         return xmlStr;
     }
 }

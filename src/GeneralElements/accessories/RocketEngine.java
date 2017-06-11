@@ -1,4 +1,4 @@
-package time.timePlan;
+package GeneralElements.accessories;
 
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.display.NumberTextField;
@@ -119,6 +119,6 @@ public class RocketEngine implements ForceSource {
     }
 
     public String toString() {
-        return "Rocket Engine";
+        return "Jet Engine";
     }
 }

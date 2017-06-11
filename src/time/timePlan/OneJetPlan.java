@@ -72,58 +72,25 @@ public class OneJetPlan {
 
     public void updateJetStatus(double deltaT, double nowT) {
         if (manualStepOn) {
-            boolean makeActive = false;
             nowStepTime += deltaT;
-            if (nowStepTime >= nowStep.startTime) {
-                if (nowStepTime < nowStep.endTime)
-                    makeActive = true;
-                else {
-                    manualStepOn = false;
-                    nowStepTime = nowT;
-                }
-            }
-            theJet.setActive(makeActive, nowStep, deltaT);
-            if (!makeActive) {
-                if (bValid)
+            if (theJet.completeThisStep(nowStep, nowStepTime, deltaT)) {
+                manualStepOn = false;
+                nowStepTime = nowT;
+                 if (bValid)
                     nowStep = theSteps.get(stepPos);
             }
         }
         else {
             if (bValid) {
-                boolean makeActive = false;
                 nowStepTime += deltaT;
-                if (nowStepTime >= nowStep.startTime) {
-                    if (nowStepTime < nowStep.endTime)
-                        makeActive = true;
-                    else {
-                        stepPos++;
-                        if (stepPos < planSize)
-                            nowStep = theSteps.get(stepPos);
-                        else
-                            bValid = false;
-                    }
-                }
-                theJet.setActive(makeActive, nowStep, deltaT);
-            }
-        }
-    }
-
-    public void updateJetStatusOLD(double deltaT, double nowT) {
-        if (bValid) {
-            boolean makeActive = false;
-            nowStepTime += deltaT;
-            if (nowStepTime >= nowStep.startTime) {
-                if (nowStepTime < nowStep.endTime)
-                    makeActive = true;
-                else {
+                if (theJet.completeThisStep(nowStep, nowStepTime, deltaT)) {
                     stepPos++;
                     if (stepPos < planSize)
                         nowStep = theSteps.get(stepPos);
                     else
                         bValid = false;
                 }
-            }
-            theJet.setActive(makeActive, nowStep, deltaT);
+             }
         }
     }
 
@@ -149,7 +116,7 @@ public class OneJetPlan {
     }
 
     public void removeOneStep(int stepN) {
-        theSteps.removeElement(stepN);
+        theSteps.remove(stepN);
     }
 
     public Item.EditResponse editPlan(InputControl inpC, Component c) {

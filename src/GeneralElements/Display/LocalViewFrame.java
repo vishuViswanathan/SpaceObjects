@@ -212,6 +212,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         lastItemWithLocalPlatform = item;
         bPlatformWasAttached = true;
         this.itemInView = item;
+        jbControlPanel.setEnabled(itemInView.hasAnyAccessories());
     }
 
     void updateViewDistanceUI(double factor) {
@@ -236,7 +237,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     }
 
     JCheckBox createSlowRevolveCB() {
-        slowRevolveCB = new JCheckBox("Slow Revolve", true);
+        slowRevolveCB = new JCheckBox("Slow Revolve", false);
         slowRevolveCB.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {

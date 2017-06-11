@@ -106,6 +106,12 @@ public class OneTimeStep {
         setValues(startTime, duration);
     }
 
+    public double setDuration(double duration) {
+        this.duration = duration;
+        endTime = startTime + duration;
+        return endTime;
+    }
+
     public double duration() {
         return endTime - startTime;
     }

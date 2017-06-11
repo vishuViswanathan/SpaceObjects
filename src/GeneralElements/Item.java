@@ -712,9 +712,16 @@ public class Item extends DarkMatter {
         initStartForce();
     }
 
+    public boolean hasAnyAccessories() {
+        return (jetController != null);
+    }
+
     public void showControlPanel(InputControl inpC, Component parent) {
-        ControlPanelDialog dlg = new ControlPanelDialog(inpC, parent);
-        dlg.setVisible(true);
+        if (jetController != null) {
+            parent.setEnabled(false);
+            ControlPanelDialog dlg = new ControlPanelDialog(inpC, parent);
+            dlg.setVisible(true);
+        }
     }
 
     class ControlPanelDialog extends JDialog {
@@ -750,6 +757,7 @@ public class Item extends DarkMatter {
 
         void closeIt() {
             setVisible(false);
+            parent.setEnabled(true);
         }
     }
 

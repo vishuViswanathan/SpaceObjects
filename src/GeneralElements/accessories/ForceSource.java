@@ -1,4 +1,4 @@
-package time.timePlan;
+package GeneralElements.accessories;
 
 import javax.swing.*;
 

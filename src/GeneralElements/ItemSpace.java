@@ -43,7 +43,7 @@ public class ItemSpace {
     public void clearSpace() {
         allItems = new LinkedList<Item>();
         allItemLinks = new LinkedList<ItemLink>();
-        allGlobalActions = new AllGlobalActions();
+        allGlobalActions = new AllGlobalActions(this);
         trace("clearing ItemSpace");
     }
 
@@ -158,7 +158,7 @@ public class ItemSpace {
         buttAddItem.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
-        sP.setPreferredSize(new Dimension(800, 550));
+        sP.setPreferredSize(new Dimension(800, 350));
         itemTable = new ItemTable(mainApp, this, allItems);
         sP.setViewportView(itemTable.getTable());
         outerP.add(sP, BorderLayout.CENTER);
@@ -209,7 +209,7 @@ public class ItemSpace {
 
     JPanel infListPan;
     GridBagConstraints gbcInfList;
-    boolean bItemGravityOn = false;
+    public boolean bItemGravityOn = false;
 
     public void enableItemGravity(boolean ena) {
         bItemGravityOn = ena;
@@ -238,7 +238,7 @@ public class ItemSpace {
         rbItemGravity.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
-        sP.setPreferredSize(new Dimension(400, 550));
+        sP.setPreferredSize(new Dimension(400, 350));
         linkTable  = new LinkTable(mainApp, tempInfList);
         sP.setViewportView(linkTable.getTable());
         outerP.add(sP, BorderLayout.CENTER);

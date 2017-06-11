@@ -3,7 +3,6 @@ package GeneralElements.accessories;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
-import GeneralElements.Surface;
 import mvUtils.display.DataWithStatus;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -13,7 +12,6 @@ import time.timePlan.OneJetPlan;
 import time.timePlan.OneTimeStep;
 
 import javax.swing.*;
-import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
@@ -21,6 +19,41 @@ import java.awt.event.ActionListener;
  * Created by mviswanathan on 13-05-2017.
  */
 public abstract class JetsAndSeekers {
+    public enum AboutAxis {
+        X("X Axis"),
+        Y("Y AxisX"),
+        Z("Z Axis");
+
+        private final String axisName;
+
+        AboutAxis(String actionName) {
+            this.axisName = actionName;
+        }
+
+        public String getValue() {
+            return axisName;
+        }
+
+        @Override
+        public String toString() {
+            return axisName;
+        }
+
+        public static AboutAxis getEnum(String text) {
+            AboutAxis retVal = null;
+            if (text != null) {
+                for (AboutAxis b : AboutAxis.values()) {
+                    if (text.equalsIgnoreCase(b.axisName)) {
+                        retVal = b;
+                        break;
+                    }
+                }
+            }
+            return retVal;
+        }
+    }
+
+
     public enum JetTableColType {
         SLNO("SlNo."),
         ELEMENT("Element Type"),
@@ -57,8 +90,10 @@ public abstract class JetsAndSeekers {
 
     public enum ElementType {
         JET("Jet"),
+        JETCOUPLE("Jet Couple"),
         SEEKER("Seeker"),
-        ALIGNER("Aligner");
+        ALIGNER("Aligner"),
+        ALIGNERWITHJETS("Aligner With Jets");
 
         private final String typeName;
 
@@ -116,11 +151,17 @@ public abstract class JetsAndSeekers {
             case JET:
                 retVal.setValue(new Jet(item, xmlStr));
                 break;
+            case JETCOUPLE:
+                retVal.setValue(new JetCouple(item, xmlStr));
+                break;
             case SEEKER:
-                ItemMovementsApp.showError("JetsAndSeekers.111: Not ready for " + ElementType.ALIGNER );
+                ItemMovementsApp.showError("JetsAndSeekers.111: Not ready for " + ElementType.SEEKER );
                 break;
             case ALIGNER:
                 retVal.setValue(new Aligner(item, xmlStr));
+                break;
+            case ALIGNERWITHJETS:
+                retVal.setValue(new AlignerWithJets(item, xmlStr));
                 break;
         }
         return retVal;
@@ -158,9 +199,22 @@ public abstract class JetsAndSeekers {
         this.thePlan = thePlan;
     }
 
-    public void setActive(boolean active, OneTimeStep theStep, double duration) {
+    public void setActive(boolean active, OneTimeStep theStep, double deltaT) {
         this.active = active;
         this.theStep = theStep;
+    }
+
+    public boolean completeThisStep(OneTimeStep theStep, double nowT, double deltaT) {
+        boolean done = false;
+        if (nowT >= theStep.startTime) {
+            boolean activate = false;
+            if (nowT < theStep.endTime)
+                activate = true;
+            else
+                done = true;
+            setActive(activate, theStep, deltaT);
+        }
+        return done;
     }
 
     public boolean isActive() {
@@ -195,11 +249,17 @@ public abstract class JetsAndSeekers {
             case JET:
                 retVal = ((Jet)theJet).editData(inpC, c);
                 break;
+            case JETCOUPLE:
+                retVal = ((JetCouple)theJet).editData(inpC, c);
+                break;
             case SEEKER:
                 ItemMovementsApp.showError("JetsAndSeekers.190: Not ready for " + ElementType.SEEKER, c );
                 break;
             case ALIGNER:
                 retVal = ((Aligner)theJet).editData(inpC, c);
+                break;
+            case ALIGNERWITHJETS:
+                retVal = ((AlignerWithJets)theJet).editData(inpC, c);
                 break;
         }
         return retVal;
@@ -220,11 +280,17 @@ public abstract class JetsAndSeekers {
                 case JET:
                     theAccessory = new Jet(item);
                     break;
+                case JETCOUPLE:
+                    theAccessory = new JetCouple(item);
+                    break;
                 case SEEKER:
                     ItemMovementsApp.showError("JetsAndSeekers.216: Not ready for " + ElementType.SEEKER);
                     break;
                 case ALIGNER:
                     theAccessory = new Aligner(item);
+                    break;
+                case ALIGNERWITHJETS:
+                    theAccessory = new AlignerWithJets(item);
                     break;
             }
         }
