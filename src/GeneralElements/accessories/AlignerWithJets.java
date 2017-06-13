@@ -1,6 +1,7 @@
 package GeneralElements.accessories;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.Display.TuplePanel;
 import GeneralElements.Item;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -58,9 +59,11 @@ public class AlignerWithJets extends JetsAndSeekers {
     }
 
     enum ActionPos {NOTSTARTED, FIRST, SECOND, THIRD, FOURTH, DONE}
+    enum AxisStep {XFOR, XREV, YFOR, YREV, ZFOR, ZREV, DONE}
     double thisActionTime; // duration of the current action
     double actionEndTime; // updated for each action pos
     Direction direction = Direction.POSZ;
+    Vector3dMV vDirection;
     Vector3dMV nowTorque = new Vector3dMV();
     double activeT; // active since
     double halfTime; // when acceleration/ deceleration switch is to take place
@@ -68,7 +71,7 @@ public class AlignerWithJets extends JetsAndSeekers {
     double quarter3Time;
     boolean opposite = false; // to take care NEGX, NEGY and NEGZ
     ActionPos nowActionPos = ActionPos.NOTSTARTED;
-
+    AxisStep nowAxisStep = AxisStep.XFOR;
     AlignTo alignBaseZ;
     AlignTo alignBaseX;
     AlignTo alignBaseY;
@@ -82,45 +85,22 @@ public class AlignerWithJets extends JetsAndSeekers {
 
     public AlignerWithJets(Item item) {
         super(item, "UNKNOWN",  ElementType.ALIGNERWITHJETS);
+        vDirection = new Vector3dMV(0, 0, 1);
         alignerJetSetX = new AlignerJetSet(this, AboutAxis.X);
         alignerJetSetY = new AlignerJetSet(this, AboutAxis.Y);
         alignerJetSetZ = new AlignerJetSet(this, AboutAxis.Z);
     }
 
     public AlignerWithJets(Item item, String xmlStr) {
-        super(item, ElementType.ALIGNERWITHJETS);
+        this(item);
         takeFromXML(xmlStr);
     }
 
     private void prepareAlignToList() throws Exception{
         if (!initiated) {
-            alignBaseZ = new AlignTo(item.miAsVector.z, alignerJetSetZ);
-            alignBaseX = new AlignTo(item.miAsVector.x, alignerJetSetX);
-            alignBaseY = new AlignTo(item.miAsVector.y, alignerJetSetY);
-
-            alignBaseZ.setNeighbours(alignBaseY, alignBaseX);
-            alignBaseX.setNeighbours(alignBaseZ, alignBaseY);
-            alignBaseY.setNeighbours(alignBaseX, alignBaseZ);
-
-            opposite = false;
-            switch (direction) {
-                case NEGZ:
-                    opposite = true;
-                case POSZ:
-                    myAlignBase = alignBaseZ;
-                    break;
-                case NEGX:
-                    opposite = true;
-                case POSX:
-                    myAlignBase = alignBaseX;
-                    break;
-                case NEGY:
-                    opposite = true;
-                case POSY:
-                    myAlignBase = alignBaseY;
-                    break;
-
-            }
+            alignBaseZ = new AlignTo(item.miAsVector.z, alignerJetSetZ, AboutAxis.Z);
+            alignBaseX = new AlignTo(item.miAsVector.x, alignerJetSetX, AboutAxis.X);
+            alignBaseY = new AlignTo(item.miAsVector.y, alignerJetSetY, AboutAxis.Y);
             initiated = true;
         }
     }
@@ -145,7 +125,7 @@ public class AlignerWithJets extends JetsAndSeekers {
     void resetStatus() {
         this.theStep = null;
         basicsSet = false;
-        nowActionPos = ActionPos.NOTSTARTED;
+        nowAxisStep = AxisStep.XFOR;
     }
 
     public void ActivateIt(OneTimeStep theStep, double deltaT) throws Exception{
@@ -168,27 +148,49 @@ public class AlignerWithJets extends JetsAndSeekers {
         globalAlignTo = new Vector3dMV(item.status.velocity);
         if (theStep.stepAction == OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY)
             globalAlignTo.negate();
-        nowActionPos = ActionPos.NOTSTARTED;
+        nowAxisStep = AxisStep.XFOR;
         activeT = 0;
         return retVal;
     }
 
     class AlignTo  {
+        boolean rotate = true;
+        AboutAxis axis;
         double mI;
         AlignerJetSet alignerJetSet;
-        AlignTo prev;
-        AlignTo next;
+        double angleAlignAxis;
         double torqueMagnitude;
         double torque;
         double alpha; // angular acceleration
 
-        AlignTo (double mI, AlignerJetSet alignerJetSet) throws Exception {
+        AlignTo (double mI, AlignerJetSet alignerJetSet, AboutAxis axis) throws Exception {
             this.mI = mI;
             this.alignerJetSet = alignerJetSet;
+            this.axis = axis;
             torqueMagnitude = alignerJetSet.getTorque().length();
             alpha = torqueMagnitude / mI;
             if (alpha == 0)
                 throw new Exception("Torque capability is 0");
+            switch(axis) {
+                case X:
+                    if (vDirection.z == 0 && vDirection.y == 0)
+                        rotate = false;
+                    else
+                        angleAlignAxis = Math.atan2(vDirection.z, vDirection.y);
+                    break;
+                case Y:
+                    if (vDirection.x == 0 && vDirection.z == 0)
+                        rotate = false;
+                    else
+                        angleAlignAxis = Math.atan2(vDirection.x, vDirection.z);
+                    break;
+                case Z:
+                    if (vDirection.y == 0 && vDirection.x == 0)
+                        rotate = false;
+                    else
+                        angleAlignAxis = Math.atan2(vDirection.y, vDirection.x);
+                    break;
+            }
         }
 
         double actionTime(double theta) {
@@ -206,197 +208,69 @@ public class AlignerWithJets extends JetsAndSeekers {
             }
         }
 
-        public void setNeighbours(AlignTo prev, AlignTo next) {
-            this.prev = prev;
-            this.next = next;
-        }
-
-        void setTorque(boolean secondTime) {
-            Vector3dMV alignTo = new Vector3dMV(globalAlignTo);
-            item.globalToItem().transform(alignTo);
-            double numerator = 0;
-            double denominator = 0;
-            torque = 0;
-            prev.torque = 0;
-            next.torque = 0;
-            switch (direction) {
-                case POSZ:
-                case NEGZ:
-                    numerator = (secondTime) ? alignTo.x : alignTo.y;
-                    denominator = alignTo.z;
-                    break;
-                case POSX:
-                case NEGX:
-                    numerator = (secondTime) ? alignTo.y : alignTo.z;
-                    denominator = alignTo.x;
-                    break;
-                case POSY:
-                case NEGY:
-                    numerator = (secondTime) ? alignTo.z : alignTo.x;
-                    denominator = alignTo.y;
-                    break;
-            }
-            setTorque(numerator, denominator, secondTime);
-        }
-
-        double setTorque(double numerator, double denominator, boolean secondTime) {
-            double theta;
-            if (secondTime) {
-                if (denominator == 0)
-                    theta = ((numerator == 0) ? 0 : Math.PI / 2);
-                else
-                    theta = Math.atan(numerator / denominator);
-                if (denominator < 0)
-                    theta += Math.PI;
-                if (theta > Math.PI)
-                    theta -= (2 * Math.PI);
-                if (opposite) { // case of NEGX etc.
-                    if (theta <= 0)
-                        theta += Math.PI;
-                    else
-                        theta -= Math.PI;
+        void setTorque() {
+            if (rotate) {
+                Vector3dMV alignTo = new Vector3dMV(globalAlignTo);
+                item.globalToItem().transform(alignTo);
+                double angleV = 0;
+                double theta;
+                switch (axis) {
+                    case X:
+                        angleV = Math.atan2(alignTo.z, alignTo.y);
+                        break;
+                    case Y:
+                        angleV = Math.atan2(alignTo.x, alignTo.z);
+                        break;
+                    case Z:
+                        angleV = Math.atan2(alignTo.y, alignTo.x);
+                        break;
                 }
-                thisActionTime = prev.actionTime(theta);
-
-            } else {
-                if (denominator == 0)
-                    theta = ((numerator == 0) ? 0 : -Math.PI / 2);
-                else
-                    theta = -Math.atan(numerator / denominator);
-                if (denominator < 0)
-                    theta -= Math.PI;
-                if (theta < -Math.PI)
-                    theta += (2 * Math.PI);
-                if (opposite) { // case of NEGX etc.
-                    if (theta <= 0)
-                        theta += Math.PI;
-                    else
-                        theta -= Math.PI;
-                }
-                thisActionTime = next.actionTime(theta);
+                theta = angleV - angleAlignAxis;
+                thisActionTime = actionTime(theta);
             }
-            return thisActionTime;
+            else {
+                torque = 0;
+                thisActionTime = 0;
+            }
         }
     }
 
     private void updateTorque(double duration) {
-        switch (direction) {
-            case POSZ:
-            case NEGZ:
-                switch (nowActionPos) {
-                    case NOTSTARTED:
-                        myAlignBase.setTorque(false);
-                        actionEndTime = thisActionTime;
-                        nowTorque.set(alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                        nowActionPos = ActionPos.FIRST;
-                        break;
-                    case FIRST:
-                        if (activeT >= actionEndTime) {
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(-alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.SECOND;
-                        }
-                        break;
-                    case SECOND:
-                        if (activeT >= actionEndTime) {
-                            myAlignBase.setTorque(true);
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.THIRD;
-                        }
-                        break;
-                    case THIRD:
-                        if (activeT >= actionEndTime) {
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, -alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.FOURTH;
-                        }
-                        break;
-                    case FOURTH:
-                        if (activeT >= actionEndTime) {
-                            nowTorque.set(0, 0, 0);
-                            nowActionPos = ActionPos.DONE;
-                        }
-                }
+        switch (nowAxisStep) {
+            case XFOR:
+                alignBaseX.setTorque();
+                actionEndTime = thisActionTime;
+                nowTorque.set(alignBaseX.torque, 0, 0);
+                nowAxisStep = AxisStep.XREV;
                 break;
-            case POSX:
-            case NEGX:
-                switch (nowActionPos) {
-                    case NOTSTARTED:
-                        myAlignBase.setTorque(false);
-                        actionEndTime = thisActionTime;
-                        nowTorque.set(alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                        nowActionPos = ActionPos.FIRST;
-                        break;
-                    case FIRST:
-                        if (activeT >= actionEndTime) {
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, -alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.SECOND;
-                        }
-                        break;
-                    case SECOND:
-                        if (activeT >= actionEndTime) {
-                            myAlignBase.setTorque(true);
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.THIRD;
-                        }
-                        break;
-                    case THIRD:
-                        if (activeT >= actionEndTime) {
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, alignBaseY.torque, -alignBaseZ.torque);
-                            nowActionPos = ActionPos.FOURTH;
-                        }
-                        break;
-                    case FOURTH:
-                        if (activeT >= actionEndTime) {
-                            nowTorque.set(0, 0, 0);
-                            nowActionPos = ActionPos.DONE;
-                        }
-                }
+            case XREV:
+                actionEndTime += thisActionTime;
+                nowTorque.set(-alignBaseX.torque, 0, 0);
+                nowAxisStep = AxisStep.YFOR;
                 break;
-            case POSY:
-            case NEGY:
-                switch (nowActionPos) {
-                    case NOTSTARTED:
-                        myAlignBase.setTorque(false);
-                        actionEndTime = thisActionTime;
-                        nowTorque.set(alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                        nowActionPos = ActionPos.FIRST;
-                        break;
-                    case FIRST:
-                        if (activeT >= actionEndTime) {
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, alignBaseY.torque, -alignBaseZ.torque);
-                            nowActionPos = ActionPos.SECOND;
-                        }
-                        break;
-                    case SECOND:
-                        if (activeT >= actionEndTime) {
-                            myAlignBase.setTorque(true);
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.THIRD;
-                        }
-                        break;
-                    case THIRD:
-                        if (activeT >= actionEndTime) {
-                            actionEndTime += thisActionTime;
-                            nowTorque.set(-alignBaseX.torque, alignBaseY.torque, alignBaseZ.torque);
-                            nowActionPos = ActionPos.FOURTH;
-                        }
-                        break;
-                    case FOURTH:
-                        if (activeT >= actionEndTime) {
-                            nowTorque.set(0, 0, 0);
-                            nowActionPos = ActionPos.DONE;
-                        }
-                }
+            case YFOR:
+                alignBaseY.setTorque();
+                actionEndTime = thisActionTime;
+                nowTorque.set(0, alignBaseY.torque, 0);
+                nowAxisStep = AxisStep.YREV;
+                break;
+            case YREV:
+                actionEndTime += thisActionTime;
+                nowTorque.set(0, -alignBaseY.torque,0);
+                nowAxisStep = AxisStep.ZFOR;
+                break;
+            case ZFOR:
+                alignBaseZ.setTorque();
+                actionEndTime = thisActionTime;
+                nowTorque.set(0, 0, alignBaseZ.torque);
+                nowAxisStep = AxisStep.ZREV;
+                break;
+            case ZREV:
+                actionEndTime += thisActionTime;
+                nowTorque.set(0, 0, -alignBaseZ.torque);
+                nowAxisStep = AxisStep.DONE;
                 break;
         }
-
         activeT += duration;
     }
 
@@ -408,7 +282,7 @@ public class AlignerWithJets extends JetsAndSeekers {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = super.dataInXML();
         xmlStr.append(XMLmv.putTag("name", name));
-        xmlStr.append(XMLmv.putTag("direction", direction.toString()));
+        xmlStr.append(XMLmv.putTag("vDirection", vDirection.dataInCSV()));
         xmlStr.append(XMLmv.putTag("alignerJetSetX", alignerJetSetX.dataInXML()));
         xmlStr.append(XMLmv.putTag("alignerJetSetY", alignerJetSetY.dataInXML()));
         xmlStr.append(XMLmv.putTag("alignerJetSetZ", alignerJetSetZ.dataInXML()));
@@ -422,7 +296,24 @@ public class AlignerWithJets extends JetsAndSeekers {
         vp = XMLmv.getTag(xmlStr, "name", 0);
         name = vp.val.trim();
         vp = XMLmv.getTag(xmlStr, "direction", vp.endPos);
-        direction = Direction.getEnum(vp.val);
+        if (vp.val.length() > 0) {
+            direction = Direction.getEnum(vp.val);
+            switch(direction) {
+                case POSX:
+                    vDirection.set(1, 0, 0);
+                    break;
+                case POSY:
+                    vDirection.set(0, 1, 0);
+                    break;
+                case POSZ:
+                    vDirection.set(0, 0, 1);
+                    break;
+                default:
+                    showError("Unknown Direction: " + direction);
+                    break;
+            }
+
+        }
         int nowPos = vp.endPos;
         vp = XMLmv.getTag(xmlStr, "alignerJetSetX", vp.endPos);
         if (vp.val.length() > 0) {
@@ -469,7 +360,9 @@ public class AlignerWithJets extends JetsAndSeekers {
         InputControl inpC;
         Item.EditResponse response;
         TextField tName;
-        JComboBox<Direction> cbDirection;
+        TuplePanel directionP;
+
+//        JComboBox<Direction> cbDirection;
         JButton jbTimePlan;
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
@@ -489,12 +382,11 @@ public class AlignerWithJets extends JetsAndSeekers {
         void dbInit() {
             initiated = false; // of the main class
             tName = new TextField(name, 30);
-            cbDirection = new JComboBox<Direction>(Direction.values());
-            cbDirection.setSelectedItem(direction);
+            directionP = new TuplePanel(inpC, vDirection, 6, -100, +100, "###.###", "Axis Direction");
             JPanel outerP = new JPanel(new BorderLayout());
             MultiPairColPanel jpBasic = new MultiPairColPanel("Aligner Details");
             jpBasic.addItemPair("ID", tName);
-            jpBasic.addItemPair("Aligner Direction Vector", cbDirection);
+            jpBasic.addItemPair("Aligner Direction Vector", directionP);
             jpBasic.addItem("Direction is in Item's local coordinates");
 
             ActionOnAlignerJet l = new ActionOnAlignerJet();
@@ -522,8 +414,7 @@ public class AlignerWithJets extends JetsAndSeekers {
             buttPanel.add(ok, BorderLayout.EAST);
             jpBasic.addItem(buttPanel);
             outerP.add(jpBasic);
-            ActionListener li = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
+            ActionListener li =  (e ->{
                     Object src = e.getSource();
                     if (src == ok) {
                         if (takeDataFromUI()) {
@@ -540,8 +431,7 @@ public class AlignerWithJets extends JetsAndSeekers {
                         response = Item.EditResponse.NOTCHANGED;
                         closeThisWindow();
                     }
-                }
-            };
+                });
             ok.addActionListener(li);
             cancel.addActionListener(li);
             delete.addActionListener(li);
@@ -573,7 +463,9 @@ public class AlignerWithJets extends JetsAndSeekers {
         boolean takeDataFromUI() {
             boolean retVal = true;
             name = tName.getText();
-            direction = (Direction)cbDirection.getSelectedItem();
+            vDirection.set(directionP.getTuple3d());
+            if (vDirection.lengthSquared() > 0)
+                vDirection.normalize();
             return retVal;
         }
 
@@ -583,7 +475,7 @@ public class AlignerWithJets extends JetsAndSeekers {
     }
 
     void showError(String msg) {
-        ItemMovementsApp.showError("Aligner: " + msg);
+        ItemMovementsApp.showError("AlignerWithJets: " + msg);
     }
 
 }
