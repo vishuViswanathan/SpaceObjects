@@ -244,31 +244,41 @@ public class AlignerWithJets extends JetsAndSeekers {
                 nowAxisStep = AxisStep.XREV;
                 break;
             case XREV:
-                actionEndTime += thisActionTime;
-                nowTorque.set(-alignBaseX.torque, 0, 0);
-                nowAxisStep = AxisStep.YFOR;
+                if (activeT >= actionEndTime) {
+                    actionEndTime += thisActionTime;
+                    nowTorque.set(-alignBaseX.torque, 0, 0);
+                    nowAxisStep = AxisStep.YFOR;
+                }
                 break;
             case YFOR:
-                alignBaseY.setTorque();
-                actionEndTime = thisActionTime;
-                nowTorque.set(0, alignBaseY.torque, 0);
-                nowAxisStep = AxisStep.YREV;
+                if (activeT >= actionEndTime) {
+                    alignBaseY.setTorque();
+                    actionEndTime = thisActionTime;
+                    nowTorque.set(0, alignBaseY.torque, 0);
+                    nowAxisStep = AxisStep.YREV;
+                }
                 break;
             case YREV:
-                actionEndTime += thisActionTime;
-                nowTorque.set(0, -alignBaseY.torque,0);
-                nowAxisStep = AxisStep.ZFOR;
+                if (activeT >= actionEndTime) {
+                    actionEndTime += thisActionTime;
+                    nowTorque.set(0, -alignBaseY.torque, 0);
+                    nowAxisStep = AxisStep.ZFOR;
+                }
                 break;
             case ZFOR:
-                alignBaseZ.setTorque();
-                actionEndTime = thisActionTime;
-                nowTorque.set(0, 0, alignBaseZ.torque);
-                nowAxisStep = AxisStep.ZREV;
+                if (activeT >= actionEndTime) {
+                    alignBaseZ.setTorque();
+                    actionEndTime = thisActionTime;
+                    nowTorque.set(0, 0, alignBaseZ.torque);
+                    nowAxisStep = AxisStep.ZREV;
+                }
                 break;
             case ZREV:
-                actionEndTime += thisActionTime;
-                nowTorque.set(0, 0, -alignBaseZ.torque);
-                nowAxisStep = AxisStep.DONE;
+                if (activeT >= actionEndTime) {
+                    actionEndTime += thisActionTime;
+                    nowTorque.set(0, 0, -alignBaseZ.torque);
+                    nowAxisStep = AxisStep.DONE;
+                }
                 break;
         }
         activeT += duration;
