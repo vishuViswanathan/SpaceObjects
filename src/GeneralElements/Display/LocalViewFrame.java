@@ -73,8 +73,6 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
             }
         });
 
-
-
         add(localViewPanel, BorderLayout.CENTER);
         JPanel menuP = new JPanel(new GridBagLayout());
         GridBagConstraints outerGbc = new GridBagConstraints();
@@ -88,6 +86,14 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         menuP.add(menuPanel(), outerGbc);
         add(menuP, BorderLayout.EAST);
         pack();
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (controlPanel != null)
+                    controlPanel.setVisible(false);
+            }
+        });
+
 //        this.setSize(1100, 600);
     }
 
@@ -255,10 +261,12 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         return slowRevolveCB;
     }
 
+    Window controlPanel;
+
     JComponent createControlPanelButton() {
         jbControlPanel = new JButton("Control Panel");
         jbControlPanel.addActionListener(e -> {
-            itemInView.showControlPanel(controller, jbControlPanel);
+            controlPanel = itemInView.showControlPanel(controller, jbControlPanel);
         });
         return jbControlPanel;
     }

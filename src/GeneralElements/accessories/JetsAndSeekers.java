@@ -2,7 +2,6 @@ package GeneralElements.accessories;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
-import GeneralElements.ItemSpace;
 import mvUtils.display.DataWithStatus;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -16,7 +15,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 /**
- * Created by mviswanathan on 13-05-2017.
+```` * Created by mviswanathan on 13-05-2017 .
  */
 public abstract class JetsAndSeekers {
     public enum AboutAxis {
@@ -298,17 +297,17 @@ public abstract class JetsAndSeekers {
     }
 
     static class AccessoryBasic extends JDialog {
-        JComboBox jcItem = new JComboBox(ElementType.values());
+        JComboBox<ElementType> jcItem = new JComboBox<>((ElementType[])ElementType.values());
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
-        ItemSpace theSpace;
-        String theName;
+//        ItemSpace theSpace;
+//        String theName;
         Item.EditResponse response = Item.EditResponse.CANCEL;
 
         AccessoryBasic() {
             setModal(true);
-            this.theSpace = theSpace;
-            this.theName = theName;
+//            this.theSpace = theSpace;
+//            this.theName = theName;
             jcItem.setSelectedItem(Item.ItemType.SPHERE);
             setTitle("Selection Object Type");
             MultiPairColPanel jp = new MultiPairColPanel("Selection Object Type");
@@ -333,7 +332,7 @@ public abstract class JetsAndSeekers {
         }
 
         ElementType getSelectedType() {
-            return (ElementType) jcItem.getItemAt(jcItem.getSelectedIndex());
+            return jcItem.getItemAt(jcItem.getSelectedIndex());
         }
 
         Item.EditResponse getResponse() {
@@ -346,8 +345,7 @@ public abstract class JetsAndSeekers {
     }
 
     public StringBuilder dataInXML() {
-        StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("elementType", elementType.toString()));
-        return xmlStr;
+        return new StringBuilder(XMLmv.putTag("elementType", elementType.toString()));
     }
 
 }

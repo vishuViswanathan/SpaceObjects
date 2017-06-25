@@ -406,17 +406,19 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     //    Thread calTh;
     SpaceEvaluator evaluator;
 
-    void startRunThread() {
+    boolean startRunThread() {
+        boolean running = false;
         continueIt = false;
-        space.noteItemData();
-        if (showOrbitMap()) {
-            runIt = true;
-            SpaceEvaluator.closePool();
-            evaluator = SpaceEvaluator.getSpaceEvaluator(this, true);
-//            handleDisplay();
-            evaluator.start();
+        if (space.noteItemData()) {
+            if (showOrbitMap()) {
+                runIt = true;
+                SpaceEvaluator.closePool();
+                evaluator = SpaceEvaluator.getSpaceEvaluator(this, true);
+                evaluator.start();
+                running = true;
+            }
         }
-
+        return running;
     }
 
     public void oneMoreTime() {
@@ -922,11 +924,13 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             aBlock: {
                 if (src == pbStart) {
                     duration = ntfDuration.getData();
+                    boolean running = false;
                     if (duration > 0) {
                         space.saveInfluenceList();
-                        startRunThread();
+                        running = startRunThread();
                     }
-                    pbStart.setEnabled(false);
+                    if (running)
+                        pbStart.setEnabled(false);
                     break aBlock;
                 }
 

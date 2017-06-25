@@ -3,6 +3,7 @@ package time.timePlan;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
+import GeneralElements.accessories.AlignerWithJets;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -22,6 +23,7 @@ public class OneTimeStep {
     public enum StepAction {
         ALIGNTOVELOCITY("Align To Velocity"),
         ALIGNCOUNTERTOVELOCITY("Align Counter To Velocity"),
+        ALIGNTOANOBJECT("Align To An Object"),
         FIREJET("Fire Jet");
 
         private final String typeName;
@@ -89,6 +91,7 @@ public class OneTimeStep {
     }
     JetsAndSeekers forElement;
     public StepAction stepAction;
+    public Item alignToObject;
     public double startTime;
     public double duration;
     public double endTime;
@@ -296,21 +299,35 @@ public class OneTimeStep {
         return true;
     }
 
-    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ActionListener activationListener) {
+    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, Item[] otherItems, ActionListener activationListener) {
         JPanel jp = new JPanel();
         JComboBox<StepAction> cbStepAction;
         cbStepAction = new JComboBox<>(forElement.actions());
         cbStepAction.setSelectedItem(stepAction);
+        JComboBox<Item> cbAlignToObject = new JComboBox<>(otherItems);
+        cbAlignToObject.setEnabled(false);
         NumberTextField ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
         Indicator bulb = new Indicator(10, Color.red, Color.blue);
+        cbStepAction.addActionListener(e -> {
+            StepAction action = (StepAction)cbStepAction.getSelectedItem();
+            if (action == StepAction.ALIGNTOANOBJECT)
+                cbAlignToObject.setEnabled(true);
+            else
+                cbAlignToObject.setEnabled(false);
+
+        });
         JButton onButton = new JButton("Activate");
         onButton.addActionListener(e -> {
             stepAction = (StepAction)cbStepAction.getSelectedItem();
+            if (stepAction == StepAction.ALIGNTOANOBJECT)
+                alignToObject = (Item)cbAlignToObject.getSelectedItem();
             duration = ntDuration.getData();
             activationListener.actionPerformed(e);});
         jp.add(new JLabel(jetName));
         jp.add(cbStepAction);
-        jp.add(ntDuration);
+        if (!(forElement instanceof AlignerWithJets))
+            jp.add(ntDuration);
+        jp.add(cbAlignToObject);
         jp.add(bulb.displayUnit());
         jp.add(onButton);
 

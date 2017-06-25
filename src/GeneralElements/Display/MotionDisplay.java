@@ -229,6 +229,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JButton viewAllZX = new JButton("View All in ZX plane");
     JButton viewAllXY = new JButton("View All in XY plane");
     JButton viewAllYZ = new JButton("View All in YZ plane");
+    JComboBox<Item> cbItems;
     JButton stopB = new JButton(stopItStr);
     JButton resultsB = new JButton("Save Vectors");
     JScrollBar sbUpdateSpeed;
@@ -249,6 +250,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         outerGbc.insets = new Insets(5, 0, 5, 0);
         outerGbc.gridx = 0;
         outerGbc.gridy = 0;
+        cbItems = new JComboBox(space.getAlItems().toArray());
         ActionListener l = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -275,6 +277,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                        setViewAll(ViewDirection.YMinus);
                        break block;
                    }
+                   if (src == cbItems) {
+                       localViewFrame.showLocalView((Item)cbItems.getSelectedItem());
+                       localViewFrame.setVisible(true);
+                       break block;
+                   }
                    if (src == stopB) {
                        if (isStopButtInContinue()) {
                            controller.oneMoreTime();
@@ -292,6 +299,9 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                }
             }
         };
+        cbItems.addActionListener(l);
+        outerP.add(cbItems, outerGbc);
+        outerGbc.gridy++;
         viewAllXY.addActionListener(l);
         outerP.add(viewAllXY, outerGbc);
         outerGbc.gridy++;

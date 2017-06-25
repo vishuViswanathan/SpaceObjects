@@ -385,7 +385,9 @@ public class Aligner extends JetsAndSeekers {
     }
 
     public OneTimeStep.StepAction[] actions() {
-        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.ALIGNTOVELOCITY, OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY};
+        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.ALIGNTOVELOCITY,
+                OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY,
+                OneTimeStep.StepAction.ALIGNTOANOBJECT};
     }
 
     public Item.EditResponse editData(InputControl inpC, Component c) {

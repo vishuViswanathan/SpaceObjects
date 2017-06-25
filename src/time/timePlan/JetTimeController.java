@@ -145,13 +145,13 @@ public class JetTimeController extends JetController{
         return retVal;
     }
 
-    public JPanel controlPanel(Component parent, InputControl inpC) {
+    public JPanel controlPanel(Component parent, InputControl inpC, Item[] otherItems) {
         ManualControlListener li;
         MultiPairColPanel mp = new MultiPairColPanel(item.name + " Control Panel");
         for (JetsAndSeekers oneJet: jets) {
             OneJetPlan onePlan = jetAndPlan.get(oneJet);
             li = new ManualControlListener(onePlan);
-            mp.addItem(jetAndPlan.get(oneJet).controlPanel(oneJet.name, parent, inpC, li));
+            mp.addItem(jetAndPlan.get(oneJet).controlPanel(oneJet.name, parent, inpC, otherItems, li));
         }
         return mp;
     }

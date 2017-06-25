@@ -71,6 +71,15 @@ public class ItemSpace {
         return allItems;
     }
 
+    public Item[] getOtherItems(Item excludeThis) {
+        Item[] others = new Item[nItems() - 1];
+        int c = 0;
+        for (Item i: allItems)
+            if (i != excludeThis)
+                others[c++] = i;
+        return others;
+    }
+
     public int addItem(Item oneItem)  {
         allItems.add(oneItem);
         oneItem.setSpace(this);
@@ -125,10 +134,15 @@ public class ItemSpace {
         return retVal;
     }
 
-    public void noteItemData() {
-        for (Item i: allItems)
-            i.noteInput();
-        initLinks();
+    public boolean noteItemData() {
+        if (allItems.size() > 0) {
+            for (Item i : allItems)
+                i.noteInput();
+            initLinks();
+            return true;
+        }
+        else
+            return false;
     }
 
     void initLinks() {

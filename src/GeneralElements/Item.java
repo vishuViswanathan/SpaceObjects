@@ -27,6 +27,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
+import java.util.LinkedList;
 import java.util.Vector;
 
 /**
@@ -716,15 +717,17 @@ public class Item extends DarkMatter {
         return (jetController != null);
     }
 
-    public void showControlPanel(InputControl inpC, Component parent) {
+    public Window showControlPanel(InputControl inpC, Component parent) {
+        ControlPanelDialog dlg = null;
         if (jetController != null) {
             parent.setEnabled(false);
-            ControlPanelDialog dlg = new ControlPanelDialog(inpC, parent);
+            dlg = new ControlPanelDialog(inpC, parent);
             dlg.setVisible(true);
         }
+        return dlg;
     }
 
-    class ControlPanelDialog extends JDialog {
+    class ControlPanelDialog extends JFrame {
         Component parent;
         InputControl inpC;
         JButton close = new JButton("Close");
@@ -744,7 +747,8 @@ public class Item extends DarkMatter {
 
         void dbInit() {
             JPanel outerPan = new JPanel(new BorderLayout());
-            outerPan.add(jetController.controlPanel(parent, inpC), BorderLayout.CENTER);
+            LinkedList<Item> allItems = space.getAllItems();
+            outerPan.add(jetController.controlPanel(parent, inpC, space.getOtherItems(Item.this)), BorderLayout.CENTER);
             JPanel buttonP = new JPanel();
             close.addActionListener(e -> {
                 closeIt();

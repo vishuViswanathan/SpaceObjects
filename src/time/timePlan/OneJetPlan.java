@@ -42,7 +42,7 @@ public class OneJetPlan {
 
     public OneJetPlan(JetsAndSeekers theJet) {
         this.theJet = theJet;
-        theSteps = new Vector<OneTimeStep>();
+        theSteps = new Vector<>();
         theJet.noteTimePlan(this);
         manualStep = new OneTimeStep(theJet, 0, 5);
         manualStepOn = false;
@@ -238,8 +238,8 @@ public class OneJetPlan {
         return retVal;
     }
 
-    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ActionListener activationListener) {
-        return manualStep.controlPanel(jetName, parent, inpC, activationListener);
+    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, Item[] otherItems, ActionListener activationListener) {
+        return manualStep.controlPanel(jetName, parent, inpC, otherItems, activationListener);
     }
 
     class TimePlanTable {
