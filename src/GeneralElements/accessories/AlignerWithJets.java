@@ -73,7 +73,6 @@ public class AlignerWithJets extends JetsAndSeekers {
     AlignerJetSet alignerJetSetX;
     AlignerJetSet alignerJetSetY;
     AlignerJetSet alignerJetSetZ;
-//    LinkedList<Direction> axisList
     Queue<AxisStep> axisQueue;
 
     boolean initiated = false;
@@ -92,9 +91,11 @@ public class AlignerWithJets extends JetsAndSeekers {
         axisQueue.add(AxisStep.ZFOR);
         axisQueue.add(AxisStep.XFOR);
         axisQueue.add(AxisStep.YFOR);
-        axisQueue.add(AxisStep.ZFOR);
-        axisQueue.add(AxisStep.XFOR);
-        axisQueue.add(AxisStep.YFOR);
+        if (!justTurn) {
+            axisQueue.add(AxisStep.ZFOR);
+            axisQueue.add(AxisStep.XFOR);
+            axisQueue.add(AxisStep.YFOR);
+        }
         thisActionTime = 0;
     }
 
@@ -138,8 +139,9 @@ public class AlignerWithJets extends JetsAndSeekers {
 
     public void ActivateIt(OneTimeStep theStep, double deltaT) throws Exception{
         if (nowAxisStep != AxisStep.DONE) {
-            if (this.theStep != theStep) { // a new step
+            if (!theStep.isON) { // a new step
                 this.theStep = theStep;
+                theStep.markItOn(true);
                 prepareAlignToList();
                 basicsSet = prepareBasicsForTorques();
                 active = true;
@@ -149,9 +151,12 @@ public class AlignerWithJets extends JetsAndSeekers {
      }
 
     Vector3dMV globalAlignTo;
+    Vector3dMV turnByAngle;
+    boolean justTurn = false;
     boolean basicsSet = false;
 
     private boolean prepareBasicsForTorques() {
+        justTurn = false;
         switch (theStep.stepAction) {
             case ALIGNTOANOBJECT:
                 globalAlignTo = objectDirection(theStep.alignToObject);
@@ -163,12 +168,12 @@ public class AlignerWithJets extends JetsAndSeekers {
                 globalAlignTo = new Vector3dMV(item.status.velocity);
                 globalAlignTo.negate();
                 break;
+            case TURNBYANGLE:
+                turnByAngle = theStep.turnByAngle;
+                justTurn = true;
+                break;
         }
-//        globalAlignTo = new Vector3dMV(item.status.velocity);
-//        if (theStep.stepAction == OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY)
-//            globalAlignTo.negate();
         prepareAxisSequence();
-//        nowAxisStep = AxisStep.ZFOR;
         nowAxisStep = axisQueue.remove();
         activeT = 0;
         return true;
@@ -237,6 +242,72 @@ public class AlignerWithJets extends JetsAndSeekers {
 
         void setTorque() {
             if (rotate) {
+                if (justTurn) {
+                    double theta = 0;
+                    switch(axis) {
+                        case X:
+                            theta = turnByAngle.getX();
+                            break;
+                        case Y:
+                            theta = turnByAngle.getY();
+                            break;
+                        case Z:
+                            theta = turnByAngle.getZ();
+                            break;
+                    }
+                    thisActionTime = actionTime(theta);
+                }
+                else {
+                    double theta;
+                    Vector3dMV alignTo = new Vector3dMV(globalAlignTo);
+                    item.globalToItem().transform(alignTo);
+                    double angleV = 0;
+                    boolean tryLater = false;
+                    switch (axis) {
+                        case X:
+                            tryLater = alignTo.z == 0 && alignTo.y == 0;
+                            if (tryLater)
+                                axisQueue.add(AxisStep.XFOR);
+                            else
+                                angleV = Math.atan2(alignTo.z, alignTo.y);
+                            break;
+                        case Y:
+                            tryLater = alignTo.x == 0 && alignTo.z == 0;
+                            if (tryLater)
+                                axisQueue.add(AxisStep.YFOR);
+                            else
+                                angleV = Math.atan2(alignTo.x, alignTo.z);
+                            break;
+                        case Z:
+                            tryLater = alignTo.y == 0 && alignTo.x == 0;
+                            if (tryLater)
+                                axisQueue.add(AxisStep.ZFOR);
+                            else
+                                angleV = Math.atan2(alignTo.y, alignTo.x);
+                            break;
+                    }
+                    if (tryLater) {
+                        ItemMovementsApp.debug("AlignerWithJets, tryLater is on");
+                        thisActionTime = 0;
+                        torque = 0;
+                    } else {
+                        theta = angleV - angleAlignAxis;
+                        if (theta < -Math.PI)
+                            theta += (2 * Math.PI);
+                        else if (theta > Math.PI)
+                            theta -= (2 * Math.PI);
+                        thisActionTime = actionTime(theta);
+                    }
+                }
+            }
+            else {
+                torque = 0;
+                thisActionTime = 0;
+            }
+        }
+
+        void setTorqueOLD() {
+            if (rotate) {
                 Vector3dMV alignTo = new Vector3dMV(globalAlignTo);
                 item.globalToItem().transform(alignTo);
                 double angleV = 0;
@@ -266,7 +337,7 @@ public class AlignerWithJets extends JetsAndSeekers {
                         break;
                 }
                 if (tryLater) {
-                    ItemMovementsApp.debug("AlignerWithJets, tryLater ins on");
+                    ItemMovementsApp.debug("AlignerWithJets, tryLater is on");
                     thisActionTime = 0;
                     torque = 0;
                  }
@@ -343,63 +414,7 @@ public class AlignerWithJets extends JetsAndSeekers {
                 if (activeT >= thisActionTime) {
                     nowTorque.set(0, 0, 0);
                     nowAxisStep = AxisStep.DONE;
-                }
-                break;
-        }
-        activeT += duration;
-    }
-
-    private void updateTorqueOLD(double duration) {
-        switch (nowAxisStep) {
-            case XFOR:
-                if (activeT >= thisActionTime) {
-                    alignBaseX.setTorque();
-                    activeT = 0;
-                    nowTorque.set(alignBaseX.torque, 0, 0);
-                    nowAxisStep = AxisStep.XREV;
-                }
-                break;
-            case XREV:
-                if (activeT >= thisActionTime) {
-                    activeT = 0;
-                    nowTorque.set(-alignBaseX.torque, 0, 0);
-                    nowAxisStep = AxisStep.YFOR;
-                }
-                break;
-            case YFOR:
-                if (activeT >= thisActionTime) {
-                    alignBaseY.setTorque();
-                    activeT = 0;
-                    nowTorque.set(0, alignBaseY.torque, 0);
-                    nowAxisStep = AxisStep.YREV;
-                }
-                break;
-            case YREV:
-                if (activeT >= thisActionTime) {
-                    activeT = 0;
-                    nowTorque.set(0, -alignBaseY.torque, 0);
-                    nowAxisStep = AxisStep.FINISH;
-                }
-                break;
-            case ZFOR:
-//                if (activeT >= thisActionTime) {
-                    alignBaseZ.setTorque();
-                    activeT = 0;
-                    nowTorque.set(0, 0, alignBaseZ.torque);
-                    nowAxisStep = AxisStep.ZREV;
-//                }
-                break;
-            case ZREV:
-                if (activeT >= thisActionTime) {
-                    activeT = 0;
-                    nowTorque.set(0, 0, -alignBaseZ.torque);
-                    nowAxisStep = AxisStep.XFOR;
-                }
-                break;
-            case FINISH:
-                if (activeT >= thisActionTime) {
-                    nowTorque.set(0, 0, 0);
-                    nowAxisStep = AxisStep.DONE;
+                    theStep.markItOn(false);
                 }
                 break;
         }
@@ -474,7 +489,7 @@ public class AlignerWithJets extends JetsAndSeekers {
     public OneTimeStep.StepAction[] actions() {
         return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.ALIGNTOVELOCITY,
                 OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY,
-                OneTimeStep.StepAction.ALIGNTOANOBJECT };
+                OneTimeStep.StepAction.ALIGNTOANOBJECT, OneTimeStep.StepAction.TURNBYANGLE};
     }
 
     public Item.EditResponse editData(InputControl inpC, Component c) {

@@ -1038,11 +1038,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     static public void debug(String msg) {
         log.debug(msg);
+        System.out.println("DEBUG: " + msg);
     }
 
     public static void main(String[] args) {
         final ItemMovementsApp orbit = new ItemMovementsApp(true);
         orbit.setVisible(true);
     }
-
 }

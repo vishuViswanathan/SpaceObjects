@@ -59,7 +59,7 @@ public class OneJetPlan {
     public boolean activateManual(double nowT, double deltaT) {
         boolean retVal = false;
         if (!manualStepOn && manualStep != null)   {
-            ItemMovementsApp.debug("Present active Step is not checked and will be interrupted, if ON");
+//            ItemMovementsApp.debug("Present active Step is not checked and will be interrupted, if ON");
             manualStep.startTime = nowT;
             manualStep.endTime = nowT + manualStep.duration;
             nowStep = manualStep;
@@ -74,10 +74,12 @@ public class OneJetPlan {
         if (manualStepOn) {
             nowStepTime += deltaT;
             if (theJet.completeThisStep(nowStep, nowStepTime, deltaT)) {
-                manualStepOn = false;
-                nowStepTime = nowT;
-                 if (bValid)
-                    nowStep = theSteps.get(stepPos);
+                if (!nowStep.repeat) {
+                    manualStepOn = false;
+                    nowStepTime = nowT;
+                    if (bValid)
+                        nowStep = theSteps.get(stepPos);
+                }
             }
         }
         else {

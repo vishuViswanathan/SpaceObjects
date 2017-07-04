@@ -1,6 +1,7 @@
 package time.timePlan;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.Display.TuplePanel;
 import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
 import GeneralElements.accessories.AlignerWithJets;
@@ -11,6 +12,7 @@ import mvUtils.display.NumberTextField;
 import mvUtils.display.SmartFormatter;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
+import mvUtils.physics.Vector3dMV;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +26,7 @@ public class OneTimeStep {
         ALIGNTOVELOCITY("Align To Velocity"),
         ALIGNCOUNTERTOVELOCITY("Align Counter To Velocity"),
         ALIGNTOANOBJECT("Align To An Object"),
+        TURNBYANGLE("Turn by this angle"),
         FIREJET("Fire Jet");
 
         private final String typeName;
@@ -92,9 +95,12 @@ public class OneTimeStep {
     JetsAndSeekers forElement;
     public StepAction stepAction;
     public Item alignToObject;
+    public Vector3dMV turnByAngle = new Vector3dMV();
     public double startTime;
     public double duration;
     public double endTime;
+    public boolean isON = false;
+    boolean repeat = false;
 
     public OneTimeStep(JetsAndSeekers element, String xmlStr) {
         this.forElement = element;
@@ -299,6 +305,14 @@ public class OneTimeStep {
         return true;
     }
 
+    Indicator bulb;
+
+    public void markItOn(boolean on) {
+        isON = on;
+        if (bulb != null)
+            bulb.switchIt(on);
+    }
+
     public JPanel controlPanel(String jetName, Component parent, InputControl inpC, Item[] otherItems, ActionListener activationListener) {
         JPanel jp = new JPanel();
         JComboBox<StepAction> cbStepAction;
@@ -306,21 +320,33 @@ public class OneTimeStep {
         cbStepAction.setSelectedItem(stepAction);
         JComboBox<Item> cbAlignToObject = new JComboBox<>(otherItems);
         cbAlignToObject.setEnabled(false);
+        double maxAngle = Math.PI;
+        TuplePanel tpTurnByAngle = new TuplePanel(inpC, turnByAngle, 4, -maxAngle, +maxAngle, "0.000",
+                "Angle to turn by (-PI to +PI)");
+        tpTurnByAngle.setEnabled(false);
         NumberTextField ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
-        Indicator bulb = new Indicator(10, Color.red, Color.blue);
+        bulb = new Indicator(10, Color.red, Color.blue);
+        bulb.switchIt(isON);
+        JCheckBox chBRepeat = new JCheckBox("Repeat Action", repeat);
+        chBRepeat.addActionListener(e -> {repeat = chBRepeat.isSelected();});
         cbStepAction.addActionListener(e -> {
             StepAction action = (StepAction)cbStepAction.getSelectedItem();
             if (action == StepAction.ALIGNTOANOBJECT)
                 cbAlignToObject.setEnabled(true);
             else
                 cbAlignToObject.setEnabled(false);
-
+            if (action == StepAction.TURNBYANGLE)
+                tpTurnByAngle.setEnabled(true);
+            else
+                tpTurnByAngle.setEnabled(false);
         });
         JButton onButton = new JButton("Activate");
         onButton.addActionListener(e -> {
             stepAction = (StepAction)cbStepAction.getSelectedItem();
             if (stepAction == StepAction.ALIGNTOANOBJECT)
                 alignToObject = (Item)cbAlignToObject.getSelectedItem();
+            else if (stepAction == StepAction.TURNBYANGLE)
+                turnByAngle.set(tpTurnByAngle.getTuple3d());
             duration = ntDuration.getData();
             activationListener.actionPerformed(e);});
         jp.add(new JLabel(jetName));
@@ -328,7 +354,9 @@ public class OneTimeStep {
         if (!(forElement instanceof AlignerWithJets))
             jp.add(ntDuration);
         jp.add(cbAlignToObject);
+        jp.add(tpTurnByAngle);
         jp.add(bulb.displayUnit());
+        jp.add(chBRepeat);
         jp.add(onButton);
 
         return jp;

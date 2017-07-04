@@ -2,6 +2,7 @@ package GeneralElements.Display;
 
 import GeneralElements.Item;
 import com.sun.j3d.loaders.Scene;
+import com.sun.j3d.loaders.objectfile.ObjectFile;
 import com.sun.j3d.loaders.vrml97.VrmlLoader;
 
 import javax.media.j3d.*;
@@ -22,8 +23,18 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
 
     private void loadVrmlFile(String fileName) {
         Scene scene = null;
-
-        VrmlLoader loader = new VrmlLoader();
+        if (fileName.endsWith("obj")) {
+            ObjectFile loader = new ObjectFile();
+            try {
+                // load the scene
+                scene = loader.load(fileName);
+            } catch (Exception e) {
+                System.out.println("Exception loading OBJ from path:" + e);
+                e.printStackTrace();
+            }
+        }
+        else {
+            VrmlLoader loader = new VrmlLoader();
 
 //        try {
 //            URL loadUrl = new URL("file:/" + location);
@@ -44,6 +55,7 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
                 e.printStackTrace();
             }
 //        }
+        }
 
         if (scene != null) {
             // get the scene group
