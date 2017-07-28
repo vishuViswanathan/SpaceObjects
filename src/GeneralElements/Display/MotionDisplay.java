@@ -392,10 +392,10 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         gbc.gridy++;
         menuP.add(getSpeedSelector(), gbc);
         gbc.gridy++;
-        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
+//        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
             menuP.add(showRealTimeCB(), gbc);
             gbc.gridy++;
-        }
+//        }
         menuP.add(showLinksCB(), gbc);
         gbc.gridy++;
         menuP.add(showOrbitCB(), gbc);

@@ -116,11 +116,20 @@ public class DateAndJDN extends GregorianCalendar{
         return jp;
     }
 
+
     public JPanel panWithDateTime() {
         JPanel jp = new JPanel(new BorderLayout());
         jp.add(new JLabel("Date "), BorderLayout.WEST);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
         jp.add(new JLabel(sdf.format(getTime())), BorderLayout.EAST);
         return jp;
+    }
+
+    public static void main(String[] args) {
+        double jdn = Double.valueOf(args[0]);
+        DateAndJDN dAndJDn = new DateAndJDN();
+        dAndJDn.setTimeZone(TimeZone.getTimeZone("GMT"));
+        dAndJDn.setCalendarFromJDn(jdn);
+        System.out.println(dAndJDn.getTime().toString());
     }
 }

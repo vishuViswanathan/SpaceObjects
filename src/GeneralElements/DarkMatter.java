@@ -287,7 +287,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             if (bFinal) {
                 status.velocity.set(newVelocity);
                 status.acc.set(thisAcc);
-                status.time = nowT;
+                status.time = nowT + deltaT; // 20170724
 //                if (bFlightPlan)
 //                    mass += flightPlan.massChange(deltaT);
             }

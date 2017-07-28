@@ -30,56 +30,64 @@ public class PlanetsAndMoons implements DefaultScheme {
 
     }
 
-//    @Override
-//    public boolean getScheme(JFrame parent, ItemSpace space) {
-//        this.mainF = parent;
-//        Color[] colors = {Color.blue, Color.cyan, Color.white, Color.gray, Color.green, Color.BLUE,
-//                Color.CYAN, Color.GRAY, Color.GREEN, Color.yellow, Color.darkGray};
-//        int nowColor = 0;
-//        int nColors = colors.length;
-//        boolean bRetVal = false;
-//        String folderName = planetDataDir + subDir;
-//        File folder = new File(folderName);
-//        String[] fileNames = folder.list();
-////        String[] fileNames = {"sun.csv", "mercury.csv", "earth.csv", "saturn.csv"};
-//        Item item;
-//        Statement st = createDBConnection("jdbc:odbc:ODBCtoPlanetData");
-////  Trial due to no jdbcodbc in Java 8       Statement st = createDBConnection("jdbc:odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)};" +
-////                        "DBQ=J:\\SpaceObjects\\planetData\\20141011\\PlanetAndMoonData1.mdb;DriverID=22;READONLY=true");
-//        String itemName;
-//        StringBuilder xmlStr = new StringBuilder();
-//        int itemCount = 0;
-//        if (st != null) {
-//            for (String oneFile:fileNames) {
-//                if (oneFile.indexOf(".csv") > 0) {
-//                    itemName = oneFile.substring(0, oneFile.length() - 4);
-//                    StringBuilder oneObjInXml = new StringBuilder();
-//                    item = getObjectFromTextFile(st, folderName + "\\" + oneFile, itemName, colors[nowColor], oneObjInXml);
-//                    if (item == null)  {
-//                        showError("Unable to create object " + itemName);
-//                    }
-//                    else {
-//                        space.addItem(item);
-//                        nowColor++;
-//                        // recycle colors
-//                        if (nowColor >= nColors)
-//                            nowColor = 0;
-//                        xmlStr.append(XMLmv.putTag("item" + ("" + itemCount++).trim(), oneObjInXml));
-//                    }
-//                }
-//            }
-//            closeDBconnection();
-//            xmlStr.insert(0, "#Base Data of Planets and Moons\n\n" + XMLmv.putTag("nItems", itemCount));
-//            saveBasePlaneData(xmlStr);
-//            bRetVal = true;
-//        }
-//        if (createInputSummary)
-//            closeInputFiles();
-//        return bRetVal;
-//    }
-
     @Override
     public boolean getScheme(JFrame parent, ItemSpace space) {
+        this.mainF = parent;
+        Color[] colors = {Color.blue, Color.cyan, Color.white, Color.gray, Color.green, Color.BLUE,
+                Color.CYAN, Color.GRAY, Color.GREEN, Color.yellow, Color.darkGray};
+        int nowColor = 0;
+        int nColors = colors.length;
+        boolean bRetVal = false;
+        String folderName = planetDataDir + subDir;
+
+        JFileChooser fc = new JFileChooser();
+        fc.setCurrentDirectory(new java.io.File(".")); // start at application current directory
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnVal = fc.showOpenDialog(parent);
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            File folder = fc.getSelectedFile();
+            folderName = folder.getAbsolutePath();
+            ItemMovementsApp.debug("PlanetsAndMoons folderName = " + folderName);
+//        FileDialog fileDlg =
+//                new FileDialog(mainF, "Select Folder",
+//                        FileDialog.LOAD);
+////        fileDlg.setFile("*.imDat");
+//        fileDlg.setVisible(true);
+//        folderName = fileDlg.getDirectory();
+//        File folder = new File(folderName);
+            String[] fileNames = folder.list();
+            if (planetsBaseDataFromFile()) {
+                baseJDN = -1; // reset
+                Item item;
+                String itemName;
+                StringBuilder xmlStr = new StringBuilder();
+                int itemCount = 0;
+                for (String oneFile : fileNames) {
+                    if (oneFile.endsWith(".csv")) {
+                        itemName = oneFile.substring(0, oneFile.length() - 4);
+                        StringBuilder oneObjInXml = new StringBuilder();
+                        item = getObjectFromTextFile(folderName + "\\" + oneFile, itemName, colors[nowColor]);
+                        if (item == null) {
+                            showError("Unable to create object " + itemName);
+                        } else {
+                            space.addItem(item);
+                            nowColor++;
+                            // recycle colors
+                            if (nowColor >= nColors)
+                                nowColor = 0;
+                            xmlStr.append(XMLmv.putTag("item" + ("" + itemCount++).trim(), oneObjInXml));
+                        }
+                    }
+                }
+                bRetVal = true;
+            }
+            if (createInputSummary)
+                closeInputFiles();
+        }
+        return bRetVal;
+    }
+
+    public boolean getSchemeOLD(JFrame parent, ItemSpace space) {
         this.mainF = parent;
         Color[] colors = {Color.blue, Color.cyan, Color.white, Color.gray, Color.green, Color.BLUE,
                 Color.CYAN, Color.GRAY, Color.GREEN, Color.yellow, Color.darkGray};
@@ -194,13 +202,13 @@ public class PlanetsAndMoons implements DefaultScheme {
         boolean bRetVal = false;
         String filePath = baseDataFilePath;
             if (!filePath.equals("nullnull")) {
-//                debug("Data file name :" + filePath);
+                ItemMovementsApp.debug("Data file name :" + filePath);
                 try {
                     BufferedInputStream iStream = new BufferedInputStream(new FileInputStream(filePath));
                     //           FileInputStream iStream = new FileInputStream(fileName);
                     File f = new File(filePath);
                     long len = f.length();
-                    if (len > 100 && len < 10000) {
+                    if (len > 100 && len < 100000) {
                         int iLen = (int) len;
                         byte[] data = new byte[iLen];
                         iStream.read(data);
@@ -231,7 +239,52 @@ public class PlanetsAndMoons implements DefaultScheme {
                     showError("Some Problem in getting file!");
                 }
         }
+        bRetVal = getGMData();
         return bRetVal;
+    }
+
+    Hashtable<String, Double> gmData;
+
+    boolean getGMData() {
+        boolean retVal = false;
+        gmData = new Hashtable<>();
+        String filePath = planetDataDir + "\\gm_Horizons.pck";
+        try {
+            File f = new File(filePath);
+            long len = f.length();
+            String line = "NOT READ YET";
+            if (len > 1000 && len < 15000) {
+                BufferedReader iStream = new BufferedReader(new FileReader(f));
+                try {
+                    line = iStream.readLine();
+                    while (line != null) {
+                        String l = line.trim();
+                        String parts[] = l.split("=");
+                        if (parts.length == 2 && parts[0].trim().endsWith("GM")) {
+                            String valStr = parts[1].replace("(", "").replace(")", "");
+
+                            try {
+                                double gm = Double.valueOf(valStr);
+                                gmData.put(parts[0].trim(), gm * 1e9); // converting to m3/s2/kg from km3/s2/kg
+                                retVal = true;
+                            } catch (NumberFormatException e) {
+                                retVal = false;
+                                break;
+                            }
+                        }
+                        line = iStream.readLine();
+                    }
+                }
+                catch (Exception e) {
+                    showError("Error reading file " + filePath + ", last line '" + line + "'");
+                }
+            }
+        } catch (IOException e) {
+            showError("Unable to get open file  " + filePath);
+        }
+        if (!retVal)
+            showError("Some problem in reading GM from file " + filePath);
+        return retVal;
     }
 
     Item getPlanetOrMoon(String objName, Color color) {
@@ -286,7 +339,7 @@ public class PlanetsAndMoons implements DefaultScheme {
                         }
                     }
                     else {
-                        showError("There is some problem is Mass or radius of " + objName + ", taking as 1kg and 1m");
+                        debug("There is some problem is Mass or radius of " + objName + ", taking as 1kg and 1m");
                         item = new Item(objName, 1, 1 * 2, color, mainF);
                     }
                 } catch (NumberFormatException e) {
@@ -375,7 +428,7 @@ public class PlanetsAndMoons implements DefaultScheme {
         Item obj;
         obj = getPlanetOrMoon(objName, color);
         if (obj == null) {
-            showError("There is some problem is Mass or dia of " + objName);
+            debug("There is some problem in Mass or dia of " + objName);
         }
         else {
             // now get the position and velocity params
@@ -389,6 +442,19 @@ public class PlanetsAndMoons implements DefaultScheme {
                     try {
                         iStream.read(data);
                         String strDat = new String(data);
+                        ValAndPos vp = XMLmv.getTag(strDat, "GMID", 0);
+                        if (vp.val.length() > 0) {
+                            String gmID = vp.val;
+                            Double gm = gmData.get(gmID);
+                            if (gm != null) {
+                                double oldm = obj.mass;
+                                obj.mass = gm / Constants.G;
+                                debug(obj.name + ": old mass = " + oldm + ", new = " + obj.mass);
+                            }
+                            else
+                                showError("Cannot get GM for " + gmID);
+                        }
+
                         String vectors = StringOps.substring(strDat, "$$SOE", "$$EOE");
                         if (vectors.length() > 50) {
                             String[] split = vectors.split(",", 33);
@@ -403,12 +469,12 @@ public class PlanetsAndMoons implements DefaultScheme {
                                     if (createInputSummary)
                                         addToInputFiles(objName, split);
                                     baseJDN = nowJDN;
-                                    double x = Double.valueOf(split[2]) * oneAuInM;
-                                    double y = Double.valueOf(split[3]) * oneAuInM;
-                                    double z = Double.valueOf(split[4]) * oneAuInM;
-                                    double vx = Double.valueOf(split[5]) * oneAuInM / secsPerDay;
-                                    double vy = Double.valueOf(split[6])* oneAuInM / secsPerDay;
-                                    double vz= Double.valueOf(split[7])* oneAuInM / secsPerDay;
+                                    double x = Double.valueOf(split[2]) * 1000;// * oneAuInM;
+                                    double y = Double.valueOf(split[3])* 1000;// * oneAuInM;
+                                    double z = Double.valueOf(split[4])* 1000; //* oneAuInM;
+                                    double vx = Double.valueOf(split[5])* 1000; // * oneAuInM / secsPerDay;
+                                    double vy = Double.valueOf(split[6])* 1000; // oneAuInM / secsPerDay;
+                                    double vz= Double.valueOf(split[7])* 1000; //  oneAuInM / secsPerDay;
                                     obj.initPosEtc(new Point3d(x, y, z), new Vector3d(vx, vy, vz));
                                 }
                                 else {
@@ -526,7 +592,7 @@ public class PlanetsAndMoons implements DefaultScheme {
                         try {
                             inputSummaryFiles[j].write(header.getBytes());
                         } catch (IOException e) {
-                            showError("Ünable to write Header to file " + filePath + "\n" + e.getMessage());
+                            showError("Unable to write Header to file " + filePath + "\n" + e.getMessage());
                             allOk = false;
                             break;
                         }
@@ -579,7 +645,11 @@ public class PlanetsAndMoons implements DefaultScheme {
     }
 
     void showError(String msg){
-        System.out.println("Error: " + msg);
+        ItemMovementsApp.showError("Error: " + msg);
+    }
+
+    void debug(String msg) {
+        ItemMovementsApp.debug("PlanetsAndMoons: " + msg);
     }
 
 }

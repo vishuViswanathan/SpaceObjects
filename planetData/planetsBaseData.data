@@ -1,9 +1,9 @@
 #Base Data of Planets and Moons
 
-<nItems>34</nItems>
+<nItems>51</nItems>
 <item0><name>Ariel - Uranus</name>
 <radius>578.9</radius>
-<mass>1.27E21</mass>
+<mass>1.353E21</mass>
 <GM>0.0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
@@ -11,18 +11,18 @@
 <isLightSrc>0</isLightSrc>
 </item0>
 <item1><name>Callisto -  Jupiter</name>
-<radius>2400.0</radius>
-<mass>1.0759373796381915E23</mass>
-<GM>7.179289E12</GM>
+<radius>580</radius>
+<mass>1.07623</mass>
+<GM>0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item1>
 <item2><name>Charon - Pluto</name>
-<radius>635.0</radius>
-<mass>1.5331378070584288E21</mass>
-<GM>1.023E11</GM>
+<radius>605</radius>
+<mass>1.5327E21</mass>
+<GM>1.02271E11</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
@@ -39,8 +39,8 @@
 </item3>
 <item4><name>Dione - Saturn</name>
 <radius>560.0</radius>
-<mass>1.05E21</mass>
-<GM>0.0</GM>
+<mass>1.09572E21</mass>
+<GM>73.113e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
@@ -57,35 +57,35 @@
 </item5>
 <item6><name>Enceladus - Saturn</name>
 <radius>250.0</radius>
-<mass>8.4E19</mass>
-<GM>0.0</GM>
+<mass>10.805E19</mass>
+<GM> 7.206e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item6>
 <item7><name>Europa - Jupiter</name>
-<radius>1569.0</radius>
-<mass>4.7998438387492715E22</mass>
-<GM>3.202739E12</GM>
+<radius>1569.0</radius>17-07-2017
+<mass>4.797E22</mass>
+<GM>0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item7>
 <item8><name>Ganymede - Jupiter</name>
-<radius>2631.0</radius>
-<mass>1.4818584687505152E23</mass>
-<GM>9.887834E12</GM>
+<radius>2634</radius>
+<mass>1.482E23</mass>
+<GM>0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item8>
 <item9><name>Hyperion - Saturn</name>
-<radius>150.0</radius>
-<mass>1.77E19</mass>
-<GM>0.0</GM>
+<radius>133.0</radius>
+<mass>5.54e18</mass> 20170717 was 1.08e18
+<GM>0.37e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
@@ -93,17 +93,17 @@
 </item9>
 <item10><name>Iapetus - Saturn</name>
 <radius>730.0</radius>
-<mass>1.88E21</mass>
-<GM>0.0</GM>
+<mass>1.806E21</mass>
+<GM>120.51e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item10>
 <item11><name>Io - Jupiter</name>
-<radius>1815.0</radius>
-<mass>8.931937973110891E22</mass>
-<GM>5.959916E12</GM>
+<radius>1821.0</radius>
+<mass>8.933E22</mass>
+<GM>0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
@@ -111,17 +111,17 @@
 </item11>
 <item12><name>Jupiter</name>
 <radius>71492.0</radius>
-<mass>1.8986111090296274E27</mass>
-<GM>1.26686535E17</GM>
+<mass>1.8986107493492E27</mass> 20170717 was 1.8986111090296274E27
+<GM>1.26686511E17</GM>
 <imageName>jupiter.jpg</imageName>
-<rotationPeriod>9.83</rotationPeriod>
-<axisInclination>3.13</axisInclination>
+<rotationPeriod>9.894</rotationPeriod>
+<axisInclination>3.13</axisInclination> 20170717 not available
 <isLightSrc>0</isLightSrc>
 </item12>
 <item13><name>Mars</name>
-<radius>3396.19</radius>
-<mass>6.41693E23</mass>
-<GM>0.0</GM>
+<radius>3389</radius>
+<mass>6.41854E23</mass> 20170717 was 6.41693E23
+<GM>42828.3e9</GM>
 <imageName>mars.jpg</imageName>
 <rotationPeriod>24.62</rotationPeriod>
 <axisInclination>25.19</axisInclination>
@@ -129,17 +129,17 @@
 </item13>
 <item14><name>Mercury</name>
 <radius>2439.7</radius>
-<mass>3.3030104E23</mass>
-<GM>0.0</GM>
+<mass>3.30188E23</mass> 20170717 was 3.30302E23
+<GM>22032.09e9</GM>
 <imageName>mercury.jpg</imageName>
 <rotationPeriod>1407.6</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item14>
 <item15><name>Mimas - Saturn</name>
-<radius>196.0</radius>
-<mass>3.8E19</mass>
-<GM>0.0</GM>
+<radius>198.8</radius>
+<mass>3.7512E19</mass> 20170717 was 3.8E19
+<GM>2.503e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
@@ -147,7 +147,7 @@
 </item15>
 <item16><name>Miranda - Uranus</name>
 <radius>235.8</radius>
-<mass>6.33E19</mass>
+<mass>6.59E19</mass> 20170717 was 6.33E19
 <GM>0.0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
@@ -156,41 +156,32 @@
 </item16>
 <item17><name>Moon - Earth</name>
 <radius>1737.5</radius>
-<mass>7.347673092457352E22</mass>
-<GM>4.902801E12</GM>
+<mass>7.3476716987E22</mass>
+<GM>4.90280007E12</GM>
 <imageName>moon.jpg</imageName>
 <rotationPeriod>655.73</rotationPeriod>
 <axisInclination>6.68</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item17>
 <item18><name>Neptune</name>
-<radius>24746.0</radius>
-<mass>1.0241E26</mass>
-<GM>0.0</GM>
+<radius>24766.0</radius>
+<mass>1.024355911E26</mass> 20170717 was 1.0241E26
+<GM>6.835107e15</GM>
 <imageName>null</imageName>
-<rotationPeriod>0.0</rotationPeriod>
+<rotationPeriod>16.11</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item18>
-<item19><name>Nereid - Neptune</name>
-<radius>170.0</radius>
-<mass>0.0</mass>
+<item19><name>Oberon - Uranus</name>
+<radius>761.4</radius>
+<mass>3.014E21</mass> 20170717 was 3.03E21
 <GM>0.0</GM>
-<imageName></imageName>
+<imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item19>
-<item20><name>Oberon - Uranus</name>
-<radius>761.4</radius>
-<mass>3.03E21</mass>
-<GM>0.0</GM>
-<imageName>null</imageName>
-<rotationPeriod>0.0</rotationPeriod>
-<axisInclination>0.0</axisInclination>
-<isLightSrc>0</isLightSrc>
-</item20>
-<item21><name>Phobos - Mars</name>
+<item20><name>Phobos - Mars</name>
 <radius>11.0</radius>
 <mass>1.08E16</mass>
 <GM>0.0</GM>
@@ -198,62 +189,53 @@
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item21>
-<item22><name>Pluto</name>
-<radius>1151.0</radius>
-<mass>1.309E22</mass>
-<GM>0.0</GM>
+</item20>
+<item21><name>Pluto</name>
+<radius>1195.0</radius>
+<mass>1.3074E22</mass>
+<GM>872.4e9</GM>
 <imageName>pluto.jpg</imageName>
 <rotationPeriod>-153.29</rotationPeriod>
 <axisInclination>122.53</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item22>
-<item23><name>Proteus  - Neptune</name>
-<radius>200.0</radius>
-<mass>0.0</mass>
-<GM>0.0</GM>
-<imageName></imageName>
-<rotationPeriod>0.0</rotationPeriod>
-<axisInclination>0.0</axisInclination>
-<isLightSrc>0</isLightSrc>
-</item23>
-<item24><name>Rhea  - Saturn</name>
+</item21>
+<item22><name>Rhea  - Saturn</name>
 <radius>765.0</radius>
-<mass>2.49E21</mass>
-<GM>0.0</GM>
+<mass>2.30705E21</mass> 201701717 was 2.49E21
+<GM>153.94e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item24>
-<item25><name>Saturn</name>
-<radius>60268.0</radius>
-<mass>5.684630405884372E26</mass>
+</item22>
+<item23><name>Saturn</name>
+<radius>5832.0</radius>
+<mass>5.684630405884372E26</mass> 20170717 Horizon 5.68319e26
 <GM>3.7931208E16</GM>
 <imageName>saturn.jpg</imageName>
 <rotationPeriod>10.66</rotationPeriod>
 <axisInclination>26.73</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item25>
-<item26><name>Sun</name>
-<radius>695000.0</radius>
-<mass>1.988919445701585E30</mass>
+</item23>
+<item24><name>Sun</name>
+<radius>695500.0</radius>
+<mass>1.988919445701585E30</mass> 20170717 Horizon 1.988544e30
 <GM>1.3271244004193939E20</GM>
 <imageName>sun.jpg</imageName>
 <rotationPeriod>609.12</rotationPeriod>
 <axisInclination>7.25</axisInclination>
 <isLightSrc>1</isLightSrc>
-</item26>
-<item27><name>Tethys - Saturn</name>
-<radius>530.0</radius>
-<mass>7.55E20</mass>
-<GM>0.0</GM>
+</item24>
+<item25><name>Tethys - Saturn</name>
+<radius>536.0</radius>
+<mass>6.17601E20</mass> 20170717 was 7.55E20
+<GM>41.21e9</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item27>
-<item28><name>Titan - Saturn</name>
+</item25>
+<item26><name>Titan - Saturn</name>
 <radius>2575.0</radius>
 <mass>1.3455252308324054E23</mass>
 <GM>8.9781382E12</GM>
@@ -261,49 +243,220 @@
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item28>
-<item29><name>Titania -  Uranus</name>
+</item26>
+<item27><name>Titania -  Uranus</name>
 <radius>788.9</radius>
-<mass>3.49E21</mass>
+<mass>3.527E21</mass> 20170717 was 3.49E21
+<GM>0.0</GM>
+<imageName>null</imageName>
+<rotationPeriod>0.0</rotationPeriod>
+<axisInclination>0.0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item27>
+<item28><name>Triton - Neptune</name>
+<radius>1352.6</radius>
+<mass>2.147E22</mass> 20170717 was 2.139499055089553E22
+<GM>0</GM>
+<imageName>null</imageName>
+<rotationPeriod>0.0</rotationPeriod>
+<axisInclination>0.0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item28>
+<item29><name>Umbriel - Uranus</name>
+<radius>584.7</radius>
+<mass>1.172E21</mass> 20170717 was 1.27e21
 <GM>0.0</GM>
 <imageName>null</imageName>
 <rotationPeriod>0.0</rotationPeriod>
 <axisInclination>0.0</axisInclination>
 <isLightSrc>0</isLightSrc>
 </item29>
-<item30><name>Triton - Neptune</name>
-<radius>1350.0</radius>
-<mass>2.139499055089553E22</mass>
-<GM>1.4276E12</GM>
-<imageName>null</imageName>
-<rotationPeriod>0.0</rotationPeriod>
-<axisInclination>0.0</axisInclination>
-<isLightSrc>0</isLightSrc>
-</item30>
-<item31><name>Umbriel - Uranus</name>
-<radius>584.7</radius>
-<mass>1.27E21</mass>
-<GM>0.0</GM>
-<imageName>null</imageName>
-<rotationPeriod>0.0</rotationPeriod>
-<axisInclination>0.0</axisInclination>
-<isLightSrc>0</isLightSrc>
-</item31>
-<item32><name>Uranus</name>
+<item30><name>Uranus</name>
 <radius>25559.0</radius>
-<mass>8.683230949301546E25</mass>
-<GM>5.793964E15</GM>
+<mass>8.683230949301546E25</mass> 20170717 Horizon 8.68102e25
+<GM>5.793966E15</GM>
 <imageName>uranus.jpg</imageName>
 <rotationPeriod>17.24</rotationPeriod>
 <axisInclination>97.77</axisInclination>
 <isLightSrc>0</isLightSrc>
-</item32>
-<item33><name>Venus</name>
+</item30>
+<item31><name>Venus</name>
 <radius>6051.8</radius>
-<mass>4.866732E24</mass>
-<GM>0.0</GM>
+<mass>4.8685537E24</mass> 20170717 was 4.866732E24
+<GM>324858.63e9</GM>
 <imageName>venus.jpg</imageName>
 <rotationPeriod>-5832.5</rotationPeriod>
 <axisInclination>177.36</axisInclination>
 <isLightSrc>0</isLightSrc>
+</item31>
+<item32><name>Bennu</name>
+<radius>0.246</radius>
+<mass>7.79e10</mass>
+<GM>5.2</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item32>
+<item33><name>Calypso - Saturn</name>
+<radius>15</radius>
+<mass>3.597E15</mass>
+<GM>0.00024e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
 </item33>
+<item34><name>Ceres</name>
+<radius>469.7</radius>
+<mass>9.38592E20</mass>
+<GM>62.6284e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item34>
+<item35><name>Eros</name>
+<radius>469.7</radius>
+<mass>6.6885E15</mass>
+<GM>0.0004463e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item35>
+<item36><name>Epimetheus-Saturn</name>
+<radius>69</radius>
+<mass>0.0055E20</mass>
+<GM>0</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item36>
+<item37><name>Helene-Saturn </name>
+<radius>16</radius>
+<mass>2.547E16</mass>
+<GM>1.7e6</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item37>
+<item38><name>Hygiea</name>
+<radius>203.56</radius>
+<mass>1.049e20</mass>
+<GM>7e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item38>
+<item39><name>Ida</name>
+<radius>16</radius>
+<mass>4.1213e16</mass>
+<GM>0.00275e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item39>
+<item40><name>Interamnia</name>
+<radius>153</radius>
+<mass>7.4933e19</mass>
+<GM>5e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item40>
+<item41><name>Itokawa</name>
+<radius>0.165</radius>
+<mass>3.147e10</mass>
+<GM>2.1</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item41>
+<item42><name>Janus-Saturn</name>
+<radius>97</radius>
+<mass>0.0198e20</mass>
+<GM>0</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item42>
+<item43><name>Kalliope</name>
+<radius>84</radius>
+<mass>7.3585e18</mass>
+<GM>0.491e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item43>
+<item44><name>Mathilde</name>
+<radius>26.4</radius>
+<mass>1.03258e17</mass>
+<GM>0.00689e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item44>
+<item45><name>Pallas</name>
+<radius>273</radius>
+<mass>2.143e20</mass>
+<GM>14.3e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item45>
+<item46><name>Pandora-Saturn</name>
+<radius>55</radius>
+<mass>0.0013e20</mass>
+<GM>0</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item46>
+<item47><name>Phoebe-Saturn</name>
+<radius>107</radius>
+<mass>8.2921e18</mass>
+<GM>0.5533e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item47>
+<item48><name>Prometheus-Saturn</name>
+<radius>75</radius>
+<mass>0.0014e20</mass>
+<GM>0</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item48>
+<item49><name>Psyche</name>
+<radius>126</radius>
+<mass>6.729e19</mass>
+<GM>4.49e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item49>
+<item50><name>Vests</name>
+<radius>263</radius>
+<mass>2.667e20</mass>
+<GM>17.8e9</GM>
+<imageName>null</imageName>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
+<isLightSrc>0</isLightSrc>
+</item50>

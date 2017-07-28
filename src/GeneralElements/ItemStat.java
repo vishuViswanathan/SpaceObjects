@@ -13,7 +13,7 @@ import javax.vecmath.Vector3d;
  * Created by M Viswanathan on 20 May 2014
  */
 public class ItemStat {
-    static public enum Param {
+    public enum Param {
         POSITION("Position"),
         VELOCITY("VELOCITY"),
         ACCELERATION("Acceleration"),
@@ -53,7 +53,7 @@ public class ItemStat {
     }
 
     double time;
-    double distFromPrimary;
+    double distFromPrimary; // TODO not used
     public Point3dMV pos;
     public Vector3dMV angularPos;  // on object's local coordinates
     public Vector3dMV velocity;
@@ -87,14 +87,6 @@ public class ItemStat {
     public void initAngularPos(Vector3d angularPos, Vector3d angularVelocity) {
         this.angularPos.set(angularPos);
         this.angularVelocity.set(angularVelocity);
-        angularAcceleration.set(0, 0, 0);
-    }
-
-    public void initPos(Point3d pos, Vector3d velocity, Vector3d angularVelocity) {
-        this.pos.set(pos);
-        this.velocity.set(velocity);
-        acc.set(0, 0, 0);
-        angularVelocity.set(angularVelocity);
         angularAcceleration.set(0, 0, 0);
     }
 
@@ -133,7 +125,8 @@ public class ItemStat {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("pos", pos.dataInCSV())).
                                     append(XMLmv.putTag("vel", velocity.dataInCSV()));
-        xmlStr.append(XMLmv.putTag("angularPos", angularPos.dataInCSV()));
+        xmlStr.append(XMLmv.putTag("angularPos", angularPos.dataInCSV())).
+                append(XMLmv.putTag("angularVel", angularVelocity.dataInCSV()));
 //        if (angularVelocity.isNonZero())
 //            xmlStr.append(XMLmv.putTag("angularVel", angularVelocity.dataInCSV()));
         return xmlStr;
@@ -149,9 +142,9 @@ public class ItemStat {
         vp = XMLmv.getTag(xmlStr, "angularPos", 0);
         if (vp.val.length() > 0)
             angularPos.set(vp.val);
-//        vp = XMLmv.getTag(xmlStr, "angularVel", 0);
-//        if (vp.val.length() > 0)
-//            angularVelocity.set(vp.val);
+        vp = XMLmv.getTag(xmlStr, "angularVel", 0);
+        if (vp.val.length() > 0)
+            angularVelocity.set(vp.val);
         return retVal;
     }
 

@@ -87,8 +87,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     static JFrame mainF;
     DateAndJDN dateAndJDN = new DateAndJDN();
     JButton pbStart = new JButton("Start");
-//    JButton pbSaveData = new JButton("Save Data to File");
-//    JButton pbReadData = new JButton("Data From file");
     NumberTextField ntfDuration;  // , ntfStep;
     double duration = 2000; // in h
     public double calculationStep =2; //in seconds
@@ -219,6 +217,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     JMenuItem mITuning = new JMenuItem("Tune Calculations step");
     JMenuItem mIReadData = new JMenuItem("Read Data From File");
     JMenuItem mISaveData =new JMenuItem("Save Data to File");
+    JMenuItem mIClearData = new JMenuItem("Start with Clean Slate");
     JMenuItem mIExit = new JMenuItem("Exit");
 
     JMenuItem mIDaily = new JMenuItem("Daily objects (m)");
@@ -241,6 +240,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         mIExit.addActionListener(ml);
         mIReadData.addActionListener(ml);
         mISaveData.addActionListener(ml);
+        mIClearData.addActionListener(ml);
         mIExit.addActionListener(ml);
         mITuning.addActionListener(ml);
         JMenuBar menuBar = new JMenuBar();
@@ -249,6 +249,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         fileMenu.addSeparator();
         fileMenu.add(mIReadData);
         fileMenu.add(mISaveData);
+        fileMenu.addSeparator();
+        fileMenu.add(mIClearData);
         fileMenu.addSeparator();
         fileMenu.add(mIExit);
         menuBar.add(fileMenu);
@@ -374,14 +376,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         JPanel jp = new JPanel();
         ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.######", "Duration");
         MyListener listener = new MyListener();
-//        pbReadData.addActionListener(listener);
-//        pbSaveData.addActionListener(listener);
         pbStart.addActionListener(listener);
         JPanel durPanel = new JPanel(new BorderLayout());
         durPanel.add(new JLabel("Duration in h"), BorderLayout.WEST);
         durPanel.add(ntfDuration, BorderLayout.EAST);
-//        jp.add(pbReadData);
-//        jp.add(pbSaveData);
         jp.add(durPanel);
         jp.add(pbStart);
         return jp;
@@ -728,17 +726,22 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public boolean writeCurrentVectorsToFile() {
         boolean bRetVal = false;
         String filePath = "results\\statusVectors.csv";
-        double posFactor = 1 / Constants.oneAuInkm / 1000;
-        double velFactor = posFactor * Constants.secsPerDay;
+//        double posFactor = 1 / Constants.oneAuInkm / 1000;
+//        double velFactor = posFactor * Constants.secsPerDay;
+        double posFactor = 1.0;
+        double velFactor = 1.0;
         try {
             FileOutputStream stream = new FileOutputStream(filePath);
             BufferedOutputStream oStream = new BufferedOutputStream(stream);
             int nObj = space.nItems();
 
             try {
+//                String header = "JDN " + nowDate.getJdN() + "\n" +
+//                        "Position Vector in AU - x, y, z\n" +
+//                        "Velocity Vector in AU/day - Vx, vY, vZ\n\n";
                 String header = "JDN " + nowDate.getJdN() + "\n" +
-                        "Position Vector in AU - x, y, z\n" +
-                        "Velocity Vector in AU/day - Vx, vY, vZ\n\n";
+                        "Position Vector in m, x, y, z\n" +
+                        "Velocity Vector in m/s, Vx, vY, vZ\n\n";
                 oStream.write(header.getBytes());
                 for (int o = 0; o < nObj; o++) {
                     oStream.write(space.getOneItem(o).statusStringForCSV(posFactor, velFactor).toString().getBytes());
@@ -834,6 +837,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
         return XMLmv.putTag("baseData" , XMLmv.putTag("calculationStep", calculationStep) +
                 XMLmv.putTag("refreshInterval", refreshInterval) +
+                XMLmv.putTag("bRealTime", bRealTime) +
                 XMLmv.putTag("duration", duration) +
                 XMLmv.putTag("bShowOrbit", bShowOrbit) +
                 XMLmv.putTag("bShowLinks", bShowLinks) +
@@ -853,6 +857,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 calculationStep = Double.valueOf(vp.val);
                 vp = XMLmv.getTag(basicData, "refreshInterval", 0);
                 refreshInterval = Double.valueOf(vp.val) ;
+                vp = XMLmv.getTag(basicData, "bRealTime", 0);
+                bRealTime = vp.val.equals("1");
                 vp = XMLmv.getTag(basicData, "duration", 0);
                 duration = Double.valueOf(vp.val) ;
                 vp = XMLmv.getTag(basicData, "bShowOrbit", 0);
@@ -949,6 +955,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 }
                 if (src == mISaveData) {
                     saveDataToFile();
+                    break bBlock;
+                }
+                if (src == mIClearData) {
+                    space.clearSpace();
+                    setSpaceSize(SpaceSize.DAILY);
+                    proceedToItemList(true);
                     break bBlock;
                 }
                 if (src == mIReadData) {

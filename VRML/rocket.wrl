@@ -9,7 +9,7 @@ DEF PayLoad Transform {
 	ambientIntensity	0.238636
 	diffuseColor	0.8 0.8 0.80
 	specularColor	0.5 0.5 0.00
-	emissiveColor	0 0 0
+	emissiveColor	0.5 0.5 0.5
 	shininess	0.08
 	transparency	0
       }
@@ -65,7 +65,7 @@ DEF Wing1 Transform {
 	ambientIntensity	0.25
 	diffuseColor	1 1 0.6
 	specularColor	1 1 0.29
-	emissiveColor	0 0 0
+	emissiveColor	0.5 0.5 1.0
 	shininess	0.79
 	transparency	0
       }
@@ -92,7 +92,7 @@ DEF Wing2 Transform {
 	ambientIntensity	0.25
 	diffuseColor	1 1 0.6
 	specularColor	1 1 0.29
-	emissiveColor	0 0 0
+	emissiveColor	0.5 0.5 1.0
 	shininess	0.79
 	transparency	0
       }
@@ -143,7 +143,7 @@ DEF Jet1 Transform {
 	ambientIntensity	0.238636
 	diffuseColor	0.88 0.15 0.01
 	specularColor	0.19 0.03 0.03
-	emissiveColor	0 0 0
+	emissiveColor	1 0.5 0.5
 	shininess	0.08
 	transparency	0
       }
@@ -167,7 +167,7 @@ DEF Jet2 Transform {
 	ambientIntensity	0.238636
 	diffuseColor	0.88 0.15 0.01
 	specularColor	0.19 0.03 0.03
-	emissiveColor	0 0 0
+	emissiveColor	1 0.5 0.5
 	shininess	0.08
 	transparency	0
       }
@@ -191,7 +191,7 @@ DEF Jet3 Transform {
 	ambientIntensity	0.238636
 	diffuseColor	0.88 0.15 0.01
 	specularColor	0.19 0.03 0.03
-	emissiveColor	0 0 0
+	emissiveColor	1 0.5 0.5
 	shininess	0.08
 	transparency	0
       }
@@ -215,7 +215,7 @@ DEF Jet4 Transform {
 	ambientIntensity	0.238636
 	diffuseColor	0.88 0.15 0.01
 	specularColor	0.19 0.03 0.03
-	emissiveColor	0 0 0
+	emissiveColor	1 0.5 0.5
 	shininess	0.08
 	transparency	0
       }

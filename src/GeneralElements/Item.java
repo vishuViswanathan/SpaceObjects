@@ -474,6 +474,7 @@ public class Item extends DarkMatter {
         NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
         TuplePanel angularPosTuplePan;
+        TuplePanel angularVelTuplePan;
         JRadioButton rbItemFixedPos;
         TuplePanel itemVelTuplePan;
         JButton itemRelButton = new JButton("Set Relative Data");
@@ -568,6 +569,10 @@ public class Item extends DarkMatter {
             angularPosTuplePan = new TuplePanel(inpC, status.angularPos, 8, -10, +10, "##0.####", "Angular Orientation (on local axis) rad");
             jpAngularPos.add(angularPosTuplePan, BorderLayout.CENTER);
             jp.addItemPair("Angular Position in rad(local)", jpAngularPos);
+            JPanel jpAngularVel = new JPanel(new BorderLayout());
+            angularVelTuplePan = new TuplePanel(inpC, status.angularVelocity, 8, -100, +100, "##0.####", "Angular Velocity (on local axis) rad/s");
+            jpAngularVel.add(angularVelTuplePan, BorderLayout.CENTER);
+            jp.addItemPair("Angular Velocity in rad/s(local)", jpAngularVel);
             jp.addBlank();
             jp.addItemPair("", itemRelButton);
 
@@ -599,6 +604,7 @@ public class Item extends DarkMatter {
                     itemPosTuplePan.updateTuple(status.pos);
                     angularPosTuplePan.updateTuple(status.angularPos);
                     itemVelTuplePan.updateTuple(status.velocity);
+                    angularVelTuplePan.updateTuple(status.angularVelocity);
                 }
             });
             outerPan.add(jp, BorderLayout.CENTER);
@@ -644,6 +650,7 @@ public class Item extends DarkMatter {
                 ntElasticity.setEditable(false);
                 itemPosTuplePan.setEditable(false);
                 angularPosTuplePan.setEditable(false);
+                angularVelTuplePan.setEnabled(false);
                 rbItemFixedPos.setEnabled(false);
                 itemVelTuplePan.setEditable(false);
                 itemRelButton.setEnabled(false);
@@ -688,6 +695,7 @@ public class Item extends DarkMatter {
                     status.pos.set(itemPosTuplePan.getTuple3d());
                     status.angularPos.set(angularPosTuplePan.getTuple3d());
                     status.velocity.set(itemVelTuplePan.getTuple3d());
+                    status.angularVelocity.set(angularVelTuplePan.getTuple3d());
                     bFixedLocation = rbItemFixedPos.isSelected();
                     retVal = true;
                 } catch (Exception e) {
