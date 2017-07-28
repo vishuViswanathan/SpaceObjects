@@ -7,6 +7,7 @@ import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
 import mvUtils.physics.Vector3dMV;
+import mvUtils.physics.VectorBD;
 //import time.timePlan.FlightPlan;
 
 import javax.swing.*;
@@ -26,7 +27,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean bFixedLocation = false;
     Vector<LocalAction> localActions;
     public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
-    Vector3d netForce = new Vector3d();
+//    Vector3d netForce = new Vector3d();
+    VectorBD netForce = new VectorBD();
     public String name;
     public double mass;
     public double dia;
@@ -213,17 +215,17 @@ public class DarkMatter implements InputControl, EvalOnce {
     public void setLocalForces() {
         netForce.set(0, 0, 0);
         for (LocalAction action : localActions)
-            netForce.add(action.getForce());
+            netForce.addTuple(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
-            netForce.add(gAction.getForce(this));
+            netForce.addTuple(gAction.getForce(this));
     }
 
     public synchronized void addToForce(Vector3d addForce)  {
-        netForce.add(addForce);
+        netForce.addTuple(addForce);
     }
 
     public synchronized void subtractFromForce(Vector3d subtractForce) {
-        netForce.sub(subtractForce);
+        netForce.subtractTuple(subtractForce);
     }
 
     public synchronized void addToTorque(Vector3d angularAcceleration)  {

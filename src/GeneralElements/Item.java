@@ -802,7 +802,7 @@ public class Item extends DarkMatter {
     public void setLocalForces() {
         netTorque.set(0, 0, 0);
         super.setLocalForces();
-        netForce.add(jetForce);
+        netForce.addTuple(jetForce);
         netTorque.add(jetTorque);
     }
 
