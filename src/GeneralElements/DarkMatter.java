@@ -201,7 +201,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3dMV newPos = new Vector3dMV();
 
     public void initStartForce() {
-        netForce.set(0, 0, 0); // this may not be correct
+        netForce.setTuple(0, 0, 0); // this may not be correct
     }
 
     public void setStartConditions(double duration, double nowT) {
@@ -213,7 +213,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public void setLocalForces() {
-        netForce.set(0, 0, 0);
+        netForce.setTuple(0, 0, 0);
         for (LocalAction action : localActions)
             netForce.addTuple(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
