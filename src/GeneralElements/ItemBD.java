@@ -6,14 +6,16 @@ import GeneralElements.Display.TuplePanel;
 import GeneralElements.accessories.JetsAndSeekers;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import jdk.nashorn.internal.scripts.JD;
-import mvUtils.display.*;
+import mvUtils.display.InputControl;
+import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.NumberTextField;
+import mvUtils.display.SmartFormatter;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.ForceElement;
-import mvUtils.physics.Point3dMV;
 import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
+import mvUtils.physics.VectorBD;
 import time.timePlan.JetTimeController;
 
 import javax.media.j3d.Group;
@@ -32,9 +34,10 @@ import java.util.LinkedList;
 import java.util.Vector;
 
 /**
- * Created by M Viswanathan on 31 Mar 2014
+ * Created by mviswanathan on 02-08-2017.
  */
-public class Item extends DarkMatter implements ItemInterface {
+public class ItemBD extends DarkMatterBD implements ItemInterface {
+
     protected ItemType itemType;
     private String vrmlFile;
     JRadioButton rbFixedAccOn;
@@ -45,7 +48,7 @@ public class Item extends DarkMatter implements ItemInterface {
     String imageName = "";
     private boolean isLightSrc = false;
     JRadioButton rbFixedPos;
-    Item thisItem;
+    ItemBD thisItem;
     private double reportInterval = 0; // sec?  144000;
     double nextReport; // sec
     Vector<ForceElement> forceElements = new Vector<ForceElement>();
@@ -59,31 +62,30 @@ public class Item extends DarkMatter implements ItemInterface {
     Vector3d additionalAngularVel = new Vector3d();
     JetTimeController jetController;
 
-
-    protected Item(Window parent) {
+    protected ItemBD(Window parent) {
         super(parent);
         itemType = ItemType.SPHERE;
         thisItem = this;
     }
 
-    public Item(Window theParent, String name, ItemType type) {
+    public ItemBD(Window theParent, String name, ItemType type) {
         super(theParent);
         itemType = ItemType.SPHERE;
         thisItem = this;
     }
 
-    public Item(Window theParent, String name) {
+    public ItemBD(Window theParent, String name) {
         this(name, 1, 1, Color.RED, theParent);
     }
 
-    public Item(String name, double mass, double dia, Color color, Window parent) {
+    public ItemBD(String name, double mass, double dia, Color color, Window parent) {
         super(name, mass, dia, color, parent);
         itemType = ItemType.SPHERE;
         setRadioButtons();
         thisItem = this;
     }
 
-    public Item(String name, double mass, String vrmlFile, Window parent) {
+    public ItemBD(String name, double mass, String vrmlFile, Window parent) {
         super(name, mass, 1, Color.green, parent);
         itemType = ItemType.VMRL;
         this.vrmlFile = vrmlFile;
@@ -93,22 +95,10 @@ public class Item extends DarkMatter implements ItemInterface {
     }
 
 
-    public Item(String xmlStr, Window parent) {
+    public ItemBD(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
         takeFromXML(xmlStr);
-    }
-
-    public ItemType getItemType() {
-        return itemType;
-    }
-
-    public ItemSpace getSpace() {
-        return space;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void noteTotalGM(double totalGM) {
@@ -121,16 +111,32 @@ public class Item extends DarkMatter implements ItemInterface {
     }
 
     @Override
+    public ItemSpace getSpace() {
+        return space;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public String getImageName() {
         return imageName;
     }
 
+    @Override
     public Vector3d getVelocity() {
         return status.velocity;
     }
 
+    @Override
     public Point3d getPos() {
         return status.pos;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
     }
 
     public String getVrmlFile() {
@@ -193,7 +199,7 @@ public class Item extends DarkMatter implements ItemInterface {
                 Item fromItem1 = (Item) fromItem;
                 itemType = fromItem1.itemType;
                 imageName = fromItem1.imageName;
-                isLightSrc = fromItem1.isLightSrc;
+                isLightSrc = fromItem1.isLightSrc();
             }
             return true;
         } else
@@ -742,7 +748,7 @@ public class Item extends DarkMatter implements ItemInterface {
         void dbInit() {
             JPanel outerPan = new JPanel(new BorderLayout());
             LinkedList<ItemInterface> allItems = space.getAllItems();
-            outerPan.add(jetController.controlPanel(parent, inpC, space.getOtherItems(Item.this)), BorderLayout.CENTER);
+            outerPan.add(jetController.controlPanel(parent, inpC, space.getOtherItems(ItemBD.this)), BorderLayout.CENTER);
             JPanel buttonP = new JPanel();
             close.addActionListener(e -> {
                 closeIt();
@@ -788,7 +794,7 @@ public class Item extends DarkMatter implements ItemInterface {
     public void setLocalForces() {
         netTorque.set(0, 0, 0);
         setMatterLocalForces();
-        netForce.add(jetForce);
+        ((VectorBD)netForce).addTuple(jetForce);
         netTorque.add(jetTorque);
     }
 
@@ -858,9 +864,8 @@ public class Item extends DarkMatter implements ItemInterface {
         nextReport = reportInterval;
     }
 
-    @Override
     public void setInitialAcceleration(Vector3d acc) {
-        status.acc.set(acc);
+        status.acc = new Vector3dMV(acc);
     }
 
     public void initAngularPosEtc(Vector3d angularPos, Vector3d angularVelocity) {
@@ -1016,7 +1021,7 @@ public class Item extends DarkMatter implements ItemInterface {
 //    =============================================
 
     public StringBuilder statusStringForCSV(double posFactor, double velFactor) {
-        StringBuilder csvStr = new StringBuilder(name + ", " + gmID + ", " + gm + "\n");
+        StringBuilder csvStr = new StringBuilder(name + "\n");
         csvStr.append("Position , " + status.positionStringForCSV(posFactor) + "\n");
         csvStr.append("Velocity , ").append(status.velocityStringForCSV(velFactor)).append("\n");
         csvStr.append("AngVel , ").append(status.angularVelocityStringForCSV(1)).append("\n");
@@ -1117,4 +1122,6 @@ public class Item extends DarkMatter implements ItemInterface {
         System.out.println("Item: " + msg);
     }
 
+
 }
+

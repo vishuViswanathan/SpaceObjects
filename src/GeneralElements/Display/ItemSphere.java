@@ -1,6 +1,8 @@
 package GeneralElements.Display;
 
+import GeneralElements.DarkMatter;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.image.TextureLoader;
@@ -14,17 +16,17 @@ import java.awt.*;
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSphere extends Sphere implements AttributeSetter {
-    public Item planet;
+    public ItemInterface planet;
     Appearance ap;
     public boolean valid = true;
-    public ItemSphere(Item object) {
-        super(object.getDiaFloat() / 2,
+    public ItemSphere(ItemInterface object) {
+        super(((DarkMatter)object).getDiaFloat() / 2,
                 (Primitive.GENERATE_NORMALS + Primitive.GENERATE_TEXTURE_COORDS), 48);
         this.planet = object;
         ap = new Appearance();
         try {
-            if (planet.imageName.length() > 3) {
-                TextureLoader loader = new TextureLoader("images/" + planet.imageName,
+            if (planet.getImageName().length() > 3) {
+                TextureLoader loader = new TextureLoader("images/" + planet.getImageName(),
                         "LUMINANCE", new Container());
                 Texture texture = loader.getTexture();
                 texture.setBoundaryModeS(Texture.WRAP);
@@ -39,9 +41,9 @@ public class ItemSphere extends Sphere implements AttributeSetter {
             }
 
 //            Color3f emissC = new Color3f(planet.color);
-            Color3f emissC = new Color3f(planet.color); //0.5f, 0.5f, 0.5f);
+            Color3f emissC = new Color3f(((DarkMatter)planet).color); //0.5f, 0.5f, 0.5f);
 //            Color3f diffuse = new Color3f(1.0f, 1.0f, 1.0f);
-            Color3f diffuse = new Color3f(planet.color);
+            Color3f diffuse = new Color3f(((DarkMatter)planet).color);
 //            Color3f ambient = new Color3f(1.0f, 1.0f, 1.0f);
             Color3f ambient = new Color3f(0.001f, 0.00f, 0.00f);
             Color3f specular = new Color3f(0.9f, 0.9f, 0.9f);
@@ -59,7 +61,7 @@ public class ItemSphere extends Sphere implements AttributeSetter {
         }
     }
 
-    public Item getItem() {
+    public ItemInterface getItem() {
         return planet;
     }
 

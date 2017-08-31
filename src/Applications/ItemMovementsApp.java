@@ -1,5 +1,6 @@
 package Applications;
 
+import GeneralElements.DarkMatter;
 import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemSpace;
 import GeneralElements.Constants;
@@ -94,6 +95,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public boolean bShowOrbit = false;
     public boolean bShowLinks = false;
     public boolean bShowItems = true;
+
     public static Logger log;
 
     public ItemMovementsApp() {
@@ -156,6 +158,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         NumberTextField ntCalculStep;
         NumberTextField ntUpdate; // multiplier on calculation step;
         NumberTextField ntRepeats;
+        JCheckBox chBTimeDilation;
+        JCheckBox chBGravityPropagationTime;
         JButton jbOk = new JButton("Ok");
         JButton jbCancel = new JButton("Cancel");
         double upDateMultiplier;
@@ -181,11 +185,18 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     "Update once in this many steps");
             ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 0, 10, "#0",
                     "Number of times each step is repeated for Position/Force accuracy");
+            chBTimeDilation = new JCheckBox("Consider Time Dilation due to Gravity", space.bConsiderTimeDilation);
+            chBTimeDilation.setEnabled(false);
+            chBGravityPropagationTime = new JCheckBox("Consider Gravity propagation time", space.bConsiderGravityVelocity);
+            chBGravityPropagationTime.setEnabled(false);
             MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
             jp.addItemPair(ntCalculStep);
             jp.addItemPair(ntUpdate);
             jp.addBlank();
             jp.addItemPair(ntRepeats);
+            jp.addBlank();
+            jp.addItem(chBTimeDilation);
+            jp.addItem(chBGravityPropagationTime);
             jp.addBlank();
             jp.addItemPair(jbCancel, jbOk);
             add(jp);
@@ -198,6 +209,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 calculationStep = ntCalculStep.getData();
                 refreshInterval = calculationStep * ntUpdate.getData();
                 repeats = (int)ntRepeats.getData();
+                space.bConsiderTimeDilation = chBTimeDilation.isSelected();
+                space.bConsiderGravityVelocity = chBGravityPropagationTime.isSelected();
                 retVal = true;
             }
             return retVal;
@@ -398,7 +411,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     public EvalOnce getItemEvalOnce(int i) {
-        return space.getOneItem(i);
+        return (DarkMatter)(space.getOneItem(i));
     }
 
     //    Thread calTh;
@@ -489,11 +502,13 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         while (runIt && nowT < endT) {
             if (continueIt) {
                 try {
+                    if ((endT - nowT) < calculationStep)
+                        step = (endT - nowT);
                     if (!doOneStep(step, nowT)) {
                         showError("Error in one step at " + nowT + "\nSuggest restart program");
                         break;
                     }
-                    step = calculationStep;
+//                    step = calculationStep;
                     nowT += step;
                     if (nowT > nextRefresh) {
                         space.updateLinkDisplay();
@@ -512,7 +527,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         }
                         else
                             bLive = false;
-                        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
+                        nowDate = new DateAndJDN(dateAndJDN);
+                        nowDate.add(Calendar.SECOND, (int)nowT);
                         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
 //                        bLive = false;
                         lastRefresh = nowT;
@@ -526,7 +542,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             }
         }
         continueIt = false;
-        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
+        nowDate = new DateAndJDN(dateAndJDN);
+        nowDate.add(Calendar.SECOND, (int)nowT);
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
 //        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
@@ -609,45 +626,45 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(true);
     }
 
-    void doCalculationPARELLELNEW(boolean fresh)   { // TODO remove?
-        double step = calculationStep;
-        double hrsPerSec = 0;
-//        continueIt = true;
-        double endT;
-        if (fresh) {
-            space.setGlobalLinksAndActions();
-            nowT = 0;
-            setRefreshInterval(refreshInterval);
-            nextRefresh = 0;
-            endT = ntfDuration.getData() * 3600;
-            lastTnano = System.nanoTime(); // new Date()).getTime();
-//            nowDate = new DateAndJDN(dateAndJDN);
-//            continueIt = true;
-        }
-        else {
-            endT = nowT + ntfDuration.getData() * 3600;
-        }
-        boolean bLive = false;
-
-        runIt = true;
-        evaluator.startTasks();
-        while (runIt && nowT < endT) {
-            if (continueIt) {
-                try {
-                    if (!doOneStepPARELLEL(step, nowT)) {
-                        showError("Error in doOneStepPARELLEL one step at " + nowT + "\nSuggest restart program");
-                        break;
-                    }
-                    step = calculationStep;
-                    nowT += step;
-                } catch (Exception e) {
-                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
-                    runIt = false;
-                }
-            }
-        }
-        evaluator.stopTasks();
-    }
+//    void doCalculationPARELLELNEW(boolean fresh)   { // TODO remove?
+//        double step = calculationStep;
+//        double hrsPerSec = 0;
+////        continueIt = true;
+//        double endT;
+//        if (fresh) {
+//            space.setGlobalLinksAndActions();
+//            nowT = 0;
+//            setRefreshInterval(refreshInterval);
+//            nextRefresh = 0;
+//            endT = ntfDuration.getData() * 3600;
+//            lastTnano = System.nanoTime(); // new Date()).getTime();
+////            nowDate = new DateAndJDN(dateAndJDN);
+////            continueIt = true;
+//        }
+//        else {
+//            endT = nowT + ntfDuration.getData() * 3600;
+//        }
+//        boolean bLive = false;
+//
+//        runIt = true;
+//        evaluator.startTasks();
+//        while (runIt && nowT < endT) {
+//            if (continueIt) {
+//                try {
+//                    if (!doOneStepPARELLEL(step, nowT)) {
+//                        showError("Error in doOneStepPARELLEL one step at " + nowT + "\nSuggest restart program");
+//                        break;
+//                    }
+//                    step = calculationStep;
+//                    nowT += step;
+//                } catch (Exception e) {
+//                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
+//                    runIt = false;
+//                }
+//            }
+//        }
+//        evaluator.stopTasks();
+//    }
 
     boolean doOneStepPARELLEL(double deltaT, double nowT) throws Exception {
         return space.doCalculation(evaluator, deltaT, nowT);
@@ -655,46 +672,46 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     long sleepTime = 100; // ms
 
-    void handleDisplay() { // TODO remove?
-        boolean bLive = false;
-        double hrsPerSec = 0;
-        double nowCalculationTime;
-        double realDeltaT = 0;
-        double calculationDeltaT; //h
-        double lastCalculationTime = 0;
-        boolean bFirstTime = true;
-        enableButtons(false);
-        nowDate = new DateAndJDN(dateAndJDN);
-        while (runIt) {
-//            while (continueIt) {
-                nowTnano = System.nanoTime(); //new Date().getTime();
-                nowCalculationTime = evaluator.getNowT();
-                if (!bFirstTime) {
-                    calculationDeltaT = nowCalculationTime - lastCalculationTime;
-                    realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
-                    hrsPerSec = (refreshInterval / 3600) / calculationDeltaT;
-                    bFirstTime = false;
-                }
-//                space.updateLinkDisplay();
-                nowDate.add(Calendar.SECOND, (int) (realDeltaT));
-                orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
-                lastCalculationTime = nowCalculationTime;
-                lastTnano = System.nanoTime(); //nowTnano;
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-//            }
-        }
-        nowCalculationTime = evaluator.getNowT();
-        realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
-        nowDate.add(Calendar.SECOND, (int) (realDeltaT));
-        orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
-        orbitDisplay.resultsReady();
-//        SpaceEvaluator.closePool();
-        enableButtons(true);
-    }
+//    void handleDisplay() { // TODO remove?
+//        boolean bLive = false;
+//        double hrsPerSec = 0;
+//        double nowCalculationTime;
+//        double realDeltaT = 0;
+//        double calculationDeltaT; //h
+//        double lastCalculationTime = 0;
+//        boolean bFirstTime = true;
+//        enableButtons(false);
+//        nowDate = new DateAndJDN(dateAndJDN);
+//        while (runIt) {
+////            while (continueIt) {
+//                nowTnano = System.nanoTime(); //new Date().getTime();
+//                nowCalculationTime = evaluator.getNowT();
+//                if (!bFirstTime) {
+//                    calculationDeltaT = nowCalculationTime - lastCalculationTime;
+//                    realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
+//                    hrsPerSec = (refreshInterval / 3600) / calculationDeltaT;
+//                    bFirstTime = false;
+//                }
+////                space.updateLinkDisplay();
+//                nowDate.add(Calendar.SECOND, (int) (realDeltaT));
+//                orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
+//                lastCalculationTime = nowCalculationTime;
+//                lastTnano = System.nanoTime(); //nowTnano;
+//                try {
+//                    Thread.sleep(sleepTime);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+////            }
+//        }
+//        nowCalculationTime = evaluator.getNowT();
+//        realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
+//        nowDate.add(Calendar.SECOND, (int) (realDeltaT));
+//        orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
+//        orbitDisplay.resultsReady();
+////        SpaceEvaluator.closePool();
+//        enableButtons(true);
+//    }
 
     MotionDisplay orbitDisplay;
 
@@ -740,8 +757,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 //                        "Position Vector in AU - x, y, z\n" +
 //                        "Velocity Vector in AU/day - Vx, vY, vZ\n\n";
                 String header = "JDN " + nowDate.getJdN() + "\n" +
+                        "Name, HorizonID, GM\n" +
                         "Position Vector in m, x, y, z\n" +
-                        "Velocity Vector in m/s, Vx, vY, vZ\n\n";
+                        "Velocity Vector in m/s, Vx, vY, vZ\n";
                 oStream.write(header.getBytes());
                 for (int o = 0; o < nObj; o++) {
                     oStream.write(space.getOneItem(o).statusStringForCSV(posFactor, velFactor).toString().getBytes());
@@ -841,7 +859,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 XMLmv.putTag("duration", duration) +
                 XMLmv.putTag("bShowOrbit", bShowOrbit) +
                 XMLmv.putTag("bShowLinks", bShowLinks) +
-                XMLmv.putTag("spSize", spSize.toString()));
+                XMLmv.putTag("spSize", spSize.toString()) +
+                XMLmv.putTag("bConsiderTimeDilation", space.bConsiderTimeDilation) +
+                XMLmv.putTag("bConsiderGravityVelocity", space.bConsiderGravityVelocity));
     }
 
     boolean getBaseDataFromXML(String xmlStr) {
@@ -867,6 +887,14 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 bShowLinks = vp.val.equals("1");
                 vp = XMLmv.getTag(basicData, "spSize", 0);
                 spSize = SpaceSize.getEnum(vp.val);
+                vp = XMLmv.getTag(basicData, "bConsiderTimeDilation", 0);
+                space.bConsiderTimeDilation = vp.val.equals("1");
+                if (space.bConsiderTimeDilation)
+                    showMessage("bConsiderTimeDilation is set ON!");
+                vp = XMLmv.getTag(basicData, "Warning: bConsiderGravityVelocity", 0);
+                space.bConsiderGravityVelocity = vp.val.equals("1");
+                if (space.bConsiderGravityVelocity)
+                    showMessage("Warning: bConsiderGravityVelocity is et ON!");
             } catch (NumberFormatException e) {
                 showError("Some problem in reading Basic Data :" + e.getMessage());
                 retVal = false;
@@ -1005,6 +1033,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 break;
             case ASTRONOMICAL:
                 setTimingValues(10, 10 * 100, 200000, true, false, true, false);
+//                space.bConsiderTimeDilation = true;
+//                space.bConsiderGravityVelocity = true;
+                showMessage("Gravity effects on Time and Gravity propagation time are not considered");
                 rIAstronomical.setSelected(true);
                 break;
         }

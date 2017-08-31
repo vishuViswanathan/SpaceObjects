@@ -6,6 +6,7 @@ import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
+import mvUtils.general.ObjectSizeFetcher;
 import mvUtils.physics.Vector3dMV;
 import mvUtils.physics.VectorBD;
 //import time.timePlan.FlightPlan;
@@ -27,10 +28,14 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean bFixedLocation = false;
     Vector<LocalAction> localActions;
     public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
-//    Vector3d netForce = new Vector3d();
-    VectorBD netForce = new VectorBD();
+    Vector3d netForce = new Vector3d();
     public String name;
+    public String gmID; // for Horizons
     public double mass;
+    public double gm;
+    protected double totalGM;
+    protected double balanceGM;
+    public double oneByMass;
     public double dia;
     public double radius;
     double projectedArea;
@@ -56,7 +61,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     public DarkMatter(String name, double mass, double dia, Color color, Window parent) {
         this(parent);
         this.name = name;
-        this.mass = mass;
+        setMass(mass);
+//        this.mass = mass;
         this.dia = dia;
         radius = dia / 2;
         this.color = color;
@@ -64,9 +70,25 @@ public class DarkMatter implements InputControl, EvalOnce {
         calculateAreas();
     }
 
+    public void setMass(double mass) {
+        this.mass = mass;
+        gm = mass * Constants.G;
+        oneByMass = 1 / mass;
+    }
+
+    public void setGM(double gm) {
+        this.gm = gm;
+        setMass(gm / Constants.G);
+    }
+
+    public void setGMid(String gmID) {
+        this.gmID = gmID;
+    }
+
     public boolean takeBasicFrom(DarkMatter fromMatter) {
         if (fromMatter.getClass().equals(getClass())){
-            mass = fromMatter.mass;
+            setMass(fromMatter.mass);
+//            mass = fromMatter.mass;
             dia = fromMatter.dia;
             radius = dia / 2;
             eCompression = fromMatter.eCompression;
@@ -122,7 +144,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         localActions.add(action);
     }
 
-     public void clearInfluence() {
+    public void clearInfluence() {
         links.clear();
     }
 
@@ -192,6 +214,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3d lastForce = new Vector3dMV();
     Vector3d lastPosition = new Vector3d();
     Vector3d lastVelocity = new Vector3d();
+    Vector3d lastAcc = new Vector3d();
     Vector3dMV effectiveForce = new Vector3dMV();
     Vector3dMV thisAcc = new Vector3dMV();
     Vector3dMV deltaV = new Vector3dMV();
@@ -200,32 +223,33 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3dMV deltaPos = new Vector3dMV();
     Vector3dMV newPos = new Vector3dMV();
 
-    public void initStartForce() {
-        netForce.setTuple(0, 0, 0); // this may not be correct
+    public void initNetForce() {
+        netForce.set(0, 0, 0); // this may not be correct
     }
 
-    public void setStartConditions(double duration, double nowT) {
+    public void setMatterStartConditions(double duration, double nowT) {
         if (!bFixedLocation) {
             lastPosition.set(status.pos);
             lastVelocity.set(status.velocity);
+            lastAcc.set(status.acc);
             lastForce.set(netForce);
         }
     }
 
-    public void setLocalForces() {
-        netForce.setTuple(0, 0, 0);
+    public void setMatterLocalForces() {
+        netForce.set(0, 0, 0);
         for (LocalAction action : localActions)
-            netForce.addTuple(action.getForce());
+            netForce.add(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
-            netForce.addTuple(gAction.getForce(this));
+            netForce.add(gAction.getForce(this));
     }
 
     public synchronized void addToForce(Vector3d addForce)  {
-        netForce.addTuple(addForce);
+        netForce.add(addForce);
     }
 
     public synchronized void subtractFromForce(Vector3d subtractForce) {
-        netForce.subtractTuple(subtractForce);
+        netForce.sub(subtractForce);
     }
 
     public synchronized void addToTorque(Vector3d angularAcceleration)  {
@@ -252,7 +276,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return distance;
     }
 
-        // dummy not used
+    // dummy not used
     @Override
     public synchronized void evalOnce() {
     }
@@ -263,20 +287,50 @@ public class DarkMatter implements InputControl, EvalOnce {
     @Override
     public void evalOnce(double deltaT, double nowT, boolean bFinal) {
         try {
-            updatePosAndVel(deltaT, nowT, bFinal);
+            updatePAndV(deltaT, nowT, bFinal);
         } catch (Exception e) {
             ItemMovementsApp.log.error("In Item evalOnce for " + name + ":" + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    public boolean updatePAndV(double deltaT, double nowT, boolean bFinal) throws Exception {
+        boolean changed = true;
+        double localDeltaT = deltaT;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            effectiveForce.set(netForce);
+            thisAcc.scale(oneByMass, effectiveForce);
+            thisAcc.setMean(thisAcc, lastAcc);
+            if (space.bConsiderTimeDilation) {
+                localDeltaT *= Math.sqrt(1 - 2.0 * Math.sqrt(balanceGM * thisAcc.length()) / (Constants.cSquared ));
+            }
+            deltaV.scale(localDeltaT, thisAcc);
+            newVelocity.add(lastVelocity, deltaV);
+            averageV.setMean(lastVelocity, newVelocity);
+            deltaPos.scale(localDeltaT, averageV);
+            newPos.add(lastPosition, deltaPos);
+            status.pos.set(newPos); // only position is updated here
+            if (bFinal) {
+                status.velocity.set(newVelocity);
+                status.acc.set(thisAcc);
+                status.time = nowT + deltaT; // 20170724
+//                if (bFlightPlan)
+//                    mass += flightPlan.massChange(deltaT);
+            }
+        }
+        return changed;
+    }
+
+    public boolean updatePAndVOLD(double deltaT, double nowT, boolean bFinal) throws Exception { // TODO check and remove
         boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
+//            effectiveForce.set(netForce);
             effectiveForce.setMean(netForce, lastForce);
-            thisAcc.scale((1.0/ mass), effectiveForce);
+            thisAcc.scale(oneByMass, effectiveForce);
             // calculate from netForce
             deltaV.scale(deltaT, thisAcc);
             newVelocity.add(lastVelocity, deltaV);
@@ -297,7 +351,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-     public void showError(String msg) {
+    public void showError(String msg) {
         JOptionPane.showMessageDialog(parentW, name + " has some problem at " + status.time + " \n " + msg, "ERROR", JOptionPane.ERROR_MESSAGE);
         parentW.toFront();
     }

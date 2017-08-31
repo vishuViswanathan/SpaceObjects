@@ -1,7 +1,9 @@
 package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.DarkMatter;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
@@ -28,12 +30,12 @@ public class ItemGraphic {
     PathShape[] orbitShapes;
     PointArrayFIFO ptArr;
     int nShapeSets = 4;
-    int nPos = 2000; // number of positions
+    int nPos = 1000; // number of positions
     Color3f color3f;
     double viewScale = 1;
-    private Item item;
+    private ItemInterface item;
 
-    public ItemGraphic(Item item) {
+    public ItemGraphic(ItemInterface item) {
         this.item = item;
     }
 
@@ -92,10 +94,10 @@ public class ItemGraphic {
             alignPlanet.mul(turnNinetyX);
 
             tgPlanet.setTransform(alignPlanet);
-            if (item.spinAxis != null) {
+            if (item.getSpinAxis() != null) {
 //            axisTransform = new Transform3D();
                 trgAxis.getTransform(axisTransform);
-                axisTransform.set(item.spinAxis);
+                axisTransform.set(item.getSpinAxis());
                 trgAxis.setTransform(axisTransform);
             }
             trgRotation = new TransformGroup();
@@ -110,7 +112,7 @@ public class ItemGraphic {
 
             trgAxis.addChild(trgRotation);
             positionTrGrp.addChild(trgAxis);
-            color3f = new Color3f(item.color);
+            color3f = new Color3f(((DarkMatter)item).color);
             PointArrayFIFO onePtArr, lastOne = null;
             orbitShapes = new PathShape[nShapeSets];
             for (int os = 0; os < orbitShapes.length; os++) {
@@ -124,7 +126,7 @@ public class ItemGraphic {
             updateOrbitAndPos(0);
             retVal = true;
         } else
-            ItemMovementsApp.showError("ItemGraphic.212: Facing some problem in creating graphics for '" + item.name + "'");
+            ItemMovementsApp.showError("ItemGraphic.212: Facing some problem in creating graphics for '" + item.getName() + "'");
         return retVal;
     }
 
@@ -142,7 +144,7 @@ public class ItemGraphic {
 
     public PointLight getLightIfEnabled() {
         PointLight light = null;
-        if (item.isLightSrc) {
+        if (item.isLightSrc()) {
             light = new PointLight(true, new Color3f(1.0f, 1.0f, 1.0f), new Point3f(0, 0, 0), new Point3f(1, 0, 0));
             light.setCapability(PointLight.ALLOW_POSITION_WRITE);
 //            light.setAttenuation(1f, 1e-15f, 0f);
@@ -154,7 +156,7 @@ public class ItemGraphic {
     }
 
     public void updateOrbitAndPos(double spinIncrement) throws Exception{
-        ptArr.addCoordinate(item.status.pos);
+        ptArr.addCoordinate(item.getPos());
         updateObjectPosition();
         updateSpin(spinIncrement);
     }
@@ -163,15 +165,15 @@ public class ItemGraphic {
         // position the planet
 //        Transform3D positionTransform = new Transform3D();
         positionTrGrp.getTransform(positionTransform);
-        Vector3d posVector = new Vector3d(item.status.pos);
+        Vector3d posVector = new Vector3d(item.getPos());
         positionTransform.setTranslation(posVector);
 //        posVector = null;
         try {
             positionTrGrp.setTransform(positionTransform);
         } catch (Exception e) {
             String msg = e.getMessage();
-            item.showError(e.getMessage());
-            throw (new Exception(item.name + ": " + msg));
+            ItemMovementsApp.showError("ItemGraphic.175:" + e.getMessage());
+            throw (new Exception(item.getName() + ": " + msg));
         }
     }
 

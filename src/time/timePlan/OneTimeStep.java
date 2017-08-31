@@ -4,6 +4,7 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import GeneralElements.accessories.AlignerWithJets;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
@@ -313,12 +314,12 @@ public class OneTimeStep {
             bulb.switchIt(on);
     }
 
-    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, Item[] otherItems, ActionListener activationListener) {
+    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ItemInterface[] otherItems, ActionListener activationListener) {
         JPanel jp = new JPanel();
         JComboBox<StepAction> cbStepAction;
         cbStepAction = new JComboBox<>(forElement.actions());
         cbStepAction.setSelectedItem(stepAction);
-        JComboBox<Item> cbAlignToObject = new JComboBox<>(otherItems);
+        JComboBox<ItemInterface> cbAlignToObject = new JComboBox<>(otherItems);
         cbAlignToObject.setEnabled(false);
         double maxAngle = Math.PI;
         TuplePanel tpTurnByAngle = new TuplePanel(inpC, turnByAngle, 4, -maxAngle, +maxAngle, "0.000",

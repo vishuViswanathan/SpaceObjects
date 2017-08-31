@@ -1,7 +1,9 @@
 package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.DarkMatter;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
@@ -26,14 +28,14 @@ import java.awt.event.*;
 public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
     JPanel commonMenuPanel;
     MotionDisplay motionDisplay;
-    Item itemInView;
+    ItemInterface itemInView;
     ItemMovementsApp controller;
     ViewingPlatform mainViewPlatform;
     JPanel localViewPanel;
     Canvas3D localViewCanvas;
     ViewingPlatform localVp;
     OrbitBehavior localVpOrbitBehavior;
-    Item lastItemWithLocalPlatform = null;
+    ItemInterface lastItemWithLocalPlatform = null;
     NumberLabel nlViewDistance;
     JPanel jpViewDistance;
     JLabel jlItemName;
@@ -153,10 +155,10 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         addLocalViewingPlatform();
     }
 
-    public void showLocalView(Item item) {
-        jlItemName.setText(item.name);
+    public void showLocalView(ItemInterface item) {
+        jlItemName.setText(item.getName());
         attachPlatformToItem(item);
-        viewPosFromPlanet = 4 * item.dia;
+        viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         localVp.setNominalViewingTransform();
         Transform3D defaultTr = new Transform3D();
         localVp.getViewPlatformTransform().getTransform(defaultTr);
@@ -164,15 +166,15 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         localVp.getViewPlatformTransform().setTransform(defaultTr);
 
         updateViewDistanceUI(1.0);
-        setTitle(item.name);
+        setTitle(item.getName());
 //        showLocalViewFrame(item.name);
     }
 
 
-    public void showLocalView(Item item, int atX, int atY) {
-        jlItemName.setText(item.name);
+    public void showLocalView(ItemInterface item, int atX, int atY) {
+        jlItemName.setText(item.getName());
         attachPlatformToItem(item);
-        viewPosFromPlanet = 4 * item.dia;
+        viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         Transform3D mainVTr = new Transform3D();
         mainViewPlatform.getViewPlatformTransform().getTransform(mainVTr);
 
@@ -199,7 +201,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         mainVTr.get(eye);
 
         Vector3d diff = new Vector3d(eye);
-        diff.sub(item.status.pos);
+        diff.sub(item.getPos());
         double planetFromEye = diff.length();
         double factor = viewPosFromPlanet / planetFromEye;
         diff.scale(factor);
@@ -207,11 +209,11 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         localVpt.setTranslation(diff);
         localVp.getViewPlatformTransform().setTransform(localVpt);
         updateViewDistanceUI(1.0);
-        setTitle(item.name);
+        setTitle(item.getName());
 //        showLocalViewFrame(item.name);
     }
 
-    private void attachPlatformToItem(Item item) {
+    private void attachPlatformToItem(ItemInterface item) {
         if (bPlatformWasAttached)
             lastItemWithLocalPlatform.detachPlatform();
         item.attachPlatform(localVp);

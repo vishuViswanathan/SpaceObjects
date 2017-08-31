@@ -1,9 +1,7 @@
 package schemes;
 
 import Applications.ItemMovementsApp;
-import GeneralElements.Item;
-import GeneralElements.ItemSpace;
-import GeneralElements.Constants;
+import GeneralElements.*;
 import time.DateAndJDN;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
@@ -58,10 +56,14 @@ public class PlanetsAndMoons implements DefaultScheme {
             String[] fileNames = folder.list();
             if (planetsBaseDataFromFile()) {
                 baseJDN = -1; // reset
-                Item item;
+                ItemInterface item;
                 String itemName;
                 StringBuilder xmlStr = new StringBuilder();
                 int itemCount = 0;
+//  TODO 20170812 just for trial, must be undone              for (String oneFile : fileNames) {
+//                for (int i = fileNames.length - 1; i >= 0; i--) {
+//                    String oneFile = fileNames[i];
+// 20170813 undone
                 for (String oneFile : fileNames) {
                     if (oneFile.endsWith(".csv")) {
                         itemName = oneFile.substring(0, oneFile.length() - 4);
@@ -98,7 +100,7 @@ public class PlanetsAndMoons implements DefaultScheme {
         File folder = new File(folderName);
         String[] fileNames = folder.list();
         if (planetsBaseDataFromFile()) {
-            Item item;
+            ItemInterface item;
             String itemName;
             StringBuilder xmlStr = new StringBuilder();
             int itemCount = 0;
@@ -287,8 +289,8 @@ public class PlanetsAndMoons implements DefaultScheme {
         return retVal;
     }
 
-    Item getPlanetOrMoon(String objName, Color color) {
-        Item item = null;
+    ItemInterface getPlanetOrMoon(String objName, Color color) {
+        ItemInterface item = null;
         StringBuilder hashKey = new StringBuilder();
         String[] nameSplit = objName.split("-");
         if (nameSplit.length > 0) {
@@ -323,7 +325,12 @@ public class PlanetsAndMoons implements DefaultScheme {
                         mass = Double.valueOf(vp.val);
                     }
                     if (radius > 0 && mass > 0) {
-                        item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
+                        if (name.equalsIgnoreCase("BDObject")) { // enter object name for ItemBD
+                            item = new ItemBD(objName, mass, radius * 2 * 1000, color, mainF);
+                            debug("Object " + objName + " taken with BIG DECIMAL");
+                        }
+                        else
+                            item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
                         vp = XMLmv.getTag(xmlStr, "imageName", 0);
                         imageName = vp.val;
                         if (imageName != null && imageName.length() > 3 && !imageName.equalsIgnoreCase("null")) {
@@ -424,8 +431,8 @@ public class PlanetsAndMoons implements DefaultScheme {
         return obj;
     }
 
-    Item getObjectFromTextFile(String filePath, String objName, Color color) {
-        Item obj;
+    ItemInterface getObjectFromTextFile(String filePath, String objName, Color color) {
+        ItemInterface obj;
         obj = getPlanetOrMoon(objName, color);
         if (obj == null) {
             debug("There is some problem in Mass or dia of " + objName);
@@ -447,9 +454,12 @@ public class PlanetsAndMoons implements DefaultScheme {
                             String gmID = vp.val;
                             Double gm = gmData.get(gmID);
                             if (gm != null) {
-                                double oldm = obj.mass;
-                                obj.mass = gm / Constants.G;
-                                debug(obj.name + ": old mass = " + oldm + ", new = " + obj.mass);
+                                double oldm = ((DarkMatter)obj).mass;
+                                ((DarkMatter)obj).setGMid(gmID);
+                                ((DarkMatter)obj).setGM(gm);
+//                                ((DarkMatter)obj).setMass(gm / Constants.G);
+//                                ((DarkMatter)obj).mass = gm / Constants.G;
+                                debug(obj.getName() + ": old mass = " + oldm + ", new = " + ((DarkMatter)obj).mass);
                             }
                             else
                                 showError("Cannot get GM for " + gmID);
@@ -474,8 +484,19 @@ public class PlanetsAndMoons implements DefaultScheme {
                                     double z = Double.valueOf(split[4])* 1000; //* oneAuInM;
                                     double vx = Double.valueOf(split[5])* 1000; // * oneAuInM / secsPerDay;
                                     double vy = Double.valueOf(split[6])* 1000; // oneAuInM / secsPerDay;
-                                    double vz= Double.valueOf(split[7])* 1000; //  oneAuInM / secsPerDay;
-                                    obj.initPosEtc(new Point3d(x, y, z), new Vector3d(vx, vy, vz));
+                                    double vz = Double.valueOf(split[7])* 1000; //  oneAuInM / secsPerDay;
+                                    Vector3d v = new Vector3d(vx, vy, vz);
+                                    obj.initPosEtc(new Point3d(x, y, z), v);
+                                    // [16] to [17] are next Velocity data
+                                    double jdn1 = Double.valueOf(split[11]);
+                                    double deltaT = (jdn1 - nowJDN) * 3600 * 24; // in seconds
+                                    double vx1 = Double.valueOf(split[16])* 1000; // * oneAuInM / secsPerDay;
+                                    double vy1 = Double.valueOf(split[17])* 1000; // oneAuInM / secsPerDay;
+                                    double vz1 = Double.valueOf(split[18])* 1000;
+                                    Vector3d acc = new Vector3d(vx1, vy1, vz1);
+                                    acc.sub(v);
+                                    acc.scale(1/deltaT);
+                                    obj.setInitialAcceleration(acc);
                                 }
                                 else {
                                     showError("Mismatch in JDN of data for " + objName + ", skipping it");

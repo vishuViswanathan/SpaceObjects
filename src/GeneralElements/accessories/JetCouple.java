@@ -3,6 +3,7 @@ package GeneralElements.accessories;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
@@ -24,16 +25,16 @@ import java.awt.event.ActionListener;
 public class JetCouple extends Jet {
 
 
-    public JetCouple(Item item) {
+    public JetCouple(ItemInterface item) {
         this(item, "??Jet", new ForceElement(1, new Vector3d(), new Point3d()));
     }
 
-    public JetCouple(Item item, String xmlStr) {
+    public JetCouple(ItemInterface item, String xmlStr) {
         super(item, ElementType.JETCOUPLE);
         takeFromXML(xmlStr);
     }
 
-    public JetCouple(Item item, String name, ForceElement jetData) {
+    public JetCouple(ItemInterface item, String name, ForceElement jetData) {
         super(item, ElementType.JETCOUPLE);
         this.name = name;
         this.jetData = jetData;
@@ -41,7 +42,7 @@ public class JetCouple extends Jet {
 //        thePlan = new OneJetPlan(this);
     }
 
-    public JetCouple(Item item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
+    public JetCouple(ItemInterface item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
         super(item, ElementType.JETCOUPLE);
         this.name = name;
         setJetData(forceSource, direction, location);

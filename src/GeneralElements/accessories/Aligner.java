@@ -3,6 +3,7 @@ package GeneralElements.accessories;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
@@ -12,6 +13,7 @@ import time.timePlan.OneJetPlan;
 import time.timePlan.OneTimeStep;
 
 import javax.swing.*;
+import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -75,20 +77,21 @@ public class Aligner extends JetsAndSeekers {
     AlignTo myAlignBase;
     boolean initiated = false;
 
-    public Aligner(Item item) {
+    public Aligner(ItemInterface item) {
         super(item, "UNKNOWN",  ElementType.ALIGNER);
     }
 
-    public Aligner(Item item, String xmlStr) {
+    public Aligner(ItemInterface item, String xmlStr) {
         super(item, ElementType.ALIGNER);
         takeFromXML(xmlStr);
     }
 
     private void prepareAlignToList() {
         if (!initiated) {
-            alignBaseZ = new AlignTo(item.miAsVector.z);
-            alignBaseX = new AlignTo(item.miAsVector.x);
-            alignBaseY = new AlignTo(item.miAsVector.y);
+            Vector3d mi = item.getMiAsVector();
+            alignBaseZ = new AlignTo(mi.z);
+            alignBaseX = new AlignTo(mi.x);
+            alignBaseY = new AlignTo(mi.y);
 
             alignBaseZ.setNeighbours(alignBaseY, alignBaseX);
             alignBaseX.setNeighbours(alignBaseZ, alignBaseY);
@@ -157,7 +160,7 @@ public class Aligner extends JetsAndSeekers {
 
     private boolean prepareBasicsForTorques() {
         boolean retVal = false;
-        globalAlignTo = new Vector3dMV(item.status.velocity);
+        globalAlignTo = new Vector3dMV(item.getVelocity());
         if (theStep.stepAction == OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY)
             globalAlignTo.negate();
         halfTime = theStep.duration() / 2;

@@ -2,6 +2,7 @@ package GeneralElements.accessories;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import mvUtils.display.DataWithStatus;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -122,25 +123,25 @@ public abstract class JetsAndSeekers {
             return retVal;
         }
     }
-    Item item;
+    ItemInterface item;
     ElementType elementType;
     public String name;
     boolean active = false;
     OneTimeStep theStep;
     public OneJetPlan thePlan;
 
-    protected JetsAndSeekers(Item item, ElementType elementType) {
+    protected JetsAndSeekers(ItemInterface item, ElementType elementType) {
         this(item, "UNKNOWN", elementType);
     }
 
-    protected JetsAndSeekers(Item item, String name, ElementType elementType) {
+    protected JetsAndSeekers(ItemInterface item, String name, ElementType elementType) {
         this.name = name;
         this.item = item;
         this.elementType = elementType;
         thePlan = new OneJetPlan(this);
     }
 
-    public static DataWithStatus<JetsAndSeekers> getJetsAndSeekers(Item item, String xmlStr) {
+    public static DataWithStatus<JetsAndSeekers> getJetsAndSeekers(ItemInterface item, String xmlStr) {
         DataWithStatus<JetsAndSeekers> retVal = new DataWithStatus<>();
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "elementType", 0);
@@ -268,7 +269,7 @@ public abstract class JetsAndSeekers {
         return OneTimeStep.StepAction.values();
     }
 
-    static public JetsAndSeekers getNewAccessory(Item item, Component theParent) {
+    static public JetsAndSeekers getNewAccessory(ItemInterface item, Component theParent) {
         JetsAndSeekers theAccessory = null;
         AccessoryBasic dlg = new AccessoryBasic();
         dlg.setLocationRelativeTo(theParent);

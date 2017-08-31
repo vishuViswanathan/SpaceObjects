@@ -76,9 +76,19 @@ public class ItemStat {
     }
 
     public void initPos(Point3d pos, Vector3d velocity) {
+        initPos(pos, velocity, new Vector3d());
+//        this.pos.set(pos);
+//        this.velocity.set(velocity);
+//        acc.set(0, 0, 0);
+//        angularPos.set(0,0,0);
+//        angularVelocity.set(0, 0, 0);
+//        angularAcceleration.set(0, 0, 0);
+    }
+
+    public void initPos(Point3d pos, Vector3d velocity, Vector3d acc) {
         this.pos.set(pos);
         this.velocity.set(velocity);
-        acc.set(0, 0, 0);
+        acc.set(acc);
         angularPos.set(0,0,0);
         angularVelocity.set(0, 0, 0);
         angularAcceleration.set(0, 0, 0);
@@ -110,7 +120,7 @@ public class ItemStat {
         csvStr.append("" + (factor * velocity.x));
         csvStr.append(", " + (factor * velocity.y));
         csvStr.append(", " + (factor * velocity.z));
-        csvStr.append(", " + (factor * velocity.z));
+        csvStr.append(", " + (factor * velocity.length()));
         return csvStr;
     }
 

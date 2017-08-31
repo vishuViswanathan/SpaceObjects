@@ -1,7 +1,9 @@
 package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
+import GeneralElements.DarkMatter;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
@@ -20,13 +22,13 @@ public class ItemTable {
     JTable table;
     ItemMovementsApp mainApp;
     InputControl inpC;
-    LinkedList<Item> allItems;
+    LinkedList<ItemInterface> allItems;
     int slNo = 0;
     ItemSpace space;
     ItemTableModel tableModel;
     int markedRow = -1;
 
-    public ItemTable(ItemMovementsApp mainApp, ItemSpace space, LinkedList<Item> allItems) {
+    public ItemTable(ItemMovementsApp mainApp, ItemSpace space, LinkedList<ItemInterface> allItems) {
         this.mainApp = mainApp;
         this.inpC = inpC;
         this.space = space;
@@ -143,12 +145,12 @@ public class ItemTable {
                     break;
                  case MouseEvent.BUTTON1:
                     int row = table.getSelectedRow();
-                    Item thisItem = allItems.get(row);
+                    ItemInterface thisItem = allItems.get(row);
                     if (markedRow >= 0){
                         if (markedRow == row)
                             mainApp.showError("Copy on to itself! " + markedRow);
                         else {
-                            if (thisItem.takeBasicFrom(allItems.get(markedRow))) {
+                            if (thisItem.takeBasicFrom((DarkMatter)allItems.get(markedRow))) {
                                 setOneRow(row);
                             }
                             else
@@ -166,7 +168,7 @@ public class ItemTable {
                                 break;
                             case DELETE:
                                 ItemMovementsApp.showMessage("DELETE WHAT ABOUT LINKS?");
-                                space.removeLinksOf(thisItem);
+                                space.removeLinksOf((DarkMatter)thisItem);
                                 deleteRow(row);
                                 break;
                         }

@@ -429,10 +429,10 @@ public class ItemLink implements EvalOnce {
         boolean retVal = false;
         ValAndPos vp;
         vp = XMLmv.getTag(xmlStr, "item1", 0);
-        item1 = space.getItem(vp.val);
+        item1 = (DarkMatter)space.getItem(vp.val);
         if (item1 != null) {
             vp = XMLmv.getTag(xmlStr, "item2", 0);
-            item2 = space.getItem(vp.val);
+            item2 = (DarkMatter)space.getItem(vp.val);
             if (item2 != null) {
                 vp = XMLmv.getTag(xmlStr, "type", 0);
                 String typeStr = vp.val;

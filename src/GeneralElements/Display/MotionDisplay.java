@@ -2,6 +2,7 @@ package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import GeneralElements.utils.ThreeDSize;
 import time.DateAndJDN;
@@ -278,7 +279,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                        break block;
                    }
                    if (src == cbItems) {
-                       localViewFrame.showLocalView((Item)cbItems.getSelectedItem());
+                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem());
                        localViewFrame.setVisible(true);
                        break block;
                    }
@@ -720,7 +721,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             if (s != null) {
                 if (s instanceof PathShape) {
                     showLocalView(((PathShape) s).planet.getItem());
-                    debug("Selected via Path " + ((PathShape) s).planet.getItem().name);
+                    debug("Selected via Path " + ((PathShape) s).planet.getItem().getName());
                     done = true;
                 }
             }
@@ -733,7 +734,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                     if (p instanceof AttributeSetter) {
                         showLocalView(((AttributeSetter) p).getItem(), e.getX(), e.getY());
 //                                    showPlanet((ItemSphere) p, e.getX(), e.getY());
-                        debug("Selected " + ((AttributeSetter) p).getItem().name);
+                        debug("Selected " + ((AttributeSetter) p).getItem().getName());
                     }
                 }
             }
@@ -799,14 +800,14 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         localViewFrame.setVisible(true);
     }
 
-    public void showLocalView(Item item) {
+    public void showLocalView(ItemInterface item) {
         localViewFrame.showLocalView(item);
-        showLocalViewFrame(item.name);
+        showLocalViewFrame(item.getName());
     }
 
-    public void showLocalView(Item item, int atX, int atY) {
+    public void showLocalView(ItemInterface item, int atX, int atY) {
         localViewFrame.showLocalView(item, atX, atY);
-        showLocalViewFrame(item.name);
+        showLocalViewFrame(item.getName());
     }
 
 //  ===============================      Transferred from ItemGraphics

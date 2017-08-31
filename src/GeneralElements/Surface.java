@@ -92,7 +92,7 @@ public class Surface extends Item {
     RelativeDlg relDlg;
 
     class RelativeDlg extends JDialog {
-        Item parent;
+        ItemInterface parent;
         Vector3d tupRelPos, tupRelVel;
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
@@ -140,10 +140,10 @@ public class Surface extends Item {
         void takeValuesFromUI() {
             parent = space.getAllItems().get(othersCB.getSelectedIndex());
             tupRelPos.set(relPosPan.getTuple3d());
-            tupRelPos.add(parent.status.pos);
+            tupRelPos.add(parent.getPos());
             status.pos.set(tupRelPos);
             tupRelVel.set(relVelPan.getTuple3d());
-            tupRelVel.add(parent.status.velocity);
+            tupRelVel.add(parent.getVelocity());
             status.velocity.set(tupRelVel);
         }
 
@@ -320,7 +320,7 @@ public class Surface extends Item {
     }
 
     @Override
-    void noteInput() {
+    public void noteInput() {
         space.debug("Surface has no input");
     }
 

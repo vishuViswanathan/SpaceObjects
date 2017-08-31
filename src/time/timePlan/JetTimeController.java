@@ -2,6 +2,7 @@ package time.timePlan;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import GeneralElements.accessories.Jet;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.*;
@@ -20,21 +21,21 @@ import java.util.Vector;
  * Created by M Viswanathan on 17 Mar 2017
  */
 public class JetTimeController extends JetController{
-    Item item;
+    ItemInterface item;
     Hashtable<JetsAndSeekers, OneJetPlan> jetAndPlan;
     public Vector<JetsAndSeekers> jets = new Vector<>();
     JetTimeController mainThis;
 
 //    Vector<OneJetPlan> controlTable;
 
-    public JetTimeController(Item item) {
+    public JetTimeController(ItemInterface item) {
         this.item = item;
         jetAndPlan = new Hashtable<JetsAndSeekers, OneJetPlan>();
         jets = new Vector<>();
         mainThis = this;
     }
 
-    public JetTimeController(Item item, String xmlStr) {
+    public JetTimeController(ItemInterface item, String xmlStr) {
         this(item);
         takeFromXML(xmlStr);
     }
@@ -89,8 +90,8 @@ public class JetTimeController extends JetController{
         }
     }
 
-    public Item.EditResponse editJetController(InputControl inpC, Component c) {
-        Item.EditResponse response = Item.EditResponse.CANCEL;
+    public ItemInterface.EditResponse editJetController(InputControl inpC, Component c) {
+        ItemInterface.EditResponse response = ItemInterface.EditResponse.CANCEL;
         JetListEditor dlg = new JetListEditor();
         if (c == null)
             dlg.setLocation(50, 50);
@@ -101,7 +102,7 @@ public class JetTimeController extends JetController{
         switch (dlg.getResponse()) {
             case CHANGED:
 //                if (originalPlan.copyFrom(mcodifiedPlan))
-                    response = Item.EditResponse.CHANGED;
+                    response = ItemInterface.EditResponse.CHANGED;
         }
         return response;
     }
@@ -145,9 +146,9 @@ public class JetTimeController extends JetController{
         return retVal;
     }
 
-    public JPanel controlPanel(Component parent, InputControl inpC, Item[] otherItems) {
+    public JPanel controlPanel(Component parent, InputControl inpC, ItemInterface[] otherItems) {
         ManualControlListener li;
-        MultiPairColPanel mp = new MultiPairColPanel(item.name + " Control Panel");
+        MultiPairColPanel mp = new MultiPairColPanel(item.getName() + " Control Panel");
         for (JetsAndSeekers oneJet: jets) {
             OneJetPlan onePlan = jetAndPlan.get(oneJet);
             li = new ManualControlListener(onePlan);
@@ -172,11 +173,11 @@ public class JetTimeController extends JetController{
         JButton jbSave = new JButton("Save Jet List");
         JButton jbCancel = new JButton("Cancel");
         JButton jbAddNewJet = new JButton("Add new Jet");
-        Item.EditResponse response = Item.EditResponse.CANCEL;
+        ItemInterface.EditResponse response = ItemInterface.EditResponse.CANCEL;
         JDialog thisDlg;
         JetListEditor() {
             setModal(true);
-            inpC = item.space.getInputControl();
+            inpC = item.getSpace().getInputControl();
             thisDlg = this;
             init();
         }
@@ -193,13 +194,13 @@ public class JetTimeController extends JetController{
                 public void actionPerformed(ActionEvent e) {
                     Object src = e.getSource();
                     if (src == jbCancel) {
-                        response = Item.EditResponse.CANCEL;
+                        response = ItemInterface.EditResponse.CANCEL;
                         closeThisDlg();
                     }
                     else if (src == jbAddNewJet)
                         addNewJet(thisDlg);
                     else if (src == jbSave) {
-                        response = Item.EditResponse.CHANGED;
+                        response = ItemInterface.EditResponse.CHANGED;
                         closeThisDlg();
                     }
                 }
@@ -223,7 +224,7 @@ public class JetTimeController extends JetController{
         boolean addNewJet(Component c) {
             JetsAndSeekers theAccessory = JetsAndSeekers.getNewAccessory(item, c);
             if (theAccessory != null) {
-                if (JetsAndSeekers.editData(theAccessory, inpC, c) == Item.EditResponse.CHANGED) {
+                if (JetsAndSeekers.editData(theAccessory, inpC, c) == ItemInterface.EditResponse.CHANGED) {
                     jetTable.addOneRow(theAccessory);
                     return true;
                 }
@@ -231,7 +232,7 @@ public class JetTimeController extends JetController{
             return false;
         }
 
-        Item.EditResponse getResponse() {
+        ItemInterface.EditResponse getResponse() {
             return response;
         }
     }
@@ -251,7 +252,7 @@ public class JetTimeController extends JetController{
 //            this.space = space;
 //        }
 //
-//        public Item.EditResponse editPlan(InputControl inpC, FlightPlan flightPlan) {
+//        public ItemInterface.EditResponse editPlan(InputControl inpC, FlightPlan flightPlan) {
 //        }
 //
 //    }

@@ -3,6 +3,7 @@ package GeneralElements.accessories;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
@@ -27,27 +28,27 @@ public class Jet extends JetsAndSeekers {
     ForceElement jetData;
 //    boolean active;
 
-    public Jet(Item item) {
+    public Jet(ItemInterface item) {
         this(item, "??Jet", new ForceElement(1, new Vector3d(), new Point3d()));
     }
 
-    protected Jet(Item item, ElementType type) {
+    protected Jet(ItemInterface item, ElementType type) {
         super(item, type);
     }
 
-    public Jet(Item item, String xmlStr) {
+    public Jet(ItemInterface item, String xmlStr) {
         this(item, ElementType.JET);
         takeFromXML(xmlStr);
     }
 
-    public Jet(Item item, String name, ForceElement jetData) {
+    public Jet(ItemInterface item, String name, ForceElement jetData) {
         super(item, name, ElementType.JET);
         this.jetData = jetData;
         forceSource = new RocketEngine("Test Jet", jetData.getForce().length() / 1000, 10);
 //        thePlan = new OneJetPlan(this);
     }
 
-    public Jet(Item item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
+    public Jet(ItemInterface item, String name, ForceSource forceSource, Vector3d direction, Point3d location) {
         super(item, name, ElementType.JET);
         setJetData(forceSource, direction, location);
 //        thePlan = new OneJetPlan(this);

@@ -29,11 +29,14 @@ import java.util.Vector;
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
-    LinkedList<Item> allItems;
+    LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
     Vector<GlobalAction> activeGlobalActions;
     ItemMovementsApp mainApp;
     AllGlobalActions allGlobalActions;
+    double pastHistoryTime = 36000; // time in s to keep position history
+    public boolean bConsiderTimeDilation = false; // gravity effect on local clock
+    public boolean bConsiderGravityVelocity = false; // propagation time for Gravity
 
     public ItemSpace(ItemMovementsApp mainApp) {
         this.mainApp = mainApp;
@@ -41,9 +44,11 @@ public class ItemSpace {
     }
 
     public void clearSpace() {
-        allItems = new LinkedList<Item>();
+        allItems = new LinkedList<ItemInterface>();
         allItemLinks = new LinkedList<ItemLink>();
         allGlobalActions = new AllGlobalActions(this);
+        bConsiderTimeDilation = false;
+        bConsiderGravityVelocity = false;
         trace("clearing ItemSpace");
     }
 
@@ -51,11 +56,11 @@ public class ItemSpace {
         return activeGlobalActions;
     }
 
-    public LinkedList<Item> getAlItems() {
+    public LinkedList<ItemInterface> getAlItems() {
         return allItems;
     }
 
-    public Item getOneItem(int i) {
+    public ItemInterface getOneItem(int i) {
         return allItems.get(i);
     }
 
@@ -67,22 +72,22 @@ public class ItemSpace {
         return allItemLinks.size();
     }
 
-    LinkedList<Item> getAllItems() {
+    LinkedList<ItemInterface> getAllItems() {
         return allItems;
     }
 
-    public Item[] getOtherItems(Item excludeThis) {
-        Item[] others = new Item[nItems() - 1];
+    public ItemInterface[] getOtherItems(ItemInterface excludeThis) {
+        ItemInterface[] others = new ItemInterface[nItems() - 1];
         int c = 0;
-        for (Item i: allItems)
+        for (ItemInterface i: allItems)
             if (i != excludeThis)
                 others[c++] = i;
         return others;
     }
 
-    public int addItem(Item oneItem)  {
+    public int addItem(ItemInterface oneItem)  {
         allItems.add(oneItem);
-        oneItem.setSpace(this);
+        ((DarkMatter)oneItem).setSpace(this);
         return allItems.size();
     }
 
@@ -108,17 +113,21 @@ public class ItemSpace {
             }
         }
         if (bItemGravityOn || anyElasticItem()) {
-            Item item;
+            ItemInterface item;
             int iLen = allItems.size();
             ItemLink oneLink;
+            double totalGm = 0;
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
+                totalGm += item.getGM();
                 for (int n = i + 1; n < iLen; n++) {
-                    oneLink = new ItemLink(item, allItems.get(n), bItemGravityOn, this);
+                    oneLink = new ItemLink((DarkMatter)item, (DarkMatter)allItems.get(n), bItemGravityOn, this);
                     if (oneLink.isValid())
                         addItemLink(oneLink);
                 }
             }
+            for (ItemInterface i:allItems)
+                i.noteTotalGM(totalGm);
         }
         activeGlobalActions = allGlobalActions.activeActions();
 
@@ -128,15 +137,16 @@ public class ItemSpace {
 
     boolean anyElasticItem() {
         boolean retVal = false;
-        for (DarkMatter item: allItems)
-            if (retVal = item.isElastic())
+        for (ItemInterface item: allItems) {
+            if (retVal = ((DarkMatter)item).isElastic())
                 break;
+        }
         return retVal;
     }
 
     public boolean noteItemData() {
         if (allItems.size() > 0) {
-            for (Item i : allItems)
+            for (ItemInterface i : allItems)
                 i.noteInput();
             initLinks();
             return true;
@@ -270,8 +280,8 @@ public class ItemSpace {
 
     void clearItemLinks() {
         allItemLinks.clear();
-        for (Item it:allItems)
-            it.clearInfluence();
+        for (ItemInterface it:allItems)
+            ((DarkMatter)it).clearInfluence();
     }
 
     public void saveInfluenceList() {
@@ -284,10 +294,10 @@ public class ItemSpace {
         listEdited = false;
     }
 
-    public Item getItem(String name) {
-        Item item = null;
-        for (Item it: allItems)
-            if (it.name.equals(name)) {
+    public ItemInterface getItem(String name) {
+        ItemInterface item = null;
+        for (ItemInterface it: allItems)
+            if (it.getName().equals(name)) {
                 item = it;
                 break;
             }
@@ -337,8 +347,8 @@ public class ItemSpace {
 
     public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp,RenderingAttributes itemAttrib,
                                   RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
-        for (Item it: allItems) {
-            if (!it.boundaryItem) {
+        for (ItemInterface it: allItems) {
+            if (!((DarkMatter)it).boundaryItem) {
                 ItemGraphic itemG = it.createItemGraphic(grp, orbitAttrib);
                 if (itemG != null) {
                     itemG.setItemDisplayAttribute(itemAttrib);
@@ -353,21 +363,21 @@ public class ItemSpace {
     }
 
     public void initForces() {
-        for (Item i: allItems)
+        for (ItemInterface i: allItems)
             i.setLocalForces();
         for (ItemLink link:allItemLinks)
             link.setLocalForces();
     }
 
     void setItemStartConditions(double duration, double nowT) {
-        for (Item i: allItems)
+        for (ItemInterface i: allItems)
             i.setStartConditions(duration, nowT);
         for (ItemLink link:allItemLinks)
             link.setStartConditions(duration, nowT);
     }
 
     void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
-        for (Item i: allItems)
+        for (ItemInterface i: allItems)
             i.updatePosAndVel(deltaT, nowT, bFinal);
         for (ItemLink link:allItemLinks)
             link.updatePosAndVel(deltaT, nowT, bFinal);
@@ -438,10 +448,11 @@ public class ItemSpace {
         DoubleMaxMin maxMin = new DoubleMaxMin();
         double objectRadius;
         double pos;
-        for (Item i: allItems) {
-            objectRadius = i.dia / 2;
+        for (ItemInterface i: allItems) {
+            DarkMatter dm = (DarkMatter)i;
+            objectRadius = dm.dia / 2;
             if (objectRadius > 0) {
-                pos = i.getPositionX();
+                pos = dm.getPositionX();
                 maxMin.takeNewValue(pos + objectRadius);
                 maxMin.takeNewValue(pos - objectRadius);
             }
@@ -453,10 +464,11 @@ public class ItemSpace {
         DoubleMaxMin maxMin = new DoubleMaxMin();
         double objectRadius;
         double pos;
-        for (Item i: allItems) {
-            objectRadius = i.dia / 2;
+        for (ItemInterface i: allItems) {
+            DarkMatter dm = (DarkMatter)i;
+            objectRadius = dm.dia / 2;
             if (objectRadius > 0) {
-                pos = i.getPositionY();
+                pos = dm.getPositionY();
                 maxMin.takeNewValue(pos + objectRadius);
                 maxMin.takeNewValue(pos - objectRadius);
             }
@@ -468,10 +480,11 @@ public class ItemSpace {
         DoubleMaxMin maxMin = new DoubleMaxMin();
         double objectRadius;
         double pos;
-        for (Item i: allItems) {
-            objectRadius = i.dia / 2;
+        for (ItemInterface i: allItems) {
+            DarkMatter dm = (DarkMatter)i;
+            objectRadius = dm.dia / 2;
             if (objectRadius > 0) {
-                pos = i.getPositionZ();
+                pos = dm.getPositionZ();
                 maxMin.takeNewValue(pos + objectRadius);
                 maxMin.takeNewValue(pos - objectRadius);
             }
@@ -503,7 +516,7 @@ public class ItemSpace {
     StringBuilder allItemsInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("nItems", nItems()));
         int i = 0;
-        for (Item it: allItems)
+        for (ItemInterface it: allItems)
             xmlStr.append(XMLmv.putTag("it#" + ("" + i++).trim(), it.dataInXML().toString()));
         return xmlStr;
     }

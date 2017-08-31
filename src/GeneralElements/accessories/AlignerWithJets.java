@@ -3,6 +3,7 @@ package GeneralElements.accessories;
 import Applications.ItemMovementsApp;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
@@ -12,6 +13,7 @@ import time.timePlan.OneJetPlan;
 import time.timePlan.OneTimeStep;
 
 import javax.swing.*;
+import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -77,7 +79,7 @@ public class AlignerWithJets extends JetsAndSeekers {
 
     boolean initiated = false;
 
-    public AlignerWithJets(Item item) {
+    public AlignerWithJets(ItemInterface item) {
         super(item, "UNKNOWN",  ElementType.ALIGNERWITHJETS);
         vDirection = new Vector3dMV(0, 0, 1);
         alignerJetSetX = new AlignerJetSet(this, AboutAxis.X);
@@ -99,16 +101,17 @@ public class AlignerWithJets extends JetsAndSeekers {
         thisActionTime = 0;
     }
 
-    public AlignerWithJets(Item item, String xmlStr) {
+    public AlignerWithJets(ItemInterface item, String xmlStr) {
         this(item);
         takeFromXML(xmlStr);
     }
 
     private void prepareAlignToList() throws Exception{
         if (!initiated) {
-            alignBaseZ = new AlignTo(item.miAsVector.z, alignerJetSetZ, AboutAxis.Z);
-            alignBaseX = new AlignTo(item.miAsVector.x, alignerJetSetX, AboutAxis.X);
-            alignBaseY = new AlignTo(item.miAsVector.y, alignerJetSetY, AboutAxis.Y);
+            Vector3d mi = item.getMiAsVector();
+            alignBaseZ = new AlignTo(mi.z, alignerJetSetZ, AboutAxis.Z);
+            alignBaseX = new AlignTo(mi.x, alignerJetSetX, AboutAxis.X);
+            alignBaseY = new AlignTo(mi.y, alignerJetSetY, AboutAxis.Y);
             initiated = true;
         }
     }
@@ -162,10 +165,10 @@ public class AlignerWithJets extends JetsAndSeekers {
                 globalAlignTo = objectDirection(theStep.alignToObject);
                 break;
             case ALIGNTOVELOCITY:
-                globalAlignTo = new Vector3dMV(item.status.velocity);
+                globalAlignTo = new Vector3dMV(item.getVelocity());
                 break;
             case ALIGNCOUNTERTOVELOCITY:
-                globalAlignTo = new Vector3dMV(item.status.velocity);
+                globalAlignTo = new Vector3dMV(item.getVelocity());
                 globalAlignTo.negate();
                 break;
             case TURNBYANGLE:
@@ -181,7 +184,7 @@ public class AlignerWithJets extends JetsAndSeekers {
 
     Vector3dMV objectDirection(Item object) {
         Vector3dMV retVal = new Vector3dMV(object.status.pos);
-        retVal.sub(item.status.pos);
+        retVal.sub(item.getPos());
         return retVal;
     }
 

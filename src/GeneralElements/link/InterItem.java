@@ -102,18 +102,17 @@ public class InterItem extends Influence {
         if (oneIsASurface)
             return getBoundaryForce();
         boolean retVal = true;
-        Vector3d nowForce = null;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos); // vector item1 towards item2
         double distance = distVect.length();
         double compression = limitDistance - distance;
-        nowForce = new Vector3d();
+        Vector3d nowForce = new Vector3d();
         if (isSticky)
             getStickingEffect(distVect, distance, compression, deltaT, bFinal, nowForce);
         else {
-            distVect = new Vector3d();
-            distVect.sub(item2.status.pos, item1.status.pos); // vector item1 towards item2
-            distance = distVect.length();
+//            distVect = new Vector3d();
+//            distVect.sub(item2.status.pos, item1.status.pos); // vector item1 towards item2
+//            distance = distVect.length();
             if (compression > 0) {
                 if (elasticityON) {
                     double force;

@@ -1,6 +1,7 @@
 package GeneralElements.Display;
 
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.vrml97.VrmlLoader;
 
@@ -15,12 +16,12 @@ import java.net.URL;
  * Created by M Viswanathan on 09 Mar 2017
  */
 public class ItemDisplay extends Group {
-    Item theItem;
+    ItemInterface theItem;
     AttributeSetter attributeSetter;
     boolean valid = false;
-    public ItemDisplay(Item theItem) {
+    public ItemDisplay(ItemInterface theItem) {
         this.theItem = theItem;
-        switch (theItem.itemType) {
+        switch (theItem.getItemType()) {
             case SPHERE:
                 ItemSphere theDisplay = new ItemSphere(theItem);
                 if (theDisplay.valid) {
@@ -38,7 +39,7 @@ public class ItemDisplay extends Group {
         }
     }
 
-    public Item getItem() {
+    public ItemInterface getItem() {
         return theItem;
     }
 

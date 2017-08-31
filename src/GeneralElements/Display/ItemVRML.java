@@ -1,6 +1,7 @@
 package GeneralElements.Display;
 
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
 import com.sun.j3d.loaders.vrml97.VrmlLoader;
@@ -15,10 +16,10 @@ import java.net.URL;
  * Created by M Viswanathan on 12 Mar 2017
  */
 public class ItemVRML extends BranchGroup implements AttributeSetter {
-    Item theItem;
-    public ItemVRML(Item theItem) {
+    ItemInterface theItem;
+    public ItemVRML(ItemInterface theItem) {
         this.theItem = theItem;
-        loadVrmlFile(theItem.vrmlFile);
+        loadVrmlFile(theItem.getVrmlFile());
     }
 
     private void loadVrmlFile(String fileName) {
@@ -80,7 +81,7 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
 
 
     @Override
-    public Item getItem() {
+    public ItemInterface getItem() {
         return theItem;
     }
 

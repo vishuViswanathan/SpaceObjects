@@ -64,19 +64,19 @@ public class LinkWithMass extends InfluenceDef  {
 
     public void setStartConditions(double duration, double nowT) {
         for (DarkMatter mat:massElements)
-            mat.setStartConditions(duration, nowT);
+            mat.setMatterStartConditions(duration, nowT);
     }
 
     public void initStartForces() {
         if (!elementsSet)
             setAllElements();
         for (DarkMatter mat:massElements)
-            mat.initStartForce();
+            mat.initNetForce();
     }
 
     public void setLocalForces() {
         for (DarkMatter mat:massElements)
-            mat.setLocalForces();
+            mat.setMatterLocalForces();
     }
 
     public void setGravityLinks(boolean bSet) {
@@ -86,7 +86,7 @@ public class LinkWithMass extends InfluenceDef  {
 
     public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
         for (DarkMatter mat:massElements)
-            mat.updatePosAndVel(deltaT, nowT, bFinal);
+            mat.updatePAndV(deltaT, nowT, bFinal);
     }
 
     public boolean setAllElements() {

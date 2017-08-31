@@ -15,4 +15,6 @@ public class Constants {
 //              as pr http://www.blazelabs.com/f-u-massvariation.asp mass and G vary with velocity
     public static double oneAuInkm  = 149597870.700;
     public static double secsPerDay = 86400.0;
+    public static double c = 2.99792458E8; // speed of light in vacuum in m/s
+    public static double cSquared = c * c;
 }

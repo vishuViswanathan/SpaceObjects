@@ -2,6 +2,7 @@ package time.timePlan;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.InputControl;
@@ -240,7 +241,7 @@ public class OneJetPlan {
         return retVal;
     }
 
-    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, Item[] otherItems, ActionListener activationListener) {
+    public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ItemInterface[] otherItems, ActionListener activationListener) {
         return manualStep.controlPanel(jetName, parent, inpC, otherItems, activationListener);
     }
 
