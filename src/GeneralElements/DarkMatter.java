@@ -6,9 +6,7 @@ import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
-import mvUtils.general.ObjectSizeFetcher;
 import mvUtils.physics.Vector3dMV;
-import mvUtils.physics.VectorBD;
 //import time.timePlan.FlightPlan;
 
 import javax.swing.*;
@@ -216,7 +214,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3d lastVelocity = new Vector3d();
     Vector3d lastAcc = new Vector3d();
     Vector3dMV effectiveForce = new Vector3dMV();
-    Vector3dMV thisAcc = new Vector3dMV();
+    Vector3dMV effectiveAcc = new Vector3dMV();
+    Vector3dMV nowAcc = new Vector3dMV();
     Vector3dMV deltaV = new Vector3dMV();
     Vector3dMV newVelocity = new Vector3dMV();
     Vector3dMV averageV = new Vector3dMV();
@@ -301,12 +300,13 @@ public class DarkMatter implements InputControl, EvalOnce {
             changed = false;
         else {
             effectiveForce.set(netForce);
-            thisAcc.scale(oneByMass, effectiveForce);
-            thisAcc.setMean(thisAcc, lastAcc);
+            nowAcc.scale(oneByMass, effectiveForce);
+            effectiveAcc.setMean(nowAcc, lastAcc);
+//            nowAcc.setMean(nowAcc, lastAcc);
             if (space.bConsiderTimeDilation) {
-                localDeltaT *= Math.sqrt(1 - 2.0 * Math.sqrt(balanceGM * thisAcc.length()) / (Constants.cSquared ));
+                localDeltaT *= Math.sqrt(1 - 2.0 * Math.sqrt(balanceGM * effectiveAcc.length()) / (Constants.cSquared ));
             }
-            deltaV.scale(localDeltaT, thisAcc);
+            deltaV.scale(localDeltaT, effectiveAcc);
             newVelocity.add(lastVelocity, deltaV);
             averageV.setMean(lastVelocity, newVelocity);
             deltaPos.scale(localDeltaT, averageV);
@@ -314,7 +314,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             status.pos.set(newPos); // only position is updated here
             if (bFinal) {
                 status.velocity.set(newVelocity);
-                status.acc.set(thisAcc);
+                status.acc.set(nowAcc);
                 status.time = nowT + deltaT; // 20170724
 //                if (bFlightPlan)
 //                    mass += flightPlan.massChange(deltaT);
@@ -330,9 +330,9 @@ public class DarkMatter implements InputControl, EvalOnce {
         else {
 //            effectiveForce.set(netForce);
             effectiveForce.setMean(netForce, lastForce);
-            thisAcc.scale(oneByMass, effectiveForce);
+            nowAcc.scale(oneByMass, effectiveForce);
             // calculate from netForce
-            deltaV.scale(deltaT, thisAcc);
+            deltaV.scale(deltaT, nowAcc);
             newVelocity.add(lastVelocity, deltaV);
             averageV.setMean(lastVelocity, newVelocity);
             deltaPos.scale(deltaT, averageV);
@@ -342,7 +342,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             status.pos.set(newPos); // only position is updated here
             if (bFinal) {
                 status.velocity.set(newVelocity);
-                status.acc.set(thisAcc);
+                status.acc.set(nowAcc);
                 status.time = nowT + deltaT; // 20170724
 //                if (bFlightPlan)
 //                    mass += flightPlan.massChange(deltaT);
