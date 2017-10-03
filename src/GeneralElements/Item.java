@@ -1023,6 +1023,13 @@ public class Item extends DarkMatter implements ItemInterface {
         return csvStr;
     }
 
+    public StringBuilder statusStringForHistory(double posFactor, double velFactor) {
+        StringBuilder csvStr = new StringBuilder(name + ", " + gmID + ", " + gm + ",");
+        csvStr.append(status.positionStringForCSV(posFactor) + ",");
+        csvStr.append(status.velocityStringForCSV(velFactor)).append("\n");
+        return csvStr;
+    }
+
     protected StringBuilder defaultDataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("itemType", ("" + itemType)));

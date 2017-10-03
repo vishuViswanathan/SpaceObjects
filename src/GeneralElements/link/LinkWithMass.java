@@ -107,7 +107,6 @@ public class LinkWithMass extends InfluenceDef  {
         double uProjectedArea = projectedAreaPerM * oneLinkLen;
         boolean retVal = true;
         double initialLenF = 1;
-//        if (distance <= freeLen) {
         if (distance > 0) {
             // create mass elements and position them uniformly between item1 and item2, but at an oneLinkLen
             // in zigzag fashion if required

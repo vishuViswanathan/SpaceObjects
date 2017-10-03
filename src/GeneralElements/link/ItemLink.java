@@ -35,28 +35,16 @@ public class ItemLink implements EvalOnce {
         this.item2 = item2;
         this.inf = inf;
         valid = inf.isValid();
-        if (valid) {
-            item1.addInfluence(this);
-            item2.addInfluence(this);
-        }
+//        if (valid) {
+//            item1.addInfluence(this);
+//            item2.addInfluence(this);
+//        }
     }
 
-//    public ItemLink(DarkMatter item1, DarkMatter item2, ItemSpace space) {
-//        this(item1, item2, true, space);
-//    }
-//
     public ItemLink(DarkMatter item1, DarkMatter item2, boolean gravityON, ItemSpace space) {
-        this(item1, item2, new InterItem(item1, item2, gravityON), space);
+        this(item1, item2, new InterItem(item1, item2), space);
     }
 
-//    public ItemLink(DarkMatter item1, DarkMatter item2, Influence.Type type, ItemSpace space) {
-//        this(space);
-//        this.item1 = item1;
-//        this.item2 = item2;
-//        inf = Influence.createInfluence(item1, item2, type);
-//        valid = true;
-//    }
-//
     public ItemLink(ItemSpace space) {
         this.space = space;
         this.control = space.getInputControl();

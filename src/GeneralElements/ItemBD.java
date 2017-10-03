@@ -1028,6 +1028,10 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
         return csvStr;
     }
 
+    public StringBuilder statusStringForHistory(double posFactor, double velFactor) {
+        return new StringBuilder("Not installed in ItemBD.1032");
+    }
+
     protected StringBuilder defaultDataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("itemType", ("" + itemType)));

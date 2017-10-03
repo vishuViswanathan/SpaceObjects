@@ -38,11 +38,8 @@ public class BungeeJumping implements DefaultScheme{
             space.addItem(it);
             it.initPosEtc(new Point3d(xPos, -linkNum * pitch, 0), new Vector3d(0, 0, 0));
             if (linkNum > 0) {
-//                link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
                 link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
                 space.addItemLink(link);
-//                it.addLocalAction(new FixedAcceleration(it));
-//                it.addLocalAction(new V2Resistance(it, resistFactor));
             }
             else
                 it.setbFixedLocation(true);
@@ -52,9 +49,6 @@ public class BungeeJumping implements DefaultScheme{
         it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
         space.addItem(it);
         it.initPosEtc(new Point3d(xPos, -(lastPos + 1) * pitch, 0), new Vector3d(0, 0, 0));
-//        it.addLocalAction(new FixedAcceleration(it));
-//        it.addLocalAction(new V2Resistance(it, resistFactor));
-//        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
         space.addItemLink(link);
         lastItem = it;
@@ -65,12 +59,8 @@ public class BungeeJumping implements DefaultScheme{
             it =  new Item("I" + linkNum, mass1, 0.1, Color.yellow, mainF);
             space.addItem(it);
             it.initPosEtc(new Point3d(xPos, yPos, 0), new Vector3d(0, 0, 0));
-//            link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
             link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
             space.addItemLink(link);
-//            it.addLocalAction(new FixedAcceleration(it));
-//            it.addLocalAction(new V2Resistance(it, resistFactor));
-//            lastPos = linkNum;
             lastItem = it;
             yPos += pitch; // going up
         }
@@ -81,10 +71,7 @@ public class BungeeJumping implements DefaultScheme{
         it.initPosEtc(new Point3d(xPos, yPos, 0), new Vector3d(jumpXVel, 0, 0));
         it = new Surface("Floor", new Point3d( -5, -5, -5), new Point3d( -5, -5, 0), new Point3d( 0, -5, 5), mainF );
         space.addItem(it);
-//        link = new ItemLink(lastItem, it, new Rod(lastItem, it, pitch, k, true) , space);
         link = new ItemLink(lastItem, it, new Rod(lastItem, it, 1, k) , space);
-//        it.addLocalAction(new FixedAcceleration(it));
-//        it.addLocalAction(new V2Resistance(it, resistFactor));
         space.addItemLink(link);
         return true;
     }

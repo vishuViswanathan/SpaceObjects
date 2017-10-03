@@ -41,15 +41,9 @@ public class BungeeJumpingWithRope implements DefaultScheme{
         it.initPosEtc(new Point3d(4,0, 0), new Vector3d(0, 0, 0));
         it.seteCompression(20000);
         space.addItem(it);
-//        LinkWithMass rope = new Rope(lastItem, it, 25, massPerM, ropeDia, e, 50);
         LinkWithMass rope = new Rope(lastItem, it, (25.0/4), e);
-//       if (rope.setAllElements()) {
-            ItemLink link = new ItemLink(lastItem, it, rope, space);
-            space.addItemLink(link);
-//        }
-//        it = new Surface("Floor", new Point3d( -5, -5, -5), new Point3d( -5, -5, 0), new Point3d( 0, -5, 5), mainF );
-//        space.addItem(it);
-
+        ItemLink link = new ItemLink(lastItem, it, rope, space);
+        space.addItemLink(link);
         return true;
     }
 

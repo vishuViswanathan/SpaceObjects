@@ -12,12 +12,9 @@ import javax.vecmath.Vector3d;
  * For inter item Gravity, contact force etc.
  */
 public class InterItem extends Influence {
-    boolean gravityON = false;
     boolean elasticityON = false;
     boolean isSticky = false;
     double totalMass;
-    boolean theyAreStuck = false;
-//    double lastVelocityI1, lastVelocityI2;  // approaching velocities
     double limitDistance;
     double factorLbyR;
     double diffE; // e1 - e2
@@ -27,12 +24,8 @@ public class InterItem extends Influence {
     double e2;
     boolean equalE = false;
     boolean oneIsASurface = false;
-    Vector3d nowAngularVelocity = new Vector3d();;
-    Vector3d lastStickingAngularVel = new Vector3d();
-    Vector3d deltaAngularVel = new Vector3d();
-    Vector3d angularAcceleration = new Vector3d();
 
-    public InterItem (DarkMatter itemOne, DarkMatter itemTwo, boolean gravityON) {
+    public InterItem(DarkMatter itemOne, DarkMatter itemTwo) {
         type = Type.INTERITEM;
         hasDetails = false;
         item1 = itemOne;
@@ -41,8 +34,7 @@ public class InterItem extends Influence {
             oneIsASurface = true;
             if (itemTwo.boundaryItem)
                 valid = false;
-        }
-        else if (itemTwo.boundaryItem) {
+        } else if (itemTwo.boundaryItem) {
             if (oneIsASurface) // already
                 valid = false;
             else {
@@ -61,7 +53,6 @@ public class InterItem extends Influence {
                 limitDistance = r2;
                 factorLbyR = 1 / (r2 / e2);
             } else {
-                this.gravityON = gravityON;
                 double r1 = item1.getDia() / 2;
                 double r2 = item2.getDia() / 2;
                 limitDistance = r1 + r2;
@@ -76,12 +67,11 @@ public class InterItem extends Influence {
                     } else
                         factorLbyR = 1 / (r1 / e1 + r2 / e2);
                     elasticityON = true;
-                } else  {
+                } else {
                     if (e1 == -1 || e2 == -1) {
                         totalMass = item1.mass + item2.mass;
                         isSticky = true;
-                    }
-                    else
+                    } else
                         factorLbyR = 0;
                 }
             }
@@ -95,6 +85,7 @@ public class InterItem extends Influence {
      * 3) compression is the distance of the distorted surface from the original.
      * 4) the case e1 == e2 is handled differently since the general formula causes DIV0 error
      * 5) Depending on time step, can cause error due to a large incremental position
+     *
      * @return
      */
     @Override
@@ -107,141 +98,33 @@ public class InterItem extends Influence {
         double distance = distVect.length();
         double compression = limitDistance - distance;
         Vector3d nowForce = new Vector3d();
-        if (isSticky)
-            getStickingEffect(distVect, distance, compression, deltaT, bFinal, nowForce);
-        else {
-//            distVect = new Vector3d();
-//            distVect.sub(item2.status.pos, item1.status.pos); // vector item1 towards item2
-//            distance = distVect.length();
-            if (compression > 0) {
-                if (elasticityON) {
-                    double force;
-                    nowForce.set(distVect);
-                    if (equalE) {
-                        double compFraction = 1 - compression / limitDistance;
-                        force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
-                    } else {
-                        double a = r1xE1LessE1;
-                        double b = r2E1PLusR1E2 - compression * diffE;
-                        double c = -e2 * compression;
-                        double m1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
-                        force = -m1 * e1 / (1 - m1); // negated since it is a repulsion
-                    }
-                    double ratio = force / distance;
-                    if (Double.isNaN(ratio)) {
-                        retVal = false;
-                    } else {
-                        nowForce.scale(ratio);
-                    }
+        if (compression > 0) {
+            if (elasticityON) {
+                double force;
+                nowForce.set(distVect);
+                if (equalE) {
+                    double compFraction = 1 - compression / limitDistance;
+                    force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
+                } else {
+                    double a = r1xE1LessE1;
+                    double b = r2E1PLusR1E2 - compression * diffE;
+                    double c = -e2 * compression;
+                    double m1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+                    force = -m1 * e1 / (1 - m1); // negated since it is a repulsion
+                }
+                double ratio = force / distance;
+                if (Double.isNaN(ratio)) {
+                    retVal = false;
+                } else {
+                    nowForce.scale(ratio);
                 }
             }
-        }
-        if (gravityON) {
-            double gForceValue = (item1.mass / distance) * Constants.G * (item2.mass / distance); // attraction force
-            double ratio = gForceValue / distance;
-            if (Double.isNaN(ratio)) {
-                retVal = false;
-            } else {
-                Vector3d gForce = new Vector3d(distVect);
-                gForce.scale(ratio);
-                nowForce.add(gForce);
-             }
         }
         if (retVal) {
             item1.addToForce(nowForce);
             item2.subtractFromForce(nowForce);
         }
         return retVal;
-    }
-
-    /**
-     *
-     * @param distVect
-     * @param distance // vector item1 towards item2
-     * @param compression
-     * @return
-     */
-
-    boolean getStickingEffect(Vector3d distVect, double distance, double compression, double deltaT,
-                              boolean bFinal, Vector3d nowForce) {
-        if ((compression > 0 && distance > 0) || theyAreStuck) {
-            if (bFinal) {
-                // now the torque
-                //velocity of item2 in th plane perpendicular to the distance Vector
-                Vector3d relVel = item2.status.velocity.projectionOnPlane(distVect);
-                Vector3d vI1 = item1.status.velocity.projectionOnPlane(distVect);
-                relVel.sub(vI1);
-                relVel.scale(item1.radius / distance);  // at item1 surface
-                // add the effect of items' angular velocity
-                relVel.add(relSurfaceVelDueToAngularVel(distVect, distance));
-
-                nowAngularVelocity.cross(relVel, distVect);
-                nowAngularVelocity.scale(-1 / distVect.lengthSquared());
-                nowAngularVelocity.scale(distance / item1.radius);
-                item1.addToAngularVel(nowAngularVelocity);
-                Vector3d nowAngularVel2 = new Vector3d(nowAngularVelocity);
-                nowAngularVel2.scale(item1.radius / item2.radius);
-                item2.addToAngularVel(nowAngularVel2);
-            }
-            if (theyAreStuck) {
-                Vector3d uDistanceVect = new Vector3dMV(1/distance, distVect);
-                double nowApproachVelI1 = uDistanceVect.dot(item1.status.velocity);
-                double nowApproachVelI2 = uDistanceVect.dot(item2.status.velocity);
-                double netVelocity = (nowApproachVelI1 * item1.mass + nowApproachVelI2 * item2.mass) / totalMass;
-                double accI1 = (nowApproachVelI1 - netVelocity) / deltaT;
-                nowForce.set(new Vector3dMV(- item1.mass * accI1, uDistanceVect));
-                // this works out to be exact opposite when nowForce is evaluated with accI2 and item2.mass
-            }
-            else {
-                theyAreStuck = bFinal; // once stuck, always stuck
-            }
-        }
-        return true;
-    }
-
-    Vector3d relSurfaceVelDueToAngularVel(Vector3d distVect, double distance) {
-        // angVel2 is angular velocity vector on plane perpendicular to distVect
-        Vector3d angVel2 = item2.status.angularVelocity.projectionOnPlane(distVect);
-        Vector3d surVel2 = new Vector3d();
-        surVel2.cross(angVel2, distVect);
-        surVel2.scale(-item2.radius / distance); // to reverse the radius as vector
-        Vector3d angVel1 = item1.status.angularVelocity.projectionOnPlane(distVect);
-        Vector3d surVel1 = new Vector3d();
-        surVel1.cross(angVel1, distVect);
-        surVel1.scale(item1.radius / distance);
-        Vector3d netSurVel = new Vector3d(surVel2);
-        netSurVel.sub(surVel1);
-        return netSurVel;
-    }
-
-    boolean getStickingEffectOLD(Vector3d distVect, double distance, double compression, double deltaT,
-                              boolean bFinal, Vector3d nowForce) {
-        if ((compression > 0 && distance > 0) || theyAreStuck) {
-            if (bFinal) {
-                // now the torque
-                //velocity of item2 in th plane perpendicular to the distance Vector
-                Vector3d relVel = item2.status.velocity.projectionOnPlane(distVect);
-                Vector3d vI1 = item1.status.velocity.projectionOnPlane(distVect);
-                relVel.sub(vI1);
-                nowAngularVelocity.cross(relVel, distVect);
-                nowAngularVelocity.scale(-1 / distVect.lengthSquared());
-                item1.addToAngularVel(nowAngularVelocity);
-                item2.addToAngularVel(nowAngularVelocity);
-            }
-          if (theyAreStuck) {
-                Vector3d uDistanceVect = new Vector3dMV(1/distance, distVect);
-                double nowApproachVelI1 = uDistanceVect.dot(item1.status.velocity);
-                double nowApproachVelI2 = uDistanceVect.dot(item2.status.velocity);
-                double netVelocity = (nowApproachVelI1 * item1.mass + nowApproachVelI2 * item2.mass) / totalMass;
-                double accI1 = (nowApproachVelI1 - netVelocity) / deltaT;
-                nowForce.set(new Vector3dMV(- item1.mass * accI1, uDistanceVect));
-                // this works out to be exact opposite when nowForce is evaluated with accI2 and item2.mass
-            }
-            else {
-                theyAreStuck = bFinal; // once stuck, always stuck
-            }
-        }
-        return true;
     }
 
     boolean getBoundaryForce() {

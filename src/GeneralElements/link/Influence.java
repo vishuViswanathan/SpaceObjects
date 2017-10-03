@@ -26,7 +26,8 @@ public class Influence {
 //        GRAVITY("Gravity"),
         SPRING("Spring"),
         ROPE("Rope"),
-        ROD("Rod");
+        ROD("Rod"),
+        GRAVITY("Gravity");
 
         private final String inflName;
 
@@ -118,7 +119,7 @@ public class Influence {
 //                inf = new Gravity(dm1, dm2);
 //                break;
             case INTERITEM:
-                inf = new InterItem(dm1, dm2, true);
+                inf = new InterItem(dm1, dm2);
                 break;
             case ROD:
                 inf = new Rod(dm1, dm2, 1, 20000);

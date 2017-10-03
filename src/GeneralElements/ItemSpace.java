@@ -7,6 +7,7 @@ import GeneralElements.Display.ItemTable;
 import GeneralElements.Display.LinkTable;
 import GeneralElements.globalActions.AllGlobalActions;
 import GeneralElements.globalActions.GlobalAction;
+import GeneralElements.link.Gravity;
 import GeneralElements.link.ItemLink;
 import GeneralElements.utils.ThreeDSize;
 import mvUtils.display.InputControl;
@@ -112,27 +113,42 @@ public class ItemSpace {
                 il--;
             }
         }
-        if (bItemGravityOn || anyElasticItem()) {
+        if (anyElasticItem()) {
             ItemInterface item;
             int iLen = allItems.size();
             ItemLink oneLink;
-            double totalGm = 0;
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
-                totalGm += item.getGM();
                 for (int n = i + 1; n < iLen; n++) {
                     oneLink = new ItemLink((DarkMatter)item, (DarkMatter)allItems.get(n), bItemGravityOn, this);
                     if (oneLink.isValid())
                         addItemLink(oneLink);
                 }
             }
+        }
+        if (bItemGravityOn) {
+            ItemInterface item;
+            int iLen = allItems.size();
+            Gravity oneGravity;
+            double totalGm = 0;
+            for (int i = 0; i < iLen; i++) {
+                item = allItems.get(i);
+                totalGm += item.getGM();
+                for (int n = 0; n < iLen; n++) {
+                    if (n != i) {
+                        oneGravity = new Gravity((DarkMatter) item, (DarkMatter) allItems.get(n), this);
+                        if (oneGravity.isValid())
+                            ((DarkMatter) item).addGravityLink(oneGravity);
+                    }
+                }
+            }
             for (ItemInterface i:allItems)
                 i.noteTotalGM(totalGm);
+
         }
         activeGlobalActions = allGlobalActions.activeActions();
-
-        for (ItemLink l: allItemLinks)
-            l.setGravityLinks(bItemGravityOn);
+//        for (ItemLink l: allItemLinks)
+//            l.setGravityLinks(bItemGravityOn);
     }
 
     boolean anyElasticItem() {
@@ -281,7 +297,7 @@ public class ItemSpace {
     void clearItemLinks() {
         allItemLinks.clear();
         for (ItemInterface it:allItems)
-            ((DarkMatter)it).clearInfluence();
+            ((DarkMatter)it).clearGravityLinks();
     }
 
     public void saveInfluenceList() {

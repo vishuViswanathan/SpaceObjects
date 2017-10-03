@@ -319,6 +319,8 @@ public interface ItemInterface {
 
     StringBuilder statusStringForCSV(double posFactor, double velFactor);
 
+    StringBuilder statusStringForHistory(double posFactor, double velFactor);
+
     StringBuilder dataInXML();
 
     boolean takeFromXML(String xmlStr) throws NumberFormatException;

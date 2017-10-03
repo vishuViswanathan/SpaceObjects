@@ -23,6 +23,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Vector;
 
@@ -96,6 +97,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public boolean bShowLinks = false;
     public boolean bShowItems = true;
 
+    String historyFilePath = "results\\history.xml";
+    double fileHistoryInterval = 3600; // in s
+    boolean bHistoryToFileON = false;
+
     public static Logger log;
 
     public ItemMovementsApp() {
@@ -160,6 +165,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         NumberTextField ntRepeats;
         JCheckBox chBTimeDilation;
         JCheckBox chBGravityPropagationTime;
+        JCheckBox cbHistoryToFile;
+        NumberTextField ntFileHistoryInterval;
+        JButton jbHistoryFilePath;
+        JLabel lHistoryFilePath;
+
         JButton jbOk = new JButton("Ok");
         JButton jbCancel = new JButton("Cancel");
         double upDateMultiplier;
@@ -184,17 +194,37 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             ntUpdate = new NumberTextField(mainApp, upDateMultiplier, 6, false, 1, 10000, "#,###",
                     "Update once in this many steps");
             ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 0, 10, "#0",
-                    "Number of times each step is repeated for Position/Force accuracy");
+                    "Step repeats for Position/Force accuracy");
             chBTimeDilation = new JCheckBox("Consider Time Dilation due to Gravity", space.bConsiderTimeDilation);
             chBTimeDilation.setEnabled(false);
             chBGravityPropagationTime = new JCheckBox("Consider Gravity propagation time", space.bConsiderGravityVelocity);
             chBGravityPropagationTime.setEnabled(false);
+            lHistoryFilePath = new JLabel(historyFilePath);
+            jbHistoryFilePath = new JButton("Set File Path");
+            jbHistoryFilePath.addActionListener(e-> {
+                String path = getHistoryFilePath();
+                if (path.length() > 0) {
+                    historyFilePath = path;
+                    lHistoryFilePath.setText(path);
+                }
+
+            });
+            ntFileHistoryInterval = new NumberTextField(mainApp, fileHistoryInterval, 6, false, 0,
+                    3600*24, "#,##0.000", "History step interval (s)");
+            cbHistoryToFile = new JCheckBox("History To File", bHistoryToFileON);
+            cbHistoryToFile.addActionListener(e-> {bHistoryToFileON = cbHistoryToFile.isSelected();
+                    setHistoryFields();
+            });
+            setHistoryFields();
             MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
             jp.addItemPair(ntCalculStep);
             jp.addItemPair(ntUpdate);
             jp.addBlank();
             jp.addItemPair(ntRepeats);
             jp.addBlank();
+            jp.addItem(cbHistoryToFile);
+            jp.addItemPair(ntFileHistoryInterval);
+            jp.addItemPair(jbHistoryFilePath, lHistoryFilePath);
             jp.addItem(chBTimeDilation);
             jp.addItem(chBGravityPropagationTime);
             jp.addBlank();
@@ -214,6 +244,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 retVal = true;
             }
             return retVal;
+        }
+
+        void setHistoryFields() {
+            ntFileHistoryInterval.setEnabled(bHistoryToFileON);
+            jbHistoryFilePath.setEnabled(bHistoryToFileON);
         }
 
         boolean dataOK() {
@@ -479,6 +514,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(false);
         double step = calculationStep;
         double hrsPerSec = 0;
+        double nextHistorySave = 0;
 //        continueIt = true;
         double endT;
         if (fresh) {
@@ -496,11 +532,18 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         }
         boolean bLive = false;
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive); //.format(nowDate.getTime()));
-
+        if (bHistoryToFileON) {
+            openHistoryFile();
+            updateHistoryFile(nowT);
+            nextHistorySave += fileHistoryInterval;
+        }
         runIt = true;
 
         while (runIt && nowT < endT) {
             if (continueIt) {
+                if (bHistoryToFileON && nowT >= nextHistorySave) {
+                    updateHistoryFile(nowT);
+                    nextHistorySave += fileHistoryInterval;               }
                 try {
                     if ((endT - nowT) < calculationStep)
                         step = (endT - nowT);
@@ -545,6 +588,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         nowDate = new DateAndJDN(dateAndJDN);
         nowDate.add(Calendar.SECOND, (int)nowT);
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
+        if (bHistoryToFileON) {
+            updateHistoryFile(nowT);
+            closeHistoryFile();
+        }
+
 //        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
         enableButtons(true);
@@ -626,92 +674,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(true);
     }
 
-//    void doCalculationPARELLELNEW(boolean fresh)   { // TODO remove?
-//        double step = calculationStep;
-//        double hrsPerSec = 0;
-////        continueIt = true;
-//        double endT;
-//        if (fresh) {
-//            space.setGlobalLinksAndActions();
-//            nowT = 0;
-//            setRefreshInterval(refreshInterval);
-//            nextRefresh = 0;
-//            endT = ntfDuration.getData() * 3600;
-//            lastTnano = System.nanoTime(); // new Date()).getTime();
-////            nowDate = new DateAndJDN(dateAndJDN);
-////            continueIt = true;
-//        }
-//        else {
-//            endT = nowT + ntfDuration.getData() * 3600;
-//        }
-//        boolean bLive = false;
-//
-//        runIt = true;
-//        evaluator.startTasks();
-//        while (runIt && nowT < endT) {
-//            if (continueIt) {
-//                try {
-//                    if (!doOneStepPARELLEL(step, nowT)) {
-//                        showError("Error in doOneStepPARELLEL one step at " + nowT + "\nSuggest restart program");
-//                        break;
-//                    }
-//                    step = calculationStep;
-//                    nowT += step;
-//                } catch (Exception e) {
-//                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
-//                    runIt = false;
-//                }
-//            }
-//        }
-//        evaluator.stopTasks();
-//    }
-
     boolean doOneStepPARELLEL(double deltaT, double nowT) throws Exception {
         return space.doCalculation(evaluator, deltaT, nowT);
     }
 
     long sleepTime = 100; // ms
-
-//    void handleDisplay() { // TODO remove?
-//        boolean bLive = false;
-//        double hrsPerSec = 0;
-//        double nowCalculationTime;
-//        double realDeltaT = 0;
-//        double calculationDeltaT; //h
-//        double lastCalculationTime = 0;
-//        boolean bFirstTime = true;
-//        enableButtons(false);
-//        nowDate = new DateAndJDN(dateAndJDN);
-//        while (runIt) {
-////            while (continueIt) {
-//                nowTnano = System.nanoTime(); //new Date().getTime();
-//                nowCalculationTime = evaluator.getNowT();
-//                if (!bFirstTime) {
-//                    calculationDeltaT = nowCalculationTime - lastCalculationTime;
-//                    realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
-//                    hrsPerSec = (refreshInterval / 3600) / calculationDeltaT;
-//                    bFirstTime = false;
-//                }
-////                space.updateLinkDisplay();
-//                nowDate.add(Calendar.SECOND, (int) (realDeltaT));
-//                orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
-//                lastCalculationTime = nowCalculationTime;
-//                lastTnano = System.nanoTime(); //nowTnano;
-//                try {
-//                    Thread.sleep(sleepTime);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-////            }
-//        }
-//        nowCalculationTime = evaluator.getNowT();
-//        realDeltaT =  ((double)(nowTnano - lastTnano))/ 1e9;
-//        nowDate.add(Calendar.SECOND, (int) (realDeltaT));
-//        orbitDisplay.updateDisplay(nowCalculationTime, nowDate, hrsPerSec, bLive);
-//        orbitDisplay.resultsReady();
-////        SpaceEvaluator.closePool();
-//        enableButtons(true);
-//    }
 
     MotionDisplay orbitDisplay;
 
@@ -767,12 +734,85 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 oStream.close();
                 bRetVal = true;
             } catch (IOException e) {
-                showError("Some problem wring Vectors to file " + filePath + "\n" + e.getMessage());
+                showError("Some problem writing Vectors to file " + filePath + "\n" + e.getMessage());
             }
         } catch (FileNotFoundException e) {
             showError("Some problem saving Vectors to file " + filePath + "\n" + e.getMessage());
         }
         return bRetVal;
+    }
+
+    BufferedOutputStream historyFileStream;
+
+    void openHistoryFile() {
+        try {
+            FileOutputStream stream = new FileOutputStream(historyFilePath);
+            historyFileStream = new BufferedOutputStream(stream);
+            try {
+                historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
+                historyFileStream.write("# 'at' has JDN, date and time\n".getBytes());
+                historyFileStream.write("# 'obj' has name, HorizonID, x, y, z, Vx, Vy, Vz\n\n".getBytes());
+
+            } catch (IOException e) {
+                showError("Some problem in Wring header to History File " + historyFilePath + "\n" + e.getMessage());
+            }
+        } catch (FileNotFoundException e) {
+            showError("Some problem in opening History File " + historyFilePath + "\n" + e.getMessage());
+        }
+    }
+
+    void closeHistoryFile() {
+        try {
+            historyFileStream.close();
+        } catch (IOException e) {
+            showError("Some problem in CLOSING History File " + historyFilePath + "\n" + e.getMessage());
+        }
+    }
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
+
+    public boolean updateHistoryFile(double nowT) {
+        DateAndJDN jdn = new DateAndJDN(dateAndJDN);
+        jdn.add(Calendar.SECOND, (int)nowT);
+
+        boolean bRetVal = false;
+        double posFactor = 1.0;
+        double velFactor = 1.0;
+        int nObj = space.nItems();
+        try {
+            StringBuilder data = new StringBuilder(XMLmv.putTag("at", jdn.getJdN() + "," + sdf.format(jdn.getTime())));
+            for (int o = 0; o < nObj; o++) {
+                data.append(XMLmv.putTag("obj",
+                        space.getOneItem(o).statusStringForHistory(posFactor, velFactor)));
+            }
+            String toFile = new String(XMLmv.putTag("set", data));
+            historyFileStream.write(toFile.getBytes());
+            bRetVal = true;
+        } catch (IOException e) {
+            showError("Some problem writing Vectors to history file " + historyFilePath + "\n" + e.getMessage());
+        }
+        return bRetVal;
+    }
+
+    String getHistoryFilePath() {
+        String fileName = historyFilePath;
+        String title = "History File Name";
+        FileDialog fileDlg =
+                new FileDialog(mainF, title,
+                        FileDialog.SAVE);
+        fileDlg.setFile("*.xml");
+        fileDlg.setVisible(true);
+
+        String bareFile = fileDlg.getFile();
+        if (!(bareFile == null)) {
+            int len = bareFile.length();
+            if ((len < 8) || !(bareFile.substring(len - 4).equalsIgnoreCase(".xml"))) {
+                showMessage("Adding '.xml' to file name");
+                bareFile = bareFile + ".xml";
+            }
+            fileName = fileDlg.getDirectory() + bareFile;
+        }
+        return fileName;
     }
 
     void saveDataToFile() {
@@ -1029,10 +1069,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         switch(size) {
             case DAILY:
                 setTimingValues(0.0002, 0.02, 200, false, true, false, true);
+                repeats = 5;
                 rIDaily.setSelected(true);
                 break;
             case ASTRONOMICAL:
                 setTimingValues(10, 10 * 100, 200000, true, false, true, false);
+                repeats = 0;
 //                space.bConsiderTimeDilation = true;
 //                space.bConsiderGravityVelocity = true;
                 showMessage("Gravity effects on Time and Gravity propagation time are not considered");
