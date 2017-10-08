@@ -23,6 +23,8 @@ import java.awt.event.ActionListener;
  * Created by mviswanathan on 02-08-2017.
  */
 public interface ItemInterface {
+    // the steps RK .., K1... k4 are for  Runge-Kutta method
+    enum UpdateStep {FINAL, INTERMEDIATE, RK4, RK2, EuFwd, EUMod, K1, K2, K3, K4}
     enum ItemType {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
@@ -311,7 +313,7 @@ public interface ItemInterface {
 
     //    =========================== calculations ======================
 
-    boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception;
+    boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
     Transform3D globalToItem();
 

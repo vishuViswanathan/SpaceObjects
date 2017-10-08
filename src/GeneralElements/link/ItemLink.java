@@ -2,6 +2,7 @@ package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
 import GeneralElements.Item;
+import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
@@ -83,7 +84,7 @@ public class ItemLink implements EvalOnce {
     }
 
     // dummy not used
-    public void evalOnce(double deltaT, double nowT, boolean bFinal){}
+    public void evalOnce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep){}
 
 
     public boolean addLinksDisplay(Group grp, RenderingAttributes linkAttrib) {
@@ -116,8 +117,8 @@ public class ItemLink implements EvalOnce {
         return inf.evalForce(deltaT, bFinal);
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception{
-        inf.updatePosAndVel(deltaT, nowT, bFinal);
+    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVel(deltaT, nowT, updateStep);
     }
 
     public void setStartConditions(double duration, double nowT) {

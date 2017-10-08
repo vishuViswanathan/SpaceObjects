@@ -2,6 +2,7 @@ package GeneralElements.link;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
+import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import GeneralElements.localActions.LocalAction;
 import mvUtils.mvXML.ValAndPos;
@@ -84,9 +85,9 @@ public class LinkWithMass extends InfluenceDef  {
             showMessage("Not Ready for inter-gravity on links");
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {  // deltaT is time is seconds
+    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {  // deltaT is time is seconds
         for (DarkMatter mat:massElements)
-            mat.updatePAndV(deltaT, nowT, bFinal);
+            mat.updatePAndV(deltaT, nowT, updateStep);
     }
 
     public boolean setAllElements() {

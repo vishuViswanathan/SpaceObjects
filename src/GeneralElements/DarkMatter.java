@@ -283,16 +283,16 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     @Override
-    public void evalOnce(double deltaT, double nowT, boolean bFinal) {
+    public void evalOnce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) {
         try {
-            updatePAndV(deltaT, nowT, bFinal);
+            updatePAndV(deltaT, nowT, updateStep);
         } catch (Exception e) {
             ItemMovementsApp.log.error("In Item evalOnce for " + name + ":" + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public boolean updatePAndV(double deltaT, double nowT, boolean bFinal) throws Exception {
+    public boolean updatePAndV(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = true;
         if (bFixedLocation)
             changed = false;
@@ -307,14 +307,14 @@ public class DarkMatter implements InputControl, EvalOnce {
                 deltaPos.scale(deltaT, averageV);
                 newPos.add(lastPosition, deltaPos);
                 status.pos.set(newPos); // only position is updated here
-                if (bFinal) {
+                if (updateStep == ItemInterface.UpdateStep.FINAL) {
                     status.velocity.set(newVelocity);
                     status.acc.set(nowAcc);
                 }
             }
             if (gravityON)
-                considerGravityEffectEuModified(deltaT, nowT);
-            status.time = nowT + deltaT; // 20170724
+                considerGravityEffectRK4(deltaT, nowT);
+            status.time = nowT + deltaT;
         }
         return changed;
     }
@@ -329,6 +329,24 @@ public class DarkMatter implements InputControl, EvalOnce {
                 acc.add(oneG.accDueToG());
             }
         }
+        return changed;
+    }
+
+    public boolean considerGravityEffectEu(double deltaT, double nowT) {
+        boolean changed = false;
+        double deltaTBy2 = deltaT / 2;
+        double deltaTBy6 = deltaT / 6;
+        TwoVectors pvBase = new TwoVectors(status.pos, status.velocity);
+
+        TwoVectors pv = new TwoVectors(pvBase);
+        TwoVectors pv1 = new TwoVectors(pv, bFixedLocation);
+
+        pvBase.scaleAndAdd(deltaT, pv1);
+        status.pos.set(pvBase.v1);
+        status.velocity.set(pvBase.v2);
+
+//            status.time = nowT + deltaT;
+        changed = true;
         return changed;
     }
 

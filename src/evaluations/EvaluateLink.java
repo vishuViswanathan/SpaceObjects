@@ -1,5 +1,6 @@
 package evaluations;
 
+import GeneralElements.ItemInterface;
 import GeneralElements.link.ItemLink;
 
 /**
@@ -22,7 +23,7 @@ public class EvaluateLink implements EvalOnce { // TODOremove
     }
 
     @Override
-    public void evalOnce(double deltaT, double nowT, boolean bFinal) {
+    public void evalOnce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) {
 
     }
 }

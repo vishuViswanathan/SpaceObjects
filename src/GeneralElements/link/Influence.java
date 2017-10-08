@@ -1,6 +1,7 @@
 package GeneralElements.link;
 
 import GeneralElements.DarkMatter;
+import GeneralElements.ItemInterface;
 import mvUtils.mvXML.XMLmv;
 
 import javax.media.j3d.Group;
@@ -74,7 +75,7 @@ public class Influence {
 
     public boolean evalForce(double deltaT, boolean bFinal) {return false;}
 
-    public void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
     }
 
     public boolean isValid() {

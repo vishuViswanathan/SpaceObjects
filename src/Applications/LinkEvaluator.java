@@ -1,5 +1,6 @@
 package Applications;
 
+import GeneralElements.ItemInterface;
 import GeneralElements.link.ItemLink;
 import evaluations.EvalOnce;
 
@@ -23,7 +24,7 @@ public class LinkEvaluator implements EvalOnce {
 
     //dummy
     @Override
-    public void evalOnce(double deltaT, double nowT, boolean bFinal) {
+    public void evalOnce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) {
 
     }
 }

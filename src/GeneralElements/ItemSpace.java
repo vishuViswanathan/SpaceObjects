@@ -392,11 +392,11 @@ public class ItemSpace {
             link.setStartConditions(duration, nowT);
     }
 
-    void updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (ItemInterface i: allItems)
-            i.updatePosAndVel(deltaT, nowT, bFinal);
+            i.updatePosAndVel(deltaT, nowT, updateStep);
         for (ItemLink link:allItemLinks)
-            link.updatePosAndVel(deltaT, nowT, bFinal);
+            link.updatePosAndVel(deltaT, nowT, updateStep);
     }
 
     boolean evalInfluence(double deltaT, double nowT) throws Exception  {
@@ -412,7 +412,7 @@ public class ItemSpace {
                 }
             if (!ok)
                 break;
-            updatePosAndVel(deltaT, nowT, false); // not the final calculation
+            updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE); // not the final calculation
         }
         // now finalise it
         if (ok) {
@@ -424,7 +424,7 @@ public class ItemSpace {
                     break;
                 }
             if (ok)
-                updatePosAndVel(deltaT, nowT, true); // the final calculation
+                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.FINAL); // the final calculation
         }
         return ok;
     }
@@ -436,7 +436,7 @@ public class ItemSpace {
             initForces();
             evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
             evaluator.awaitForceComplete(); // now all netForce calculations are ready
-            updatePosAndVel(evaluator, deltaT, nowT, false);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE);
 
         }
         // now finalise it
@@ -444,13 +444,13 @@ public class ItemSpace {
             initForces();
             evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
             evaluator.awaitForceComplete(); // now all netForce calculations are ready
-            updatePosAndVel(evaluator, deltaT, nowT, true);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.FINAL);
         }
         return ok;
     }
 
-    void updatePosAndVel(SpaceEvaluator evaluator , double deltaT, double nowT, boolean bFinal) throws Exception  {
-        evaluator.setTimes(deltaT, nowT, bFinal);
+    void updatePosAndVel(SpaceEvaluator evaluator , double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception  {
+        evaluator.setTimes(deltaT, nowT, updateStep);
         evaluator.awaitStartUpdatePositions(); // this should start the upatePosVelocity calculations
         evaluator.awaitPositionsReady(); // now all Positions are ready
     }

@@ -1,20 +1,22 @@
 package evaluations;
 
+import GeneralElements.ItemInterface;
+
 /**
  * Created by M Viswanathan on 18 Aug 2014
  */
 public class CallableItemGroup extends CallableGroup {
     double deltaT;
     double nowT;
-    boolean bFinal;
+    ItemInterface.UpdateStep updateStep;
     public CallableItemGroup(int id) {
         super(id);
     }
 
-    public void setTimes(double deltaT, double nowT, boolean bFinal) {
+    public void setTimes(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) {
         this.deltaT = deltaT;
         this.nowT = nowT;
-        this.bFinal = bFinal;
+        this.updateStep = updateStep;
     }
 
 /*
@@ -48,7 +50,7 @@ public class CallableItemGroup extends CallableGroup {
 
     void evalOnce() {
         for (EvalOnce oneEval:group)
-            oneEval.evalOnce(deltaT, nowT, bFinal);
+            oneEval.evalOnce(deltaT, nowT, updateStep);
     }
 
 

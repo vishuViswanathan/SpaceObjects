@@ -932,10 +932,10 @@ public class Item extends DarkMatter implements ItemInterface {
 
     //    =========================== calculations ======================
 
-    public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    public boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
-        updateAngularPosAndVelocity(deltaT, nowT, bFinal);
-        updatePAndV(deltaT, nowT, bFinal);
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndV(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();
@@ -975,9 +975,9 @@ public class Item extends DarkMatter implements ItemInterface {
     Vector3d lastAngle = new Vector3d();
     Vector3dMV newAngle = new Vector3dMV();
 
-    boolean updateAngularPosAndVelocity(double deltaT, double nowT, boolean bFinal) {
+    boolean updateAngularPosAndVelocity(double deltaT, double nowT, UpdateStep updateStep) {
         boolean changed = false;
-        if (bFinal) {
+        if (updateStep == UpdateStep.FINAL) {
 //            Transform3D tr = new Transform3D();
 //            itemGraphic.get().getTotalTransform(tr);
 //            tr.invert();

@@ -1,5 +1,6 @@
 package Applications;
 
+import GeneralElements.ItemInterface;
 import evaluations.CallableGroup;
 import evaluations.CallableItemGroup;
 
@@ -245,10 +246,10 @@ public class SpaceEvaluator implements Runnable {
         return nowT;
     }
 
-    public void setTimes(double deltaT, double nowT, boolean bFinal) {
+    public void setTimes(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) {
         this.nowT = nowT;
         for (CallableItemGroup  group: itemCallables) {
-            group.setTimes(deltaT, nowT, bFinal);
+            group.setTimes(deltaT, nowT, updateStep);
         }
     }
 

@@ -342,7 +342,7 @@ public class Surface extends Item {
         return distance;
     }
 
-    public boolean updatePosAndVel(double deltaT, double nowT, boolean bFinal) throws Exception {
+    public boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
         return false;
     }
 

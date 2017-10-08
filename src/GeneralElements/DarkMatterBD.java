@@ -44,9 +44,9 @@ public class DarkMatterBD extends DarkMatter {
         ((VectorBD)netForce).subtractTuple(subtractForce);
     }
 
-    public boolean updatePAndV(double deltaT, double nowT, boolean bFinal) throws Exception {
+    public boolean updatePAndV(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         ((VectorBD)netForce).update3dValues();
-        return super.updatePAndV(deltaT, nowT, bFinal);
+        return super.updatePAndV(deltaT, nowT, updateStep);
     }
 
     }
