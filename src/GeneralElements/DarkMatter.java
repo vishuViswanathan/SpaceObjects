@@ -297,7 +297,11 @@ public class DarkMatter implements InputControl, EvalOnce {
         if (bFixedLocation)
             changed = false;
         else {
+            if (gravityON)
+                considerGravityEffectEuModified(deltaT, nowT);
             if (netForce.length() > 0) {
+                lastAcc = status.acc;
+                lastVelocity = status.velocity;
                 effectiveForce.set(netForce);
                 nowAcc.scale(oneByMass, effectiveForce);
                 effectiveAcc.setMean(nowAcc, lastAcc);
@@ -312,8 +316,8 @@ public class DarkMatter implements InputControl, EvalOnce {
                     status.acc.set(nowAcc);
                 }
             }
-            if (gravityON)
-                considerGravityEffectRK4(deltaT, nowT);
+//            if (gravityON)
+//                considerGravityEffectRK4(deltaT, nowT);
             status.time = nowT + deltaT;
         }
         return changed;
