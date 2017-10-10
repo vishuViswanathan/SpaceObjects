@@ -92,6 +92,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     NumberTextField ntfDuration;  // , ntfStep;
     double duration = 2000; // in h
     public double calculationStep =2; //in seconds
+//    public double initialSmallerStep = 2;
     public int repeats = 5; // number of times each step is repeated for position-force accuracy
     public boolean bShowOrbit = false;
     public boolean bShowLinks = false;
@@ -129,6 +130,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         mainF.add(cbSpaceSize);
         duration = 200;
         calculationStep = 0.0002; // was 0.000002;
+//        initialSmallerStep = calculationStep;
         refreshInterval = 200 * calculationStep; // was 20000
         proceedToItemList(false);
         space.enableItemGravity(false);
@@ -149,6 +151,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     void setTimingValues(double calculationStep, double refreshInterval, double duration, boolean bEnableItemGravity,
                          boolean bShowLinks, boolean bShowOrbit, boolean bRealTime)  {
         this.calculationStep = calculationStep;
+//        initialSmallerStep = calculationStep;
         this.refreshInterval = refreshInterval;
         this.duration = duration;
         ntfDuration.setData(duration);
@@ -161,6 +164,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     class TimingValuesDlg extends JDialog {
         NumberTextField ntCalculStep;
+//        NumberTextField ntInitialSmallerStep;
         NumberTextField ntUpdate; // multiplier on calculation step;
         NumberTextField ntRepeats;
         JCheckBox chBTimeDilation;
@@ -191,6 +195,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             upDateMultiplier = refreshInterval / calculationStep;
             ntCalculStep = new NumberTextField(mainApp, calculationStep, 6, false, 0.0000001, 10000, "0.000E00",
                     "Calculation step in seconds");
+//            ntInitialSmallerStep = new NumberTextField(mainApp, initialSmallerStep, 6, false, 0.0000001, 10000, "0.000E00",
+//                    "Calculation step in seconds");
             ntUpdate = new NumberTextField(mainApp, upDateMultiplier, 6, false, 1, 10000, "#,###",
                     "Update once in this many steps");
             ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 0, 10, "#0",
@@ -218,6 +224,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             setHistoryFields();
             MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
             jp.addItemPair(ntCalculStep);
+//            jp.addItemPair(ntInitialSmallerStep);
             jp.addItemPair(ntUpdate);
             jp.addBlank();
             jp.addItemPair(ntRepeats);
@@ -237,6 +244,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             boolean retVal = false;
             if (dataOK()) {
                 calculationStep = ntCalculStep.getData();
+//                initialSmallerStep = ntInitialSmallerStep.getData();
+//                if (initialSmallerStep > calculationStep)
+//                    initialSmallerStep = calculationStep;
                 refreshInterval = calculationStep * ntUpdate.getData();
                 repeats = (int)ntRepeats.getData();
                 space.bConsiderTimeDilation = chBTimeDilation.isSelected();

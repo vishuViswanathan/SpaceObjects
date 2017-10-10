@@ -3,8 +3,6 @@ package GeneralElements;
 import Applications.ItemMovementsApp;
 import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.Gravity;
-import GeneralElements.link.InterItem;
-import GeneralElements.link.ItemLink;
 import GeneralElements.localActions.LocalAction;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
@@ -23,7 +21,7 @@ import java.util.Vector;
  */
 public class DarkMatter implements InputControl, EvalOnce {
     public Window parentW;
-//    Vector<ItemLink> links;
+    //    Vector<ItemLink> links;
     Vector<Gravity> gravityLinks;
     boolean gravityON = false;
     public ItemSpace space;
@@ -297,74 +295,132 @@ public class DarkMatter implements InputControl, EvalOnce {
         if (bFixedLocation)
             changed = false;
         else {
-            if (gravityON)
-                considerGravityEffectEuModified(deltaT, nowT);
-            if (netForce.length() > 0) {
-                lastAcc = status.acc;
-                lastVelocity = status.velocity;
-                effectiveForce.set(netForce);
-                nowAcc.scale(oneByMass, effectiveForce);
-                effectiveAcc.setMean(nowAcc, lastAcc);
-                deltaV.scale(deltaT, effectiveAcc);
-                newVelocity.add(lastVelocity, deltaV);
-                averageV.setMean(lastVelocity, newVelocity);
-                deltaPos.scale(deltaT, averageV);
-                newPos.add(lastPosition, deltaPos);
-                status.pos.set(newPos); // only position is updated here
-                if (updateStep == ItemInterface.UpdateStep.FINAL) {
-                    status.velocity.set(newVelocity);
-                    status.acc.set(nowAcc);
-                }
+            switch (updateStep) {
+                case INTERMEDIATE:
+                    considerNetForceEffect(deltaT,false);
+                    break;
+                case FINAL:
+                case EuFwd:
+                case EUMod:
+                case RK2:
+                case RK4:
+                    if (gravityON)
+                        considerGravityEffect(deltaT, updateStep);
+                    considerNetForceEffect(deltaT, true);
+                    status.time = nowT + deltaT;
+                    break;
+                default:
+                    if (gravityON)
+                        considerGravityEffect(deltaT, updateStep);
+                    break;
             }
-//            if (gravityON)
-//                considerGravityEffectRK4(deltaT, nowT);
-            status.time = nowT + deltaT;
         }
         return changed;
     }
 
-    boolean considerGravityEffect(Vector3d acc) {
+    boolean considerNetForceEffect(double deltaT, boolean bFinal) {
+        boolean changed = false;
+        if (netForce.length() > 0) {
+            lastAcc = status.acc;
+            lastVelocity = status.velocity;
+            effectiveForce.set(netForce);
+            nowAcc.scale(oneByMass, effectiveForce);
+            effectiveAcc.setMean(nowAcc, lastAcc);
+            deltaV.scale(deltaT, effectiveAcc);
+            newVelocity.add(lastVelocity, deltaV);
+            averageV.setMean(lastVelocity, newVelocity);
+            deltaPos.scale(deltaT, averageV);
+            newPos.add(lastPosition, deltaPos);
+            status.pos.set(newPos); // only position is updated here
+            if (bFinal) {
+                status.velocity.set(newVelocity);
+                status.acc.set(nowAcc);
+            }
+            changed = true;
+        }
+        return changed;
+    }
+
+    TwoVectors pvBase;
+    TwoVectors pv1, pv2, pv3, pv4;
+    TwoVectors k1, k2, k3, k4;
+
+    public Tuple3d getPosition(ItemInterface.UpdateStep updateStep) {
+        Tuple3d pos = status.pos;
+        switch(updateStep) {
+            case K2:
+                pos = pv1.v1;
+                break;
+            case K3:
+                pos = pv2.v1;
+                break;
+            case K4:
+                pos = pv3.v1;
+                break;
+        }
+        return pos;
+    }
+
+    boolean considerGravityEffect(double deltaT, ItemInterface.UpdateStep updateStep) {
         boolean changed = true;
-        if (bFixedLocation)
-            changed = false;
-        else {
+        double deltaTBy2 = deltaT / 2;
+        double deltaTBy6 = deltaT / 6;
+        TwoVectors pv;
+        switch (updateStep) {
+            case K1:
+                pvBase = new TwoVectors(status.pos, status.velocity);
+                k1 = new TwoVectors(pvBase, updateStep);
+                pv1 = new TwoVectors(pvBase, deltaTBy2, k1);
+                break;
+            case K2:
+//                pv1 = new TwoVectors(pvBase, deltaTBy2, k1);
+                k2 = new TwoVectors(pv1, updateStep);
+                pv2 = new TwoVectors(pvBase, deltaTBy2, k2);
+                break;
+            case K3:
+//                pv2 = new TwoVectors(pvBase, deltaTBy2, k2);
+                k3 = new TwoVectors(pv2, updateStep);
+                pv3 = new TwoVectors(pvBase, deltaT, k3);
+                break;
+            case K4:
+//                pv3 = new TwoVectors(pvBase, deltaTBy2, k3);
+                k4 = new TwoVectors(pv3, updateStep);
+                break;
+            case EuFwd:
+                pvBase.scaleAndAdd(deltaT, k1);
+                status.pos.set(pvBase.v1);
+                status.velocity.set(pvBase.v2);
+                break;
+            case RK4:
+                k1.scaleAndAdd(2, k2);
+                k1.scaleAndAdd(2, k3);
+                k1.add(k4);
 
-            for (Gravity oneG: gravityLinks) {
-                acc.add(oneG.accDueToG());
-            }
+                pvBase.scaleAndAdd(deltaTBy6, k1);
+                status.pos.set(pvBase.v1);
+                status.velocity.set(pvBase.v2);
+                break;
+            case FINAL:
+                changed = considerGravityEffectEuModified(deltaT);
+                break;
+            default:
+                changed = false;
+                break;
         }
         return changed;
     }
 
-    public boolean considerGravityEffectEu(double deltaT, double nowT) {
+    public boolean considerGravityEffectEuModified(double deltaT) {
         boolean changed = false;
         double deltaTBy2 = deltaT / 2;
         double deltaTBy6 = deltaT / 6;
         TwoVectors pvBase = new TwoVectors(status.pos, status.velocity);
 
-        TwoVectors pv = new TwoVectors(pvBase);
-        TwoVectors pv1 = new TwoVectors(pv, bFixedLocation);
-
-        pvBase.scaleAndAdd(deltaT, pv1);
-        status.pos.set(pvBase.v1);
-        status.velocity.set(pvBase.v2);
-
-//            status.time = nowT + deltaT;
-        changed = true;
-        return changed;
-    }
-
-    public boolean considerGravityEffectEuModified(double deltaT, double nowT) {
-        boolean changed = false;
-        double deltaTBy2 = deltaT / 2;
-        double deltaTBy6 = deltaT / 6;
-        TwoVectors pvBase = new TwoVectors(status.pos, status.velocity);
-
-        TwoVectors pv = new TwoVectors(pvBase);
-        TwoVectors pv1 = new TwoVectors(pv, bFixedLocation);
+        TwoVectors pv = pvBase;
+        TwoVectors pv1 = new TwoVectors(pv);
 
         pv = new TwoVectors(pvBase, deltaT, pv1);
-        TwoVectors pv2 = new TwoVectors(pv, bFixedLocation);
+        TwoVectors pv2 = new TwoVectors(pv);
 
         pv1.makeMeanWith(pv2);
         pvBase.scaleAndAdd(deltaT, pv1);
@@ -376,54 +432,16 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-    public boolean considerGravityEffectRK4(double deltaT, double nowT) {
-        boolean changed = false;
-        double deltaTBy2 = deltaT / 2;
-        double deltaTBy6 = deltaT / 6;
-        TwoVectors pvBase = new TwoVectors(status.pos, status.velocity);
-
-        TwoVectors pv = new TwoVectors(pvBase);
-        TwoVectors pv1 = new TwoVectors(pv, bFixedLocation);
-
-        pv = new TwoVectors(pvBase, deltaTBy2, pv1);
-        TwoVectors pv2 = new TwoVectors(pv, bFixedLocation);
-
-        pv = new TwoVectors(pvBase, deltaTBy2, pv2);
-        TwoVectors pv3 = new TwoVectors(pv, bFixedLocation);
-
-        pv = new TwoVectors(pvBase, deltaT, pv2);
-        TwoVectors pv4 = new TwoVectors(pv, bFixedLocation);
-
-//            // EulerFwd
-//            pvBase.scaleAndAdd(deltaT, pv1);
-
-        pv1.scaleAndAdd(2, pv2);
-        pv1.scaleAndAdd(2, pv3);
-        pv1.add(pv4);
-
-        pvBase.scaleAndAdd(deltaTBy6, pv1);
-        status.pos.set(pvBase.v1);
-        status.velocity.set(pvBase.v2);
-
-//            status.time = nowT + deltaT;
-        changed = true;
-        return changed;
-    }
-
     class TwoVectors {
-        Vector3dMV v1;
+        Vector3dMV v1 = new Vector3dMV();
         Vector3dMV v2;
         TwoVectors(Tuple3d v1, Tuple3d v2) {
             this.v1 = new Vector3dMV(v1);
             this.v2 = new Vector3dMV(v2);
         }
 
-        TwoVectors(TwoVectors va) {
-            this(va.v1, va.v2);
-        }
-
         TwoVectors(TwoVectors base, double scale, TwoVectors scaleThis) {
-            this(base);
+            this(base.v1, base.v2);
             scaleAndAdd(scale, scaleThis);
         }
 
@@ -433,13 +451,20 @@ public class DarkMatter implements InputControl, EvalOnce {
             return this;
         }
 
-        TwoVectors(TwoVectors pAndV, boolean bFixed) {
-            v1 = pAndV.v2;
-            if (!bFixed) {
-                v2 = new Vector3dMV();
-                for (Gravity oneG: gravityLinks) {
-                    v2.add(oneG.accDueToG(pAndV.v1));
-                }
+        TwoVectors(TwoVectors pAndV) {
+            v1.set(pAndV.v2);
+            v2 = new Vector3dMV();
+            for (Gravity oneG : gravityLinks) {
+                v2.add(oneG.accDueToG(pAndV.v1));
+            }
+        }
+
+        TwoVectors(TwoVectors pAndV, ItemInterface.UpdateStep updateStep) {
+//            this(pAndV);
+            v1.set(pAndV.v2);
+            v2 = new Vector3dMV();
+            for (Gravity oneG : gravityLinks) {
+                v2.add(oneG.accDueToG(pAndV.v1, updateStep));
             }
         }
 
@@ -485,6 +510,4 @@ public class DarkMatter implements InputControl, EvalOnce {
     public String toString() {
         return name;
     }
-
-
 }

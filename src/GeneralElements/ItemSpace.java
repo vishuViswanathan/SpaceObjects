@@ -423,8 +423,15 @@ public class ItemSpace {
                     ok = false;
                     break;
                 }
-            if (ok)
+            if (ok) {
                 updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.FINAL); // the final calculation
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K1);
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K2);
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K3);
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K4);
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.RK4);
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.EuFwd);
+            }
         }
         return ok;
     }
@@ -444,7 +451,12 @@ public class ItemSpace {
             initForces();
             evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
             evaluator.awaitForceComplete(); // now all netForce calculations are ready
-            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.FINAL);
+//            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.FINAL);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K1);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K2);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K3);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K4);
+            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.RK4);
         }
         return ok;
     }

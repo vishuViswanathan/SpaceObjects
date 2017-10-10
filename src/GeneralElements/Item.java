@@ -977,24 +977,23 @@ public class Item extends DarkMatter implements ItemInterface {
 
     boolean updateAngularPosAndVelocity(double deltaT, double nowT, UpdateStep updateStep) {
         boolean changed = false;
-        if (updateStep == UpdateStep.FINAL) {
-//            Transform3D tr = new Transform3D();
-//            itemGraphic.get().getTotalTransform(tr);
-//            tr.invert();
-//            tr.transform(netTorque);
-            globalToItem().transform(netTorque);
-            effectiveTorque.setMean(netTorque, lastTorque);
-            thisAngularAcc.scale(oneByMI, effectiveTorque);
-            deltaAngularV.scale(deltaT, thisAngularAcc);
-            newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
-//            newAngularVelocity.add(additionalAngularVel);
-            averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
-//            averageAngularV.add(additionalAngularVel);
-            deltaAngle.scale(deltaT, averageAngularV);
-            newAngle.add(lastAngle, deltaAngle);
-            itemGraphic.get().updateAngularPosition(deltaAngle);
-            noteAngularStatus();
-            changed = true;
+        switch(updateStep) {
+            case FINAL:
+            case EuFwd:
+            case EUMod:
+            case RK4:
+                globalToItem().transform(netTorque);
+                effectiveTorque.setMean(netTorque, lastTorque);
+                thisAngularAcc.scale(oneByMI, effectiveTorque);
+                deltaAngularV.scale(deltaT, thisAngularAcc);
+                newAngularVelocity.add(lastAngularVelocity, deltaAngularV);
+                averageAngularV.setMean(lastAngularVelocity, newAngularVelocity);
+                deltaAngle.scale(deltaT, averageAngularV);
+                newAngle.add(lastAngle, deltaAngle);
+                itemGraphic.get().updateAngularPosition(deltaAngle);
+                noteAngularStatus();
+                changed = true;
+                break;
         }
         return changed;
     }

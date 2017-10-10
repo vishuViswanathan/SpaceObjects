@@ -1,9 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.Constants;
-import GeneralElements.DarkMatter;
-import GeneralElements.ItemSpace;
-import GeneralElements.ItemStat;
+import GeneralElements.*;
 import mvUtils.physics.Vector3dMV;
 
 import javax.vecmath.Vector3d;
@@ -42,6 +39,20 @@ public class Gravity extends Influence {
         boolean retVal = true;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, nowPos); // vector item1 towards item2
+        double distance = distVect.length();
+        Vector3dMV accVector = new Vector3dMV();
+        double acc = item2.gm / distance / distance; // attraction force
+        double ratio = acc / distance;
+        if (!Double.isNaN(ratio)) {
+            accVector.set(distVect);
+            accVector.scale(ratio, distVect);
+        }
+        return accVector;
+    }
+
+    public Vector3d accDueToG(Vector3d nowPos, ItemInterface.UpdateStep updateStep) {
+        Vector3d distVect = new Vector3d();
+        distVect.sub(item2.getPosition(updateStep), nowPos); // vector item1 towards item2
         double distance = distVect.length();
         Vector3dMV accVector = new Vector3dMV();
         double acc = item2.gm / distance / distance; // attraction force
