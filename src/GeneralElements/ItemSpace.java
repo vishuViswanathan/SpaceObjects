@@ -424,12 +424,12 @@ public class ItemSpace {
                     break;
                 }
             if (ok) {
-                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.FINAL); // the final calculation
-//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K1);
-//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K2);
-//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K3);
-//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K4);
-//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.RK4);
+//                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.FINAL); // the final calculation
+                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K1);
+                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K2);
+                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K3);
+                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K4);
+                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.RK4);
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.EuFwd);
             }
         }
