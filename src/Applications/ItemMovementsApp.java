@@ -527,6 +527,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         double nextHistorySave = 0;
 //        continueIt = true;
         double endT;
+        debug("in doCalculationSERIAL");
         if (fresh) {
             space.setGlobalLinksAndActions();
             nowT = 0;
@@ -548,8 +549,24 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             nextHistorySave += fileHistoryInterval;
         }
         runIt = true;
-
+//        try {
+//            Thread.sleep(2);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        debug("before runIt && nowT < endT and continueIt " + runIt + ", " + nowT + ", " + endT + ", " + continueIt);
+        boolean firstTime = true;
         while (runIt && nowT < endT) {
+            if (firstTime || !continueIt) {
+                try { // why is this required ????
+                    Thread.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+//                debug("continueIt: " + continueIt);
+                firstTime = false;
+            }
+//            debug("");
             if (continueIt) {
                 if (bHistoryToFileON && nowT >= nextHistorySave) {
                     updateHistoryFile(nowT);
@@ -563,7 +580,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     }
 //                    step = calculationStep;
                     nowT += step;
+//                    debug("nowT " + nowT);
                     if (nowT > nextRefresh) {
+//                        debug("nowT > nextRefresh");
                         space.updateLinkDisplay();
                         showNow = false;
                         nowTnano = System.nanoTime(); //new Date().getTime();
@@ -1132,7 +1151,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     static public void debug(String msg) {
-        log.debug(msg);
+//        log.debug(msg);
         System.out.println("DEBUG: " + msg);
     }
 

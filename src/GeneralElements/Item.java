@@ -6,7 +6,7 @@ import GeneralElements.Display.TuplePanel;
 import GeneralElements.accessories.JetsAndSeekers;
 import GeneralElements.localActions.LocalAction;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import jdk.nashorn.internal.scripts.JD;
+// import jdk.nashorn.internal.scripts.JD;
 import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
