@@ -98,7 +98,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public boolean bShowLinks = false;
     public boolean bShowItems = true;
 
-    String historyFilePath = "results\\history.xml";
+    boolean xmlHistory = false;
+    String historyFilePath = "results\\history.csv";
     double fileHistoryInterval = 3600; // in s
     boolean bHistoryToFileON = false;
 
@@ -253,6 +254,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 space.bConsiderGravityVelocity = chBGravityPropagationTime.isSelected();
                 retVal = true;
             }
+            fileHistoryInterval = ntFileHistoryInterval.getData();
             return retVal;
         }
 
@@ -570,7 +572,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             if (continueIt) {
                 if (bHistoryToFileON && nowT >= nextHistorySave) {
                     updateHistoryFile(nowT);
-                    nextHistorySave += fileHistoryInterval;               }
+                    nextHistorySave += fileHistoryInterval;
+                }
                 try {
                     if ((endT - nowT) < calculationStep)
                         step = (endT - nowT);
@@ -778,9 +781,15 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             FileOutputStream stream = new FileOutputStream(historyFilePath);
             historyFileStream = new BufferedOutputStream(stream);
             try {
-                historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
-                historyFileStream.write("# 'at' has JDN, date and time\n".getBytes());
-                historyFileStream.write("# 'obj' has name, HorizonID, x, y, z, Vx, Vy, Vz\n\n".getBytes());
+                if (xmlHistory) {
+                    historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
+                    historyFileStream.write("# 'at' has JDN, date and time\n".getBytes());
+                    historyFileStream.write("# 'obj' has name, HorizonID, gm, x, y, z, Vx, Vy, Vz, V, Ax, Ay, Az, A\n\n".getBytes());
+                }
+                else {
+                    historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
+                    historyFileStream.write("JDN, date and time, NowT, ObjectName, HorizonID, gm, x, y, z, Vx, Vy, Vz, V, Ax, Ay, Az, A\n".getBytes());
+                }
 
             } catch (IOException e) {
                 showError("Some problem in Wring header to History File " + historyFilePath + "\n" + e.getMessage());
@@ -809,13 +818,22 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         double velFactor = 1.0;
         int nObj = space.nItems();
         try {
-            StringBuilder data = new StringBuilder(XMLmv.putTag("at", jdn.getJdN() + "," + sdf.format(jdn.getTime())));
-            for (int o = 0; o < nObj; o++) {
-                data.append(XMLmv.putTag("obj",
-                        space.getOneItem(o).statusStringForHistory(posFactor, velFactor)));
+            if (xmlHistory) {
+                StringBuilder data = new StringBuilder(XMLmv.putTag("at", jdn.getJdN() + "," + sdf.format(jdn.getTime())));
+                for (int o = 0; o < nObj; o++) {
+                    data.append(XMLmv.putTag("obj",
+                            space.getOneItem(o).statusStringForHistory(posFactor, velFactor)));
+                }
+                String toFile = new String(XMLmv.putTag("set", data));
+                historyFileStream.write(toFile.getBytes());
             }
-            String toFile = new String(XMLmv.putTag("set", data));
-            historyFileStream.write(toFile.getBytes());
+            else {
+                for (int o = 0; o < nObj; o++) {
+                    String toFile = "" + jdn.getJdN() + "," + sdf.format(jdn.getTime()) + ", " + nowT + ", " +
+                            space.getOneItem(o).statusStringForHistory(posFactor, velFactor);
+                    historyFileStream.write(toFile.getBytes());
+                }
+            }
             bRetVal = true;
         } catch (IOException e) {
             showError("Some problem writing Vectors to history file " + historyFilePath + "\n" + e.getMessage());
@@ -829,15 +847,15 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         FileDialog fileDlg =
                 new FileDialog(mainF, title,
                         FileDialog.SAVE);
-        fileDlg.setFile("*.xml");
+        fileDlg.setFile("*.csv");
         fileDlg.setVisible(true);
 
         String bareFile = fileDlg.getFile();
         if (!(bareFile == null)) {
             int len = bareFile.length();
-            if ((len < 8) || !(bareFile.substring(len - 4).equalsIgnoreCase(".xml"))) {
-                showMessage("Adding '.xml' to file name");
-                bareFile = bareFile + ".xml";
+            if ((len < 8) || !(bareFile.substring(len - 4).equalsIgnoreCase(".csv"))) {
+                showMessage("Adding '.csv' to file name");
+                bareFile = bareFile + ".csv";
             }
             fileName = fileDlg.getDirectory() + bareFile;
         }

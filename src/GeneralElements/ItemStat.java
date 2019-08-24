@@ -124,6 +124,15 @@ public class ItemStat {
         return csvStr;
     }
 
+    public StringBuilder accelerationStringForCSV(double factor) {
+        StringBuilder csvStr = new StringBuilder();
+        csvStr.append("" + (factor * acc.x));
+        csvStr.append(", " + (factor * acc.y));
+        csvStr.append(", " + (factor * acc.z));
+        csvStr.append(", " + (factor * acc.length()));
+        return csvStr;
+    }
+
     public StringBuilder angularVelocityStringForCSV(double factor) {
         StringBuilder csvStr = new StringBuilder();
         csvStr.append("" + (factor * angularVelocity.x));
