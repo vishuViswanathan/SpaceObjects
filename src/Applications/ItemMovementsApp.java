@@ -531,6 +531,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         double endT;
         debug("in doCalculationSERIAL");
         if (fresh) {
+            space.initAllItemConnections();
             space.setGlobalLinksAndActions();
             nowT = 0;
             setRefreshInterval(refreshInterval);
@@ -551,11 +552,11 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             nextHistorySave += fileHistoryInterval;
         }
         runIt = true;
-//        try {
-//            Thread.sleep(2);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Thread.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         debug("before runIt && nowT < endT and continueIt " + runIt + ", " + nowT + ", " + endT + ", " + continueIt);
         boolean firstTime = true;
         while (runIt && nowT < endT) {
@@ -641,6 +642,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 //        continueIt = true;
         double endT;
         if (fresh) {
+            space.initAllItemConnections();
             space.setGlobalLinksAndActions();
             nowT = 0;
             setRefreshInterval(refreshInterval);
@@ -925,6 +927,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         String xmlStr = new String(data);
                         if (getBaseDataFromXML(xmlStr) && space.takeFromXML(xmlStr)) {
                             bRetVal = true;
+                            space.initAllItemConnections();
                             parent().toFront();
                         } else
                             showError("Unable to take data from file");
@@ -1008,7 +1011,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     public static void showError(String msg, Component caller) {
-        log.info(msg);
+//        log.info(msg);
         JOptionPane.showMessageDialog(caller, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
         mainF.toFront();
     }

@@ -137,13 +137,14 @@ public class Aligner extends JetsAndSeekers {
     }
 
 
-    public void setActive(boolean active, OneTimeStep theStep, double deltaT) {
+    public void setActiveOLD(boolean active, OneTimeStep theStep, double deltaT) {
         this.active = active;
         if (active) {
             if (this.theStep != theStep) { // a new step
                 this.theStep = theStep;
                 prepareAlignToList();
-                basicsSet = prepareBasicsForTorques();
+                basicsSet = prepareBasicsForTorques(deltaT);
+//                basicsSet = prepareBasicsForTorques();
             }
             updateTorque(deltaT);
         }
@@ -154,23 +155,156 @@ public class Aligner extends JetsAndSeekers {
         }
     }
 
+    public void setActive(boolean active, OneTimeStep theStep, double deltaT) {
+        this.active = active;
+        if (active) {
+//            if (this.theStep != theStep) { // a new step
+                this.theStep = theStep;
+                prepareAlignToList();
+                basicsSet = prepareBasicsForTorques(deltaT);
+                instantaneousAlign();
+//            }
+        }
+        else {
+            this.theStep = null;
+            basicsSet = false;
+            nowTimePos = NOTSTARTED;
+        }
+    }
+
+    void instantaneousAlign() {
+        Vector3dMV alignTo = new Vector3dMV(globalAlignTo);
+        item.globalToItem().transform(alignTo);
+        double numerator = 0;
+        double denominator = 0;
+        Vector3dMV deltaAngle = new Vector3dMV();
+        // first action
+        switch (direction) {
+            case POSZ:
+            case NEGZ:
+                numerator = alignTo.y;
+                denominator = alignTo.z;
+                break;
+            case POSX:
+            case NEGX:
+                numerator = alignTo.z;
+                denominator = alignTo.x;
+                break;
+            case POSY:
+            case NEGY:
+                numerator = alignTo.x;
+                denominator = alignTo.y;
+                break;
+        }
+        double theta;
+        if (denominator == 0)
+            theta = ((numerator == 0) ? 0 : -Math.PI / 2);
+        else
+            theta = -Math.atan(numerator / denominator);
+        if (denominator < 0)
+            theta -= Math.PI;
+        if (theta < -Math.PI)
+            theta += (2 * Math.PI);
+        if (opposite) { // case of NEGX etc.
+            if (theta <= 0)
+                theta += Math.PI;
+            else
+                theta -= Math.PI;
+        }
+//        theta = -theta;
+        switch (direction) {
+            case POSZ:
+            case NEGZ:
+                deltaAngle.set(theta, 0, 0);
+                break;
+            case POSX:
+            case NEGX:
+                deltaAngle.set(0, theta, 0);
+                break;
+            case POSY:
+            case NEGY:
+                deltaAngle.set(0, 0, theta);
+                break;
+        }
+//        System.out.println("theta " + theta);
+        item.updateAngularPosition(deltaAngle);
+        // second action
+        Vector3dMV alignTo2 = new Vector3dMV(globalAlignTo);
+        item.globalToItem().transform(alignTo2);
+        switch (direction) {
+            case POSZ:
+            case NEGZ:
+                numerator = alignTo2.x;
+                denominator = alignTo2.z;
+                break;
+            case POSX:
+            case NEGX:
+                numerator = alignTo2.y;
+                denominator = alignTo2.x;
+                break;
+            case POSY:
+            case NEGY:
+                numerator = alignTo2.z;
+                denominator = alignTo2.y;
+                break;
+        }
+        if (denominator == 0)
+            theta = ((numerator == 0) ? 0 : Math.PI / 2);
+        else
+            theta = Math.atan(numerator / denominator);
+        if (denominator < 0)
+            theta += Math.PI;
+        if (theta > Math.PI)
+            theta -= (2 * Math.PI);
+        if (opposite) { // case of NEGX etc.
+            if (theta <= 0)
+                theta += Math.PI;
+            else
+                theta -= Math.PI;
+        }
+//        theta = -theta;
+        switch (direction) {
+            case POSZ:
+            case NEGZ:
+                deltaAngle.set(0, theta, 0);
+                break;
+            case POSX:
+            case NEGX:
+                deltaAngle.set(0, 0, theta);
+                break;
+            case POSY:
+            case NEGY:
+                deltaAngle.set(theta, 0, 0);
+                break;
+        }
+//        System.out.println("theta2 " + theta);
+        item.updateAngularPosition(deltaAngle);
+    }
+
     Vector3dMV globalAlignTo;
     double tRefSq;
     boolean basicsSet = false;
 
-    private boolean prepareBasicsForTorques() {
+    private boolean prepareBasicsForTorques(double deltaT) {
         boolean retVal = false;
-        globalAlignTo = new Vector3dMV(item.getVelocity());
+        switch (theStep.stepAction) {
+            case ALIGNTOVELOCITY:
+            case ALIGNCOUNTERTOVELOCITY:
+                globalAlignTo = new Vector3dMV(item.getVelocity(theStep.alignToObject));
+                break;
+            case ALIGNTOANOBJECT:
+                globalAlignTo = new Vector3dMV(theStep.alignToObject.getPos());
+                break;
+        }
         if (theStep.stepAction == OneTimeStep.StepAction.ALIGNCOUNTERTOVELOCITY)
             globalAlignTo.negate();
         halfTime = theStep.duration() / 2;
         if (halfTime > 0) {
             quarter1Time = halfTime / 2;
+            quarter1Time = ((long)(quarter1Time / deltaT)) * deltaT;
             // redo the timings
             halfTime =  2 * quarter1Time;
             theStep.setDuration(2 * halfTime);
-
-
             quarter3Time = quarter1Time + halfTime;
             tRefSq = quarter1Time * quarter1Time;
             nowTimePos = NOTSTARTED;
@@ -194,6 +328,7 @@ public class Aligner extends JetsAndSeekers {
             this.prev = prev;
             this.next = next;
         }
+
 
         void setTorque(boolean second) {
             Vector3dMV alignTo = new Vector3dMV(globalAlignTo);
@@ -240,7 +375,8 @@ public class Aligner extends JetsAndSeekers {
                     else
                         theta -= Math.PI;
                 }
-                prev.torque = theta / tRefSq * prev.mI;
+//                prev.torque = theta / tRefSq * prev.mI;
+                prev.torque = -theta / tRefSq * prev.mI;
 
             } else {
                 if (denominator == 0)
@@ -257,7 +393,8 @@ public class Aligner extends JetsAndSeekers {
                     else
                         theta -= Math.PI;
                 }
-                next.torque = theta / tRefSq * next.mI;
+//                next.torque = theta / tRefSq * next.mI;
+                next.torque = -theta / tRefSq * next.mI;
             }
         }
     }

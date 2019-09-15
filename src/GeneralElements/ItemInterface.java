@@ -6,6 +6,7 @@ import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
+import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
 import javax.media.j3d.Group;
@@ -94,6 +95,8 @@ public interface ItemInterface {
             return retVal;
         }
     }
+
+    void initConnections();
 
     ItemType getItemType();
 
@@ -245,6 +248,8 @@ public interface ItemInterface {
 
     Vector3d getVelocity();
 
+    Vector3d getVelocity(ItemInterface relativeTo);
+
     Point3d getPos();
 
     String getImageName();
@@ -268,6 +273,8 @@ public interface ItemInterface {
     Window showControlPanel(InputControl inpC, Component parent);
 
     void setLocalForces();
+
+    ItemInterface[] getOtherItems();
 
     void initStartForce();
 
@@ -314,6 +321,8 @@ public interface ItemInterface {
     //    =========================== calculations ======================
 
     boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    void updateAngularPosition(Vector3dMV deltaAngle);
 
     Transform3D globalToItem();
 

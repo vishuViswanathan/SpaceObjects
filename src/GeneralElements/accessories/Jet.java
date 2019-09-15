@@ -69,6 +69,7 @@ public class Jet extends JetsAndSeekers {
     public void addEffect() {
         if (active) {
             item.addTojetForce(jetData.getForce());
+            System.out.println(name + ": " + jetData.getForce().length());
             item.addToJetTorque(jetData.getTorque());
         }
     }
@@ -160,7 +161,7 @@ public class Jet extends JetsAndSeekers {
             MultiPairColPanel jpBasic = new MultiPairColPanel("Jet Details");
 //            jpBasic.addItemPair(ntDuration);
             jpBasic.addItemPair("Jet ID", tName);
-            jpBasic.addItemPair("Jet Direction Vector (m)", directionP);
+            jpBasic.addItemPair("Jet-Force Direction Vector (m)", directionP);
             jpBasic.addItemPair("Jet Location Vector (m)", locationP);
             jpBasic.addItem("Direction and Location are in Item's local coordinates");
             jpBasic.addItem(forceSource.fsDetails());

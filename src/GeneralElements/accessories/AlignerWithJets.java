@@ -165,10 +165,10 @@ public class AlignerWithJets extends JetsAndSeekers {
                 globalAlignTo = objectDirection(theStep.alignToObject);
                 break;
             case ALIGNTOVELOCITY:
-                globalAlignTo = new Vector3dMV(item.getVelocity());
+                globalAlignTo = new Vector3dMV(item.getVelocity(theStep.alignToObject));
                 break;
             case ALIGNCOUNTERTOVELOCITY:
-                globalAlignTo = new Vector3dMV(item.getVelocity());
+                globalAlignTo = new Vector3dMV(item.getVelocity(theStep.alignToObject));
                 globalAlignTo.negate();
                 break;
             case TURNBYANGLE:
@@ -182,8 +182,8 @@ public class AlignerWithJets extends JetsAndSeekers {
         return true;
     }
 
-    Vector3dMV objectDirection(Item object) {
-        Vector3dMV retVal = new Vector3dMV(object.status.pos);
+    Vector3dMV objectDirection(ItemInterface object) {
+        Vector3dMV retVal = new Vector3dMV(object.getStatus().pos);
         retVal.sub(item.getPos());
         return retVal;
     }

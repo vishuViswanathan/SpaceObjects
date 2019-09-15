@@ -325,6 +325,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             lastVelocity = status.velocity;
             effectiveForce.set(netForce);
             nowAcc.scale(oneByMass, effectiveForce);
+//            System.out.println("DarkMatter.#328 nowAcc: " +  nowAcc.dataInCSV() + ", Vel :" + status.velocity.dataInCSV());
             effectiveAcc.setMean(nowAcc, lastAcc);
             deltaV.scale(deltaT, effectiveAcc);
             newVelocity.add(lastVelocity, deltaV);

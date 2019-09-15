@@ -94,7 +94,6 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
         thisItem = this;
     }
 
-
     public ItemBD(String xmlStr, Window parent) {
         this(parent);
         setRadioButtons();
@@ -108,6 +107,10 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
 
     public double getGM() {
         return gm;
+    }
+
+    public ItemInterface[] getOtherItems() {
+        return space.getOtherItems(this);
     }
 
     @Override
@@ -130,9 +133,19 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
         return status.velocity;
     }
 
+    public Vector3d getVelocity(ItemInterface relativeTo) {
+        Vector3d v = new Vector3d(status.velocity);
+        v.sub(relativeTo.getVelocity());
+        return v;
+    }
+
     @Override
     public Point3d getPos() {
         return status.pos;
+    }
+
+    public void initConnections() {
+        jetController.initConnections(space);
     }
 
     public ItemType getItemType() {
@@ -1002,6 +1015,10 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
             changed = true;
         }
         return changed;
+    }
+
+    public void updateAngularPosition(Vector3dMV deltaAngle){
+        itemGraphic.get().updateAngularPosition(deltaAngle);
     }
 
     double lastTime = 0;

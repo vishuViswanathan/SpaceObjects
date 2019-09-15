@@ -104,6 +104,11 @@ public class ItemSpace {
         allItemLinks.add(l);
     }
 
+    public void initAllItemConnections() {
+        for (ItemInterface it: allItems)
+            it.initConnections();
+    }
+
     public void setGlobalLinksAndActions() {
         ItemLink link;
         for (int il = 0; il < allItemLinks.size();il++ ) {
@@ -230,6 +235,18 @@ public class ItemSpace {
                 itemTable.addOneRow(newItem);
             }
         }
+    }
+
+    public boolean noNameRepeat(String newItemName) {
+        boolean retVal = true;
+        debug("Chacking item repeat");
+        for (ItemInterface it: allItems) {
+            if (newItemName.equalsIgnoreCase(it.getName())) {
+                retVal = false;
+                break;
+            }
+        }
+        return retVal;
     }
 
     LinkedList <ItemLink> tempInfList;

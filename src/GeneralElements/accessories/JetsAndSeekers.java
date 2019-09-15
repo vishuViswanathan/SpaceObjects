@@ -3,6 +3,7 @@ package GeneralElements.accessories;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
+import GeneralElements.ItemSpace;
 import mvUtils.display.DataWithStatus;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -141,6 +142,10 @@ public abstract class JetsAndSeekers {
         thePlan = new OneJetPlan(this);
     }
 
+    public void initConnections(ItemSpace space) {
+        thePlan.initConnections(space);
+    }
+
     public static DataWithStatus<JetsAndSeekers> getJetsAndSeekers(ItemInterface item, String xmlStr) {
         DataWithStatus<JetsAndSeekers> retVal = new DataWithStatus<>();
         ValAndPos vp;
@@ -165,6 +170,10 @@ public abstract class JetsAndSeekers {
                 break;
         }
         return retVal;
+    }
+
+    public ItemInterface[] getOtherItems() {
+        return item.getOtherItems();
     }
 
     public static String[] getColHeader() {
@@ -207,6 +216,7 @@ public abstract class JetsAndSeekers {
     public boolean completeThisStep(OneTimeStep theStep, double nowT, double deltaT) {
         boolean done = false;
         if (nowT >= theStep.startTime) {
+            System.out.println(name + ": " + nowT);
             boolean activate = false;
             if (nowT < theStep.endTime)
                 activate = true;

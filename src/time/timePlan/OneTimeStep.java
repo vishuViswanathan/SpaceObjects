@@ -5,6 +5,7 @@ import GeneralElements.Display.TuplePanel;
 import GeneralElements.Display.controlPanel.Indicator;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
+import GeneralElements.ItemSpace;
 import GeneralElements.accessories.AlignerWithJets;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.InputControl;
@@ -95,7 +96,8 @@ public class OneTimeStep {
     }
     JetsAndSeekers forElement;
     public StepAction stepAction;
-    public Item alignToObject;
+    public ItemInterface alignToObject;
+    public String alignToName = "";
     public Vector3dMV turnByAngle = new Vector3dMV();
     public double startTime;
     public double duration;
@@ -130,6 +132,12 @@ public class OneTimeStep {
         this.startTime = startTime;
         this.duration = duration;
         this.endTime = startTime + duration;
+    }
+
+    public void initConnections(ItemSpace space) {
+        if (alignToName.length() > 0)
+            alignToObject = space.getItem(alignToName);
+
     }
 
     public static String[] getColHeader() {
@@ -205,6 +213,7 @@ public class OneTimeStep {
 //        double duration;
         Item.EditResponse response;
         JComboBox<StepAction> cbStepAction;
+        JComboBox<ItemInterface> cbAlignToObject;
         NumberTextField ntStartTime;
         NumberTextField ntDuration;
         JButton ok = new JButton("OK");
@@ -223,11 +232,26 @@ public class OneTimeStep {
 //            duration = endTime - startTime;
             cbStepAction = new JComboBox<>(forElement.actions()); //StepAction.values());
             cbStepAction.setSelectedItem(stepAction);
+            cbAlignToObject = new JComboBox<>(forElement.getOtherItems());
+            if (alignToObject != null)
+                cbAlignToObject.setSelectedItem(alignToObject);
+            cbAlignToObject.setEnabled(false);
+            cbStepAction.addActionListener(e -> {
+                StepAction action = (StepAction)cbStepAction.getSelectedItem();
+                if (action == StepAction.ALIGNTOANOBJECT || action == StepAction.ALIGNTOVELOCITY ||
+                        action == StepAction.ALIGNCOUNTERTOVELOCITY)
+                    cbAlignToObject.setEnabled(true);
+                else
+                    cbAlignToObject.setEnabled(false);
+            });
+            cbStepAction.setSelectedItem(stepAction);
             ntStartTime = new NumberTextField(inpC, startTime, 6, false, 0, Double.MAX_VALUE, "#,##0.000", "Start Time (s)");
             ntDuration = new NumberTextField(inpC, duration, 6, false, 0, 1e6, "#,##0.000", "Sep Duration (s)");
             JPanel outerP = new JPanel(new BorderLayout());
             MultiPairColPanel jpBasic = new MultiPairColPanel("Time Plan Step Details");
             jpBasic.addItemPair("Select Action", cbStepAction);
+            jpBasic.addItemPair("Object", cbAlignToObject);
+            jpBasic.addItem("(Applicable for Object and Vel selection)");
             jpBasic.addItemPair(ntStartTime);
             jpBasic.addItemPair(ntDuration);
             jpBasic.addBlank();
@@ -274,9 +298,17 @@ public class OneTimeStep {
                 if (duration > 0) {
                     if (ntStartTime.dataOK()) {
                         stepAction = (StepAction)cbStepAction.getSelectedItem();
-                        startTime = ntStartTime.getData();
-                        endTime = startTime + duration;
-                        retVal = true;
+                        if (stepAction == StepAction.TURNBYANGLE) {
+                            ItemMovementsApp.showMessage("NOT ready for " + StepAction.TURNBYANGLE + " yet!");
+                        }
+                        else {
+                            startTime = ntStartTime.getData();
+                            endTime = startTime + duration;
+                            alignToObject = (Item)cbAlignToObject.getSelectedItem();
+                            if (alignToObject != null)
+                                alignToName = alignToObject.getName();
+                            retVal = true;
+                        }
                     }
                 }
             }
@@ -289,6 +321,7 @@ public class OneTimeStep {
 
     public StringBuilder dataInXML() {
         return (new StringBuilder(XMLmv.putTag("stepAction", stepAction.toString())).
+                append(XMLmv.putTag("alignToName", alignToName)).
                 append(XMLmv.putTag("startTime", startTime))).
                 append(XMLmv.putTag("duration", (endTime - startTime)));
     }
@@ -298,6 +331,13 @@ public class OneTimeStep {
         vp = XMLmv.getTag(xmlStr, "stepAction", 0);
         if (vp.val.length() > 0)
             stepAction = StepAction.getEnum(vp.val);
+        if (stepAction == StepAction.ALIGNTOANOBJECT || stepAction == StepAction.ALIGNTOVELOCITY ||
+                stepAction == StepAction.ALIGNCOUNTERTOVELOCITY) {
+            vp = XMLmv.getTag(xmlStr, "alignToName", vp.endPos);
+            alignToName = vp.val;
+        }
+        else
+            alignToName = "";
         vp = XMLmv.getTag(xmlStr, "startTime", vp.endPos);
         double stTime = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "duration", vp.endPos);

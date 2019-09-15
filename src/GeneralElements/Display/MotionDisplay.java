@@ -219,6 +219,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         tg.addChild(vpTransBehavior);
     }
     JLabel nowTime = new JLabel();
+    JLabel nowDate = new JLabel();
     JLabel timeLabel;
     String  pauseStr = "Pause Action";
     String resumeStr = "Resume";
@@ -361,7 +362,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JPanel commonMenuPanel() {
         JPanel menuP = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 0, 5, 0);
+        gbc.insets = new Insets(5, 0, 0, 0);
         gbc.gridx = 0;
         gbc.gridy = 0;
         ActionListener l = new ActionListener() {
@@ -385,6 +386,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         nowTp.add(timeLabel);
         nowTime.setSize(new Dimension(100, 20));
         nowTp.add(nowTime);
+        nowDate.setSize(new Dimension(150, 20));
+        nowTp.add(nowDate);
         menuP.add(nowTp, gbc);
         gbc.gridy++;
         menuP.add(getPlanetSizeBar(), gbc);
@@ -397,6 +400,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             menuP.add(showRealTimeCB(), gbc);
             gbc.gridy++;
 //        }
+        menuP.add(showLinksCB(), gbc);
         menuP.add(showLinksCB(), gbc);
         gbc.gridy++;
         menuP.add(showOrbitCB(), gbc);
@@ -520,7 +524,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return chkBshowLinks;
     }
 
-        JCheckBox showItemsCB() {
+    JCheckBox showItemsCB() {
         chkBShowItems = new JCheckBox("Show Items", true);
         chkBShowItems.setSelected(controller.bShowItems);
         chkBShowItems.addChangeListener(new ChangeListener() {
@@ -532,7 +536,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         });
         return chkBShowItems;
     }
-
 
     JCheckBox showRealTimeCB() {
         chkBrealTime = new JCheckBox("Real Time", true);
@@ -813,13 +816,15 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 //  ===============================      Transferred from ItemGraphics
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
-    DecimalFormat nowTfmt = new DecimalFormat("#,###.000000");
+    DecimalFormat nowTfmt = new DecimalFormat("#,###.000");
     Color colRealTime = Color.BLUE;
     Color colSimulation = Color.gray;
     public void updateDisplay(double nowT, DateAndJDN viewTime, double hrsPerSec, boolean bLive) {
-        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            nowTime.setText(sdf.format(viewTime.getTime()));
-        else
+        nowDate.setText(sdf.format(viewTime.getTime()));
+//        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+//        if (controller.bShowDateTime)
+//            nowTime.setText(sdf.format(viewTime.getTime()));
+//        else
             nowTime.setText(nowTfmt.format(nowT)); // / 3600));
         if (bLive) {
             nowTime.setForeground(colRealTime);

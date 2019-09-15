@@ -3,6 +3,7 @@ package time.timePlan;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
+import GeneralElements.ItemSpace;
 import GeneralElements.accessories.Jet;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.*;
@@ -57,6 +58,11 @@ public class JetTimeController extends JetController{
             jetAndPlan.remove(jet);
         }
 
+    }
+
+    public void initConnections(ItemSpace space) {
+        for (JetsAndSeekers j: jets)
+            j.initConnections(space);
     }
 
     public boolean addOneJetPlanStep(Jet jet, double startTime, double duration) {

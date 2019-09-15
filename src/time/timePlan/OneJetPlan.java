@@ -3,6 +3,7 @@ package time.timePlan;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
+import GeneralElements.ItemSpace;
 import GeneralElements.accessories.JetsAndSeekers;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.InputControl;
@@ -120,6 +121,11 @@ public class OneJetPlan {
 
     public void removeOneStep(int stepN) {
         theSteps.remove(stepN);
+    }
+
+    public void initConnections(ItemSpace space) {
+        for (OneTimeStep oneStep: theSteps)
+            oneStep.initConnections(space);
     }
 
     public Item.EditResponse editPlan(InputControl inpC, Component c) {

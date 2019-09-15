@@ -129,6 +129,17 @@ public class Item extends DarkMatter implements ItemInterface {
         return status.velocity;
     }
 
+    public void initConnections() {
+        if (jetController != null)
+            jetController.initConnections(space);
+    }
+
+    public Vector3d getVelocity(ItemInterface relativeTo) {
+        Vector3d v = new Vector3d(status.velocity);
+        v.sub(relativeTo.getVelocity());
+        return v;
+    }
+
     public Point3d getPos() {
         return status.pos;
     }
@@ -663,29 +674,36 @@ public class Item extends DarkMatter implements ItemInterface {
             boolean retVal = false;
             name = tfItemName.getText();
             if (name.length() > 1 && (!name.substring(0, 2).equals("##"))) {
-                try {
-                    setMass(ntItemMass.getData());
+//                if (space.noNameRepeat(name)) {
+                if (space.getItem(name) != this) {
+                    try {
+                        setMass(ntItemMass.getData());
 //                    mass = ntItemMass.getData();
-                    if (itemType == ItemType.SPHERE) {
-                        imageName = tfImageFilePath.getText().trim();
-                        commonMI = ntCommonMI.getData();
-                        setMomentsOfInertia(commonMI);
+                        if (itemType == ItemType.SPHERE) {
+                            imageName = tfImageFilePath.getText().trim();
+                            commonMI = ntCommonMI.getData();
+                            setMomentsOfInertia(commonMI);
+                        }
+                        dia = ntItemDia.getData();
+                        if (itemType == ItemType.VMRL) {
+                            vrmlFile = tfVRMLflePath.getText().trim();
+                            Vector3d mIxyz = new Vector3d(tpMI.getTuple3d());
+                            setMomentsOfInertia(mIxyz.x, mIxyz.y, mIxyz.z);
+                        }
+                        eCompression = ntElasticity.getData();
+                        status.pos.set(itemPosTuplePan.getTuple3d());
+                        status.angularPos.set(angularPosTuplePan.getTuple3d());
+                        status.velocity.set(itemVelTuplePan.getTuple3d());
+                        status.angularVelocity.set(angularVelTuplePan.getTuple3d());
+                        bFixedLocation = rbItemFixedPos.isSelected();
+                        retVal = true;
+                    } catch (Exception e) {
+                        showError("Some parameter is not acceptable");
+                        retVal = false;
                     }
-                    dia = ntItemDia.getData();
-                    if (itemType == ItemType.VMRL) {
-                        vrmlFile = tfVRMLflePath.getText().trim();
-                        Vector3d mIxyz = new Vector3d(tpMI.getTuple3d());
-                        setMomentsOfInertia(mIxyz.x, mIxyz.y, mIxyz.z);
-                    }
-                    eCompression = ntElasticity.getData();
-                    status.pos.set(itemPosTuplePan.getTuple3d());
-                    status.angularPos.set(angularPosTuplePan.getTuple3d());
-                    status.velocity.set(itemVelTuplePan.getTuple3d());
-                    status.angularVelocity.set(angularVelTuplePan.getTuple3d());
-                    bFixedLocation = rbItemFixedPos.isSelected();
-                    retVal = true;
-                } catch (Exception e) {
-                    showError("Some parameter is not acceptable");
+                }
+                else {
+                    showError("Item name " + name + " already exisits in the list");
                     retVal = false;
                 }
             } else
@@ -705,6 +723,10 @@ public class Item extends DarkMatter implements ItemInterface {
         status.time = 0;
         nextReport = 0;
         initNetForce();
+    }
+
+    public ItemInterface[] getOtherItems() {
+        return space.getOtherItems(this);
     }
 
     public boolean hasAnyAccessories() {
@@ -996,6 +1018,11 @@ public class Item extends DarkMatter implements ItemInterface {
                 break;
         }
         return changed;
+    }
+
+
+    public void updateAngularPosition(Vector3dMV deltaAngle){
+        itemGraphic.get().updateAngularPosition(deltaAngle);
     }
 
     double lastTime = 0;
