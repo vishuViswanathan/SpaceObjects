@@ -242,6 +242,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JCheckBox chkBshowOrbit;
     JCheckBox chkBshowLinks;
     JCheckBox chkBrealTime;
+    JCheckBox chkShowRelOrbits;
+    boolean bShowRelOrbits = false;
 
     JPanel commonMenuPanel;
     JPanel commonMenuPanelHolder;
@@ -280,7 +282,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                        break block;
                    }
                    if (src == cbItems) {
-                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem());
+                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem(), bShowRelOrbits,
+                               relOrbitAttrib);
                        localViewFrame.setVisible(true);
                        break block;
                    }
@@ -312,9 +315,9 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         outerGbc.gridy++;
         viewAllZX.addActionListener(l);
         outerP.add(viewAllZX, outerGbc);
-        outerGbc.gridy++;
-        saveViewB.addActionListener(l);
-        outerP.add(saveViewB, outerGbc);
+//        outerGbc.gridy++;
+//        saveViewB.addActionListener(l);
+//        outerP.add(saveViewB, outerGbc);
         outerGbc.gridy++;
         resetViewB.addActionListener(l);
         outerP.add(resetViewB, outerGbc);
@@ -402,6 +405,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 //        }
         menuP.add(showLinksCB(), gbc);
         menuP.add(showLinksCB(), gbc);
+        gbc.gridy++;
+        menuP.add(showRelOrbitCB(), gbc);
         gbc.gridy++;
         menuP.add(showOrbitCB(), gbc);
         gbc.gridy++;
@@ -549,6 +554,19 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return chkBrealTime;
     }
 
+    JCheckBox showRelOrbitCB() {
+        chkShowRelOrbits = new JCheckBox("Show Rel Orbits", true);
+        chkShowRelOrbits.setSelected(bShowRelOrbits);
+        chkShowRelOrbits.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                bShowRelOrbits = chkShowRelOrbits.isSelected();
+                relOrbitAttrib.setVisible(bShowRelOrbits);
+            }
+        });
+        return chkShowRelOrbits;
+    }
+
     JScrollBar planetSizeBar;
     NumberTextField nlPlanetScale;
 
@@ -599,6 +617,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     RenderingAttributes orbitAttrib;
+    RenderingAttributes relOrbitAttrib;
     RenderingAttributes linkAttrib;
     RenderingAttributes itemAttrib;
 
@@ -612,9 +631,13 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         orbitAttrib = new RenderingAttributes();
         orbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         orbitAttrib.setVisible(controller.bShowOrbit);
+        relOrbitAttrib = new RenderingAttributes();
+        relOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+        relOrbitAttrib.setVisible(bShowRelOrbits);
         linkAttrib = new RenderingAttributes();
         linkAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         linkAttrib.setVisible(controller.bShowLinks);
+
         space.addObjectAndOrbit(itemGraphics, tgMain, itemAttrib, orbitAttrib, linkAttrib);
         tgMain.addChild(oneAxis(1, 1e13, Color.red));
         tgMain.addChild(oneAxis(2, 1e13, Color.blue));
@@ -804,12 +827,12 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     public void showLocalView(ItemInterface item) {
-        localViewFrame.showLocalView(item);
+        localViewFrame.showLocalView(item, bShowRelOrbits, relOrbitAttrib);
         showLocalViewFrame(item.getName());
     }
 
     public void showLocalView(ItemInterface item, int atX, int atY) {
-        localViewFrame.showLocalView(item, atX, atY);
+        localViewFrame.showLocalView(item, atX, atY, bShowRelOrbits, relOrbitAttrib);
         showLocalViewFrame(item.getName());
     }
 

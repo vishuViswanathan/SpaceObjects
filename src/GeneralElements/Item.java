@@ -900,6 +900,10 @@ public class Item extends DarkMatter implements ItemInterface {
 
     WeakReference<ItemGraphic> itemGraphic;
 
+    public ItemGraphic getItemGraphic() {
+        return itemGraphic.get();
+    }
+
     public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
         ItemGraphic itemG = new ItemGraphic(this);
         if (itemG.addObjectAndOrbit(grp, orbitAtrib)) {
@@ -914,9 +918,10 @@ public class Item extends DarkMatter implements ItemInterface {
         itemGraphic.get().setItemDisplayAttribute(itemAttribute);
     }
 
-    public void attachPlatform(ViewingPlatform platform) {
+    public void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbit,
+                               RenderingAttributes relOrbitAtrib) {
         try {
-            itemGraphic.get().attachPlatform(platform);
+            itemGraphic.get().attachPlatform(platform, bShowRelOrbit, relOrbitAtrib);
         } catch (NullPointerException e) {
             showError("ERROR in Attaching a platform to an item " + name + ":" + e.getMessage());
         }

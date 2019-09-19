@@ -1,6 +1,7 @@
 package GeneralElements;
 
 import GeneralElements.Display.ItemGraphic;
+import GeneralElements.Display.PathShape;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -119,6 +120,8 @@ public interface ItemInterface {
     double getGM();
 
     void noteTotalGM(double totalGM);
+
+    ItemGraphic getItemGraphic();
 
     static Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
         Item theItem = null;
@@ -308,7 +311,8 @@ public interface ItemInterface {
 
     void setItemDisplayAttribute(RenderingAttributes itemAttribute);
 
-    void attachPlatform(ViewingPlatform platform);
+    void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
+                        RenderingAttributes relOrbitAtrib);
 
     void detachPlatform();
 

@@ -910,9 +910,14 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
         itemGraphic.get().setItemDisplayAttribute(itemAttribute);
     }
 
-    public void attachPlatform(ViewingPlatform platform) {
+    public ItemGraphic getItemGraphic() {
+        return itemGraphic.get();
+    }
+
+    public void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
+                        RenderingAttributes relOrbitAtrib) {
         try {
-            itemGraphic.get().attachPlatform(platform);
+            itemGraphic.get().attachPlatform(platform, bShowRelOrbits, relOrbitAtrib);
         } catch (NullPointerException e) {
             showError("ERROR in Attaching a platform to an item " + name + ":" + e.getMessage());
         }

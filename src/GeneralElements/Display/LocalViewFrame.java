@@ -13,6 +13,7 @@ import mvUtils.display.NumberLabel;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -155,9 +156,10 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         addLocalViewingPlatform();
     }
 
-    public void showLocalView(ItemInterface item) {
+    public void showLocalView(ItemInterface item, boolean bShowRelOrbits,
+                              RenderingAttributes relOrbitAttrib) {
         jlItemName.setText(item.getName());
-        attachPlatformToItem(item);
+        attachPlatformToItem(item, bShowRelOrbits, relOrbitAttrib);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         localVp.setNominalViewingTransform();
         Transform3D defaultTr = new Transform3D();
@@ -171,9 +173,10 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     }
 
 
-    public void showLocalView(ItemInterface item, int atX, int atY) {
+    public void showLocalView(ItemInterface item, int atX, int atY, boolean bShowRelOrbits,
+                              RenderingAttributes relOrbitAttrib) {
         jlItemName.setText(item.getName());
-        attachPlatformToItem(item);
+        attachPlatformToItem(item, bShowRelOrbits, relOrbitAttrib);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         Transform3D mainVTr = new Transform3D();
         mainViewPlatform.getViewPlatformTransform().getTransform(mainVTr);
@@ -213,10 +216,13 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
 //        showLocalViewFrame(item.name);
     }
 
-    private void attachPlatformToItem(ItemInterface item) {
-        if (bPlatformWasAttached)
+    private void attachPlatformToItem(ItemInterface item, boolean showRelOrbits,
+                                      RenderingAttributes relOrbitAtrib) {
+        if (bPlatformWasAttached) {
             lastItemWithLocalPlatform.detachPlatform();
-        item.attachPlatform(localVp);
+            System.out.println("Local Platform detached");
+        }
+        item.attachPlatform(localVp, showRelOrbits, relOrbitAtrib);
         lastItemWithLocalPlatform = item;
         bPlatformWasAttached = true;
         this.itemInView = item;

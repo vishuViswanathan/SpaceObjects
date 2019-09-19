@@ -11,15 +11,17 @@ public class PointArrayFIFO extends PointArray {
     int nextPos = 0;
     int size = 0;
     boolean full = false;
-    PointArrayFIFO nextArray;
+    PointArrayFIFO nextArray = null;
     int onceIn = 1; // add data to it once in so may inputs
     int nowCount = 0;
+    Color3f color;
     public PointArrayFIFO(int vertexCount, int vertexFormat, Color3f color) {
         this(vertexCount, 1, vertexFormat, color);
     }
 
     public PointArrayFIFO(int vertexCount, int onceIn, int vertexFormat, Color3f color) {
         super(vertexCount, vertexFormat);
+        this.color = color;
         for (int i = 0; i < vertexCount; i++)
             setColor(i, color);
         size = vertexCount;
@@ -28,6 +30,10 @@ public class PointArrayFIFO extends PointArray {
 
     public void noteNextArray(PointArrayFIFO nextArray) {
         this.nextArray = nextArray;
+    }
+
+    public PointArrayFIFO getNextArray() {
+        return nextArray;
     }
 
     public void addCoordinate(Point3d point) {
