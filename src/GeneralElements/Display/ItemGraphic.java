@@ -76,6 +76,7 @@ public class ItemGraphic {
         prepareAllRelativeOrbits(relOrbitAtrib);
     }
 
+
     ViewingPlatform attachedPlatform;
     boolean bPlatformAttached = false;
 
@@ -142,20 +143,66 @@ public class ItemGraphic {
         return retVal;
     }
 
+    RelativePointArrayFIFO relativeOnePointArray(PointArrayFIFO onPointArray, ItemInterface itemRelativeTo) {
+        PointArrayFIFO  fifoRelativeTo = itemRelativeTo.getItemGraphic().getPtArray();
+        RelativePointArrayFIFO onePtArr = new RelativePointArrayFIFO(onPointArray, itemRelativeTo, fifoRelativeTo);
+        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_READ);
+        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_WRITE);
+        onePtArr.setCapability(PointArray.ALLOW_COLOR_WRITE);
+        return onePtArr;
+    }
+
+    boolean updateRelOrbitBase(ItemInterface itemRelativeTo) {
+        PointArrayFIFO  fifoRelativeTo = itemRelativeTo.getItemGraphic().getPtArray();
+        RelativePointArrayFIFO oneRelPtArr = relPtArr;
+        PointArrayFIFO ptArrHist = ptArr;
+        while (oneRelPtArr != null) {
+            oneRelPtArr.takeData(ptArrHist, itemRelativeTo, fifoRelativeTo);
+            oneRelPtArr = (RelativePointArrayFIFO)oneRelPtArr.getNextArray();
+            ptArrHist = ptArrHist.getNextArray();
+        }
+        return true;
+    }
+
     public PathShape[] prepareRelativeOrbit(ItemInterface relativeTo, RenderingAttributes orbitAtrib) {
-        relPtArr = relativeOnePointArray(ptArr, relativeTo);
+        if (relPtArr == null) {
+            relPtArr = relativeOnePointArray(ptArr, relativeTo);
 //                new RelativePointArrayFIFO(ptArr, relativeTo);
 //        RelativePointArrayFIFO onePtArr = relPtArr;
-        PointArrayFIFO onePtArr = relPtArr;
-        relOrbitShapes = new PathShape[nShapeSets];
-        for (int os = 0; os < orbitShapes.length; os++) {
-            relOrbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
-            onePtArr = onePtArr.getNextArray();
+            PointArrayFIFO onePtArr = relPtArr;
+            relOrbitShapes = new PathShape[nShapeSets];
+            for (int os = 0; os < orbitShapes.length; os++) {
+                relOrbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
+                onePtArr = onePtArr.getNextArray();
+            }
         }
         return relOrbitShapes;
     }
 
     void prepareAllRelativeOrbits(RenderingAttributes orbitAtrib) {
+        LinkedList<ItemInterface> itemList = item.getSpace().getAlItems();
+        if (relOrbitGroup == null) {
+            PathShape oneRelOrbitShapesArr[];
+            relOrbitGroup = new BranchGroup();
+            relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+            relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+            relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
+            for (ItemInterface i : itemList) {
+                oneRelOrbitShapesArr = i.getItemGraphic().prepareRelativeOrbit(item, orbitAtrib);
+                for (PathShape p : oneRelOrbitShapesArr)
+                    relOrbitGroup.addChild(p);
+            }
+            positionTrGrp.addChild(relOrbitGroup);
+        }
+        else {
+            positionTrGrp.removeChild(relOrbitGroup);
+            for (ItemInterface i : itemList) {
+                i.getItemGraphic().updateRelOrbitBase(item);
+            }
+        }
+    }
+
+    void prepareAllRelativeOrbitsOLD(RenderingAttributes orbitAtrib) {
         PathShape oneRelOrbitShapesArr[];
         LinkedList<ItemInterface> itemList = item.getSpace().getAlItems();
         if (relOrbitGroup != null) {
@@ -180,15 +227,6 @@ public class ItemGraphic {
 
     PointArrayFIFO onePointArray(int vertexCount, int onceIn, int vertexFormat, Color3f color) {
         PointArrayFIFO onePtArr = new PointArrayFIFO(vertexCount, onceIn, vertexFormat, color);
-        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_READ);
-        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_WRITE);
-        onePtArr.setCapability(PointArray.ALLOW_COLOR_WRITE);
-        return onePtArr;
-    }
-
-    RelativePointArrayFIFO relativeOnePointArray(PointArrayFIFO onPointArray, ItemInterface itemRelativeTo) {
-        PointArrayFIFO  fifoRelativeTo = itemRelativeTo.getItemGraphic().getPtArray();
-        RelativePointArrayFIFO onePtArr = new RelativePointArrayFIFO(onPointArray, itemRelativeTo, fifoRelativeTo);
         onePtArr.setCapability(PointArray.ALLOW_COORDINATE_READ);
         onePtArr.setCapability(PointArray.ALLOW_COORDINATE_WRITE);
         onePtArr.setCapability(PointArray.ALLOW_COLOR_WRITE);
