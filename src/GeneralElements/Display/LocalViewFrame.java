@@ -11,10 +11,7 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.NumberLabel;
 
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.Canvas3D;
-import javax.media.j3d.RenderingAttributes;
-import javax.media.j3d.Transform3D;
+import javax.media.j3d.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -222,7 +219,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
             lastItemWithLocalPlatform.detachPlatform();
             System.out.println("Local Platform detached");
         }
-        item.attachPlatform(localVp, showRelOrbits, relOrbitAtrib);
+        item.attachPlatform(localVp, showRelOrbits, relOrbitAtrib, motionDisplay.relOrbitGroup);
         lastItemWithLocalPlatform = item;
         bPlatformWasAttached = true;
         this.itemInView = item;

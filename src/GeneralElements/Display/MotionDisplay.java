@@ -5,6 +5,7 @@ import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import GeneralElements.utils.ThreeDSize;
+import collection.RelOrbitGroup;
 import time.DateAndJDN;
 import com.sun.j3d.utils.behaviors.mouse.MouseBehavior;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
@@ -51,6 +52,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     double duration;
     ItemMovementsApp controller;
     Vector<ItemGraphic> itemGraphics;
+    RelOrbitGroup relOrbitGroup;
+
 
     public MotionDisplay(ItemSpace space, double interval, double duration, ItemMovementsApp controller) throws Exception {
         super("Objects in Motion");
@@ -114,7 +117,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         univ.addBranchGraph(scene);
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
-    }
+        relOrbitGroup = new RelOrbitGroup();
+         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+         relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
+     }
 
     ViewDirection lastViewDirection = ViewDirection.ZMinus;
 

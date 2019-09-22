@@ -14,11 +14,11 @@ public class RelativePointArrayFIFO extends PointArrayFIFO {
     public RelativePointArrayFIFO(PointArrayFIFO reference, ItemInterface relativeTo, PointArrayFIFO fifoRelativeTo) {
         super(reference.getVertexCount(), reference.getVertexFormat(), reference.color);
         takeData(reference, relativeTo, fifoRelativeTo);
+        setCapability(PointArray.ALLOW_COORDINATE_READ);
+        setCapability(PointArray.ALLOW_COORDINATE_WRITE);
+        setCapability(PointArray.ALLOW_COLOR_WRITE);
         if (reference.nextArray != null) {
             nextArray = new RelativePointArrayFIFO(reference.nextArray, relativeTo, fifoRelativeTo.nextArray);
-            nextArray.setCapability(PointArray.ALLOW_COORDINATE_READ);
-            nextArray.setCapability(PointArray.ALLOW_COORDINATE_WRITE);
-            nextArray.setCapability(PointArray.ALLOW_COLOR_WRITE);
         }
     }
 

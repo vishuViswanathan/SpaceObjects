@@ -5,6 +5,7 @@ import GeneralElements.DarkMatter;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
+import collection.RelOrbitGroup;
 import collection.RelativePointArrayFIFO;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
@@ -22,7 +23,6 @@ import java.util.LinkedList;
  */
 public class ItemGraphic {
     TransformGroup positionTrGrp;
-    BranchGroup relOrbitGroup;
     Transform3D positionTransform = new Transform3D();
     TransformGroup tgPlanet;
     Transform3D scaleTransform = new Transform3D();
@@ -37,6 +37,7 @@ public class ItemGraphic {
     RelativePointArrayFIFO relPtArr;
     int nShapeSets = 4;
     int nPos = 1000; // number of positions
+    int onceIn = 4; // each historystep takes one data inthis many of theprevious
     Color3f color3f;
     double viewScale = 1;
     private ItemInterface item;
@@ -69,11 +70,11 @@ public class ItemGraphic {
     }
 
     public void attachPlatform(ViewingPlatform platform,
-                               boolean bShowRelOrbits, RenderingAttributes relOrbitAtrib) {
+                               boolean bShowRelOrbits, RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup) {
         attachedPlatform = platform;
         positionTrGrp.addChild(attachedPlatform);
         bPlatformAttached = true;
-        prepareAllRelativeOrbits(relOrbitAtrib);
+        prepareAllRelativeOrbits(relOrbitAtrib, relOrbitGroup);
     }
 
 
@@ -129,7 +130,7 @@ public class ItemGraphic {
             PointArrayFIFO onePtArr, lastOne = null;
             orbitShapes = new PathShape[nShapeSets];
             for (int os = 0; os < orbitShapes.length; os++) {
-                onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1)) ? 1 : 4), GeometryArray.COORDINATES | GeometryArray.COLOR_3, color3f);
+                onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1)) ? 1 : onceIn), GeometryArray.COORDINATES | GeometryArray.COLOR_3, color3f);
                 onePtArr.noteNextArray(lastOne);
                 orbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
                 lastOne = onePtArr;
@@ -143,12 +144,12 @@ public class ItemGraphic {
         return retVal;
     }
 
-    RelativePointArrayFIFO relativeOnePointArray(PointArrayFIFO onPointArray, ItemInterface itemRelativeTo) {
+    RelativePointArrayFIFO relativeOnePointArray(PointArrayFIFO onePointArray, ItemInterface itemRelativeTo) {
         PointArrayFIFO  fifoRelativeTo = itemRelativeTo.getItemGraphic().getPtArray();
-        RelativePointArrayFIFO onePtArr = new RelativePointArrayFIFO(onPointArray, itemRelativeTo, fifoRelativeTo);
-        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_READ);
-        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_WRITE);
-        onePtArr.setCapability(PointArray.ALLOW_COLOR_WRITE);
+        RelativePointArrayFIFO onePtArr = new RelativePointArrayFIFO(onePointArray, itemRelativeTo, fifoRelativeTo);
+//        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_READ);
+//        onePtArr.setCapability(PointArray.ALLOW_COORDINATE_WRITE);
+//        onePtArr.setCapability(PointArray.ALLOW_COLOR_WRITE);
         return onePtArr;
     }
 
@@ -160,6 +161,7 @@ public class ItemGraphic {
             oneRelPtArr.takeData(ptArrHist, itemRelativeTo, fifoRelativeTo);
             oneRelPtArr = (RelativePointArrayFIFO)oneRelPtArr.getNextArray();
             ptArrHist = ptArrHist.getNextArray();
+            fifoRelativeTo = fifoRelativeTo.getNextArray();
         }
         return true;
     }
@@ -167,8 +169,6 @@ public class ItemGraphic {
     public PathShape[] prepareRelativeOrbit(ItemInterface relativeTo, RenderingAttributes orbitAtrib) {
         if (relPtArr == null) {
             relPtArr = relativeOnePointArray(ptArr, relativeTo);
-//                new RelativePointArrayFIFO(ptArr, relativeTo);
-//        RelativePointArrayFIFO onePtArr = relPtArr;
             PointArrayFIFO onePtArr = relPtArr;
             relOrbitShapes = new PathShape[nShapeSets];
             for (int os = 0; os < orbitShapes.length; os++) {
@@ -179,46 +179,35 @@ public class ItemGraphic {
         return relOrbitShapes;
     }
 
-    void prepareAllRelativeOrbits(RenderingAttributes orbitAtrib) {
+    void prepareAllRelativeOrbits(RenderingAttributes orbitAtrib, RelOrbitGroup relOrbitGroup) {
         LinkedList<ItemInterface> itemList = item.getSpace().getAlItems();
-        if (relOrbitGroup == null) {
+        ItemGraphic ig;
+        if (!relOrbitGroup.isInitiated()) {
             PathShape oneRelOrbitShapesArr[];
-            relOrbitGroup = new BranchGroup();
-            relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
-            relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
-            relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
             for (ItemInterface i : itemList) {
                 oneRelOrbitShapesArr = i.getItemGraphic().prepareRelativeOrbit(item, orbitAtrib);
                 for (PathShape p : oneRelOrbitShapesArr)
                     relOrbitGroup.addChild(p);
             }
-            positionTrGrp.addChild(relOrbitGroup);
+            relOrbitGroup.setInitiated();
         }
         else {
-            positionTrGrp.removeChild(relOrbitGroup);
-            for (ItemInterface i : itemList) {
-                i.getItemGraphic().updateRelOrbitBase(item);
+
+            for (ItemInterface it : itemList) {
+                ig = it.getItemGraphic();
+                ig.detachRelOrbitGroup(relOrbitGroup);
+                ig.updateRelOrbitBase(item);
             }
         }
+        attachRelObitGroup(relOrbitGroup);
     }
 
-    void prepareAllRelativeOrbitsOLD(RenderingAttributes orbitAtrib) {
-        PathShape oneRelOrbitShapesArr[];
-        LinkedList<ItemInterface> itemList = item.getSpace().getAlItems();
-        if (relOrbitGroup != null) {
-//            relOrbitGroup.removeAllChildren();
-            positionTrGrp.removeChild(relOrbitGroup);
-        }
-        relOrbitGroup = new BranchGroup();
-        relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
-        relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
-        relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
-        for (ItemInterface i: itemList) {
-            oneRelOrbitShapesArr = i.getItemGraphic().prepareRelativeOrbit(item, orbitAtrib);
-            for (PathShape p: oneRelOrbitShapesArr)
-                relOrbitGroup.addChild(p);
-        }
+    public void attachRelObitGroup(RelOrbitGroup relOrbitGroup) {
         positionTrGrp.addChild(relOrbitGroup);
+    }
+
+    public void detachRelOrbitGroup(RelOrbitGroup relOrbitGroup) {
+        positionTrGrp.removeChild(relOrbitGroup);
     }
 
     public void setItemDisplayAttribute(RenderingAttributes attribute) {

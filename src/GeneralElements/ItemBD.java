@@ -5,6 +5,7 @@ import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.accessories.JetsAndSeekers;
 import GeneralElements.localActions.LocalAction;
+import collection.RelOrbitGroup;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -18,6 +19,7 @@ import mvUtils.physics.Vector3dMV;
 import mvUtils.physics.VectorBD;
 import time.timePlan.JetTimeController;
 
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
@@ -915,9 +917,10 @@ public class ItemBD extends DarkMatterBD implements ItemInterface {
     }
 
     public void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
-                        RenderingAttributes relOrbitAtrib) {
+                               RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup) {
+
         try {
-            itemGraphic.get().attachPlatform(platform, bShowRelOrbits, relOrbitAtrib);
+            itemGraphic.get().attachPlatform(platform, bShowRelOrbits, relOrbitAtrib, relOrbitGroup);
         } catch (NullPointerException e) {
             showError("ERROR in Attaching a platform to an item " + name + ":" + e.getMessage());
         }

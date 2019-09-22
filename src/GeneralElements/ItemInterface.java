@@ -2,6 +2,7 @@ package GeneralElements;
 
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.PathShape;
+import collection.RelOrbitGroup;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
@@ -10,6 +11,7 @@ import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
@@ -311,8 +313,11 @@ public interface ItemInterface {
 
     void setItemDisplayAttribute(RenderingAttributes itemAttribute);
 
+//    void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
+//                        RenderingAttributes relOrbitAtrib);
+
     void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
-                        RenderingAttributes relOrbitAtrib);
+                        RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup);
 
     void detachPlatform();
 
