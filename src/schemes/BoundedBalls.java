@@ -47,7 +47,7 @@ public class BoundedBalls implements DefaultScheme {
 //        space.addItem(it);
         it = new Surface("Floor", new Point3d( -5, ymin, -5),
                 new Point3d( -5, ymin, 0), new Point3d( 0, ymin, 5),
-                0.9, mainF );
+                1.0, mainF );
         it.setStickingPressure(10000);
         space.addItem(it);
         it = new Surface("EastWall", new Point3d( xmin, -5, -5),

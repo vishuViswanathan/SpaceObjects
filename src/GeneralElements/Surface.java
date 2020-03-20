@@ -41,7 +41,7 @@ public class Surface extends Item {
     }
 
     public Surface(Window parent, String name) {
-        this(name, new Point3d(0, 0, 0), new Point3d (5, 0, 0), new Point3d(0, 0, -5), parent);
+        this(name, new Point3d(0, 0, 0), new Point3d(5, 0, 0), new Point3d(0, 0, -5), parent);
     }
 
     public Surface(String name, Point3d p1, Point3d p2, Point3d p3, double collisionLossFactor, Window parent) {
@@ -68,6 +68,11 @@ public class Surface extends Item {
         point3 = new Point3dMV(p3);
         setPlane();
     }
+
+    public Vector3d getNormal() {
+        return normal;
+    }
+
 
     void setPlane() {
         Vector3d line1 = new Vector3d(point2);
@@ -222,6 +227,7 @@ public class Surface extends Item {
             jp.addItemPair("point1", tpPoint1);
             jp.addItemPair("point2", tpPoint2);
             jp.addItemPair("point3", tpPoint3);
+            jp.addItem("Points in clockwise, looking at Surface of Interest");
             itemRelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

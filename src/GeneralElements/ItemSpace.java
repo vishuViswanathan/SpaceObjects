@@ -184,6 +184,8 @@ public class ItemSpace {
     JButton buttAddItem;
     JToggleButton cloneItem;
     JButton buttAddLink;
+    JRadioButton rbInterItemCollision;
+    public boolean bInterItemCollisionOn = false;
     ButtonListener bl;
     ItemTable itemTable;
     LinkTable linkTable;
@@ -201,6 +203,8 @@ public class ItemSpace {
         if (bl == null)
             bl = new ButtonListener();
         buttAddItem.addActionListener(bl);
+        rbInterItemCollision = new JRadioButton("Collision Enabled");
+        rbInterItemCollision.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
         sP.setPreferredSize(new Dimension(800, 350));
@@ -219,6 +223,7 @@ public class ItemSpace {
         JPanel buttPan = new JPanel(new GridLayout(1, 2));
         buttPan.add(buttAddItem);
         buttPan.add(cloneItem);
+        buttPan.add(rbInterItemCollision);
         return buttPan;
     }
     public void updateItemTable() {
@@ -271,6 +276,11 @@ public class ItemSpace {
     public void enableItemGravity(boolean ena) {
         bItemGravityOn = ena;
         rbItemGravity.setSelected(ena);
+    }
+
+    public void enableItemCollision(boolean ena) {
+        bInterItemCollisionOn = ena;
+        rbInterItemCollision.setSelected(ena);
     }
 
 
@@ -363,6 +373,9 @@ public class ItemSpace {
             }
             else if (src == rbItemGravity) {
                 bItemGravityOn = rbItemGravity.isSelected();
+            }
+            else if (src == rbInterItemCollision) {
+                bInterItemCollisionOn = rbInterItemCollision.isSelected();
             }
         }
     }

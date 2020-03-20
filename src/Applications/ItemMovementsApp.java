@@ -136,6 +136,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         refreshInterval = 200 * calculationStep; // was 20000
         proceedToItemList(false);
         space.enableItemGravity(false);
+        space.enableItemCollision(false);
         bShowOrbit = false;
         bShowLinks = true;
         bRealTime = true;

@@ -1,8 +1,6 @@
 package GeneralElements.link;
 
-import GeneralElements.DarkMatter;
-import GeneralElements.Constants;
-import GeneralElements.Item;
+import GeneralElements.*;
 import mvUtils.physics.Vector3dMV;
 
 import javax.vecmath.Vector3d;
@@ -24,9 +22,13 @@ public class InterItem extends Influence {
     double e2;
     boolean equalE = false;
     boolean oneIsASurface = false;
-
-    public InterItem(DarkMatter itemOne, DarkMatter itemTwo) {
+    Vector3d surfaceNormal;
+    ItemSpace space;
+    boolean collisionOn = false;
+    public InterItem(DarkMatter itemOne, DarkMatter itemTwo, ItemSpace space) {
         type = Type.INTERITEM;
+        this.space = space;
+        collisionOn = space.bInterItemCollisionOn;
         hasDetails = false;
         item1 = itemOne;
         item2 = itemTwo;
@@ -46,6 +48,8 @@ public class InterItem extends Influence {
         }
         if (valid) {
             if (oneIsASurface) {
+                surfaceNormal = new Vector3d(item1.getNormal());
+                surfaceNormal.normalize();
                 e2 = item2.getECompression();
                 if (e2 > 0)
                     elasticityON = true;
@@ -78,6 +82,9 @@ public class InterItem extends Influence {
         }
     }
 
+    public InterItem(DarkMatter itemOne, DarkMatter itemTwo) {
+        this(itemOne, itemTwo, null);
+    }
     /**
      * for inter-item elastic forces the following sre considered
      * 1) the object's elasticity is isotropic
@@ -99,7 +106,7 @@ public class InterItem extends Influence {
         double compression = limitDistance - distance;
         Vector3d nowForce = new Vector3d();
         if (compression > 0) {
-            if (elasticityON) {
+            if (elasticityON && collisionOn) {
                 double force;
                 nowForce.set(distVect);
                 if (equalE) {
@@ -116,7 +123,7 @@ public class InterItem extends Influence {
                 if (Double.isNaN(ratio)) {
                     retVal = false;
                 } else {
-                    nowForce.scale(ratio);
+                    nowForce.scale(ratio / 2);  // 20200317 take the force halfway
                 }
             }
         }
@@ -133,6 +140,12 @@ public class InterItem extends Influence {
         double distance = distVect.length();
         double compression = limitDistance - distance;
         if (compression > 0) {
+//            Vector3d projection = new Vector3d(surfaceNormal);
+//            double lenOfProjection = (item2.getStatus().velocity).dot(projection);
+//            projection.scale(-2 * lenOfProjection);
+//            item2.addToAddVelocity(projection);
+
+
             distVect.scale(1 / distance);
             double compFraction = 1 - compression / limitDistance;  // note the compressions is negative;
             double force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
@@ -143,12 +156,21 @@ public class InterItem extends Influence {
 //                force += item1.getStickingEffect(item2.getStickingArea(distance)); // item1 is the boundary item
             Vector3d nowForce = new Vector3d(distVect);
             nowForce.negate();
-            nowForce.scale(force);
+            nowForce.scale(force / 2); // 20200317 take the force halfway
             item2.addToForce(nowForce);
             retVal = true;
         }
         return retVal;
     }
+
+    Vector3d componetAlong(Vector3d vect, Vector3d along) {
+        Vector3d projection = new Vector3d(along);
+        projection.normalize();
+        double lenOfProjection = vect.dot(projection);
+        projection.scale(lenOfProjection);
+        return projection;
+    }
+
 
     void trace(String msg) {
         System.out.println("InterItem:" + msg);

@@ -30,6 +30,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector<LocalAction> localActions;
     public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
     Vector3d netForce = new Vector3d();
+    Vector3d addVelocity = new Vector3d();
     public String name;
     public String gmID; // for Horizons
     public double mass;
@@ -159,6 +160,8 @@ public class DarkMatter implements InputControl, EvalOnce {
         return collisionLossFactor;
     }
 
+    public Vector3d getNormal() {return null;}
+
     public void setStickingPressure(double stickingPressure) {
         this.stickingPressure = stickingPressure;
         canStick = (stickingPressure > 0);
@@ -221,6 +224,7 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public void initNetForce() {
         netForce.set(0, 0, 0); // this may not be correct
+        addVelocity.set(0, 0, 0);
     }
 
     public void setMatterStartConditions(double duration, double nowT) {
@@ -242,6 +246,10 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public synchronized void addToForce(Vector3d addForce)  {
         netForce.add(addForce);
+    }
+
+    public synchronized void addToAddVelocity(Vector3d addVel)  {
+        addVelocity.add(addVel);
     }
 
     public synchronized void subtractFromForce(Vector3d subtractForce) {
@@ -329,6 +337,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             effectiveAcc.setMean(nowAcc, lastAcc);
             deltaV.scale(deltaT, effectiveAcc);
             newVelocity.add(lastVelocity, deltaV);
+            newVelocity.add(addVelocity);
             averageV.setMean(lastVelocity, newVelocity);
             deltaPos.scale(deltaT, averageV);
             newPos.add(lastPosition, deltaPos);

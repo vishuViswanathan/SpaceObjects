@@ -20,6 +20,7 @@ public class Influence {
     double kCompression = 0;
     public boolean hasDetails = true;
     boolean valid = true;
+    boolean collisionOn = false;
 
     static public enum Type {
         INTERITEM("InterItem"),
