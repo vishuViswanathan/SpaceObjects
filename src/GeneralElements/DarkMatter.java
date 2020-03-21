@@ -328,7 +328,7 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     boolean considerNetForceEffect(double deltaT, boolean bFinal) {
         boolean changed = false;
-        if (netForce.length() > 0) {
+//        if (netForce.length() > 0) {
             lastAcc = status.acc;
             lastVelocity = status.velocity;
             effectiveForce.set(netForce);
@@ -347,7 +347,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                 status.acc.set(nowAcc);
             }
             changed = true;
-        }
+//        }
         return changed;
     }
 
