@@ -4,6 +4,7 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
 import GeneralElements.Surface;
+import mvUtils.physics.Vector3dMV;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
@@ -30,14 +31,18 @@ public class BoundedBalls implements DefaultScheme {
 
         Point3d minCorner = new Point3d(xmin, ymin, zmin);
         Point3d maxCorner = new Point3d(xmax, ymax, zmax);
-        Vector3d vel1 = new Vector3d(-5, -5, 0);
-        Vector3d vel2 = new Vector3d(5, 5, 0);
+//        Vector3d vel1 = new Vector3d(-5, -5, 0);
+//        Vector3d vel2 = new Vector3d(5, 5, 0);
+        double vel1 = 5;
+        double vel2 = 5;
+        Random rd = new Random();
+        Vector3d axes = new Vector3d(1, 1, 0);
         addManyBallsAtRandom(mainF, space, 20, minCorner, maxCorner,
-                vel1,vel2, "B", 0.05, 0.1, Color.RED, 200000);
+                vel1, vel2, axes, rd, "A", 0.05, 0.1, Color.RED, 200000);
         addManyBallsAtRandom(mainF, space, 20, minCorner, maxCorner,
-                vel1,vel2, "B", 0.05, 0.1, Color.YELLOW, 200000);
+                vel1,vel2, axes, rd, "B", 0.05, 0.1, Color.YELLOW, 200000);
         addManyBallsAtRandom(mainF, space, 10, minCorner, maxCorner,
-                vel1,vel2, "B", 0.05, 0.1, Color.CYAN, 200000);
+                vel1,vel2, axes, rd, "C", 0.05, 0.1, Color.CYAN, 200000);
         Item it;
 //        it =  new Item("Ball", mass2, 1, Color.RED, mainF);
 //        it.initPosEtc(new Point3d(0,0, 0), new Vector3d(5, 5, 0));
@@ -47,8 +52,8 @@ public class BoundedBalls implements DefaultScheme {
 //        space.addItem(it);
         it = new Surface("Floor", new Point3d( -5, ymin, -5),
                 new Point3d( -5, ymin, 0), new Point3d( 0, ymin, 5),
-                1.0, mainF );
-        it.setStickingPressure(10000);
+                mainF );
+        // it.setStickingPressure(10000);
         space.addItem(it);
         it = new Surface("EastWall", new Point3d( xmin, -5, -5),
                 new Point3d( xmin, 5, 0), new Point3d( xmin, -5, 5), mainF );
@@ -73,6 +78,23 @@ public class BoundedBalls implements DefaultScheme {
     }
 
     void addManyBallsAtRandom(JFrame mainF, ItemSpace space, int qty, Point3d minCorner, Point3d maxCorner,
+                              double vel1, double vel2, Tuple3d axes , Random rd,
+                              String baseName, double mass, double dia,
+                              Color color, double compression) {
+        Point3d posRange = new Point3d(maxCorner);
+        posRange.sub(minCorner);
+         for (int n = 0; n < qty; n++) {
+            String nowName = baseName + n;
+            Point3d pos = new Point3d(minCorner.x + rd.nextDouble() * posRange.x,
+                    minCorner.y + rd.nextDouble() * posRange.y,
+                    minCorner.z + rd.nextDouble() * posRange.z);
+            Vector3d vel = Vector3dMV.getRandomVector(vel1, vel2, axes, rd);
+            addOneBall(mainF, space, nowName, mass, dia, color, pos, vel, compression);
+        }
+    }
+
+
+    void addManyBallsAtRandomOLD(JFrame mainF, ItemSpace space, int qty, Point3d minCorner, Point3d maxCorner,
                               Vector3d vel1, Vector3d vel2, String baseName, double mass, double dia,
                               Color color, double compression ) {
         Random rd = new Random();

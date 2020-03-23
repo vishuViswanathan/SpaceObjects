@@ -787,12 +787,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             try {
                 if (xmlHistory) {
                     historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
-                    historyFileStream.write("# 'at' has JDN, date and time\n".getBytes());
+                    historyFileStream.write("# 'at' has JDN, DateAndTime\n".getBytes());
                     historyFileStream.write("# 'obj' has name, HorizonID, gm, x, y, z, Vx, Vy, Vz, V, Ax, Ay, Az, A\n\n".getBytes());
                 }
                 else {
                     historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
-                    historyFileStream.write("JDN, date and time, NowT, ObjectName, HorizonID, gm, x, y, z, Vx, Vy, Vz, V, Ax, Ay, Az, A\n".getBytes());
+                    historyFileStream.write("JDN,DateAndTime,NowT,ObjectName,HorizonID,mass,gm,x,y,z,Vx,Vy,Vz,V,Ax,Ay,Az,A\n".getBytes());
                 }
 
             } catch (IOException e) {
@@ -833,7 +833,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             }
             else {
                 for (int o = 0; o < nObj; o++) {
-                    String toFile = "" + jdn.getJdN() + "," + sdf.format(jdn.getTime()) + ", " + nowT + ", " +
+                    String toFile = "" + jdn.getJdN() + "," + sdf.format(jdn.getTime()) + "," + nowT + "," +
                             space.getOneItem(o).statusStringForHistory(posFactor, velFactor);
                     historyFileStream.write(toFile.getBytes());
                 }

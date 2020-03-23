@@ -1049,15 +1049,15 @@ public class Item extends DarkMatter implements ItemInterface {
 //    =============================================
 
     public StringBuilder statusStringForCSV(double posFactor, double velFactor) {
-        StringBuilder csvStr = new StringBuilder(name + ", " + gmID + ", " + gm + "\n");
-        csvStr.append("Position , " + status.positionStringForCSV(posFactor) + "\n");
-        csvStr.append("Velocity , ").append(status.velocityStringForCSV(velFactor)).append("\n");
-        csvStr.append("AngVel , ").append(status.angularVelocityStringForCSV(1)).append("\n");
+        StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + gm + "\n");
+        csvStr.append("Position," + status.positionStringForCSV(posFactor) + "\n");
+        csvStr.append("Velocity,").append(status.velocityStringForCSV(velFactor)).append("\n");
+        csvStr.append("AngVel,").append(status.angularVelocityStringForCSV(1)).append("\n");
         return csvStr;
     }
 
     public StringBuilder statusStringForHistory(double posFactor, double velFactor) {
-        StringBuilder csvStr = new StringBuilder(name + ", " + gmID + ", " + gm + ",");
+        StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + mass + "," + gm + ",");
         csvStr.append(status.positionStringForCSV(posFactor) + ",");
         csvStr.append(status.velocityStringForCSV(velFactor) + ",");
         csvStr.append(status.accelerationStringForCSV(velFactor)).append("\n");

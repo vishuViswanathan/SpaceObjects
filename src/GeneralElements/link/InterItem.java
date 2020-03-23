@@ -135,8 +135,9 @@ public class InterItem extends Influence {
     }
 
     boolean getBoundaryForce() {
-        boolean retVal = true;
+        boolean retVal;
         Vector3d distVect = item1.distanceVector(item2.status.pos);
+        // distance vector is normal to surface
         double distance = distVect.length();
         double compression = limitDistance - distance;
         if (compression > 0) {
@@ -154,12 +155,14 @@ public class InterItem extends Influence {
                 force *= item1.getCollisionLossFactor();
 //            if (item1.canStick()) // item1 is the boundary item
 //                force += item1.getStickingEffect(item2.getStickingArea(distance)); // item1 is the boundary item
+            // the nowForce is normal to the surface 'item1'
             Vector3d nowForce = new Vector3d(distVect);
             nowForce.negate();
+//            nowForce.scale(force); // 20200323 no halfway NOT good speed explodes
             nowForce.scale(force / 2); // 20200317 take the force halfway
             item2.addToForce(nowForce);
-            retVal = true;
         }
+        retVal = true;
         return retVal;
     }
 
