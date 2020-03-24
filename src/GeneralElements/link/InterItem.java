@@ -141,26 +141,26 @@ public class InterItem extends Influence {
         double distance = distVect.length();
         double compression = limitDistance - distance;
         if (compression > 0) {
-//            Vector3d projection = new Vector3d(surfaceNormal);
-//            double lenOfProjection = (item2.getStatus().velocity).dot(projection);
-//            projection.scale(-2 * lenOfProjection);
-//            item2.addToAddVelocity(projection);
+            Vector3d projection = new Vector3d(surfaceNormal);
+            double lenOfProjection = (item2.getStatus().velocity).dot(projection);
+            projection.scale(-2 * lenOfProjection);
+            item2.addToAddVelocity(projection);
 
 
-            distVect.scale(1 / distance);
-            double compFraction = 1 - compression / limitDistance;  // note the compressions is negative;
-            double force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
-            double alignedVelocity = distVect.dot(item2.status.velocity);
-            if (alignedVelocity > 0)
-                force *= item1.getCollisionLossFactor();
-//            if (item1.canStick()) // item1 is the boundary item
-//                force += item1.getStickingEffect(item2.getStickingArea(distance)); // item1 is the boundary item
-            // the nowForce is normal to the surface 'item1'
-            Vector3d nowForce = new Vector3d(distVect);
-            nowForce.negate();
-//            nowForce.scale(force); // 20200323 no halfway NOT good speed explodes
-            nowForce.scale(force / 2); // 20200317 take the force halfway
-            item2.addToForce(nowForce);
+//            distVect.scale(1 / distance);
+//            double compFraction = 1 - compression / limitDistance;  // note the compressions is negative;
+//            double force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
+//            double alignedVelocity = distVect.dot(item2.status.velocity);
+//            if (alignedVelocity > 0)
+//                force *= item1.getCollisionLossFactor();
+////            if (item1.canStick()) // item1 is the boundary item
+////                force += item1.getStickingEffect(item2.getStickingArea(distance)); // item1 is the boundary item
+//            // the nowForce is normal to the surface 'item1'
+//            Vector3d nowForce = new Vector3d(distVect);
+//            nowForce.negate();
+////            nowForce.scale(force); // 20200323 no halfway NOT good speed explodes
+//            nowForce.scale(force / 2); // 20200317 take the force halfway
+//            item2.addToForce(nowForce);
         }
         retVal = true;
         return retVal;
