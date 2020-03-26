@@ -2,6 +2,7 @@ package Applications;
 
 import GeneralElements.DarkMatter;
 import GeneralElements.Display.MotionDisplay;
+import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import GeneralElements.Constants;
 import time.DateAndJDN;
@@ -176,6 +177,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         NumberTextField ntFileHistoryInterval;
         JButton jbHistoryFilePath;
         JLabel lHistoryFilePath;
+        JTextField tfHistoryFilePath;
 
         JButton jbOk = new JButton("Ok");
         JButton jbCancel = new JButton("Cancel");
@@ -208,13 +210,18 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             chBTimeDilation.setEnabled(false);
             chBGravityPropagationTime = new JCheckBox("Consider Gravity propagation time", space.bConsiderGravityVelocity);
             chBGravityPropagationTime.setEnabled(false);
-            lHistoryFilePath = new JLabel(historyFilePath);
+ //           lHistoryFilePath = new JLabel(historyFilePath);
+            tfHistoryFilePath = new JTextField(20);
+            tfHistoryFilePath.setText(historyFilePath);
+            tfHistoryFilePath.setToolTipText(historyFilePath);
             jbHistoryFilePath = new JButton("Set File Path");
             jbHistoryFilePath.addActionListener(e-> {
                 String path = getHistoryFilePath();
                 if (path.length() > 0) {
                     historyFilePath = path;
-                    lHistoryFilePath.setText(path);
+//                    lHistoryFilePath.setText(path);
+                    tfHistoryFilePath.setText(path);
+                    tfHistoryFilePath.setToolTipText(historyFilePath);
                 }
 
             });
@@ -234,7 +241,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             jp.addBlank();
             jp.addItem(cbHistoryToFile);
             jp.addItemPair(ntFileHistoryInterval);
-            jp.addItemPair(jbHistoryFilePath, lHistoryFilePath);
+//            jp.addItemPair(jbHistoryFilePath, lHistoryFilePath);
+            jp.addItemPair(jbHistoryFilePath, tfHistoryFilePath);
             jp.addItem(chBTimeDilation);
             jp.addItem(chBGravityPropagationTime);
             jp.addBlank();
@@ -272,7 +280,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     void getTimingValues() {
         TimingValuesDlg dlg = new TimingValuesDlg();
-        dlg.setLocation(300, 300);
+        dlg.setLocationRelativeTo(mainF);
         dlg.setVisible(true);
     }
 
@@ -365,7 +373,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     void selectScheme() {
         SchemeSelector selector = new SchemeSelector();
-        selector.setLocation(300, 300);
+//        selector.sersetLocation(300, 300);
+        selector.setLocationRelativeTo(mainF);
         selector.setVisible(true);
         int selIndex = cbSchemes.getSelectedIndex();
         space.clearSpace();
@@ -833,9 +842,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             }
             else {
                 for (int o = 0; o < nObj; o++) {
-                    String toFile = "" + jdn.getJdN() + "," + sdf.format(jdn.getTime()) + "," + nowT + "," +
-                            space.getOneItem(o).statusStringForHistory(posFactor, velFactor);
-                    historyFileStream.write(toFile.getBytes());
+                    ItemInterface ifc = space.getOneItem(o);
+                    if (ifc.getItemType() != ItemInterface.ItemType.SURFACE) {
+                        String toFile = "" + jdn.getJdN() + "," + sdf.format(jdn.getTime()) + "," + nowT + "," +
+                                ifc.statusStringForHistory(posFactor, velFactor);
+                        historyFileStream.write(toFile.getBytes());
+                    }
                 }
             }
             bRetVal = true;

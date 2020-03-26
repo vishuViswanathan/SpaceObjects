@@ -17,39 +17,30 @@ import java.util.Random;
  * Created by M Viswanathan on 19 Feb 2015
  */
 public class BoundedBalls implements DefaultScheme {
-    double e = 20000; // similar to e but force (ie N/100%)
-    double mass2 = 100;
 
     public BoundedBalls() {
     }
 
     @Override
     public boolean getScheme(JFrame mainF, ItemSpace space) {
-        double xmin = -10, xmax = 10;
-        double ymin = -10, ymax = 10;
+        double xmin = -5, xmax = 5;
+        double ymin = -5, ymax = 5;
+//        Take care of item dia and boundary
         double zmin = 0, zmax = 0;
 
-        Point3d minCorner = new Point3d(xmin, ymin, zmin);
-        Point3d maxCorner = new Point3d(xmax, ymax, zmax);
-//        Vector3d vel1 = new Vector3d(-5, -5, 0);
-//        Vector3d vel2 = new Vector3d(5, 5, 0);
-        double vel1 = 5;
+        Point3d minCorner = new Point3d(xmin + 1, ymin + 1, zmin);
+        Point3d maxCorner = new Point3d(xmax - 1, ymax - 1, zmax);
+        double vel1 = 0;
         double vel2 = 5;
         Random rd = new Random();
         Vector3d axes = new Vector3d(1, 1, 0);
+        addManyBallsAtRandom(mainF, space, 40, minCorner, maxCorner,
+                vel1, vel2, axes, rd, "A", 0.05, 0.05, Color.RED, 200000);
+        addManyBallsAtRandom(mainF, space, 40, minCorner, maxCorner,
+                vel1,vel2, axes, rd, "B", 0.05, 0.05, Color.YELLOW, 200000);
         addManyBallsAtRandom(mainF, space, 20, minCorner, maxCorner,
-                vel1, vel2, axes, rd, "A", 0.05, 0.1, Color.RED, 200000);
-        addManyBallsAtRandom(mainF, space, 20, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "B", 0.05, 0.1, Color.YELLOW, 200000);
-        addManyBallsAtRandom(mainF, space, 10, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "C", 0.05, 0.1, Color.CYAN, 200000);
+                vel1,vel2, axes, rd, "C", 0.05, 0.05, Color.CYAN, 200000);
         Item it;
-//        it =  new Item("Ball", mass2, 1, Color.RED, mainF);
-//        it.initPosEtc(new Point3d(0,0, 0), new Vector3d(5, 5, 0));
-//        it.seteCompression(200000);
-//        space.addItem(it);
-//        it = new Surface("InclinedFloor", new Point3d( 0, -0.5, -5), new Point3d( 0, -0.5, 5), new Point3d( 5, -1, 5), mainF );
-//        space.addItem(it);
         it = new Surface("Floor", new Point3d( -5, ymin, -5),
                 new Point3d( -5, ymin, 0), new Point3d( 0, ymin, 5),
                 mainF );

@@ -107,30 +107,43 @@ public class InterItem extends Influence {
         Vector3d nowForce = new Vector3d();
         if (compression > 0) {
             if (elasticityON && collisionOn) {
-                double force;
-                nowForce.set(distVect);
-                if (equalE) {
-                    double compFraction = 1 - compression / limitDistance;
-                    force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
-                } else {
-                    double a = r1xE1LessE1;
-                    double b = r2E1PLusR1E2 - compression * diffE;
-                    double c = -e2 * compression;
-                    double m1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
-                    force = -m1 * e1 / (1 - m1); // negated since it is a repulsion
-                }
-                double ratio = force / distance;
-                if (Double.isNaN(ratio)) {
-                    retVal = false;
-                } else {
-                    nowForce.scale(ratio / 2);  // 20200317 take the force halfway
-                }
+                distVect.normalize();
+                double v1Before = item1.status.velocity.projectionLength(distVect);
+                double v2Before = item2.status.velocity.projectionLength(distVect);
+                double mass1 = item1.mass;
+                double mass2 = item2.mass;
+                double v1After = (v1Before * (mass1 - mass2) + 2 * mass2 * v2Before) /
+                        (mass1 + mass2);
+                double v2After = v1After + v1Before - v2Before;
+                item1.addToAddVelocity(new Vector3dMV(v1After - v1Before, distVect));
+                item2.addToAddVelocity(new Vector3dMV(v2After - v2Before, distVect));
+
+
+//
+//                double force;
+//                nowForce.set(distVect);
+//                if (equalE) {
+//                    double compFraction = 1 - compression / limitDistance;
+//                    force = -compression * factorLbyR * (1 / compFraction); // negated since it is a repulsion
+//                } else {
+//                    double a = r1xE1LessE1;
+//                    double b = r2E1PLusR1E2 - compression * diffE;
+//                    double c = -e2 * compression;
+//                    double m1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+//                    force = -m1 * e1 / (1 - m1); // negated since it is a repulsion
+//                }
+//                double ratio = force / distance;
+//                if (Double.isNaN(ratio)) {
+//                    retVal = false;
+//                } else {
+//                    nowForce.scale(ratio / 2);  // 20200317 take the force halfway
+//                }
             }
         }
-        if (retVal) {
-            item1.addToForce(nowForce);
-            item2.subtractFromForce(nowForce);
-        }
+//        if (retVal) {
+//            item1.addToForce(nowForce);
+//            item2.subtractFromForce(nowForce);
+//        }
         return retVal;
     }
 
