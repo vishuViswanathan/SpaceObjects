@@ -73,6 +73,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     String[] schemesList = {"BallAndFloor",
                             "BoundedBalls",
+                            "ContactSpread",
                             "BungeeJumping",
                             "BungeeJumpingWithRope",
                             "ChainWithBall",
@@ -801,7 +802,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 }
                 else {
                     historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
-                    historyFileStream.write("JDN,DateAndTime,NowT,ObjectName,HorizonID,mass,gm,x,y,z,Vx,Vy,Vz,V,Ax,Ay,Az,A\n".getBytes());
+                    historyFileStream.write("JDN,DateAndTime,NowT,ObjectName,HorizonID,mass,gm,x,y,z,Vx,Vy,Vz,V,Ax,Ay,Az,A,Infected,Cured\n".getBytes());
                 }
 
             } catch (IOException e) {
@@ -845,7 +846,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     ItemInterface ifc = space.getOneItem(o);
                     if (ifc.getItemType() != ItemInterface.ItemType.SURFACE) {
                         String toFile = "" + jdn.getJdN() + "," + sdf.format(jdn.getTime()) + "," + nowT + "," +
-                                ifc.statusStringForHistory(posFactor, velFactor);
+                                ifc.statusStringForHistory(posFactor, velFactor) + "\n";
                         historyFileStream.write(toFile.getBytes());
                     }
                 }

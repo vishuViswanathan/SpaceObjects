@@ -435,7 +435,7 @@ public class ItemSpace {
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                if (!inf.evalForce(deltaT, false)) {
+                if (!inf.evalForce(nowT, deltaT, false)) {
                     showError("in evalInfluence: evalForce is false for Link " + inf);
                     ok = false;
                     break;
@@ -448,7 +448,7 @@ public class ItemSpace {
         if (ok) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                if (!inf.evalForce(deltaT, true)) {
+                if (!inf.evalForce(nowT, deltaT, true)) {
                     showError("In evalInfluence: evalForce-final is false for Link " + inf);
                     ok = false;
                     break;

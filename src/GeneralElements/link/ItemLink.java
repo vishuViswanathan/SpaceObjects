@@ -79,8 +79,8 @@ public class ItemLink implements EvalOnce {
     }
 
     @Override
-    public void evalOnce(double deltaT, boolean bFinal) {
-        evalForce(deltaT, bFinal);
+    public void evalOnce(double nowT, double deltaT, boolean bFinal) {
+        evalForce(nowT, deltaT, bFinal);
     }
 
     // dummy not used
@@ -113,8 +113,8 @@ public class ItemLink implements EvalOnce {
         return inf.evalForce();
     }
 
-    public boolean evalForce(double deltaT, boolean bFinal) {
-        return inf.evalForce(deltaT, bFinal);
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {
+        return inf.evalForce(nowT, deltaT, bFinal);
     }
 
     public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{

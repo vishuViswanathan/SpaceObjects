@@ -74,7 +74,7 @@ public class Influence {
 //    enum Types {GRAVITY, SPRING, ATTRACTION, REPULSION, CSPRING, ESPRING};
     public boolean evalForce() {return false;}
 
-    public boolean evalForce(double deltaT, boolean bFinal) {return false;}
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {return false;}
 
     public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
     }

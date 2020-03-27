@@ -32,6 +32,7 @@ public interface ItemInterface {
     enum ItemType {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
+        LIVE("Live"),
         VMRL("from VMRL file");
 
         private final String typeName;
@@ -124,6 +125,7 @@ public interface ItemInterface {
     void noteTotalGM(double totalGM);
 
     ItemGraphic getItemGraphic();
+
 
     static Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
         Item theItem = null;

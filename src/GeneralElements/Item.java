@@ -907,8 +907,11 @@ public class Item extends DarkMatter implements ItemInterface {
         return itemGraphic.get();
     }
 
+    ItemGraphic itemG;
+
     public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
-        ItemGraphic itemG = new ItemGraphic(this);
+//        ItemGraphic itemG = new ItemGraphic(this);
+        itemG = new ItemGraphic(this);
         if (itemG.addObjectAndOrbit(grp, orbitAtrib)) {
             itemGraphic = new WeakReference<ItemGraphic>(itemG);
             itemGraphic.get().updateAngularPosition(status.angularPos);
@@ -1061,11 +1064,11 @@ public class Item extends DarkMatter implements ItemInterface {
         StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + mass + "," + gm + ",");
         csvStr.append(status.positionStringForCSV(posFactor) + ",");
         csvStr.append(status.velocityStringForCSV(velFactor) + ",");
-        csvStr.append(status.accelerationStringForCSV(velFactor)).append("\n");
+        csvStr.append(status.accelerationStringForCSV(velFactor)); //.append("\n");
         return csvStr;
     }
 
-    protected StringBuilder defaultDataInXML() {
+     protected StringBuilder defaultDataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("itemType", ("" + itemType)));
         return xmlStr;

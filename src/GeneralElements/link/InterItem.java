@@ -96,7 +96,7 @@ public class InterItem extends Influence {
      * @return
      */
     @Override
-    public boolean evalForce(double deltaT, boolean bFinal) {
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {
         if (oneIsASurface)
             return getBoundaryForce();
         boolean retVal = true;
@@ -106,6 +106,7 @@ public class InterItem extends Influence {
         double compression = limitDistance - distance;
         Vector3d nowForce = new Vector3d();
         if (compression > 0) {
+            item1.touchedBy(nowT, item2);
             if (elasticityON && collisionOn) {
                 distVect.normalize();
                 double v1Before = item1.status.velocity.projectionLength(distVect);

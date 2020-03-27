@@ -109,6 +109,8 @@ public class DarkMatter implements InputControl, EvalOnce {
         gravityON = true;
     }
 
+    public void touchedBy(double nowT, DarkMatter it) {};
+
     public double getPositionX() {
         return status.pos.getX();
     }
@@ -285,7 +287,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     public synchronized void evalOnce() {
     }
 
-    public void evalOnce(double deltaT, boolean bFInal) {
+    public void evalOnce(double nowT, double deltaT, boolean bFInal) {
     }
 
     @Override
