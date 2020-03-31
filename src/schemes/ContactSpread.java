@@ -32,13 +32,13 @@ public class ContactSpread implements DefaultScheme {
         Point3d minCorner = new Point3d(xmin + 1, ymin + 1, zmin);
         Point3d maxCorner = new Point3d(xmax - 1, ymax - 1, zmax);
         double vel1 = 0;
-        double vel2 = 2;
+        double vel2 = 5;
         Random rd = new Random();
         Vector3d axes = new Vector3d(1, 1, 0);
         addManyBallsAtRandom(mainF, space, 50, minCorner, maxCorner,
                 vel1, vel2, axes, rd, "A", 0.05, 0.05, false, 200000);
         addManyBallsAtRandom(mainF, space, 1, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "C", 0.05, 0.05, true, 200000);
+                2,2, axes, rd, "C", 0.05, 0.05, true, 200000);
         Item it;
         it = new Surface("Floor", new Point3d( -5, ymin, -5),
                 new Point3d( -5, ymin, 0), new Point3d( 0, ymin, 5),

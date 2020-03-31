@@ -67,9 +67,28 @@ public class LiveItem extends Item {
         nContacts++;
     }
 
-    public boolean updatePAndV(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        noteIfCured(nowT);
-        return super.updatePAndV(deltaT, nowT, updateStep);
+    public boolean updatePAndVforAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        if (updateStep == UpdateStep.FINAL)
+            noteIfCured(nowT);
+        return super.updatePAndVforAllActions(deltaT, nowT, updateStep);
+    }
+
+    public boolean updatePAndVforGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        if (updateStep == UpdateStep.FINAL)
+            noteIfCured(nowT);
+        return super.updatePAndVforGravityOnly(deltaT, nowT, updateStep);
+    }
+
+    public boolean updatePAndVforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        if (updateStep == UpdateStep.FINAL)
+            noteIfCured(nowT);
+        return super.updatePAndVforNetForceOnly(deltaT, nowT, updateStep);
+    }
+
+    public boolean updatePAndVnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        if (updateStep == UpdateStep.FINAL)
+            noteIfCured(nowT);
+        return super.updatePAndVnoGravityNoNetForce(deltaT, nowT, updateStep);
     }
 
     public StringBuilder statusStringForCSV(double posFactor, double velFactor) {

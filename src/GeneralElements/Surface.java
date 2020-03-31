@@ -348,7 +348,23 @@ public class Surface extends Item {
         return distance;
     }
 
-    public boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelOLD(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+        return false;
+    }
+
+    public boolean updatePosAndVelGravityOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+        return false;
+    }
+
+    public boolean updatePosAndVelAllActions(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+        return false;
+    }
+
+    public boolean updatePosAndVelforNetForceOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+        return false;
+    }
+
+    public boolean updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
         return false;
     }
 

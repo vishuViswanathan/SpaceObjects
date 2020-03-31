@@ -87,7 +87,7 @@ public class LinkWithMass extends InfluenceDef  {
 
     public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {  // deltaT is time is seconds
         for (DarkMatter mat:massElements)
-            mat.updatePAndV(deltaT, nowT, updateStep);
+            mat.updatePAndVforAllActions(deltaT, nowT, updateStep);
     }
 
     public boolean setAllElements() {

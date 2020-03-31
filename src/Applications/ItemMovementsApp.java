@@ -545,6 +545,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         if (fresh) {
             space.initAllItemConnections();
             space.setGlobalLinksAndActions();
+            space.setActiveActions();
             nowT = 0;
             setRefreshInterval(refreshInterval);
             nextRefresh = 0;

@@ -30,6 +30,7 @@ import java.util.Vector;
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
+    enum ActiveActions {ALL, ONLYNERFORCE, ONLYGRAVITY, NONE};
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
     Vector<GlobalAction> activeGlobalActions;
@@ -38,6 +39,12 @@ public class ItemSpace {
     double pastHistoryTime = 36000; // time in s to keep position history
     public boolean bConsiderTimeDilation = false; // gravity effect on local clock
     public boolean bConsiderGravityVelocity = false; // propagation time for Gravity
+    boolean bSomeLocalActions = false;
+    boolean bSomeGlobalActions = false;
+    boolean bAllActions = false;
+    boolean bOnlyGravity = false;
+    boolean bOnlyNetForce = false;
+    ActiveActions activeActions;
 
     public ItemSpace(ItemMovementsApp mainApp) {
         this.mainApp = mainApp;
@@ -105,9 +112,26 @@ public class ItemSpace {
     }
 
     public void initAllItemConnections() {
-        for (ItemInterface it: allItems)
+        bSomeLocalActions = false;
+        bSomeGlobalActions = false;
+        for (ItemInterface it: allItems) {
             it.initConnections();
+            if (it.anyLocalAction())
+                bSomeLocalActions = true;
+        }
     }
+
+    public void setActiveActions() {
+        activeActions = ActiveActions.NONE;
+
+        if (bItemGravityOn & (bSomeLocalActions || bSomeGlobalActions))
+            activeActions = ActiveActions.ALL;
+        else if (bItemGravityOn)
+            activeActions = ActiveActions.ONLYGRAVITY;
+        else if (bSomeLocalActions || bSomeGlobalActions)
+            activeActions = ActiveActions.ONLYNERFORCE;
+    }
+
 
     public void setGlobalLinksAndActions() {
         ItemLink link;
@@ -152,6 +176,8 @@ public class ItemSpace {
 
         }
         activeGlobalActions = allGlobalActions.activeActions();
+        if (activeGlobalActions.size() > 0)
+            bSomeGlobalActions = true;
 //        for (ItemLink l: allItemLinks)
 //            l.setGravityLinks(bItemGravityOn);
     }
@@ -423,12 +449,30 @@ public class ItemSpace {
     }
 
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        for (ItemInterface i: allItems)
-            i.updatePosAndVel(deltaT, nowT, updateStep);
+        switch(activeActions) {
+            case ALL:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelAllActions(deltaT, nowT, updateStep);
+                break;
+            case ONLYGRAVITY:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
+                break;
+            case ONLYNERFORCE:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
+                break;
+            default:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
+                break;
+        }
         for (ItemLink link:allItemLinks)
             link.updatePosAndVel(deltaT, nowT, updateStep);
     }
 
+
+// Called from doCalculation() (In SERIAL)
     boolean evalInfluence(double deltaT, double nowT) throws Exception  {
         boolean ok = true;
         setItemStartConditions(deltaT, nowT);
@@ -466,6 +510,10 @@ public class ItemSpace {
         return ok;
     }
 
+
+/*
+This is called only in PARALLEL - NOT USED NOW
+ */
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         boolean ok = true;
         setItemStartConditions(deltaT, nowT);

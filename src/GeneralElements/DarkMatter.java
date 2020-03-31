@@ -214,6 +214,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     Vector3d lastForce = new Vector3dMV();
     Vector3d lastPosition = new Vector3d();
     Vector3d lastVelocity = new Vector3d();
+    Vector3d effectiveLastVelocity = new Vector3d();
     Vector3d lastAcc = new Vector3d();
     Vector3dMV effectiveForce = new Vector3dMV();
     Vector3dMV effectiveAcc = new Vector3dMV();
@@ -292,22 +293,22 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     @Override
     public void evalOnce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) {
-        try {
-            updatePAndV(deltaT, nowT, updateStep);
-        } catch (Exception e) {
-            ItemMovementsApp.log.error("In Item evalOnce for " + name + ":" + e.getMessage());
-            e.printStackTrace();
-        }
+//        try {
+//            updatePAndV(deltaT, nowT, updateStep);
+//        } catch (Exception e) {
+//            ItemMovementsApp.log.error("In Item evalOnce for " + name + ":" + e.getMessage());
+//            e.printStackTrace();
+//        }
     }
 
-    public boolean updatePAndV(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = true;
+    public boolean updatePAndVOLD(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        boolean changed = false;
         if (bFixedLocation)
             changed = false;
         else {
             switch (updateStep) {
                 case INTERMEDIATE:
-                    considerNetForceEffect(deltaT,false);
+                    changed = considerNetForceEffect(deltaT,false);
                     break;
                 case FINAL:
                 case EuFwd:
@@ -316,30 +317,136 @@ public class DarkMatter implements InputControl, EvalOnce {
                 case RK4:
                     if (gravityON)
                         considerGravityEffect(deltaT, updateStep);
-                    considerNetForceEffect(deltaT, true);
+                    changed = considerNetForceEffect(deltaT, true);
                     status.time = nowT + deltaT;
                     break;
                 default:
                     if (gravityON)
-                        considerGravityEffect(deltaT, updateStep);
+                        changed = considerGravityEffect(deltaT, updateStep);
                     break;
             }
         }
         return changed;
     }
 
+    public boolean updatePAndVforAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        boolean changed = false;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            switch (updateStep) {
+                case INTERMEDIATE:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    changed = considerNetForceEffect(deltaT,false);
+                    break;
+                case FINAL:
+                case EuFwd:
+                case EUMod:
+                case RK2:
+                case RK4:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    if (gravityON)
+                        considerGravityEffect(deltaT, updateStep);
+                    changed = considerNetForceEffect(deltaT, true);
+                    status.time = nowT + deltaT;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return changed;
+    }
+
+    public boolean updatePAndVforGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        boolean changed = false;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            switch (updateStep) {
+                case INTERMEDIATE:
+                    break;
+                case FINAL:
+                case EuFwd:
+                case EUMod:
+                case RK2:
+                case RK4:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    considerGravityEffect(deltaT, updateStep);
+                    status.time = nowT + deltaT;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return changed;
+    }
+
+    public boolean updatePAndVforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        boolean changed = false;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            switch (updateStep) {
+                case INTERMEDIATE:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    changed = considerNetForceEffect(deltaT,false);
+                    break;
+                case FINAL:
+                case EuFwd:
+                case EUMod:
+                case RK2:
+                case RK4:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    changed = considerNetForceEffect(deltaT, true);
+                    status.time = nowT + deltaT;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return changed;
+    }
+
+    public boolean updatePAndVnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        boolean changed = false;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            switch (updateStep) {
+                case INTERMEDIATE:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    changed = considerAddVelocityEffect(deltaT,false);
+                    break;
+                case FINAL:
+                case EuFwd:
+                case EUMod:
+                case RK2:
+                case RK4:
+                    effectiveLastVelocity.add(lastVelocity, addVelocity);
+                    changed = considerAddVelocityEffect(deltaT, true);
+                    status.time = nowT + deltaT;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return changed;
+    }
+
+
     boolean considerNetForceEffect(double deltaT, boolean bFinal) {
         boolean changed = false;
-//        if (netForce.length() > 0) {
+        if (netForce.length() > 0) {
+//            System.out.println("DarkMatter.#334: Force > 0  with bFinal " +  bFinal);
             lastAcc = status.acc;
-            lastVelocity = status.velocity;
+//            lastVelocity = status.velocity;
             effectiveForce.set(netForce);
             nowAcc.scale(oneByMass, effectiveForce);
 //            System.out.println("DarkMatter.#328 nowAcc: " +  nowAcc.dataInCSV() + ", Vel :" + status.velocity.dataInCSV());
             effectiveAcc.setMean(nowAcc, lastAcc);
             deltaV.scale(deltaT, effectiveAcc);
-            newVelocity.add(lastVelocity, deltaV);
-            newVelocity.add(addVelocity);
+            newVelocity.add(effectiveLastVelocity, deltaV);
+//            newVelocity.add(addVelocity);
             averageV.setMean(lastVelocity, newVelocity);
             deltaPos.scale(deltaT, averageV);
             newPos.add(lastPosition, deltaPos);
@@ -349,8 +456,19 @@ public class DarkMatter implements InputControl, EvalOnce {
                 status.acc.set(nowAcc);
             }
             changed = true;
-//        }
+        }
         return changed;
+    }
+
+    boolean considerAddVelocityEffect(double deltaT, boolean bFinal) {
+//        newVelocity.add(lastVelocity, addVelocity);
+        if (bFinal) {
+            deltaPos.scale(deltaT, effectiveLastVelocity);
+            newPos.add(lastPosition, deltaPos);
+            status.pos.set(newPos); // only position is updated here
+            status.velocity.set(effectiveLastVelocity);
+        }
+        return true;
     }
 
     TwoVectors pvBase;
@@ -378,6 +496,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         double deltaTBy2 = deltaT / 2;
         double deltaTBy6 = deltaT / 6;
         TwoVectors pv;
+        // WARNING ONLY FINAL IS corrected
         switch (updateStep) {
             case K1:
                 pvBase = new TwoVectors(status.pos, status.velocity);
@@ -426,15 +545,21 @@ public class DarkMatter implements InputControl, EvalOnce {
         boolean changed = false;
         double deltaTBy2 = deltaT / 2;
         double deltaTBy6 = deltaT / 6;
-        TwoVectors pvBase = new TwoVectors(status.pos, status.velocity);
+        TwoVectors pvBase = new TwoVectors(status.pos, effectiveLastVelocity);
 
         TwoVectors pv = pvBase;
         TwoVectors pv1 = new TwoVectors(pv);
+        // pv1 is original velocity  and net acc due to gravity
 
         pv = new TwoVectors(pvBase, deltaT, pv1);
+        // pv is new pos(original pos +  velocity * deltaT) and
+        // new delta Velocity (original velocity + acc * deltaT)
+
         TwoVectors pv2 = new TwoVectors(pv);
+        // pv2 original velocity  and net acc due to gravity
 
         pv1.makeMeanWith(pv2);
+        // return mean Velocity and acc
         pvBase.scaleAndAdd(deltaT, pv1);
         status.pos.set(pvBase.v1);
         status.velocity.set(pvBase.v2);

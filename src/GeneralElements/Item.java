@@ -735,6 +735,10 @@ public class Item extends DarkMatter implements ItemInterface {
         return (jetController != null);
     }
 
+    public boolean anyLocalAction() {
+        return (localActions.size() > 0);
+    }
+
     public Window showControlPanel(InputControl inpC, Component parent) {
         ControlPanelDialog dlg = null;
         if (jetController != null) {
@@ -965,10 +969,10 @@ public class Item extends DarkMatter implements ItemInterface {
 
     //    =========================== calculations ======================
 
-    public boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelOLD(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndV(deltaT, nowT, updateStep);
+        updatePAndVOLD(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();
@@ -977,6 +981,59 @@ public class Item extends DarkMatter implements ItemInterface {
 
         return true;
     }
+
+    public boolean updatePosAndVelAllActions(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVforAllActions(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
+    public boolean updatePosAndVelGravityOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVforGravityOnly(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
+    public boolean updatePosAndVelforNetForceOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVforNetForceOnly(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
+    public boolean updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVnoGravityNoNetForce(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
 
     void noteAngularStatus() {
         status.angularPos.set(newAngle);

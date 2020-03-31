@@ -325,12 +325,12 @@ public class PlanetsAndMoons implements DefaultScheme {
                         mass = Double.valueOf(vp.val);
                     }
                     if (radius > 0 && mass > 0) {
-                        if (name.equalsIgnoreCase("BDObject")) { // enter object name for ItemBD
-                            item = new ItemBD(objName, mass, radius * 2 * 1000, color, mainF);
-                            debug("Object " + objName + " taken with BIG DECIMAL");
-                        }
-                        else
-                            item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
+//                        if (name.equalsIgnoreCase("BDObject")) { // enter object name for ItemBD
+//                            item = new ItemBD(objName, mass, radius * 2 * 1000, color, mainF);
+//                            debug("Object " + objName + " taken with BIG DECIMAL");
+//                        }
+//                        else
+                        item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
                         vp = XMLmv.getTag(xmlStr, "imageName", 0);
                         imageName = vp.val;
                         if (imageName != null && imageName.length() > 3 && !imageName.equalsIgnoreCase("null")) {

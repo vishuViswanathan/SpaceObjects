@@ -277,6 +277,8 @@ public interface ItemInterface {
 
     boolean hasAnyAccessories();
 
+    boolean anyLocalAction();
+
     Window showControlPanel(InputControl inpC, Component parent);
 
     void setLocalForces();
@@ -331,7 +333,15 @@ public interface ItemInterface {
 
     //    =========================== calculations ======================
 
-    boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndVelOLD(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelAllActions(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelGravityOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelforNetForceOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
     void updateAngularPosition(Vector3dMV deltaAngle);
 
