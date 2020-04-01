@@ -85,9 +85,33 @@ public class LinkWithMass extends InfluenceDef  {
             showMessage("Not Ready for inter-gravity on links");
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {  // deltaT is time is seconds
-        for (DarkMatter mat:massElements)
+//    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {  // deltaT is time is seconds
+//        for (DarkMatter mat : massElements)
+//            mat.updatePAndV(deltaT, nowT, updateStep);
+//    }
+
+    @Override
+    public void updatePosAndVelAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
             mat.updatePAndVforAllActions(deltaT, nowT, updateStep);
+    }
+
+    @Override
+    public void updatePosAndVelGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVforGravityOnly(deltaT, nowT, updateStep);
+    }
+
+    @Override
+    public void updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVnoGravityNoNetForce(deltaT, nowT, updateStep);
+    }
+
+    @Override
+    public void updatePosAndVelforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVforNetForceOnly(deltaT, nowT, updateStep);
     }
 
     public boolean setAllElements() {

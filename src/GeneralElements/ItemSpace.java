@@ -30,7 +30,7 @@ import java.util.Vector;
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
-    enum ActiveActions {ALL, ONLYNERFORCE, ONLYGRAVITY, NONE};
+    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, NONE};
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
     Vector<GlobalAction> activeGlobalActions;
@@ -44,7 +44,7 @@ public class ItemSpace {
     boolean bAllActions = false;
     boolean bOnlyGravity = false;
     boolean bOnlyNetForce = false;
-    ActiveActions activeActions;
+    public ActiveActions activeActions;
 
     public ItemSpace(ItemMovementsApp mainApp) {
         this.mainApp = mainApp;
@@ -129,7 +129,7 @@ public class ItemSpace {
         else if (bItemGravityOn)
             activeActions = ActiveActions.ONLYGRAVITY;
         else if (bSomeLocalActions || bSomeGlobalActions)
-            activeActions = ActiveActions.ONLYNERFORCE;
+            activeActions = ActiveActions.ONLYNETFORCE;
     }
 
 
@@ -453,22 +453,30 @@ public class ItemSpace {
             case ALL:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelAllActions(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelAllActions(deltaT, nowT, updateStep);
                 break;
             case ONLYGRAVITY:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
                 break;
-            case ONLYNERFORCE:
+            case ONLYNETFORCE:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
                 break;
             default:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
                 break;
         }
-        for (ItemLink link:allItemLinks)
-            link.updatePosAndVel(deltaT, nowT, updateStep);
+//        for (ItemLink link:allItemLinks)
+//            link.updatePosAndVel(deltaT, nowT, updateStep);
     }
 
 

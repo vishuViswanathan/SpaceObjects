@@ -76,8 +76,20 @@ public class Influence {
 
     public boolean evalForce(double nowT, double deltaT, boolean bFinal) {return false;}
 
-    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
     }
+
+    public void updatePosAndVelGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    }
+
+    public void updatePosAndVelforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    }
+
+    public void updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    }
+
+//    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//    }
 
     public boolean isValid() {
         return valid;

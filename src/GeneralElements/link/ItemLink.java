@@ -117,8 +117,24 @@ public class ItemLink implements EvalOnce {
         return inf.evalForce(nowT, deltaT, bFinal);
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
-        inf.updatePosAndVel(deltaT, nowT, updateStep);
+//    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+//        inf.updatePosAndVel(deltaT, nowT, updateStep);
+//    }
+
+    public void updatePosAndVelAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelAllActions(deltaT, nowT, updateStep);
+    }
+
+    public void updatePosAndVelforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
+    }
+
+    public void updatePosAndVelGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
+    }
+
+    public void updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
     }
 
     public void setStartConditions(double duration, double nowT) {

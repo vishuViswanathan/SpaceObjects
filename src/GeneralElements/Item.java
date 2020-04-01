@@ -736,7 +736,7 @@ public class Item extends DarkMatter implements ItemInterface {
     }
 
     public boolean anyLocalAction() {
-        return (localActions.size() > 0);
+        return (localActions.size() > 0 || (jetController != null));
     }
 
     public Window showControlPanel(InputControl inpC, Component parent) {
@@ -968,19 +968,6 @@ public class Item extends DarkMatter implements ItemInterface {
     }
 
     //    =========================== calculations ======================
-
-    public boolean updatePosAndVelOLD(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
-
-        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVOLD(deltaT, nowT, updateStep);
-        evalMaxMinPos();
-        if (nowT > nextReport) {
-            updateOrbitAndPos();
-            nextReport += reportInterval;
-        }
-
-        return true;
-    }
 
     public boolean updatePosAndVelAllActions(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
