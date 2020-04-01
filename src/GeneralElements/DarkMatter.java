@@ -368,9 +368,6 @@ public class DarkMatter implements InputControl, EvalOnce {
         }
         if (bFinal) {
             status.velocity.add(addVelocity);
-            deltaPos.scale(deltaT, status.velocity);
-            newPos.add(lastPosition, deltaPos);
-            status.pos.set(newPos);
             status.time = nowT + deltaT;
         }
         return true;
@@ -420,6 +417,9 @@ public class DarkMatter implements InputControl, EvalOnce {
             status.velocity.set(pvBase.v2);
             status.time = nowT + deltaT;
         }
+        if (bFinal) {
+            status.velocity.add(addVelocity);
+        }
         return true;
     }
 
@@ -466,6 +466,9 @@ public class DarkMatter implements InputControl, EvalOnce {
                 status.acc.set(nowAcc);
                 status.time = nowT + deltaT;
             }
+        }
+        if (bFinal) {
+            status.velocity.add(addVelocity);
         }
         return true;
     }
