@@ -42,7 +42,7 @@ public class ItemLink implements EvalOnce {
 //        }
     }
 
-    public ItemLink(DarkMatter item1, DarkMatter item2, boolean gravityON, ItemSpace space) {
+    public ItemLink(DarkMatter item1, DarkMatter item2, ItemSpace space) {
         this(item1, item2, new InterItem(item1, item2, space), space);
     }
 

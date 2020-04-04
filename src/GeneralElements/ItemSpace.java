@@ -8,6 +8,7 @@ import GeneralElements.Display.LinkTable;
 import GeneralElements.globalActions.AllGlobalActions;
 import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.Gravity;
+import GeneralElements.link.InterItem;
 import GeneralElements.link.ItemLink;
 import GeneralElements.utils.ThreeDSize;
 import mvUtils.display.InputControl;
@@ -24,13 +25,16 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.Vector;
 
+import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL;
+
 //import Applications.SpaceEvaluator;
 
 /**
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
-    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, NONE};
+//    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, NONE};
+    public enum ActiveActions {LOCAL_GLOBAL, GRAVITY_JET_BOUNCE, BOUNCE_JET_GLOBAL, NONE};
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
     Vector<GlobalAction> activeGlobalActions;
@@ -41,9 +45,6 @@ public class ItemSpace {
     public boolean bConsiderGravityVelocity = false; // propagation time for Gravity
     boolean bSomeLocalActions = false;
     boolean bSomeGlobalActions = false;
-    boolean bAllActions = false;
-    boolean bOnlyGravity = false;
-    boolean bOnlyNetForce = false;
     public ActiveActions activeActions;
 
     public ItemSpace(ItemMovementsApp mainApp) {
@@ -112,7 +113,6 @@ public class ItemSpace {
     }
 
     public void initAllItemConnections() {
-        bSomeLocalActions = false;
         bSomeGlobalActions = false;
         for (ItemInterface it: allItems) {
             it.initConnections();
@@ -122,14 +122,25 @@ public class ItemSpace {
     }
 
     public void setActiveActions() {
+        bSomeLocalActions = false;
+        // exclude InterItems
+        for (ItemLink l: allItemLinks) {
+            if (!(l.getInfluence() instanceof InterItem)) {
+                bSomeLocalActions = true;
+                break;
+            }
+         }
         activeActions = ActiveActions.NONE;
 
-        if (bItemGravityOn & (bSomeLocalActions || bSomeGlobalActions))
-            activeActions = ActiveActions.ALL;
-        else if (bItemGravityOn)
-            activeActions = ActiveActions.ONLYGRAVITY;
-        else if (bSomeLocalActions || bSomeGlobalActions)
-            activeActions = ActiveActions.ONLYNETFORCE;
+        if (bItemGravityOn)
+            activeActions = ActiveActions.GRAVITY_JET_BOUNCE;
+        else if (bSomeLocalActions)
+            activeActions = LOCAL_GLOBAL;
+        else if (bSomeGlobalActions)
+            activeActions = ActiveActions.BOUNCE_JET_GLOBAL;
+        if (activeActions != LOCAL_GLOBAL)
+            mainApp.repeats = 0;
+
     }
 
 
@@ -149,7 +160,7 @@ public class ItemSpace {
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
                 for (int n = i + 1; n < iLen; n++) {
-                    oneLink = new ItemLink((DarkMatter)item, (DarkMatter)allItems.get(n), bItemGravityOn, this);
+                    oneLink = new ItemLink((DarkMatter)item, (DarkMatter)allItems.get(n), this);
                     if (oneLink.isValid())
                         addItemLink(oneLink);
                 }
@@ -450,19 +461,19 @@ public class ItemSpace {
 
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         switch(activeActions) {
-            case ALL:
+            case LOCAL_GLOBAL:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelAllActions(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
                     link.updatePosAndVelAllActions(deltaT, nowT, updateStep);
                 break;
-            case ONLYGRAVITY:
+            case GRAVITY_JET_BOUNCE:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
                     link.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
                 break;
-            case ONLYNETFORCE:
+            case BOUNCE_JET_GLOBAL:
                 for (ItemInterface i: allItems)
                     i.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
@@ -527,16 +538,16 @@ This is called only in PARALLEL - NOT USED NOW
         setItemStartConditions(deltaT, nowT);
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
-            evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
-            evaluator.awaitForceComplete(); // now all netForce calculations are ready
+            evaluator.awaitStartLinkCalculations(); // this should start the localForce calculations
+            evaluator.awaitForceComplete(); // now all localForce calculations are ready
             updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE);
 
         }
         // now finalise it
         if (ok) {
             initForces();
-            evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
-            evaluator.awaitForceComplete(); // now all netForce calculations are ready
+            evaluator.awaitStartLinkCalculations(); // this should start the localForce calculations
+            evaluator.awaitForceComplete(); // now all localForce calculations are ready
             updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.FINAL);
 //            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K1);
 //            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K2);

@@ -142,8 +142,8 @@ public class InterItem extends Influence {
             }
         }
 //        if (retVal) {
-//            item1.addToForce(nowForce);
-//            item2.subtractFromForce(nowForce);
+//            item1.addToLocalForce(nowForce);
+//            item2.subtractFromLocalForce(nowForce);
 //        }
         return retVal;
     }
@@ -174,7 +174,7 @@ public class InterItem extends Influence {
 //            nowForce.negate();
 ////            nowForce.scale(force); // 20200323 no halfway NOT good speed explodes
 //            nowForce.scale(force / 2); // 20200317 take the force halfway
-//            item2.addToForce(nowForce);
+//            item2.addToLocalForce(nowForce);
         }
         retVal = true;
         return retVal;

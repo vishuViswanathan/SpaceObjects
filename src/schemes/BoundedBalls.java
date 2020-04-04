@@ -35,11 +35,11 @@ public class BoundedBalls implements DefaultScheme {
         Random rd = new Random();
         Vector3d axes = new Vector3d(1, 1, 0);
         addManyBallsAtRandom(mainF, space, 40, minCorner, maxCorner,
-                vel1, vel2, axes, rd, "A", 0.05, 0.05, Color.RED, 200000);
+                vel1, vel2, axes, rd, "A", 5, 0.05, Color.RED, 200000);
         addManyBallsAtRandom(mainF, space, 40, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "B", 0.05, 0.05, Color.YELLOW, 200000);
+                vel1,vel2, axes, rd, "B", 5, 0.05, Color.YELLOW, 200000);
         addManyBallsAtRandom(mainF, space, 20, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "C", 0.05, 0.05, Color.CYAN, 200000);
+                vel1,vel2, axes, rd, "C", 5, 0.05, Color.CYAN, 200000);
         Item it;
         it = new Surface("Floor", new Point3d( -5, ymin, -5),
                 new Point3d( -5, ymin, 0), new Point3d( 0, ymin, 5),

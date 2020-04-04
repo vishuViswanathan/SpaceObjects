@@ -56,7 +56,7 @@ public class Item extends DarkMatter implements ItemInterface {
     private Vector3d miAsVector = new Vector3d();
     private Vector3d oneByMI = new Vector3d();
     Vector3d netTorque = new Vector3d();
-    Vector3d jetForce = new Vector3d();
+//    Vector3d jetForce = new Vector3d();
     Torque jetTorque = new Torque();
     Vector3d additionalAngularVel = new Vector3d();
     JetTimeController jetController;
@@ -817,7 +817,7 @@ public class Item extends DarkMatter implements ItemInterface {
         netTorque.set(0, 0, 0);
         addVelocity.set(0, 0, 0);
         setMatterLocalForces();
-        netForce.add(jetForce);
+//        localForce.add(jetForce);
         netTorque.add(jetTorque);
     }
 
