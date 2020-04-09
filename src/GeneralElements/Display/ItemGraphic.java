@@ -302,4 +302,8 @@ public class ItemGraphic {
         transform.mul(positionTransform);
         return transform;
     }
+
+    public void updateColor() {
+        planet.updateColor();
+    }
 }

@@ -19,11 +19,14 @@ public class ItemDisplay extends Group {
     ItemInterface theItem;
     AttributeSetter attributeSetter;
     boolean valid = false;
+    ItemSphere theDisplay;
+    ItemInterface.ItemType itemType;
     public ItemDisplay(ItemInterface theItem) {
         this.theItem = theItem;
-        switch (theItem.getItemType()) {
+        itemType = theItem.getItemType();
+        switch (itemType) {
             case SPHERE:
-                ItemSphere theDisplay = new ItemSphere(theItem);
+                theDisplay = new ItemSphere(theItem);
                 if (theDisplay.valid) {
                     addChild(theDisplay);
                     attributeSetter = theDisplay;
@@ -93,5 +96,10 @@ public class ItemDisplay extends Group {
         sceneGroup.addChild(headLight);
 
         return sceneGroup;
+    }
+
+    public void updateColor() {
+        if (itemType == ItemInterface.ItemType.SPHERE)
+            theDisplay.updateColor();
     }
 }

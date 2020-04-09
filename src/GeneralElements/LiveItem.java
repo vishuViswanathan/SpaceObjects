@@ -5,8 +5,8 @@ import java.awt.*;
 public class LiveItem extends Item {
     static Color defaultColor = Color.cyan;
     static Color infectedColor = Color.RED;
-    static Color curedColor = Color.green;
-    static double curingTime = 50; // in seconds
+    static Color curedColor = Color.BLUE;
+    static double curingTime = 30; // in seconds
 
     boolean touched = false;
     boolean infected = false;
@@ -36,8 +36,9 @@ public class LiveItem extends Item {
         boolean retVal = false;
         if (!infected && !cured) {
             infected = true;
-
             color = infectedColor;
+            if (itemG != null)
+                itemG.updateColor();
             willBeCuredAt = nowT + curingTime;
             retVal = true;
         }
@@ -56,6 +57,7 @@ public class LiveItem extends Item {
         cured = true;
         infected = false;
         color = curedColor;
+        itemG.updateColor();
     }
 
     public void touchedBy(double nowT, DarkMatter it) {

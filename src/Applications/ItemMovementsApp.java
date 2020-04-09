@@ -74,6 +74,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     String[] schemesList = {"BallAndFloor",
                             "BoundedBalls",
                             "ContactSpread",
+                            "ContactSpreadWithChoice",
                             "BungeeJumping",
                             "BungeeJumpingWithRope",
                             "ChainWithBall",
