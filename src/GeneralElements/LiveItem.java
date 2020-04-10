@@ -69,28 +69,28 @@ public class LiveItem extends Item {
         nContacts++;
     }
 
-    public boolean updatePAndVforAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         if (updateStep == UpdateStep.FINAL)
             noteIfCured(nowT);
-        return super.updatePAndVforAllActions(deltaT, nowT, updateStep);
+        return super.updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
     }
 
-    public boolean updatePAndVforGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         if (updateStep == UpdateStep.FINAL)
             noteIfCured(nowT);
-        return super.updatePAndVforGravityOnly(deltaT, nowT, updateStep);
+        return super.updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
     }
 
-    public boolean updatePAndVforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         if (updateStep == UpdateStep.FINAL)
             noteIfCured(nowT);
-        return super.updatePAndVforNetForceOnly(deltaT, nowT, updateStep);
+        return super.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
     }
 
-    public boolean updatePAndVnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         if (updateStep == UpdateStep.FINAL)
             noteIfCured(nowT);
-        return super.updatePAndVnoGravityNoNetForce(deltaT, nowT, updateStep);
+        return super.updatePAndVforBounce(deltaT, nowT, updateStep);
     }
 
     public StringBuilder statusStringForCSV(double posFactor, double velFactor) {

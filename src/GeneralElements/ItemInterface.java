@@ -334,13 +334,13 @@ public interface ItemInterface {
     //    =========================== calculations ======================
 
 
-    boolean updatePosAndVelAllActions(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
-    boolean updatePosAndVelGravityOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndelforGravityJetBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
-    boolean updatePosAndVelforNetForceOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
-    boolean updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
     void updateAngularPosition(Vector3dMV deltaAngle);
 

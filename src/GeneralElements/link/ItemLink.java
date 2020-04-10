@@ -121,20 +121,20 @@ public class ItemLink implements EvalOnce {
 //        inf.updatePosAndVel(deltaT, nowT, updateStep);
 //    }
 
-    public void updatePosAndVelAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
-        inf.updatePosAndVelAllActions(deltaT, nowT, updateStep);
+    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
     }
 
-    public void updatePosAndVelforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
-        inf.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
+    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
     }
 
-    public void updatePosAndVelGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
-        inf.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
+    public void updatePosAndelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforGravityJetBounce(deltaT, nowT, updateStep);
     }
 
-    public void updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
-        inf.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
+    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforBounce(deltaT, nowT, updateStep);
     }
 
     public void setStartConditions(double duration, double nowT) {

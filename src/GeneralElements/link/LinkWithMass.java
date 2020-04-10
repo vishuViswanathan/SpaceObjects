@@ -91,27 +91,27 @@ public class LinkWithMass extends InfluenceDef  {
 //    }
 
     @Override
-    public void updatePosAndVelAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (DarkMatter mat : massElements)
-            mat.updatePAndVforAllActions(deltaT, nowT, updateStep);
+            mat.updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
     }
 
     @Override
-    public void updatePosAndVelGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (DarkMatter mat : massElements)
-            mat.updatePAndVforGravityOnly(deltaT, nowT, updateStep);
+            mat.updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
     }
 
     @Override
-    public void updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (DarkMatter mat : massElements)
-            mat.updatePAndVnoGravityNoNetForce(deltaT, nowT, updateStep);
+            mat.updatePAndVforBounce(deltaT, nowT, updateStep);
     }
 
     @Override
-    public void updatePosAndVelforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (DarkMatter mat : massElements)
-            mat.updatePAndVforNetForceOnly(deltaT, nowT, updateStep);
+            mat.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
     }
 
     public boolean setAllElements() {

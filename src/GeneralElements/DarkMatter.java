@@ -304,21 +304,21 @@ public class DarkMatter implements InputControl, EvalOnce {
 //        }
     }
 
-    public boolean updatePAndVforAllActions(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = false;
         if (bFixedLocation)
             changed = false;
         else {
             switch (updateStep) {
                 case INTERMEDIATE:
-                    considerAllActions(nowT, deltaT, false);
+                    considerLocalGlobalBounce(nowT, deltaT, false);
                     break;
                 case FINAL:
                 case EuFwd:
                 case EUMod:
                 case RK2:
                 case RK4:
-                    considerAllActions(nowT, deltaT, true);
+                    considerLocalGlobalBounce(nowT, deltaT, true);
                     break;
                 default:
                     break;
@@ -327,7 +327,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-    boolean considerAllActions(double nowT, double deltaT, boolean bFinal) {
+    boolean considerLocalGlobalBounce(double nowT, double deltaT, boolean bFinal) {
         lastAcc = status.acc;
 //        lastVelocity = status.velocity;
 //        lastPosition = status.pos;
@@ -352,7 +352,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return true;
     }
 
-    public boolean updatePAndVforGravityOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = false;
         if (bFixedLocation)
             changed = false;
@@ -365,7 +365,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                 case EUMod:
                 case RK2:
                 case RK4:
-                    considerGravityOnly(nowT, deltaT, true);
+                    considerGravityJetBounce(nowT, deltaT, true);
                     break;
                 default:
                     break;
@@ -374,7 +374,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-    boolean considerGravityOnly(double nowT, double deltaT, boolean bFinal) {
+    boolean considerGravityJetBounce(double nowT, double deltaT, boolean bFinal) {
         if (bFinal) {
             TwoVectors pvBase = new TwoVectors(status.pos, lastVelocity);
 
@@ -403,21 +403,21 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     // CHECK 202020402 for Bounce Jet and Global, all are without repeat
-    public boolean updatePAndVforNetForceOnly(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = false;
         if (bFixedLocation)
             changed = false;
         else {
             switch (updateStep) {
                 case INTERMEDIATE:
-                    considerNetForceOnly(nowT, deltaT, false);
+                    considerBounceJetGlobal(nowT, deltaT, false);
                     break;
                 case FINAL:
                 case EuFwd:
                 case EUMod:
                 case RK2:
                 case RK4:
-                    considerNetForceOnly(nowT, deltaT, true);
+                    considerBounceJetGlobal(nowT, deltaT, true);
                     break;
                 default:
                     break;
@@ -427,7 +427,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     // CHECK 202020402 for Bounce Jet and Global, all are without repeat
-    boolean considerNetForceOnly(double nowT, double deltaT, boolean bFinal) {
+    boolean considerBounceJetGlobal(double nowT, double deltaT, boolean bFinal) {
         if (bFinal){
             lastAcc = status.acc;
 //            lastVelocity = status.velocity;
@@ -448,7 +448,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         return true;
     }
 
-    public boolean updatePAndVnoGravityNoNetForce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = false;
         if (bFixedLocation)
             changed = false;

@@ -12,19 +12,16 @@ import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.ForceElement;
-import mvUtils.physics.Point3dMV;
 import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
-import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -969,10 +966,10 @@ public class Item extends DarkMatter implements ItemInterface {
 
     //    =========================== calculations ======================
 
-    public boolean updatePosAndVelAllActions(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforAllActions(deltaT, nowT, updateStep);
+        updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();
@@ -982,10 +979,10 @@ public class Item extends DarkMatter implements ItemInterface {
         return true;
     }
 
-    public boolean updatePosAndVelGravityOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndelforGravityJetBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforGravityOnly(deltaT, nowT, updateStep);
+        updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();
@@ -995,10 +992,10 @@ public class Item extends DarkMatter implements ItemInterface {
         return true;
     }
 
-    public boolean updatePosAndVelforNetForceOnly(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforNetForceOnly(deltaT, nowT, updateStep);
+        updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();
@@ -1008,10 +1005,10 @@ public class Item extends DarkMatter implements ItemInterface {
         return true;
     }
 
-    public boolean updatePosAndVelnoGravityNoNetForce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVnoGravityNoNetForce(deltaT, nowT, updateStep);
+        updatePAndVforBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();

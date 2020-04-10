@@ -25,7 +25,7 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.Vector;
 
-import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL;
+import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL_BOUNCE;
 
 //import Applications.SpaceEvaluator;
 
@@ -33,8 +33,10 @@ import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL;
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
-//    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, NONE};
-    public enum ActiveActions {LOCAL_GLOBAL, GRAVITY_JET_BOUNCE, BOUNCE_JET_GLOBAL, NONE};
+//    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, ONLY_BOUNCE};
+    public enum ActiveActions {
+    LOCAL_GLOBAL_BOUNCE, GRAVITY_JET_BOUNCE, BOUNCE_JET_GLOBAL, ONLY_BOUNCE
+};
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
     Vector<GlobalAction> activeGlobalActions;
@@ -130,15 +132,15 @@ public class ItemSpace {
                 break;
             }
          }
-        activeActions = ActiveActions.NONE;
+        activeActions = ActiveActions.ONLY_BOUNCE;
 
         if (bItemGravityOn)
             activeActions = ActiveActions.GRAVITY_JET_BOUNCE;
         else if (bSomeLocalActions)
-            activeActions = LOCAL_GLOBAL;
+            activeActions = LOCAL_GLOBAL_BOUNCE;
         else if (bSomeGlobalActions)
             activeActions = ActiveActions.BOUNCE_JET_GLOBAL;
-        if (activeActions != LOCAL_GLOBAL)
+        if (activeActions != LOCAL_GLOBAL_BOUNCE)
             mainApp.repeats = 0;
 
     }
@@ -461,29 +463,32 @@ public class ItemSpace {
 
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         switch(activeActions) {
-            case LOCAL_GLOBAL:
+            case LOCAL_GLOBAL_BOUNCE:
                 for (ItemInterface i: allItems)
-                    i.updatePosAndVelAllActions(deltaT, nowT, updateStep);
+                    i.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelAllActions(deltaT, nowT, updateStep);
+                    link.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
                 break;
             case GRAVITY_JET_BOUNCE:
                 for (ItemInterface i: allItems)
-                    i.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
+                    i.updatePosAndelforGravityJetBounce(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelGravityOnly(deltaT, nowT, updateStep);
+                    link.updatePosAndelforGravityJetBounce(deltaT, nowT, updateStep);
                 break;
             case BOUNCE_JET_GLOBAL:
                 for (ItemInterface i: allItems)
-                    i.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
+                    i.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelforNetForceOnly(deltaT, nowT, updateStep);
+                    link.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
+                break;
+            case ONLY_BOUNCE:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelforBounce(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelforBounce(deltaT, nowT, updateStep);
                 break;
             default:
-                for (ItemInterface i: allItems)
-                    i.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
-                for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelnoGravityNoNetForce(deltaT, nowT, updateStep);
+                debug("Unknown activeAction itemSpace.#491");
                 break;
         }
 //        for (ItemLink link:allItemLinks)
