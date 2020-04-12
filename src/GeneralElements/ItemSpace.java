@@ -39,6 +39,7 @@ public class ItemSpace {
 };
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
+    LinkedList<ItemLink> allGravityLinks;
     Vector<GlobalAction> activeGlobalActions;
     ItemMovementsApp mainApp;
     AllGlobalActions allGlobalActions;
@@ -57,6 +58,7 @@ public class ItemSpace {
     public void clearSpace() {
         allItems = new LinkedList<ItemInterface>();
         allItemLinks = new LinkedList<ItemLink>();
+        allGravityLinks = new LinkedList<ItemLink>();
         allGlobalActions = new AllGlobalActions(this);
         bConsiderTimeDilation = false;
         bConsiderGravityVelocity = false;
@@ -112,6 +114,10 @@ public class ItemSpace {
 
     public void addItemLink(ItemLink l) {
         allItemLinks.add(l);
+    }
+
+    public void addGravityLink(ItemLink l){
+        allGravityLinks.add(l);
     }
 
     public void initAllItemConnections() {
