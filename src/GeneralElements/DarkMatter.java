@@ -29,16 +29,19 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean bFixedLocation = false;
     Vector<LocalAction> localActions;
     public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
+    Vector3d gForce = new Vector3d();
     Vector3d localForce = new Vector3d();
     Vector3d addVelocity = new Vector3d();
     Vector3d jetForce = new Vector3d();
     Vector3d globalForce =new Vector3d();
+    Vector3d lastGforce = new Vector3dMV();
     Vector3d lastForce = new Vector3dMV();
     Point3dMV lastPosition = new Point3dMV();
     Vector3dMV lastVelocity = new Vector3dMV();
     //    Vector3d effectiveLastVelocity = new Vector3d();
     Vector3d lastAcc = new Vector3d();
     Vector3dMV effectiveForce = new Vector3dMV();
+    Vector3dMV thisAcc = new Vector3dMV();
     Vector3dMV effectiveAcc = new Vector3dMV();
     Vector3dMV nowAcc = new Vector3dMV();
     Vector3dMV deltaV = new Vector3dMV();
@@ -228,6 +231,7 @@ public class DarkMatter implements InputControl, EvalOnce {
 
 
     public void initNetForce() {
+        gForce.set(0, 0,0);
         localForce.set(0, 0, 0); // this may not be correct
         addVelocity.set(0, 0, 0);
     }
@@ -238,6 +242,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             lastVelocity.set(status.velocity);
             lastAcc.set(status.acc);
             lastForce.set(localForce);
+            lastGforce.set(gForce);
         }
     }
 
@@ -359,6 +364,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         else {
             switch (updateStep) {
                 case INTERMEDIATE:
+                    considerGravityJetBounce(nowT, deltaT, false);
                     break;
                 case FINAL:
                 case EuFwd:
@@ -375,31 +381,30 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     boolean considerGravityJetBounce(double nowT, double deltaT, boolean bFinal) {
-        if (bFinal) {
-            TwoVectors pvBase = new TwoVectors(status.pos, lastVelocity);
-
-            TwoVectors pv = pvBase;
-            TwoVectors pv1 = new TwoVectors(pv);
-            // pv1 is original velocity  and net acc due to gravity
-
-            pv = new TwoVectors(pvBase, deltaT, pv1);
-            // pv is new pos(original pos +  velocity * deltaT) and
-            // new delta Velocity (original velocity + acc * deltaT)
-
-            TwoVectors pv2 = new TwoVectors(pv);
-            // pv2 original velocity  and net acc due to gravity
-
-            pv1.makeMeanWith(pv2);
-            // return mean Velocity and acc
-            pvBase.scaleAndAdd(deltaT, pv1);
-            status.pos.set(pvBase.v1);
-            status.velocity.set(pvBase.v2);
-            status.time = nowT + deltaT;
+        boolean changed = true;
+        if (bFixedLocation)
+            changed = false;
+        else {
+            effectiveForce.setMean(gForce, lastGforce);
+            thisAcc.scale((1.0/ mass), effectiveForce);
+            // calculate from netForce
+            deltaV.scale(deltaT, thisAcc);
+            newVelocity.add(lastVelocity, deltaV);
+            averageV.setMean(lastVelocity, newVelocity);
+            deltaPos.scale(deltaT, averageV);
+//            if (deltaPos.length() > 0.25)
+//                ItemMovementsApp.log.info("deltaPos for " + name + "at " + nowT + " = " + deltaPos );
+            newPos.add(lastPosition, deltaPos);
+            status.pos.set(newPos); // only position is updated here
+            if (bFinal) {
+                status.velocity.set(newVelocity);
+                status.acc.set(thisAcc);
+                status.time = nowT;
+//                if (bFlightPlan)
+//                    mass += flightPlan.massChange(deltaT);
+            }
         }
-//        if (bFinal) {
-//            status.velocity.add(addVelocity);
-//        }
-        return true;
+        return changed;
     }
 
     // CHECK 202020402 for Bounce Jet and Global, all are without repeat
