@@ -39,7 +39,7 @@ public class ItemSpace {
 };
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
-    LinkedList<ItemLink> allGravityLinks;
+    LinkedList<Gravity> allGravityLinks;
     Vector<GlobalAction> activeGlobalActions;
     ItemMovementsApp mainApp;
     AllGlobalActions allGlobalActions;
@@ -58,7 +58,7 @@ public class ItemSpace {
     public void clearSpace() {
         allItems = new LinkedList<ItemInterface>();
         allItemLinks = new LinkedList<ItemLink>();
-        allGravityLinks = new LinkedList<ItemLink>();
+        allGravityLinks = new LinkedList<Gravity>();
         allGlobalActions = new AllGlobalActions(this);
         bConsiderTimeDilation = false;
         bConsiderGravityVelocity = false;
@@ -116,7 +116,7 @@ public class ItemSpace {
         allItemLinks.add(l);
     }
 
-    public void addGravityLink(ItemLink l){
+    public void addGravityLink(Gravity l){
         allGravityLinks.add(l);
     }
 
@@ -139,16 +139,17 @@ public class ItemSpace {
             }
          }
         activeActions = ActiveActions.ONLY_BOUNCE;
-
-        if (bItemGravityOn)
+        mainApp.repeats = 0;
+        if (bItemGravityOn) {
             activeActions = ActiveActions.GRAVITY_JET_BOUNCE;
-        else if (bSomeLocalActions)
+            mainApp.repeats = 1;
+        }
+        else if (bSomeLocalActions) {
             activeActions = LOCAL_GLOBAL_BOUNCE;
+            mainApp.repeats = 1;
+        }
         else if (bSomeGlobalActions)
             activeActions = ActiveActions.BOUNCE_JET_GLOBAL;
-        if (activeActions != LOCAL_GLOBAL_BOUNCE)
-            mainApp.repeats = 0;
-
     }
 
 
@@ -186,7 +187,8 @@ public class ItemSpace {
                     if (n != i) {
                         oneGravity = new Gravity((DarkMatter) item, (DarkMatter) allItems.get(n), this);
                         if (oneGravity.isValid())
-                            ((DarkMatter) item).addGravityLink(oneGravity);
+                            addGravityLink(oneGravity);
+//                            ((DarkMatter) item).addGravityLink(oneGravity);
                     }
                 }
             }
@@ -514,6 +516,12 @@ public class ItemSpace {
                     ok = false;
                     break;
                 }
+            for (Gravity gr : allGravityLinks)
+                if (!gr.evalForce(nowT, deltaT, false)) {
+                    showError("in evalInfluence#521: gr.evalForce is false for Gravity " + gr);
+                    ok = false;
+                    break;
+                }
             if (!ok)
                 break;
             updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE); // not the final calculation
@@ -524,6 +532,12 @@ public class ItemSpace {
             for (ItemLink inf : allItemLinks)
                 if (!inf.evalForce(nowT, deltaT, true)) {
                     showError("In evalInfluence: evalForce-final is false for Link " + inf);
+                    ok = false;
+                    break;
+                }
+            for (Gravity gr : allGravityLinks)
+                if (!gr.evalForce(nowT, deltaT, true)) {
+                    showError("in evalInfluence#540: gr.evalForce is false for Gravity " + gr);
                     ok = false;
                     break;
                 }

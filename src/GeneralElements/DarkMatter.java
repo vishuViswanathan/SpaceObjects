@@ -29,12 +29,12 @@ public class DarkMatter implements InputControl, EvalOnce {
     boolean bFixedLocation = false;
     Vector<LocalAction> localActions;
     public Vector3d tempForce = new Vector3d();  // used if required instead of creating a new object each time
-    Vector3d gForce = new Vector3d();
+    Vector3d gravityForce = new Vector3d();
     Vector3d localForce = new Vector3d();
     Vector3d addVelocity = new Vector3d();
     Vector3d jetForce = new Vector3d();
     Vector3d globalForce =new Vector3d();
-    Vector3d lastGforce = new Vector3dMV();
+    Vector3d lastGravityforce = new Vector3dMV();
     Vector3d lastForce = new Vector3dMV();
     Point3dMV lastPosition = new Point3dMV();
     Vector3dMV lastVelocity = new Vector3dMV();
@@ -231,7 +231,7 @@ public class DarkMatter implements InputControl, EvalOnce {
 
 
     public void initNetForce() {
-        gForce.set(0, 0,0);
+        gravityForce.set(0, 0,0);
         localForce.set(0, 0, 0); // this may not be correct
         addVelocity.set(0, 0, 0);
     }
@@ -242,7 +242,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             lastVelocity.set(status.velocity);
             lastAcc.set(status.acc);
             lastForce.set(localForce);
-            lastGforce.set(gForce);
+            lastGravityforce.set(gravityForce);
         }
     }
 
@@ -259,12 +259,20 @@ public class DarkMatter implements InputControl, EvalOnce {
         localForce.add(addForce);
     }
 
+    public synchronized void addToGraviryForce(Vector3d addForce)  {
+        gravityForce.add(addForce);
+    }
+
     public synchronized void addToAddVelocity(Vector3d addVel)  {
         addVelocity.add(addVel);
     }
 
     public synchronized void subtractFromLocalForce(Vector3d subtractForce) {
         localForce.sub(subtractForce);
+    }
+
+    public synchronized void subtractFromGravityForce(Vector3d subtractForce) {
+        gravityForce.sub(subtractForce);
     }
 
     public synchronized void addToTorque(Vector3d angularAcceleration)  {
@@ -385,7 +393,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         if (bFixedLocation)
             changed = false;
         else {
-            effectiveForce.setMean(gForce, lastGforce);
+            effectiveForce.setMean(gravityForce, lastGravityforce);
             thisAcc.scale((1.0/ mass), effectiveForce);
             // calculate from netForce
             deltaV.scale(deltaT, thisAcc);
