@@ -453,12 +453,13 @@ public class DarkMatter implements InputControl, EvalOnce {
             nowAcc.scale(oneByMass, effectiveForce);
             effectiveAcc.setMean(nowAcc, lastAcc);
             deltaV.scale(deltaT, effectiveAcc);
+            lastVelocity.add(addVelocity);
             newVelocity.add(lastVelocity, deltaV);
             averageV.setMean(lastVelocity, newVelocity);
             deltaPos.scale(deltaT, averageV);
             newPos.add(lastPosition, deltaPos);
             status.pos.set(newPos);
-            status.velocity.add(newVelocity, addVelocity);
+            status.velocity.set(newVelocity);
             status.acc.set(nowAcc);
             status.time = nowT + deltaT;
         }
@@ -499,46 +500,6 @@ public class DarkMatter implements InputControl, EvalOnce {
         }
         return true;
     }
-
-//    boolean considerNetForceEffect(double deltaT, boolean bFinal) {
-//        boolean changed = false;
-//        if (localForce.length() > 0) {
-////            System.out.println("DarkMatter.#334: Force > 0  with bFinal " +  bFinal);
-//            lastAcc = status.acc;
-////            lastVelocity = status.velocity;
-//            effectiveForce.set(localForce);
-//            nowAcc.scale(oneByMass, effectiveForce);
-////            System.out.println("DarkMatter.#328 nowAcc: " +  nowAcc.dataInCSV() + ", Vel :" + status.velocity.dataInCSV());
-//            effectiveAcc.setMean(nowAcc, lastAcc);
-//            deltaV.scale(deltaT, effectiveAcc);
-//            newVelocity.add(effectiveLastVelocity, deltaV);
-////            newVelocity.add(addVelocity);
-//            averageV.setMean(lastVelocity, newVelocity);
-//            deltaPos.scale(deltaT, averageV);
-//            newPos.add(lastPosition, deltaPos);
-//            status.pos.set(newPos); // only position is updated here
-//            if (bFinal) {
-//                status.velocity.set(newVelocity);
-//                status.acc.set(nowAcc);
-//            }
-//            changed = true;
-//        }
-//        else if (bFinal) {
-//            changed = considerAddVelocityEffect(deltaT, bFinal);
-//        }
-//        return changed;
-//    }
-
-//    boolean considerAddVelocityEffect(double deltaT, boolean bFinal) {
-////        newVelocity.add(lastVelocity, addVelocity);
-//        if (bFinal) {
-//            deltaPos.scale(deltaT, effectiveLastVelocity);
-//            newPos.add(lastPosition, deltaPos);
-//            status.pos.set(newPos); // only position is updated here
-//            status.velocity.set(effectiveLastVelocity);
-//        }
-//        return true;
-//    }
 
     TwoVectors pvBase;
     TwoVectors pv1, pv2, pv3, pv4;

@@ -37,8 +37,8 @@ public class ContactSpreadWithChoice implements DefaultScheme {
         ItemDialog dlg = new ItemDialog("Member DEtails", null, mainF);
         dlg.setVisible(true);
 
-        Point3d minCorner = new Point3d(boxXmin - diameter, boxYmin - diameter, boxZmin);
-        Point3d maxCorner = new Point3d(boxXmax + diameter, boxYmax + diameter, boxZmax);
+        Point3d minCorner = new Point3d(boxXmin + diameter, boxYmin + diameter, boxZmin);
+        Point3d maxCorner = new Point3d(boxXmax - diameter, boxYmax - diameter, boxZmax);
         Random rd = new Random();
         Vector3d axes = new Vector3d(1, 1, 0);
         // moving items
@@ -184,7 +184,7 @@ public class ContactSpreadWithChoice implements DefaultScheme {
             jp.addBlank();
 
             ntmass = new NumberTextField(inpC, mass, 6, false,
-                    0.001, 10, "####.###", "Each item Mass(kg)");
+                    0.001, 1e5, "####.###", "Each item Mass(kg)");
             ntdiameter = new NumberTextField(inpC, diameter, 6, false,
                     0.001, 10, "####.###", "Each item Dia(m)");
             outerPan.add(jp, BorderLayout.CENTER);
