@@ -183,13 +183,11 @@ public class ItemSpace {
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
                 totalGm += item.getGM();
-                for (int n = 0; n < iLen; n++) {
-                    if (n != i) {
-                        oneGravity = new Gravity((DarkMatter) item, (DarkMatter) allItems.get(n), this);
-                        if (oneGravity.isValid())
-                            addGravityLink(oneGravity);
+                for (int n = i + 1; n < iLen; n++) {
+                    oneGravity = new Gravity((DarkMatter) item, (DarkMatter) allItems.get(n), this);
+                    if (oneGravity.isValid())
+                        addGravityLink(oneGravity);
 //                            ((DarkMatter) item).addGravityLink(oneGravity);
-                    }
                 }
             }
             for (ItemInterface i:allItems)
@@ -516,12 +514,14 @@ public class ItemSpace {
                     ok = false;
                     break;
                 }
-            for (Gravity gr : allGravityLinks)
-                if (!gr.evalForce(nowT, deltaT, false)) {
-                    showError("in evalInfluence#521: gr.evalForce is false for Gravity " + gr);
-                    ok = false;
-                    break;
-                }
+            if (bItemGravityOn) {
+                for (Gravity gr : allGravityLinks)
+                    if (!gr.evalForce(nowT, deltaT, false)) {
+                        showError("in evalInfluence#521: gr.evalForce is false for Gravity " + gr);
+                        ok = false;
+                        break;
+                    }
+            }
             if (!ok)
                 break;
             updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE); // not the final calculation
@@ -535,12 +535,14 @@ public class ItemSpace {
                     ok = false;
                     break;
                 }
-            for (Gravity gr : allGravityLinks)
-                if (!gr.evalForce(nowT, deltaT, true)) {
-                    showError("in evalInfluence#540: gr.evalForce is false for Gravity " + gr);
-                    ok = false;
-                    break;
-                }
+            if (bItemGravityOn) {
+                for (Gravity gr : allGravityLinks)
+                    if (!gr.evalForce(nowT, deltaT, true)) {
+                        showError("in evalInfluence#540: gr.evalForce is false for Gravity " + gr);
+                        ok = false;
+                        break;
+                    }
+            }
             if (ok) {
                 updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.FINAL); // the final calculation
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K1);

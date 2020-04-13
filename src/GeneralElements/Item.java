@@ -813,6 +813,7 @@ public class Item extends DarkMatter implements ItemInterface {
     public void setLocalForces() {
         netTorque.set(0, 0, 0);
         addVelocity.set(0, 0, 0);
+        gravityForce.set(0, 0, 0);
         setMatterLocalForces();
 //        localForce.add(jetForce);
         netTorque.add(jetTorque);
