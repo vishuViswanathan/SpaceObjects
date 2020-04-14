@@ -395,6 +395,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         else {
 //            effectiveForce.add(gravityForce, jetForce);
             effectiveForce.setMean(gravityForce, lastGravityforce);
+            effectiveForce.add(jetForce);
             thisAcc.scale(oneByMass, effectiveForce);
             // calculate from netForce
             deltaV.scale(deltaT, thisAcc);
@@ -406,7 +407,7 @@ public class DarkMatter implements InputControl, EvalOnce {
             newPos.add(lastPosition, deltaPos);
             status.pos.set(newPos); // only position is updated here
             if (bFinal) {
-//                newVelocity.add(addVelocity);
+                newVelocity.add(addVelocity);
                 status.velocity.set(newVelocity);
                 status.acc.set(thisAcc);
                 status.time = nowT;
