@@ -127,7 +127,8 @@ public class PlanetsAndMoons implements DefaultScheme {
                 closeInputFiles();
         return bRetVal;
     }
-    String baseDataFilePath = planetDataDir + "\\planetsBaseData.data";
+//    String baseDataFilePath = planetDataDir + "\\planetsBaseData.data";
+    String baseDataFilePath = planetDataDir + "\\planetsBaseDataUpdated.data";
 
     boolean saveBasePlaneData(StringBuilder xmlStr) { // TODO Not Ready yet
         boolean retVal = false;
@@ -443,7 +444,7 @@ public class PlanetsAndMoons implements DefaultScheme {
                 BufferedInputStream iStream = new BufferedInputStream(new FileInputStream(filePath));
                 File f = new File(filePath);
                 long len = f.length();
-                if (len > 1000 && len < 15000) {
+                if (len > 100 && len < 15000) {
                     int iLen = (int) len;
                     byte[] data = new byte[iLen + 100];
                     try {

@@ -1144,7 +1144,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 repeats = 0;
 //                space.bConsiderTimeDilation = true;
 //                space.bConsiderGravityVelocity = true;
-                showMessage("Gravity effects on Time and Gravity propagation time are not considered");
+//                showMessage("Gravity effects on Time and Gravity propagation time are not considered");
                 rIAstronomical.setSelected(true);
                 break;
         }
