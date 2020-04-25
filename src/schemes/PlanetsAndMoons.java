@@ -127,7 +127,8 @@ public class PlanetsAndMoons implements DefaultScheme {
                 closeInputFiles();
         return bRetVal;
     }
-    String baseDataFilePath = planetDataDir + "\\planetsBaseData.data";
+//    String baseDataFilePath = planetDataDir + "\\planetsBaseData.data";
+    String baseDataFilePath = planetDataDir + "\\planetsBaseDataUpdated.data";
 
     boolean saveBasePlaneData(StringBuilder xmlStr) { // TODO Not Ready yet
         boolean retVal = false;
@@ -325,12 +326,12 @@ public class PlanetsAndMoons implements DefaultScheme {
                         mass = Double.valueOf(vp.val);
                     }
                     if (radius > 0 && mass > 0) {
-                        if (name.equalsIgnoreCase("BDObject")) { // enter object name for ItemBD
-                            item = new ItemBD(objName, mass, radius * 2 * 1000, color, mainF);
-                            debug("Object " + objName + " taken with BIG DECIMAL");
-                        }
-                        else
-                            item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
+//                        if (name.equalsIgnoreCase("BDObject")) { // enter object name for ItemBD
+//                            item = new ItemBD(objName, mass, radius * 2 * 1000, color, mainF);
+//                            debug("Object " + objName + " taken with BIG DECIMAL");
+//                        }
+//                        else
+                        item = new Item(objName, mass, radius * 2 * 1000, color, mainF);
                         vp = XMLmv.getTag(xmlStr, "imageName", 0);
                         imageName = vp.val;
                         if (imageName != null && imageName.length() > 3 && !imageName.equalsIgnoreCase("null")) {
@@ -443,7 +444,7 @@ public class PlanetsAndMoons implements DefaultScheme {
                 BufferedInputStream iStream = new BufferedInputStream(new FileInputStream(filePath));
                 File f = new File(filePath);
                 long len = f.length();
-                if (len > 1000 && len < 15000) {
+                if (len > 100 && len < 15000) {
                     int iLen = (int) len;
                     byte[] data = new byte[iLen + 100];
                     try {
@@ -487,16 +488,16 @@ public class PlanetsAndMoons implements DefaultScheme {
                                     double vz = Double.valueOf(split[7])* 1000; //  oneAuInM / secsPerDay;
                                     Vector3d v = new Vector3d(vx, vy, vz);
                                     obj.initPosEtc(new Point3d(x, y, z), v);
-                                    // [16] to [17] are next Velocity data
-                                    double jdn1 = Double.valueOf(split[11]);
-                                    double deltaT = (jdn1 - nowJDN) * 3600 * 24; // in seconds
-                                    double vx1 = Double.valueOf(split[16])* 1000; // * oneAuInM / secsPerDay;
-                                    double vy1 = Double.valueOf(split[17])* 1000; // oneAuInM / secsPerDay;
-                                    double vz1 = Double.valueOf(split[18])* 1000;
-                                    Vector3d acc = new Vector3d(vx1, vy1, vz1);
-                                    acc.sub(v);
-                                    acc.scale(1/deltaT);
-                                    obj.setInitialAcceleration(acc);
+//                                    // [16] to [17] are next Velocity data
+//                                    double jdn1 = Double.valueOf(split[11]);
+//                                    double deltaT = (jdn1 - nowJDN) * 3600 * 24; // in seconds
+//                                    double vx1 = Double.valueOf(split[16])* 1000; // * oneAuInM / secsPerDay;
+//                                    double vy1 = Double.valueOf(split[17])* 1000; // oneAuInM / secsPerDay;
+//                                    double vz1 = Double.valueOf(split[18])* 1000;
+//                                    Vector3d acc = new Vector3d(vx1, vy1, vz1);
+//                                    acc.sub(v);
+//                                    acc.scale(1/deltaT);
+//                                    obj.setInitialAcceleration(acc);
                                 }
                                 else {
                                     showError("Mismatch in JDN of data for " + objName + ", skipping it");

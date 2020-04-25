@@ -74,10 +74,22 @@ public class Influence {
 //    enum Types {GRAVITY, SPRING, ATTRACTION, REPULSION, CSPRING, ESPRING};
     public boolean evalForce() {return false;}
 
-    public boolean evalForce(double deltaT, boolean bFinal) {return false;}
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {return false;}
 
-    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
     }
+
+    public void updatePosAndVelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    }
+
+    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    }
+
+    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    }
+
+//    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//    }
 
     public boolean isValid() {
         return valid;

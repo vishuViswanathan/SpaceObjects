@@ -32,6 +32,7 @@ public interface ItemInterface {
     enum ItemType {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
+        LIVE("Live"),
         VMRL("from VMRL file");
 
         private final String typeName;
@@ -124,6 +125,7 @@ public interface ItemInterface {
     void noteTotalGM(double totalGM);
 
     ItemGraphic getItemGraphic();
+
 
     static Item getNewItem(ItemSpace theSpace, String theName, Window theParent) {
         Item theItem = null;
@@ -275,6 +277,8 @@ public interface ItemInterface {
 
     boolean hasAnyAccessories();
 
+    boolean anyLocalAction();
+
     Window showControlPanel(InputControl inpC, Component parent);
 
     void setLocalForces();
@@ -329,7 +333,14 @@ public interface ItemInterface {
 
     //    =========================== calculations ======================
 
-    boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndelforGravityJetBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+
+    boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
     void updateAngularPosition(Vector3dMV deltaAngle);
 

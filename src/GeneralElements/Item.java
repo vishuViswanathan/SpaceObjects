@@ -12,19 +12,16 @@ import mvUtils.display.*;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.ForceElement;
-import mvUtils.physics.Point3dMV;
 import mvUtils.physics.Torque;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
-import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -56,7 +53,7 @@ public class Item extends DarkMatter implements ItemInterface {
     private Vector3d miAsVector = new Vector3d();
     private Vector3d oneByMI = new Vector3d();
     Vector3d netTorque = new Vector3d();
-    Vector3d jetForce = new Vector3d();
+//    Vector3d jetForce = new Vector3d();
     Torque jetTorque = new Torque();
     Vector3d additionalAngularVel = new Vector3d();
     JetTimeController jetController;
@@ -735,6 +732,10 @@ public class Item extends DarkMatter implements ItemInterface {
         return (jetController != null);
     }
 
+    public boolean anyLocalAction() {
+        return (localActions.size() > 0 || (jetController != null));
+    }
+
     public Window showControlPanel(InputControl inpC, Component parent) {
         ControlPanelDialog dlg = null;
         if (jetController != null) {
@@ -811,8 +812,10 @@ public class Item extends DarkMatter implements ItemInterface {
 
     public void setLocalForces() {
         netTorque.set(0, 0, 0);
+        addVelocity.set(0, 0, 0);
+        gravityForce.set(0, 0, 0);
         setMatterLocalForces();
-        netForce.add(jetForce);
+//        localForce.add(jetForce);
         netTorque.add(jetTorque);
     }
 
@@ -906,8 +909,11 @@ public class Item extends DarkMatter implements ItemInterface {
         return itemGraphic.get();
     }
 
+    ItemGraphic itemG;
+
     public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
-        ItemGraphic itemG = new ItemGraphic(this);
+//        ItemGraphic itemG = new ItemGraphic(this);
+        itemG = new ItemGraphic(this);
         if (itemG.addObjectAndOrbit(grp, orbitAtrib)) {
             itemGraphic = new WeakReference<ItemGraphic>(itemG);
             itemGraphic.get().updateAngularPosition(status.angularPos);
@@ -961,10 +967,10 @@ public class Item extends DarkMatter implements ItemInterface {
 
     //    =========================== calculations ======================
 
-    public boolean updatePosAndVel(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndV(deltaT, nowT, updateStep);
+        updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReport) {
             updateOrbitAndPos();
@@ -973,6 +979,46 @@ public class Item extends DarkMatter implements ItemInterface {
 
         return true;
     }
+
+    public boolean updatePosAndelforGravityJetBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
+    public boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
+    public boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+
+        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+        updatePAndVforBounce(deltaT, nowT, updateStep);
+        evalMaxMinPos();
+        if (nowT > nextReport) {
+            updateOrbitAndPos();
+            nextReport += reportInterval;
+        }
+
+        return true;
+    }
+
 
     void noteAngularStatus() {
         status.angularPos.set(newAngle);
@@ -1049,22 +1095,22 @@ public class Item extends DarkMatter implements ItemInterface {
 //    =============================================
 
     public StringBuilder statusStringForCSV(double posFactor, double velFactor) {
-        StringBuilder csvStr = new StringBuilder(name + ", " + gmID + ", " + gm + "\n");
-        csvStr.append("Position , " + status.positionStringForCSV(posFactor) + "\n");
-        csvStr.append("Velocity , ").append(status.velocityStringForCSV(velFactor)).append("\n");
-        csvStr.append("AngVel , ").append(status.angularVelocityStringForCSV(1)).append("\n");
+        StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + gm + "\n");
+        csvStr.append("Position," + status.positionStringForCSV(posFactor) + "\n");
+        csvStr.append("Velocity,").append(status.velocityStringForCSV(velFactor)).append("\n");
+        csvStr.append("AngVel,").append(status.angularVelocityStringForCSV(1)).append("\n");
         return csvStr;
     }
 
     public StringBuilder statusStringForHistory(double posFactor, double velFactor) {
-        StringBuilder csvStr = new StringBuilder(name + ", " + gmID + ", " + gm + ",");
+        StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + mass + "," + gm + ",");
         csvStr.append(status.positionStringForCSV(posFactor) + ",");
         csvStr.append(status.velocityStringForCSV(velFactor) + ",");
-        csvStr.append(status.accelerationStringForCSV(velFactor)).append("\n");
+        csvStr.append(status.accelerationStringForCSV(velFactor)); //.append("\n");
         return csvStr;
     }
 
-    protected StringBuilder defaultDataInXML() {
+     protected StringBuilder defaultDataInXML() {
         StringBuilder xmlStr = new StringBuilder(XMLmv.putTag("name", name));
         xmlStr.append(XMLmv.putTag("itemType", ("" + itemType)));
         return xmlStr;

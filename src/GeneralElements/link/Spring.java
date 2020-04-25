@@ -41,7 +41,7 @@ public class Spring extends InfluenceDef  {
     }
 
     @Override
-    public boolean evalForce(double deltaT, boolean bFinal) {
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {
         boolean retVal = true;
         Vector3d distVect = new Vector3d();
         distVect.sub(item2.status.pos, item1.status.pos);
@@ -60,10 +60,10 @@ public class Spring extends InfluenceDef  {
         else {
             Vector3d nowForce = new Vector3d(distVect);
             nowForce.scale(ratio);
-            item1.addToForce(nowForce);
+            item1.addToLocalForce(nowForce);
 //            nowForce.negate();
-//            item2.addToForce(nowForce);
-            item2.subtractFromForce(nowForce);
+//            item2.addToLocalForce(nowForce);
+            item2.subtractFromLocalForce(nowForce);
         }
         return retVal;
     }

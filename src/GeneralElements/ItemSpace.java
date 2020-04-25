@@ -8,6 +8,7 @@ import GeneralElements.Display.LinkTable;
 import GeneralElements.globalActions.AllGlobalActions;
 import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.Gravity;
+import GeneralElements.link.InterItem;
 import GeneralElements.link.ItemLink;
 import GeneralElements.utils.ThreeDSize;
 import mvUtils.display.InputControl;
@@ -24,20 +25,30 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.Vector;
 
+import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL_BOUNCE;
+
 //import Applications.SpaceEvaluator;
 
 /**
  * Created by M Viswanathan on 23 May 2014
  */
 public class ItemSpace {
+//    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, ONLY_BOUNCE};
+    public enum ActiveActions {
+    LOCAL_GLOBAL_BOUNCE, GRAVITY_JET_BOUNCE, BOUNCE_JET_GLOBAL, ONLY_BOUNCE
+};
     LinkedList<ItemInterface> allItems;
     LinkedList<ItemLink> allItemLinks;
+    LinkedList<Gravity> allGravityLinks;
     Vector<GlobalAction> activeGlobalActions;
     ItemMovementsApp mainApp;
     AllGlobalActions allGlobalActions;
     double pastHistoryTime = 36000; // time in s to keep position history
     public boolean bConsiderTimeDilation = false; // gravity effect on local clock
     public boolean bConsiderGravityVelocity = false; // propagation time for Gravity
+    boolean bSomeLocalActions = false;
+    boolean bSomeGlobalActions = false;
+    public ActiveActions activeActions;
 
     public ItemSpace(ItemMovementsApp mainApp) {
         this.mainApp = mainApp;
@@ -47,6 +58,7 @@ public class ItemSpace {
     public void clearSpace() {
         allItems = new LinkedList<ItemInterface>();
         allItemLinks = new LinkedList<ItemLink>();
+        allGravityLinks = new LinkedList<Gravity>();
         allGlobalActions = new AllGlobalActions(this);
         bConsiderTimeDilation = false;
         bConsiderGravityVelocity = false;
@@ -104,10 +116,42 @@ public class ItemSpace {
         allItemLinks.add(l);
     }
 
-    public void initAllItemConnections() {
-        for (ItemInterface it: allItems)
-            it.initConnections();
+    public void addGravityLink(Gravity l){
+        allGravityLinks.add(l);
     }
+
+    public void initAllItemConnections() {
+        bSomeGlobalActions = false;
+        for (ItemInterface it: allItems) {
+            it.initConnections();
+            if (it.anyLocalAction())
+                bSomeLocalActions = true;
+        }
+    }
+
+    public void setActiveActions() {
+        bSomeLocalActions = false;
+        // exclude InterItems
+        for (ItemLink l: allItemLinks) {
+            if (!(l.getInfluence() instanceof InterItem)) {
+                bSomeLocalActions = true;
+                break;
+            }
+         }
+        activeActions = ActiveActions.ONLY_BOUNCE;
+        mainApp.repeats = 0;
+        if (bItemGravityOn) {
+            activeActions = ActiveActions.GRAVITY_JET_BOUNCE;
+            mainApp.repeats = 1;
+        }
+        else if (bSomeLocalActions) {
+            activeActions = LOCAL_GLOBAL_BOUNCE;
+            mainApp.repeats = 1;
+        }
+        else if (bSomeGlobalActions)
+            activeActions = ActiveActions.BOUNCE_JET_GLOBAL;
+    }
+
 
     public void setGlobalLinksAndActions() {
         ItemLink link;
@@ -125,7 +169,7 @@ public class ItemSpace {
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
                 for (int n = i + 1; n < iLen; n++) {
-                    oneLink = new ItemLink((DarkMatter)item, (DarkMatter)allItems.get(n), bItemGravityOn, this);
+                    oneLink = new ItemLink((DarkMatter)item, (DarkMatter)allItems.get(n), this);
                     if (oneLink.isValid())
                         addItemLink(oneLink);
                 }
@@ -139,12 +183,11 @@ public class ItemSpace {
             for (int i = 0; i < iLen; i++) {
                 item = allItems.get(i);
                 totalGm += item.getGM();
-                for (int n = 0; n < iLen; n++) {
-                    if (n != i) {
-                        oneGravity = new Gravity((DarkMatter) item, (DarkMatter) allItems.get(n), this);
-                        if (oneGravity.isValid())
-                            ((DarkMatter) item).addGravityLink(oneGravity);
-                    }
+                for (int n = i + 1; n < iLen; n++) {
+                    oneGravity = new Gravity((DarkMatter) item, (DarkMatter) allItems.get(n), this);
+                    if (oneGravity.isValid())
+                        addGravityLink(oneGravity);
+//                            ((DarkMatter) item).addGravityLink(oneGravity);
                 }
             }
             for (ItemInterface i:allItems)
@@ -152,6 +195,8 @@ public class ItemSpace {
 
         }
         activeGlobalActions = allGlobalActions.activeActions();
+        if (activeGlobalActions.size() > 0)
+            bSomeGlobalActions = true;
 //        for (ItemLink l: allItemLinks)
 //            l.setGravityLinks(bItemGravityOn);
     }
@@ -423,23 +468,60 @@ public class ItemSpace {
     }
 
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        for (ItemInterface i: allItems)
-            i.updatePosAndVel(deltaT, nowT, updateStep);
-        for (ItemLink link:allItemLinks)
-            link.updatePosAndVel(deltaT, nowT, updateStep);
+        switch(activeActions) {
+            case LOCAL_GLOBAL_BOUNCE:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
+                break;
+            case GRAVITY_JET_BOUNCE:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndelforGravityJetBounce(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndelforGravityJetBounce(deltaT, nowT, updateStep);
+                break;
+            case BOUNCE_JET_GLOBAL:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
+                break;
+            case ONLY_BOUNCE:
+                for (ItemInterface i: allItems)
+                    i.updatePosAndVelforBounce(deltaT, nowT, updateStep);
+                for (ItemLink link:allItemLinks)
+                    link.updatePosAndVelforBounce(deltaT, nowT, updateStep);
+                break;
+            default:
+                debug("Unknown activeAction itemSpace.#491");
+                break;
+        }
+//        for (ItemLink link:allItemLinks)
+//            link.updatePosAndVel(deltaT, nowT, updateStep);
     }
 
+
+// Called from doCalculation() (In SERIAL)
     boolean evalInfluence(double deltaT, double nowT) throws Exception  {
         boolean ok = true;
         setItemStartConditions(deltaT, nowT);
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                if (!inf.evalForce(deltaT, false)) {
+                if (!inf.evalForce(nowT, deltaT, false)) {
                     showError("in evalInfluence: evalForce is false for Link " + inf);
                     ok = false;
                     break;
                 }
+            if (bItemGravityOn) {
+                for (Gravity gr : allGravityLinks)
+                    if (!gr.evalForce(nowT, deltaT, false)) {
+                        showError("in evalInfluence#521: gr.evalForce is false for Gravity " + gr);
+                        ok = false;
+                        break;
+                    }
+            }
             if (!ok)
                 break;
             updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE); // not the final calculation
@@ -448,11 +530,19 @@ public class ItemSpace {
         if (ok) {
             initForces();
             for (ItemLink inf : allItemLinks)
-                if (!inf.evalForce(deltaT, true)) {
+                if (!inf.evalForce(nowT, deltaT, true)) {
                     showError("In evalInfluence: evalForce-final is false for Link " + inf);
                     ok = false;
                     break;
                 }
+            if (bItemGravityOn) {
+                for (Gravity gr : allGravityLinks)
+                    if (!gr.evalForce(nowT, deltaT, true)) {
+                        showError("in evalInfluence#540: gr.evalForce is false for Gravity " + gr);
+                        ok = false;
+                        break;
+                    }
+            }
             if (ok) {
                 updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.FINAL); // the final calculation
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K1);
@@ -466,21 +556,25 @@ public class ItemSpace {
         return ok;
     }
 
+
+/*
+This is called only in PARALLEL - NOT USED NOW
+ */
     boolean evalInfluence(SpaceEvaluator evaluator , double deltaT, double nowT) throws Exception  {
         boolean ok = true;
         setItemStartConditions(deltaT, nowT);
         for (int t = 0; t < mainApp.repeats; t++) {
             initForces();
-            evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
-            evaluator.awaitForceComplete(); // now all netForce calculations are ready
+            evaluator.awaitStartLinkCalculations(); // this should start the localForce calculations
+            evaluator.awaitForceComplete(); // now all localForce calculations are ready
             updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.INTERMEDIATE);
 
         }
         // now finalise it
         if (ok) {
             initForces();
-            evaluator.awaitStartLinkCalculations(); // this should start the netForce calculations
-            evaluator.awaitForceComplete(); // now all netForce calculations are ready
+            evaluator.awaitStartLinkCalculations(); // this should start the localForce calculations
+            evaluator.awaitForceComplete(); // now all localForce calculations are ready
             updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.FINAL);
 //            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K1);
 //            updatePosAndVel(evaluator, deltaT, nowT, ItemInterface.UpdateStep.K2);

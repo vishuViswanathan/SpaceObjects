@@ -12,6 +12,8 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Color4f;
 import java.awt.*;
 
+import static javax.media.j3d.Material.ALLOW_COMPONENT_WRITE;
+
 /**
  * Created by M Viswanathan on 23 May 2014
  */
@@ -53,6 +55,7 @@ public class ItemSphere extends Sphere implements AttributeSetter {
             blueMat.setLightingEnable(true);
 
             //           Appearance blueApp = new Appearance();
+            blueMat.setCapability(ALLOW_COMPONENT_WRITE);
             ap.setMaterial(blueMat);
             setAppearance(ap);
             setPickable(true);
@@ -67,6 +70,13 @@ public class ItemSphere extends Sphere implements AttributeSetter {
 
     public void setRenderingAttribute(RenderingAttributes renderingAttribute) {
         ap.setRenderingAttributes(renderingAttribute);
+    }
+
+    public void updateColor() {
+        Color3f c = new Color3f(((DarkMatter)planet).color);
+        Material mat = ap.getMaterial();
+        mat.setEmissiveColor(c);
+        mat.setDiffuseColor(c);
     }
 
 }

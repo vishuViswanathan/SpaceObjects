@@ -42,7 +42,7 @@ public class ItemLink implements EvalOnce {
 //        }
     }
 
-    public ItemLink(DarkMatter item1, DarkMatter item2, boolean gravityON, ItemSpace space) {
+    public ItemLink(DarkMatter item1, DarkMatter item2, ItemSpace space) {
         this(item1, item2, new InterItem(item1, item2, space), space);
     }
 
@@ -79,8 +79,8 @@ public class ItemLink implements EvalOnce {
     }
 
     @Override
-    public void evalOnce(double deltaT, boolean bFinal) {
-        evalForce(deltaT, bFinal);
+    public void evalOnce(double nowT, double deltaT, boolean bFinal) {
+        evalForce(nowT, deltaT, bFinal);
     }
 
     // dummy not used
@@ -113,12 +113,28 @@ public class ItemLink implements EvalOnce {
         return inf.evalForce();
     }
 
-    public boolean evalForce(double deltaT, boolean bFinal) {
-        return inf.evalForce(deltaT, bFinal);
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {
+        return inf.evalForce(nowT, deltaT, bFinal);
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
-        inf.updatePosAndVel(deltaT, nowT, updateStep);
+//    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+//        inf.updatePosAndVel(deltaT, nowT, updateStep);
+//    }
+
+    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
+    }
+
+    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
+    }
+
+    public void updatePosAndelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforGravityJetBounce(deltaT, nowT, updateStep);
+    }
+
+    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception{
+        inf.updatePosAndVelforBounce(deltaT, nowT, updateStep);
     }
 
     public void setStartConditions(double duration, double nowT) {

@@ -3,6 +3,7 @@ package schemes;
 import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemSpace;
+import GeneralElements.LiveItem;
 import GeneralElements.Surface;
 import mvUtils.physics.Vector3dMV;
 
@@ -16,9 +17,9 @@ import java.util.Random;
 /**
  * Created by M Viswanathan on 19 Feb 2015
  */
-public class BoundedBalls implements DefaultScheme {
+public class ContactSpread implements DefaultScheme {
 
-    public BoundedBalls() {
+    public ContactSpread() {
     }
 
     @Override
@@ -34,12 +35,10 @@ public class BoundedBalls implements DefaultScheme {
         double vel2 = 5;
         Random rd = new Random();
         Vector3d axes = new Vector3d(1, 1, 0);
-        addManyBallsAtRandom(mainF, space, 40, minCorner, maxCorner,
-                vel1, vel2, axes, rd, "A", 5, 0.05, Color.RED, 200000);
-        addManyBallsAtRandom(mainF, space, 40, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "B", 5, 0.05, Color.YELLOW, 200000);
-        addManyBallsAtRandom(mainF, space, 20, minCorner, maxCorner,
-                vel1,vel2, axes, rd, "C", 5, 0.05, Color.CYAN, 200000);
+        addManyBallsAtRandom(mainF, space, 50, minCorner, maxCorner,
+                vel1, vel2, axes, rd, "A", 0.05, 0.05, false, 200000);
+        addManyBallsAtRandom(mainF, space, 1, minCorner, maxCorner,
+                2,2, axes, rd, "C", 0.05, 0.05, true, 200000);
         Item it;
         it = new Surface("Floor", new Point3d( -5, ymin, -5),
                 new Point3d( -5, ymin, 0), new Point3d( 0, ymin, 5),
@@ -60,9 +59,9 @@ public class BoundedBalls implements DefaultScheme {
     }
 
 
-    void addOneBall(JFrame mainF, ItemSpace space, String name, double mass, double dia, Color color,
+    void addOneBall(JFrame mainF, ItemSpace space, String name, double mass, double dia, boolean infected,
                     Point3d loc, Vector3d velocity, double compression) {
-        Item it =  new Item(name, mass, dia, color, mainF);
+        Item it =  new LiveItem(name, mass, dia, infected, mainF);
         it.initPosEtc(new Point3d(loc), new Vector3d(velocity));
         it.seteCompression(compression);
         space.addItem(it);
@@ -71,39 +70,19 @@ public class BoundedBalls implements DefaultScheme {
     void addManyBallsAtRandom(JFrame mainF, ItemSpace space, int qty, Point3d minCorner, Point3d maxCorner,
                               double vel1, double vel2, Tuple3d axes , Random rd,
                               String baseName, double mass, double dia,
-                              Color color, double compression) {
+                              boolean infected, double compression) {
         Point3d posRange = new Point3d(maxCorner);
         posRange.sub(minCorner);
-         for (int n = 0; n < qty; n++) {
-            String nowName = baseName + n;
-            Point3d pos = new Point3d(minCorner.x + rd.nextDouble() * posRange.x,
-                    minCorner.y + rd.nextDouble() * posRange.y,
-                    minCorner.z + rd.nextDouble() * posRange.z);
-            Vector3d vel = Vector3dMV.getRandomVector(vel1, vel2, axes, rd);
-            addOneBall(mainF, space, nowName, mass, dia, color, pos, vel, compression);
-        }
-    }
-
-
-    void addManyBallsAtRandomOLD(JFrame mainF, ItemSpace space, int qty, Point3d minCorner, Point3d maxCorner,
-                              Vector3d vel1, Vector3d vel2, String baseName, double mass, double dia,
-                              Color color, double compression ) {
-        Random rd = new Random();
-        Point3d posRange = new Point3d(maxCorner);
-        posRange.sub(minCorner);
-        Vector3d velRange = new Vector3d(vel2);
-        velRange.sub(vel1);
         for (int n = 0; n < qty; n++) {
             String nowName = baseName + n;
             Point3d pos = new Point3d(minCorner.x + rd.nextDouble() * posRange.x,
                     minCorner.y + rd.nextDouble() * posRange.y,
                     minCorner.z + rd.nextDouble() * posRange.z);
-            Vector3d vel = new Vector3d(vel1.x + rd.nextDouble() * velRange.x,
-                    vel1.y + rd.nextDouble() * velRange.y,
-                    vel1.z + rd.nextDouble() * velRange.z);
-            addOneBall(mainF, space, nowName, mass, dia, color, pos, vel, compression);
+            Vector3d vel = Vector3dMV.getRandomVector(vel1, vel2, axes, rd);
+            addOneBall(mainF, space, nowName, mass, dia, infected, pos, vel, compression);
         }
     }
+
 
     public ItemMovementsApp.SpaceSize getSpaceSize() {
         return ItemMovementsApp.SpaceSize.DAILY;
@@ -116,6 +95,6 @@ public class BoundedBalls implements DefaultScheme {
     }
 
     public String toString() {
-        return "Bounded Balls";
+        return "Contact Spread";
     }
 }

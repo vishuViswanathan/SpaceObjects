@@ -111,33 +111,33 @@ public class ItemStat {
 
     public StringBuilder positionStringForCSV(double factor) {
         StringBuilder csvStr = new StringBuilder();
-        csvStr.append(factor * pos.x).append(", ").append(factor * pos.y).append(", ").append(factor * pos.z);
+        csvStr.append(factor * pos.x).append(",").append(factor * pos.y).append(",").append(factor * pos.z);
         return csvStr;
     }
 
     public StringBuilder velocityStringForCSV(double factor) {
         StringBuilder csvStr = new StringBuilder();
         csvStr.append("" + (factor * velocity.x));
-        csvStr.append(", " + (factor * velocity.y));
-        csvStr.append(", " + (factor * velocity.z));
-        csvStr.append(", " + (factor * velocity.length()));
+        csvStr.append("," + (factor * velocity.y));
+        csvStr.append("," + (factor * velocity.z));
+        csvStr.append("," + (factor * velocity.length()));
         return csvStr;
     }
 
     public StringBuilder accelerationStringForCSV(double factor) {
         StringBuilder csvStr = new StringBuilder();
         csvStr.append("" + (factor * acc.x));
-        csvStr.append(", " + (factor * acc.y));
-        csvStr.append(", " + (factor * acc.z));
-        csvStr.append(", " + (factor * acc.length()));
+        csvStr.append("," + (factor * acc.y));
+        csvStr.append("," + (factor * acc.z));
+        csvStr.append("," + (factor * acc.length()));
         return csvStr;
     }
 
     public StringBuilder angularVelocityStringForCSV(double factor) {
         StringBuilder csvStr = new StringBuilder();
         csvStr.append("" + (factor * angularVelocity.x));
-        csvStr.append(", " + (factor * angularVelocity.y));
-        csvStr.append(", " + (factor * angularVelocity.z));
+        csvStr.append("," + (factor * angularVelocity.y));
+        csvStr.append("," + (factor * angularVelocity.z));
         return csvStr;
     }
 

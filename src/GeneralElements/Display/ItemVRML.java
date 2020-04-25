@@ -19,7 +19,7 @@ public class ItemVRML extends BranchGroup implements AttributeSetter {
     ItemInterface theItem;
     public ItemVRML(ItemInterface theItem) {
         this.theItem = theItem;
-        loadVrmlFile(theItem.getVrmlFile());
+                        loadVrmlFile(theItem.getVrmlFile());
     }
 
     private void loadVrmlFile(String fileName) {

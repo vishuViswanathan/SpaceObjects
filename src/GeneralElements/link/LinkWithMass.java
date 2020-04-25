@@ -85,9 +85,33 @@ public class LinkWithMass extends InfluenceDef  {
             showMessage("Not Ready for inter-gravity on links");
     }
 
-    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {  // deltaT is time is seconds
-        for (DarkMatter mat:massElements)
-            mat.updatePAndV(deltaT, nowT, updateStep);
+//    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {  // deltaT is time is seconds
+//        for (DarkMatter mat : massElements)
+//            mat.updatePAndV(deltaT, nowT, updateStep);
+//    }
+
+    @Override
+    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
+    }
+
+    @Override
+    public void updatePosAndVelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
+    }
+
+    @Override
+    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVforBounce(deltaT, nowT, updateStep);
+    }
+
+    @Override
+    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+        for (DarkMatter mat : massElements)
+            mat.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
     }
 
     public boolean setAllElements() {
@@ -306,12 +330,12 @@ public class LinkWithMass extends InfluenceDef  {
     }
 
     @Override
-    public boolean evalForce(double deltaT, boolean bFinal) {
+    public boolean evalForce(double nowT, double deltaT, boolean bFinal) {
 //        if (!elementsSet)
 //            setAllElements();
         boolean retVal = true;
         for (ItemLink l: allLinks)
-            if (!l.evalForce(deltaT, bFinal)) {
+            if (!l.evalForce(nowT, deltaT, bFinal)) {
                 retVal = false;
                 break;
             }
