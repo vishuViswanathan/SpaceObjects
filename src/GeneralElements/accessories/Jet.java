@@ -69,7 +69,7 @@ public class Jet extends JetsAndSeekers {
     public void addEffect() {
         if (active) {
             item.addTojetForce(jetData.getForce());
-            System.out.println(name + ": " + jetData.getForce().length());
+            System.out.println("Jet.#72: " + name + ": " + jetData.getForce().length());
             item.addToJetTorque(jetData.getTorque());
         }
     }
@@ -103,7 +103,7 @@ public class Jet extends JetsAndSeekers {
             active = false;
         } catch (Exception e) {
             showError(".153 takeFromXML: Some mess in Time Plan");
-            retVal = false;
+//            retVal = false;
             retVal = false;
         }
         return retVal;

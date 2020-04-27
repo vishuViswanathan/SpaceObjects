@@ -42,7 +42,7 @@ import java.util.Vector;
  */
 public class MotionDisplay  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
     enum ViewDirection {XMinus, YMinus, ZMinus}
-    ItemSpace space;
+    public ItemSpace space;
     Transform3D defVPFTransform = new Transform3D();
     boolean bViewSaved = false;
     Transform3D defTGMainTransform = new Transform3D();

@@ -4,7 +4,7 @@ import GeneralElements.DarkMatter;
 import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
-import GeneralElements.Constants;
+import mvUtils.display.FramedPanel;
 import time.DateAndJDN;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
@@ -94,6 +94,13 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     DateAndJDN dateAndJDN = new DateAndJDN();
     JButton pbStart = new JButton("Start");
     NumberTextField ntfDuration;  // , ntfStep;
+    String endDate = "YYYYmmdd HH:MM:SS";
+    TextField tfEndTime;
+    boolean bEndTime = false;
+    JRadioButton rbEndTime;
+    JRadioButton rbDuration;
+    ButtonGroup bgroup;
+
     double duration = 2000; // in h
     public double calculationStep =2; //in seconds
 //    public double initialSmallerStep = 2;
@@ -161,6 +168,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         this.refreshInterval = refreshInterval;
         this.duration = duration;
         ntfDuration.setData(duration);
+        tfEndTime.setText(endDate);
         bShowItems = true;
         this.bShowLinks = bShowLinks;
         this.bShowOrbit = bShowOrbit;
@@ -446,13 +454,35 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     JPanel buttonPanel() {
-        JPanel jp = new JPanel();
+        rbDuration = new JRadioButton("Set Duration", !bEndTime);
         ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.######", "Duration");
+        ntfDuration.setEditable(!bEndTime);
+
+        rbEndTime = new JRadioButton("Set End Time(LOCAL)", bEndTime);
+        rbEndTime.setEnabled(spSize == SpaceSize.ASTRONOMICAL);
+        tfEndTime = new TextField(endDate);
+        tfEndTime.setEnabled(bEndTime);
+
+        bgroup = new ButtonGroup();
+        bgroup.add(rbDuration);
+        bgroup.add(rbEndTime);
         MyListener listener = new MyListener();
         pbStart.addActionListener(listener);
-        JPanel durPanel = new JPanel(new BorderLayout());
-        durPanel.add(new JLabel("Duration in h"), BorderLayout.WEST);
-        durPanel.add(ntfDuration, BorderLayout.EAST);
+        rbDuration.addActionListener(listener);
+
+        rbEndTime.addActionListener(listener);
+
+        JPanel durPanel = new JPanel();
+        durPanel.add(rbDuration);
+        durPanel.add(ntfDuration);
+
+        JPanel endDatePanel = new JPanel();
+        endDatePanel.add(rbEndTime);
+        endDatePanel.add(tfEndTime);
+
+        FramedPanel jp = new FramedPanel();
+        jp.setLayout(new BoxLayout(jp, BoxLayout.X_AXIS));
+        jp.add(endDatePanel);
         jp.add(durPanel);
         jp.add(pbStart);
         return jp;
@@ -1055,6 +1085,30 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         return decide(title, msg, mainF);
     }
 
+    boolean setDuration() {
+        boolean retVal = true;
+        if (bEndTime) {
+            String endStr = tfEndTime.getText();
+            if (endStr.length() >= 8) {
+                double endJDN = DateAndJDN.jdnFromString(endStr);
+                double startJDN = dateAndJDN.getJdN();
+                if (endJDN > startJDN) {
+                    duration = (endJDN - startJDN) * 24;
+                    showMessage("The duration is " + duration + " h");
+                    ntfDuration.setData(duration);
+                }
+                else
+                    retVal = false;
+            }
+            else
+                retVal = false;
+        }
+        else {
+            duration = ntfDuration.getData();
+        }
+        return retVal;
+    }
+
     class MyListener implements ActionListener {
         MyListener() {
 
@@ -1066,7 +1120,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 if (src == pbStart) {
                     duration = ntfDuration.getData();
                     boolean running = false;
-                    if (duration > 0) {
+                    if (setDuration() && duration > 0) {
                         space.saveInfluenceList();
                         running = startRunThread();
                     }
@@ -1074,8 +1128,21 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         pbStart.setEnabled(false);
                     break aBlock;
                 }
+                else if (src == rbEndTime) {
+                    bEndTime = rbEndTime.isSelected();
+                    setEndSetting();
+                }
+                else if (src == rbDuration) {
+                    bEndTime = !rbDuration.isSelected();
+                    setEndSetting();
+                }
 
             }
+        }
+
+        void setEndSetting() {
+            tfEndTime.setEnabled(bEndTime);
+            ntfDuration.setEnabled(!bEndTime);
         }
     }
 
@@ -1138,6 +1205,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 setTimingValues(0.0002, 0.02, 200, false, true, false, true);
                 repeats = 5;
                 rIDaily.setSelected(true);
+                rbDuration.setSelected(true);
+                rbEndTime.setEnabled(false);
                 break;
             case ASTRONOMICAL:
                 setTimingValues(10, 10 * 100, 200000, true, false, true, false);
@@ -1146,6 +1215,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 //                space.bConsiderGravityVelocity = true;
 //                showMessage("Gravity effects on Time and Gravity propagation time are not considered");
                 rIAstronomical.setSelected(true);
+                rbEndTime.setEnabled(true);
                 break;
         }
         spSize = size;

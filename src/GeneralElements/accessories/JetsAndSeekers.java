@@ -216,7 +216,7 @@ public abstract class JetsAndSeekers {
     public boolean completeThisStep(OneTimeStep theStep, double nowT, double deltaT) {
         boolean done = false;
         if (nowT >= theStep.startTime) {
-            System.out.println(name + ": " + nowT);
+            System.out.println("JetsAndSeekers.#219: " + name + ": " + nowT);
             boolean activate = false;
             if (nowT < theStep.endTime)
                 activate = true;

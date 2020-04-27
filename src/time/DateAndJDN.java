@@ -109,6 +109,44 @@ public class DateAndJDN extends GregorianCalendar{
         return jdN;
     }
 
+    /*
+    expectd string is of format YYYYmmdd HH:MM:SS
+     */
+    public static double jdnFromString(String str) {
+        double retVal = -1;
+        try {
+            int year = 0;
+            int month = 0;
+            int day = 0;
+            if (str.length() >= 8) {
+                String[] splits = str.split(" ");
+                if (splits[0].length() == 8) {
+                    year = Integer.parseInt(str.substring(0, 4));
+                    month = Integer.parseInt(str.substring(4, 6));
+                    day = Integer.parseInt(str.substring(6, 8));
+                }
+                int H = 0;
+                int M = 0;
+                int S = 0;
+                if (splits.length > 1) {
+                    if (splits[1].length() == 8) {
+                        String[] splits1 = splits[1].split(":");
+                        if (splits1.length == 3) {
+                            H = Integer.parseInt(splits1[0]);
+                            M = Integer.parseInt(splits1[1]);
+                            S = Integer.parseInt(splits1[2]);
+                        }
+                    }
+                }
+                retVal = jdnFromDate(year, month, day, H, M, S);
+            }
+        }
+        catch (NumberFormatException e) {
+            System.out.println("DateAndJDN.#123  Number format Exception");
+        }
+        return retVal;
+    }
+
     public JPanel panWithJDN() {
         JPanel jp = new JPanel(new BorderLayout());
         jp.add(new JLabel("JDN "), BorderLayout.WEST);
@@ -119,17 +157,23 @@ public class DateAndJDN extends GregorianCalendar{
 
     public JPanel panWithDateTime() {
         JPanel jp = new JPanel(new BorderLayout());
-        jp.add(new JLabel("Date "), BorderLayout.WEST);
+        jp.add(new JLabel("Date(GMT) "), BorderLayout.WEST);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
         jp.add(new JLabel(sdf.format(getTime())), BorderLayout.EAST);
         return jp;
     }
 
     public static void main(String[] args) {
-        double jdn = Double.valueOf(args[0]);
+        double jdn = Double.parseDouble(args[0]);
         DateAndJDN dAndJDn = new DateAndJDN();
         dAndJDn.setTimeZone(TimeZone.getTimeZone("GMT"));
         dAndJDn.setCalendarFromJDn(jdn);
         System.out.println(dAndJDn.getTime().toString());
+        String txt = "20200101 01:00:00";
+        double jdn1= jdnFromString(txt);
+        System.out.println(jdn1);
+        dAndJDn.setCalendarFromJDn(jdn1);
+        System.out.println(dAndJDn.getTime().toString());
+
     }
 }

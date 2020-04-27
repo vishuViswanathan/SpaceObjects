@@ -10,6 +10,7 @@ import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.FramedPanel;
 import mvUtils.display.NumberLabel;
+import mvUtils.physics.Vector3dMV;
 
 import javax.media.j3d.*;
 import javax.swing.*;
@@ -43,6 +44,8 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
     JButton jbControlPanel;
     JButton jbItemData;
     JButton jbItemEdit;
+    JComboBox<Item> cbItems;
+
 
     LocalViewFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
                    MotionDisplay motionDisplay) {
@@ -79,6 +82,8 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         outerGbc.insets = new Insets(5, 0, 5, 0);
         outerGbc.gridx = 0;
         outerGbc.gridy = 0;
+        menuP.add(viewFromCB(), outerGbc);
+        outerGbc.gridy++;
         commonMenuPanelHolder = new JPanel();
         commonMenuPanelHolder.add(commonMenuPanel);
         menuP.add(commonMenuPanelHolder, outerGbc);
@@ -166,9 +171,28 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
 
         updateViewDistanceUI(1.0);
         setTitle(item.getName());
-//        showLocalViewFrame(item.name);
     }
 
+    public void setViewDirection(ItemInterface viewFrom) {
+        localVp.setNominalViewingTransform();
+        Transform3D defaultTr = new Transform3D();
+        localVp.getViewPlatformTransform().getTransform(defaultTr);
+
+        Point3d eye = new Point3d(viewFrom.getPos());
+        Point3d objPos = itemInView.getPos();
+        Vector3dMV vec = new Vector3dMV(eye);
+        vec.sub(objPos);
+        vec.normalize();
+        vec.scale(viewPosFromPlanet);
+        Transform3D lookAt = new Transform3D();
+        lookAt.lookAt(eye, objPos, new Vector3d(0, 0, 1));
+        lookAt.invert();
+        lookAt.setTranslation(vec);
+        localVp.getViewPlatformTransform().setTransform(lookAt);
+//        viewPosFromPlanet = vec.length();
+        updateViewDistanceUI(1.0);
+        setTitle(itemInView.getName() + " from " + viewFrom);
+    }
 
     public void showLocalView(ItemInterface item, int atX, int atY, boolean bShowRelOrbits,
                               RenderingAttributes relOrbitAttrib) {
@@ -290,6 +314,27 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
             }
         });
         return jbItemData;
+    }
+
+    JComponent viewFromCB() {
+        FramedPanel p = new FramedPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.add(new JLabel("View direction from"));
+        cbItems = new JComboBox(motionDisplay.space.getAlItems().toArray());
+        cbItems.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ItemInterface iFrom = (ItemInterface)cbItems.getSelectedItem();
+                if (iFrom == itemInView) {
+
+                }
+                else {
+                    setViewDirection(iFrom);
+                }
+            }
+        });
+        p.add(cbItems);
+        return(p);
     }
 
     JComponent createItemEditButton() {
