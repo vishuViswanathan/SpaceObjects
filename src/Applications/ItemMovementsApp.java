@@ -5,7 +5,7 @@ import GeneralElements.Display.MotionDisplay;
 import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
 import mvUtils.display.FramedPanel;
-import time.DateAndJDN;
+import mvUtils.time.DateAndJDN;
 import evaluations.EvalOnce;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
