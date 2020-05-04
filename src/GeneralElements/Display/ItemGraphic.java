@@ -74,7 +74,8 @@ public class ItemGraphic {
         attachedPlatform = platform;
         positionTrGrp.addChild(attachedPlatform);
         bPlatformAttached = true;
-        prepareAllRelativeOrbits(relOrbitAtrib, relOrbitGroup);
+        if (bShowRelOrbits)
+            prepareAllRelativeOrbits(relOrbitAtrib, relOrbitGroup);
     }
 
 

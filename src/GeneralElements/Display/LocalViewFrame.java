@@ -91,6 +91,9 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         menuP.add(menuPanel(), outerGbc);
         add(menuP, BorderLayout.EAST);
         pack();
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setResizable(false);
+        Dimension minSize = new Dimension(300, 200);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -160,6 +163,10 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
 
     public void showLocalView(ItemInterface item, boolean bShowRelOrbits,
                               RenderingAttributes relOrbitAttrib) {
+        if (getState() == Frame.ICONIFIED ) {
+            System.out.println("was ICONIFIED");
+            setState(Frame.NORMAL);
+        }
         jlItemName.setText(item.getName());
         attachPlatformToItem(item, bShowRelOrbits, relOrbitAttrib);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
@@ -236,6 +243,9 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         setTitle(item.getName());
 //        showLocalViewFrame(item.name);
     }
+
+    boolean bSHowRelOrbits = false;
+    RenderingAttributes relOrbitAtrib;
 
     private void attachPlatformToItem(ItemInterface item, boolean showRelOrbits,
                                       RenderingAttributes relOrbitAtrib) {

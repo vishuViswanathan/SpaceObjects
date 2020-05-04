@@ -107,6 +107,7 @@ public class InterItem extends Influence {
         Vector3d nowForce = new Vector3d();
         if (compression > 0) {
             item1.touchedBy(nowT, item2);
+            item2.touchedBy(nowT, item1);
             if (elasticityON && collisionOn) {
                 distVect.normalize();
                 double v1Before = item1.status.velocity.projectionLength(distVect);

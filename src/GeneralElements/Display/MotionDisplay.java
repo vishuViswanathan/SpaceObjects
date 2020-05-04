@@ -239,6 +239,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JButton viewAllXY = new JButton("View All in XY plane");
     JButton viewAllYZ = new JButton("View All in YZ plane");
     JComboBox<Item> cbItems;
+    JButton jbShowSelected;
     JButton stopB = new JButton(stopItStr);
     JButton resultsB = new JButton("Save Vectors");
     JScrollBar sbUpdateSpeed;
@@ -262,6 +263,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         outerGbc.gridx = 0;
         outerGbc.gridy = 0;
         cbItems = new JComboBox(space.getAlItems().toArray());
+        jbShowSelected = new JButton("Show");
         ActionListener l = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -288,12 +290,23 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                        setViewAll(ViewDirection.YMinus);
                        break block;
                    }
-                   if (src == cbItems) {
-                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem(), bShowRelOrbits,
-                               relOrbitAttrib);
-                       localViewFrame.setVisible(true);
+//                   if (src == cbItems) {
+//                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem(),
+//                               (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
+//                               relOrbitAttrib);
+//                       localViewFrame.setVisible(true);
+//                       break block;
+//                   }
+
+                   if (src == jbShowSelected) {
+                       showLocalView((ItemInterface) cbItems.getSelectedItem());
+//                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem(),
+//                               (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
+//                               relOrbitAttrib);
+//                       localViewFrame.setVisible(true);
                        break block;
                    }
+
                    if (src == stopB) {
                        if (isStopButtInContinue()) {
                            controller.oneMoreTime();
@@ -311,8 +324,12 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
                }
             }
         };
-        cbItems.addActionListener(l);
-        outerP.add(cbItems, outerGbc);
+//        cbItems.addActionListener(l);
+        jbShowSelected.addActionListener(l);
+        JPanel selP = new JPanel();
+        selP.add(cbItems);
+        selP.add(jbShowSelected);
+        outerP.add(selP, outerGbc);
         outerGbc.gridy++;
         viewAllXY.addActionListener(l);
         outerP.add(viewAllXY, outerGbc);
@@ -413,8 +430,10 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         menuP.add(showLinksCB(), gbc);
         menuP.add(showLinksCB(), gbc);
         gbc.gridy++;
-        menuP.add(showRelOrbitCB(), gbc);
-        gbc.gridy++;
+        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
+            menuP.add(showRelOrbitCB(), gbc);
+            gbc.gridy++;
+        }
         menuP.add(showOrbitCB(), gbc);
         gbc.gridy++;
         pauseRunB.addActionListener(l);
@@ -741,37 +760,50 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         vpTransBehavior.setFactor(distance / 100);
     }
 
+    boolean inMouseClick = false;
+
     @Override
     public void mouseClicked(MouseEvent e) {
-        mainVpOrbitBehavior.setEnable(true);
-        pickCanvas.setShapeLocation(e);
-        PickResult result = pickCanvas.pickClosest();
-        Point3d pt = new Point3d();
-        if (result != null) {
-            result.getClosestIntersection(pt);
-            boolean done = false;
-            Object s = result.getNode(PickResult.SHAPE3D);
-            if (s != null) {
-                if (s instanceof PathShape) {
-                    showLocalView(((PathShape) s).planet.getItem());
-                    debug("Selected via Path " + ((PathShape) s).planet.getItem().getName());
-                    done = true;
+        if (!inMouseClick) {
+            inMouseClick = true;
+            mainVpOrbitBehavior.setEnable(true);
+            pickCanvas.setShapeLocation(e);
+            PickResult result = pickCanvas.pickClosest();
+            Point3d pt = new Point3d();
+            int button = e.getButton();
+            if (result != null) {
+                result.getClosestIntersection(pt);
+                boolean done = false;
+                Object s = result.getNode(PickResult.SHAPE3D);
+                if (s != null) {
+                    if (s instanceof PathShape) {
+                        ItemInterface ii = ((PathShape) s).planet.getItem();
+                        if (button == MouseEvent.BUTTON1) {
+                            showLocalView(ii);
+                            debug("Selected via Path " + ii.getName());
+                        }
+                        else
+                            cbItems.setSelectedItem(ii);
+                        done = true;
+                    }
                 }
-            }
-            if (!done) {
-//                Primitive p = (Primitive) result.getNode(PickResult.PRIMITIVE);
-                Object p = result.getNode(PickResult.GROUP);
-//                if (p == null)
-//                    p = result.getNode(PickResult.BRANCH_GROUP);
-                if (p != null) {
-                    if (p instanceof AttributeSetter) {
-                        showLocalView(((AttributeSetter) p).getItem(), e.getX(), e.getY());
-//                                    showPlanet((ItemSphere) p, e.getX(), e.getY());
-                        debug("Selected " + ((AttributeSetter) p).getItem().getName());
+                if (!done) {
+                    Object p = result.getNode(PickResult.GROUP);
+                    if (p != null) {
+                        if (p instanceof AttributeSetter) {
+                            ItemInterface ii = ((AttributeSetter) p).getItem();
+                            if (button == MouseEvent.BUTTON1)
+                                showLocalView(ii, e.getX(), e.getY());
+                            else
+                                cbItems.setSelectedItem(ii);
+                        }
                     }
                 }
             }
+            inMouseClick = false;
         }
+        else
+            debug("already in inMouseClick");
     }
 
     @Override
@@ -834,12 +866,16 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     public void showLocalView(ItemInterface item) {
-        localViewFrame.showLocalView(item, bShowRelOrbits, relOrbitAttrib);
+        localViewFrame.showLocalView(item,
+                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
+                relOrbitAttrib);
         showLocalViewFrame(item.getName());
     }
 
     public void showLocalView(ItemInterface item, int atX, int atY) {
-        localViewFrame.showLocalView(item, atX, atY, bShowRelOrbits, relOrbitAttrib);
+        localViewFrame.showLocalView(item, atX, atY,
+                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
+                relOrbitAttrib);
         showLocalViewFrame(item.getName());
     }
 
