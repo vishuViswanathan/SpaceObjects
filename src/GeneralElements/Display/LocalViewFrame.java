@@ -24,7 +24,7 @@ import java.awt.event.*;
 /**
  * Created by M Viswanathan on 04 Oct 2014
  */
-public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class LocalViewFrame  extends JDialog implements MouseListener, MouseMotionListener, MouseWheelListener {
     JPanel commonMenuPanel;
     MotionDisplay motionDisplay;
     ItemInterface itemInView;
@@ -49,7 +49,7 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
 
     LocalViewFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
                    MotionDisplay motionDisplay) {
-        super(name);
+        super();
         setLayout(new BorderLayout());
         this.mainViewPlatform = mainViewPlatform;
         this.controller = controller;
@@ -92,15 +92,23 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
         add(menuP, BorderLayout.EAST);
         pack();
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setResizable(false);
         Dimension minSize = new Dimension(300, 200);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                if (controlPanel != null)
-                    controlPanel.setVisible(false);
-            }
-        });
+        setMinimumSize(minSize);
+//        addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                if (controlPanel != null)
+//                    controlPanel.setVisible(false);
+//            }
+//            @Override
+//            public void windowIconified(WindowEvent e) {
+////                System.out.println("Iconified");
+//                super.windowIconified(e);
+//                lastItemWithLocalPlatform.detachPlatform();
+//                System.out.println("Iconified and plartform is detatched ");
+////                bIconified = true;
+//            }
+//        });
 
 //        this.setSize(1100, 600);
     }
@@ -163,10 +171,10 @@ public class LocalViewFrame  extends JFrame implements MouseListener, MouseMotio
 
     public void showLocalView(ItemInterface item, boolean bShowRelOrbits,
                               RenderingAttributes relOrbitAttrib) {
-        if (getState() == Frame.ICONIFIED ) {
-            System.out.println("was ICONIFIED");
-            setState(Frame.NORMAL);
-        }
+//        if (getState() == Frame.ICONIFIED ) {
+//            System.out.println("was ICONIFIED");
+//            setState(Frame.NORMAL);
+//        }
         jlItemName.setText(item.getName());
         attachPlatformToItem(item, bShowRelOrbits, relOrbitAttrib);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
