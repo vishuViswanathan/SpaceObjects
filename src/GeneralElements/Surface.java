@@ -94,6 +94,10 @@ public class Surface extends Item {
         distanceFromOrigin = new Vector3dMV(distanceVector(new Point3d()));
     }
 
+    public void setVisible(Boolean visible) {
+        // no graphic
+    }
+
     RelativeDlg relDlg;
 
     class RelativeDlg extends JDialog {

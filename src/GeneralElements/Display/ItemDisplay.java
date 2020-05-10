@@ -39,6 +39,8 @@ public class ItemDisplay extends Group {
                 addChild(grp);
                 valid = true;
                 break;
+            case SURFACE:
+                break;
         }
     }
 

@@ -22,6 +22,7 @@ import java.util.LinkedList;
  * Created as a separate class and a WeakReference to the Item
  */
 public class ItemGraphic {
+    RenderingAttributes itemAttrib;
     TransformGroup positionTrGrp;
     Transform3D positionTransform = new Transform3D();
     TransformGroup tgPlanet;
@@ -44,6 +45,10 @@ public class ItemGraphic {
 
     public ItemGraphic(ItemInterface item) {
         this.item = item;
+    }
+
+    public void setVisible(boolean visible) {
+        itemAttrib.setVisible(visible);
     }
 
     public boolean addObjectAndOrbit(Group grp, RenderingAttributes orbitAtrib) throws Exception{
@@ -94,6 +99,10 @@ public class ItemGraphic {
         boolean retVal = false;
         planet = new ItemDisplay(item);
         if (planet.valid) {
+            itemAttrib = new RenderingAttributes();
+            itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+            setVisible(true);
+            planet.setRenderingAttribute(itemAttrib);
             positionTrGrp = new TransformGroup();
             positionTrGrp.setCapability(Group.ALLOW_CHILDREN_WRITE);
             positionTrGrp.setCapability(Group.ALLOW_CHILDREN_EXTEND);

@@ -33,7 +33,7 @@ import java.util.Vector;
 /**
  * Created by M Viswanathan on 31 Mar 2014
  */
-public class Item extends DarkMatter implements ItemInterface {
+public class Item extends DarkMatter implements ItemInterface, Selectable {
     protected ItemType itemType;
     private String vrmlFile;
     JRadioButton rbFixedAccOn;
@@ -57,7 +57,7 @@ public class Item extends DarkMatter implements ItemInterface {
     Torque jetTorque = new Torque();
     Vector3d additionalAngularVel = new Vector3d();
     JetTimeController jetController;
-
+    boolean bVisible = true;
 
     protected Item(Window parent) {
         super(parent);
@@ -131,6 +131,22 @@ public class Item extends DarkMatter implements ItemInterface {
     public void initConnections() {
         if (jetController != null)
             jetController.initConnections(space);
+    }
+
+    @Override
+    public void setVisible(Boolean visible) {
+        itemGraphic.get().setVisible(visible);
+    }
+
+    @Override
+    public void setSelected(Boolean sel) {
+        bVisible = sel;
+        setVisible(bVisible);
+    }
+
+    @Override
+    public boolean isSelected() {
+        return bVisible;
     }
 
     public Vector3d getVelocity(ItemInterface relativeTo) {
@@ -922,9 +938,9 @@ public class Item extends DarkMatter implements ItemInterface {
         return itemG;
     }
 
-    public void setItemDisplayAttribute(RenderingAttributes itemAttribute) {
-        itemGraphic.get().setItemDisplayAttribute(itemAttribute);
-    }
+//    public void setItemDisplayAttribute(RenderingAttributes itemAttribute) {
+//        itemGraphic.get().setItemDisplayAttribute(itemAttribute);
+//    }
 
     public void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbit,
                                RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup) {

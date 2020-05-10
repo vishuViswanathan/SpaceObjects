@@ -779,7 +779,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             orbitDisplay.setVisible(true);
             return true;
         } catch (Exception e) {
-            showError("ItemMovementsApp.724: In showOrbitMap : " + e.getMessage());
+            showError("ItemMovementsApp.782: In showOrbitMap : " + e.getMessage());
 //            e.printStackTrace();
             return false;
         }

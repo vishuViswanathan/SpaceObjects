@@ -6,6 +6,7 @@ import collection.RelOrbitGroup;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
+import mvUtils.display.Selectable;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.Vector3dMV;
@@ -101,6 +102,8 @@ public interface ItemInterface {
     }
 
     void initConnections();
+
+    void setVisible(Boolean visible);
 
     ItemType getItemType();
 
@@ -315,7 +318,7 @@ public interface ItemInterface {
 
     ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception;
 
-    void setItemDisplayAttribute(RenderingAttributes itemAttribute);
+//    void setItemDisplayAttribute(RenderingAttributes itemAttribute);
 
 //    void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
 //                        RenderingAttributes relOrbitAtrib);

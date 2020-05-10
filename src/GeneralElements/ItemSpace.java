@@ -36,8 +36,9 @@ public class ItemSpace {
 //    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, ONLY_BOUNCE};
     public enum ActiveActions {
     LOCAL_GLOBAL_BOUNCE, GRAVITY_JET_BOUNCE, BOUNCE_JET_GLOBAL, ONLY_BOUNCE
-};
+    };
     LinkedList<ItemInterface> allItems;
+    Item[] itemsArray;
     LinkedList<ItemLink> allItemLinks;
     LinkedList<Gravity> allGravityLinks;
     Vector<GlobalAction> activeGlobalActions;
@@ -71,6 +72,10 @@ public class ItemSpace {
 
     public LinkedList<ItemInterface> getAlItems() {
         return allItems;
+    }
+
+    public Item[] getItemsArray() {
+        return itemsArray;
     }
 
     public ItemInterface getOneItem(int i) {
@@ -211,9 +216,15 @@ public class ItemSpace {
     }
 
     public boolean noteItemData() {
+        int size = allItems.size();
         if (allItems.size() > 0) {
-            for (ItemInterface i : allItems)
+            itemsArray = new Item[size];
+            int n = 0;
+            for (ItemInterface i : allItems) {
                 i.noteInput();
+                itemsArray[n] = (Item)i;
+                n++;
+            }
             initLinks();
             return true;
         }
@@ -436,13 +447,13 @@ public class ItemSpace {
 //        }
 //    }
 
-    public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp,RenderingAttributes itemAttrib,
+    public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp,
                                   RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
         for (ItemInterface it: allItems) {
             if (!((DarkMatter)it).boundaryItem) {
                 ItemGraphic itemG = it.createItemGraphic(grp, orbitAttrib);
                 if (itemG != null) {
-                    itemG.setItemDisplayAttribute(itemAttrib);
+//                    itemG.setItemDisplayAttribute(itemAttrib);
                     itemGraphics.add(itemG);
                 }
             }

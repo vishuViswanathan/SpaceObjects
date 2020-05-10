@@ -4,8 +4,10 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
+import GeneralElements.Surface;
 import GeneralElements.utils.ThreeDSize;
 import collection.RelOrbitGroup;
+import mvUtils.display.*;
 import mvUtils.time.DateAndJDN;
 import com.sun.j3d.utils.behaviors.mouse.MouseBehavior;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
@@ -19,9 +21,6 @@ import com.sun.j3d.utils.picking.PickTool;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
-import mvUtils.display.FramedPanel;
-import mvUtils.display.NumberLabel;
-import mvUtils.display.NumberTextField;
 
 import javax.media.j3d.*;
 import javax.swing.*;
@@ -246,6 +245,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     NumberLabel lUpdateSpeed;
     NumberLabel lSpeedSet;
     //    NumberLabel lCalculStep;
+    JButton jbShowItems;
     JCheckBox chkBShowItems;
     JCheckBox chkBshowOrbit;
     JCheckBox chkBshowLinks;
@@ -555,17 +555,41 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return chkBshowLinks;
     }
 
-    JCheckBox showItemsCB() {
-        chkBShowItems = new JCheckBox("Show Items", true);
-        chkBShowItems.setSelected(controller.bShowItems);
-        chkBShowItems.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                boolean bSel = chkBShowItems.isSelected();
-                itemAttrib.setVisible(bSel);
-            }
-        });
-        return chkBShowItems;
+
+    void SelectItemsToShow() {
+        ListSelect ls =
+                new ListSelect(space.getItemsArray(), jbShowItems, true);
+        ls.showSelectionDlg();
+        ls.takeAction();
+    }
+
+    JComponent showItemsCB() {
+         jbShowItems = new JButton("Set Items to Display");
+         jbShowItems.addActionListener(new ActionListener() {
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 SelectItemsToShow();
+             }
+         });
+         return jbShowItems;
+
+//        chkBShowItems = new JCheckBox("Show Items", true);
+//        chkBShowItems.setSelected(controller.bShowItems);
+//        chkBShowItems.addChangeListener(new ChangeListener() {
+//            @Override
+//            public void stateChanged(ChangeEvent e) {
+//                boolean bSel = chkBShowItems.isSelected();
+//                setItemsVisible(bSel);
+////                itemAttrib.setVisible(bSel);
+//            }
+//        });
+//        return chkBShowItems;
+    }
+
+    void setItemsVisible(Boolean visible) {
+         for (ItemInterface i:space.getAlItems())
+            i.setVisible(visible);
+
     }
 
     JCheckBox showRealTimeCB() {
@@ -645,15 +669,15 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     RenderingAttributes orbitAttrib;
     RenderingAttributes relOrbitAttrib;
     RenderingAttributes linkAttrib;
-    RenderingAttributes itemAttrib;
+//    RenderingAttributes itemAttrib;
 
     BranchGroup createSceneGraph() throws Exception{
         BranchGroup brGrpMain = new BranchGroup();
         tgMain = null;
         tgMain = new TransformGroup();
-        itemAttrib = new RenderingAttributes();
-        itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-        itemAttrib.setVisible(controller.bShowItems);
+//        itemAttrib = new RenderingAttributes();
+//        itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+//        itemAttrib.setVisible(controller.bShowItems);
         orbitAttrib = new RenderingAttributes();
         orbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         orbitAttrib.setVisible(controller.bShowOrbit);
@@ -664,7 +688,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         linkAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         linkAttrib.setVisible(controller.bShowLinks);
 
-        space.addObjectAndOrbit(itemGraphics, tgMain, itemAttrib, orbitAttrib, linkAttrib);
+        space.addObjectAndOrbit(itemGraphics, tgMain, orbitAttrib, linkAttrib);
         tgMain.addChild(oneAxis(1, 1e13, Color.red));
         tgMain.addChild(oneAxis(2, 1e13, Color.blue));
         tgMain.addChild(oneAxis(3, 1e13, Color.lightGray));
