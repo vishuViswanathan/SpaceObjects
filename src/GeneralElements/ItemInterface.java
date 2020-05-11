@@ -103,7 +103,9 @@ public interface ItemInterface {
 
     void initConnections();
 
-    void setVisible(Boolean visible);
+    void setVisible(boolean visible);
+
+    void setRelOrbitVisible(boolean visible);
 
     ItemType getItemType();
 
@@ -324,7 +326,7 @@ public interface ItemInterface {
 //                        RenderingAttributes relOrbitAtrib);
 
     void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbits,
-                        RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup);
+                        RelOrbitGroup relOrbitGroup);
 
     void detachPlatform();
 

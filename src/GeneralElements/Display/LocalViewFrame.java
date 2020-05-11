@@ -20,6 +20,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by M Viswanathan on 04 Oct 2014
@@ -169,14 +172,13 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         addLocalViewingPlatform();
     }
 
-    public void showLocalView(ItemInterface item, boolean bShowRelOrbits,
-                              RenderingAttributes relOrbitAttrib) {
+    public void showLocalView(ItemInterface item, boolean bShowRelOrbits) {
 //        if (getState() == Frame.ICONIFIED ) {
 //            System.out.println("was ICONIFIED");
 //            setState(Frame.NORMAL);
 //        }
         jlItemName.setText(item.getName());
-        attachPlatformToItem(item, bShowRelOrbits, relOrbitAttrib);
+        attachPlatformToItem(item, bShowRelOrbits);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         localVp.setNominalViewingTransform();
         Transform3D defaultTr = new Transform3D();
@@ -209,10 +211,9 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         setTitle(itemInView.getName() + " from " + viewFrom);
     }
 
-    public void showLocalView(ItemInterface item, int atX, int atY, boolean bShowRelOrbits,
-                              RenderingAttributes relOrbitAttrib) {
+    public void showLocalView(ItemInterface item, int atX, int atY, boolean bShowRelOrbits) {
         jlItemName.setText(item.getName());
-        attachPlatformToItem(item, bShowRelOrbits, relOrbitAttrib);
+        attachPlatformToItem(item, bShowRelOrbits);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         Transform3D mainVTr = new Transform3D();
         mainViewPlatform.getViewPlatformTransform().getTransform(mainVTr);
@@ -255,13 +256,12 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     boolean bSHowRelOrbits = false;
     RenderingAttributes relOrbitAtrib;
 
-    private void attachPlatformToItem(ItemInterface item, boolean showRelOrbits,
-                                      RenderingAttributes relOrbitAtrib) {
+    private void attachPlatformToItem(ItemInterface item, boolean showRelOrbits) {
         if (bPlatformWasAttached) {
             lastItemWithLocalPlatform.detachPlatform();
             System.out.println("Local Platform detached");
         }
-        item.attachPlatform(localVp, showRelOrbits, relOrbitAtrib, motionDisplay.relOrbitGroup);
+        item.attachPlatform(localVp, showRelOrbits,motionDisplay.relOrbitGroup);
         lastItemWithLocalPlatform = item;
         bPlatformWasAttached = true;
         this.itemInView = item;
@@ -338,7 +338,18 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         FramedPanel p = new FramedPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.add(new JLabel("View direction from"));
-        cbItems = new JComboBox(motionDisplay.space.getAlItems().toArray());
+
+        ArrayList itemList = new ArrayList(motionDisplay.space.getAlItems());
+        Collections.sort(itemList, new Comparator<Object>(){
+            @Override
+            public int compare(Object o1, Object o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+
+        cbItems = new JComboBox(itemList.toArray());
+
+//        cbItems = new JComboBox(motionDisplay.space.getAlItems().toArray());
         cbItems.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

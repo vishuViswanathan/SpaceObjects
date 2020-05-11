@@ -134,8 +134,13 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
     }
 
     @Override
-    public void setVisible(Boolean visible) {
+    public void setVisible(boolean visible) {
         itemGraphic.get().setVisible(visible);
+    }
+
+    @Override
+    public void setRelOrbitVisible(boolean visible) {
+        itemGraphic.get().setRelOrbitVisible(visible);
     }
 
     @Override
@@ -943,9 +948,9 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 //    }
 
     public void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbit,
-                               RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup) {
+                               RelOrbitGroup relOrbitGroup) {
         try {
-            itemGraphic.get().attachPlatform(platform, bShowRelOrbit, relOrbitAtrib, relOrbitGroup);
+            itemGraphic.get().attachPlatform(platform, bShowRelOrbit, relOrbitGroup);
         } catch (NullPointerException e) {
             showError("ERROR in Attaching a platform to an item " + name + ":" + e.getMessage());
         }

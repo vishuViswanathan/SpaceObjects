@@ -76,6 +76,11 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     public DarkMatter(String name, double mass, double dia, Color color, Window parent) {
         this(parent);
+//        String[] split = name.split("-");
+//        if (split.length > 1) {
+//            this.name = split[1].trim() + "-" + split[0].trim();
+//        }
+//        else
         this.name = name;
         setMass(mass);
 //        this.mass = mass;

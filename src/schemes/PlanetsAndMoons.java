@@ -312,6 +312,13 @@ public class PlanetsAndMoons implements DefaultScheme {
                 double axisInclination = 0;
                 boolean isLightSrc = false;
                 String imageName;
+
+                // Adjest objName to Planet-Moon format
+                String[] split = objName.split("-");
+                if (split.length > 1) {
+                    objName = split[1].trim() + "-" + split[0].trim();
+                }
+
                 try {
                     vp = XMLmv.getTag(xmlStr, "radius", 0);
                     radius = Double.valueOf(vp.val);

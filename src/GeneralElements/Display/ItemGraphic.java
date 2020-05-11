@@ -2,7 +2,6 @@ package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
-import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
 import collection.RelOrbitGroup;
@@ -23,6 +22,7 @@ import java.util.LinkedList;
  */
 public class ItemGraphic {
     RenderingAttributes itemAttrib;
+    RenderingAttributes itemRelOrbitAttrib;
     TransformGroup positionTrGrp;
     Transform3D positionTransform = new Transform3D();
     TransformGroup tgPlanet;
@@ -49,6 +49,11 @@ public class ItemGraphic {
 
     public void setVisible(boolean visible) {
         itemAttrib.setVisible(visible);
+        itemRelOrbitAttrib.setVisible(visible);
+    }
+
+    public void setRelOrbitVisible(boolean visible) {
+        itemRelOrbitAttrib.setVisible(visible & itemAttrib.getVisible());
     }
 
     public boolean addObjectAndOrbit(Group grp, RenderingAttributes orbitAtrib) throws Exception{
@@ -75,12 +80,12 @@ public class ItemGraphic {
     }
 
     public void attachPlatform(ViewingPlatform platform,
-                               boolean bShowRelOrbits, RenderingAttributes relOrbitAtrib, RelOrbitGroup relOrbitGroup) {
+                               boolean bShowRelOrbits, RelOrbitGroup relOrbitGroup) {
         attachedPlatform = platform;
         positionTrGrp.addChild(attachedPlatform);
         bPlatformAttached = true;
         if (bShowRelOrbits)
-            prepareAllRelativeOrbits(relOrbitAtrib, relOrbitGroup);
+            prepareAllRelativeOrbits(relOrbitGroup);
     }
 
 
@@ -101,6 +106,8 @@ public class ItemGraphic {
         if (planet.valid) {
             itemAttrib = new RenderingAttributes();
             itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+            itemRelOrbitAttrib = new RenderingAttributes();
+            itemRelOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
             setVisible(true);
             planet.setRenderingAttribute(itemAttrib);
             positionTrGrp = new TransformGroup();
@@ -176,33 +183,32 @@ public class ItemGraphic {
         return true;
     }
 
-    public PathShape[] prepareRelativeOrbit(ItemInterface relativeTo, RenderingAttributes orbitAtrib) {
+    public PathShape[] prepareRelativeOrbit(ItemInterface relativeTo) {
         if (relPtArr == null) {
             relPtArr = relativeOnePointArray(ptArr, relativeTo);
             PointArrayFIFO onePtArr = relPtArr;
             relOrbitShapes = new PathShape[nShapeSets];
             for (int os = 0; os < orbitShapes.length; os++) {
-                relOrbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
+                relOrbitShapes[os] = new PathShape(planet, onePtArr, itemRelOrbitAttrib);
                 onePtArr = onePtArr.getNextArray();
             }
         }
         return relOrbitShapes;
     }
 
-    void prepareAllRelativeOrbits(RenderingAttributes orbitAtrib, RelOrbitGroup relOrbitGroup) {
+    void prepareAllRelativeOrbits(RelOrbitGroup relOrbitGroup) {
         LinkedList<ItemInterface> itemList = item.getSpace().getAlItems();
         ItemGraphic ig;
         if (!relOrbitGroup.isInitiated()) {
             PathShape oneRelOrbitShapesArr[];
             for (ItemInterface i : itemList) {
-                oneRelOrbitShapesArr = i.getItemGraphic().prepareRelativeOrbit(item, orbitAtrib);
+                oneRelOrbitShapesArr = i.getItemGraphic().prepareRelativeOrbit(item);
                 for (PathShape p : oneRelOrbitShapesArr)
                     relOrbitGroup.addChild(p);
             }
             relOrbitGroup.setInitiated();
         }
         else {
-
             for (ItemInterface it : itemList) {
                 ig = it.getItemGraphic();
                 ig.detachRelOrbitGroup(relOrbitGroup);

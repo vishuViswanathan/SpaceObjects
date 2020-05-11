@@ -94,8 +94,13 @@ public class Surface extends Item {
         distanceFromOrigin = new Vector3dMV(distanceVector(new Point3d()));
     }
 
-    public void setVisible(Boolean visible) {
+    public void setVisible(boolean visible) {
         // no graphic
+    }
+
+    @Override
+    public void setRelOrbitVisible(boolean visible) {
+        // no relative orbit
     }
 
     RelativeDlg relDlg;

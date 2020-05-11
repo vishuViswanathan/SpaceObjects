@@ -34,6 +34,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 /**
@@ -262,7 +265,16 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         outerGbc.insets = new Insets(5, 0, 5, 0);
         outerGbc.gridx = 0;
         outerGbc.gridy = 0;
-        cbItems = new JComboBox(space.getAlItems().toArray());
+
+        ArrayList itemList = new ArrayList(space.getAlItems());
+        Collections.sort(itemList, new Comparator<Object>(){
+            @Override
+            public int compare(Object o1, Object o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+
+        cbItems = new JComboBox(itemList.toArray());
         jbShowSelected = new JButton("Show");
         ActionListener l = new ActionListener() {
             @Override
@@ -360,7 +372,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         return outerP;
     }
 
-     /**
+    /**
      * returns true if this caused the pause
      */
     public boolean pauseIfRunning() {
@@ -586,10 +598,9 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 //        return chkBShowItems;
     }
 
-    void setItemsVisible(Boolean visible) {
-         for (ItemInterface i:space.getAlItems())
-            i.setVisible(visible);
-
+    void setRelOrbitsVisible(boolean visible) {
+         for (ItemInterface i: space.getAlItems())
+             i.setRelOrbitVisible(visible);
     }
 
     JCheckBox showRealTimeCB() {
@@ -611,7 +622,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
             @Override
             public void stateChanged(ChangeEvent e) {
                 bShowRelOrbits = chkShowRelOrbits.isSelected();
-                relOrbitAttrib.setVisible(bShowRelOrbits);
+                setRelOrbitsVisible(bShowRelOrbits);
+//                relOrbitAttrib.setVisible(bShowRelOrbits);
             }
         });
         return chkShowRelOrbits;
@@ -667,7 +679,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     RenderingAttributes orbitAttrib;
-    RenderingAttributes relOrbitAttrib;
+//    RenderingAttributes relOrbitAttrib;
     RenderingAttributes linkAttrib;
 //    RenderingAttributes itemAttrib;
 
@@ -681,9 +693,9 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         orbitAttrib = new RenderingAttributes();
         orbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         orbitAttrib.setVisible(controller.bShowOrbit);
-        relOrbitAttrib = new RenderingAttributes();
-        relOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-        relOrbitAttrib.setVisible(bShowRelOrbits);
+//        relOrbitAttrib = new RenderingAttributes();
+//        relOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+//        relOrbitAttrib.setVisible(bShowRelOrbits);
         linkAttrib = new RenderingAttributes();
         linkAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         linkAttrib.setVisible(controller.bShowLinks);
@@ -891,15 +903,13 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     public void showLocalView(ItemInterface item) {
         localViewFrame.showLocalView(item,
-                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
-                relOrbitAttrib);
+                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL));
         showLocalViewFrame(item.getName());
     }
 
     public void showLocalView(ItemInterface item, int atX, int atY) {
         localViewFrame.showLocalView(item, atX, atY,
-                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
-                relOrbitAttrib);
+                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL));
         showLocalViewFrame(item.getName());
     }
 
