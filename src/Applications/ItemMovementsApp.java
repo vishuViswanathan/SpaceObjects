@@ -105,9 +105,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public double calculationStep =2; //in seconds
 //    public double initialSmallerStep = 2;
     public int repeats = 5; // number of times each step is repeated for position-force accuracy
-    public boolean bShowOrbit = false;
-    public boolean bShowLinks = false;
-    public boolean bShowItems = true;
+    static public boolean bShowPaths = false;
+    static public boolean bShowLinks = false;
+//    static public boolean bShowItems = true;
+    static public boolean bShowRelOrbits = false;
 
     boolean xmlHistory = false;
     String historyFilePath = "results\\history.csv";
@@ -147,10 +148,10 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         proceedToItemList(false);
         space.enableItemGravity(false);
         space.enableItemCollision(false);
-        bShowOrbit = false;
+        bShowPaths = false;
         bShowLinks = true;
         bRealTime = true;
-        bShowItems = true;
+//        bShowItems = true;
         setSpaceSize(SpaceSize.DAILY);
         mainF.pack();
         mainF.setVisible(true);
@@ -169,9 +170,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         this.duration = duration;
         ntfDuration.setData(duration);
         tfEndTime.setText(endDate);
-        bShowItems = true;
+//        bShowItems = true;
         this.bShowLinks = bShowLinks;
-        this.bShowOrbit = bShowOrbit;
+        this.bShowPaths = bShowOrbit;
         this.bRealTime = bRealTime;
         space.enableItemGravity(bEnableItemGravity);
     }
@@ -994,7 +995,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 XMLmv.putTag("refreshInterval", refreshInterval) +
                 XMLmv.putTag("bRealTime", bRealTime) +
                 XMLmv.putTag("duration", duration) +
-                XMLmv.putTag("bShowOrbit", bShowOrbit) +
+                XMLmv.putTag("bShowPaths", bShowPaths) +
                 XMLmv.putTag("bShowLinks", bShowLinks) +
                 XMLmv.putTag("spSize", spSize.toString()) +
                 XMLmv.putTag("bConsiderTimeDilation", space.bConsiderTimeDilation) +
@@ -1018,8 +1019,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 bRealTime = vp.val.equals("1");
                 vp = XMLmv.getTag(basicData, "duration", 0);
                 duration = Double.valueOf(vp.val) ;
-                vp = XMLmv.getTag(basicData, "bShowOrbit", 0);
-                bShowOrbit = vp.val.equals("1");
+                vp = XMLmv.getTag(basicData, "bShowPaths", 0);
+                bShowPaths = vp.val.equals("1");
                 vp = XMLmv.getTag(basicData, "bShowLinks", 0);
                 bShowLinks = vp.val.equals("1");
                 vp = XMLmv.getTag(basicData, "spSize", 0);

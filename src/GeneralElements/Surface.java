@@ -103,6 +103,11 @@ public class Surface extends Item {
         // no relative orbit
     }
 
+    @Override
+    public void setPathVisible(boolean visible) {
+        // no Path
+    }
+
     RelativeDlg relDlg;
 
     class RelativeDlg extends JDialog {

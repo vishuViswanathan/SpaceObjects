@@ -447,10 +447,10 @@ public class ItemSpace {
 //    }
 
     public void addObjectAndOrbit(Vector<ItemGraphic> itemGraphics, Group grp,
-                                  RenderingAttributes orbitAttrib, RenderingAttributes linkAttrib) throws Exception {
+                                  RenderingAttributes linkAttrib) throws Exception {
         for (ItemInterface it: allItems) {
             if (!((DarkMatter)it).boundaryItem) {
-                ItemGraphic itemG = it.createItemGraphic(grp, orbitAttrib);
+                ItemGraphic itemG = it.createItemGraphic(grp);
                 if (itemG != null) {
 //                    itemG.setItemDisplayAttribute(itemAttrib);
                     itemGraphics.add(itemG);

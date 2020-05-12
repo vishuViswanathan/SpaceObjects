@@ -4,7 +4,6 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
-import GeneralElements.Surface;
 import GeneralElements.utils.ThreeDSize;
 import collection.RelOrbitGroup;
 import mvUtils.display.*;
@@ -13,7 +12,6 @@ import com.sun.j3d.utils.behaviors.mouse.MouseBehavior;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
-import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickIntersection;
 import com.sun.j3d.utils.picking.PickResult;
@@ -249,12 +247,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     NumberLabel lSpeedSet;
     //    NumberLabel lCalculStep;
     JButton jbShowItems;
-    JCheckBox chkBShowItems;
-    JCheckBox chkBshowOrbit;
+//    JCheckBox chkBShowItems;
+    JCheckBox chkBshowPaths;
     JCheckBox chkBshowLinks;
     JCheckBox chkBrealTime;
     JCheckBox chkShowRelOrbits;
-    boolean bShowRelOrbits = false;
 
     JPanel commonMenuPanel;
     JPanel commonMenuPanelHolder;
@@ -542,26 +539,28 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     JCheckBox showOrbitCB() {
-        chkBshowOrbit = new JCheckBox("Show Path", true);
-        chkBshowOrbit.setSelected(controller.bShowOrbit);
-         chkBshowOrbit.addChangeListener(new ChangeListener() {
+        chkBshowPaths = new JCheckBox("Show Path", ItemMovementsApp.bShowPaths);
+//        chkBshowPaths.setSelected(controller.bShowPaths);
+         chkBshowPaths.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                orbitAttrib.setVisible(chkBshowOrbit.isSelected());
-//                controller.log.debug("chkBshowOrbit.isSelected()" + chkBshowOrbit.isSelected());
+                ItemMovementsApp.bShowPaths = chkBshowPaths.isSelected();
+                setPathsVisible(ItemMovementsApp.bShowPaths);
+//                orbitAttrib.setVisible(chkBshowPaths.isSelected());
+//                controller.log.debug("chkBshowPaths.isSelected()" + chkBshowPaths.isSelected());
             }
         });
-        return chkBshowOrbit;
+        return chkBshowPaths;
     }
 
     JCheckBox showLinksCB() {
         chkBshowLinks = new JCheckBox("Show Links", true);
-        chkBshowLinks.setSelected(controller.bShowLinks);
+        chkBshowLinks.setSelected(ItemMovementsApp.bShowLinks);
         chkBshowLinks.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                boolean bSel = chkBshowLinks.isSelected();
-               linkAttrib.setVisible(bSel);
+                ItemMovementsApp.bShowLinks = chkBshowLinks.isSelected();
+                linkAttrib.setVisible(ItemMovementsApp.bShowLinks);
             }
         });
         return chkBshowLinks;
@@ -603,6 +602,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
              i.setRelOrbitVisible(visible);
     }
 
+    void setPathsVisible(boolean visible) {
+        for (ItemInterface i: space.getAlItems())
+            i.setPathVisible(visible);
+    }
+
     JCheckBox showRealTimeCB() {
         chkBrealTime = new JCheckBox("Real Time", true);
         chkBrealTime.setSelected(controller.bRealTime);
@@ -616,13 +620,13 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     }
 
     JCheckBox showRelOrbitCB() {
-        chkShowRelOrbits = new JCheckBox("Show Rel Orbits", true);
-        chkShowRelOrbits.setSelected(bShowRelOrbits);
+        chkShowRelOrbits = new JCheckBox("Show Rel Orbits", ItemMovementsApp.bShowRelOrbits);
+        chkShowRelOrbits.setSelected(ItemMovementsApp.bShowRelOrbits);
         chkShowRelOrbits.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                bShowRelOrbits = chkShowRelOrbits.isSelected();
-                setRelOrbitsVisible(bShowRelOrbits);
+                ItemMovementsApp.bShowRelOrbits = chkShowRelOrbits.isSelected();
+                setRelOrbitsVisible(ItemMovementsApp.bShowRelOrbits);
 //                relOrbitAttrib.setVisible(bShowRelOrbits);
             }
         });
@@ -692,15 +696,15 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 //        itemAttrib.setVisible(controller.bShowItems);
         orbitAttrib = new RenderingAttributes();
         orbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-        orbitAttrib.setVisible(controller.bShowOrbit);
+        orbitAttrib.setVisible(ItemMovementsApp.bShowPaths);
 //        relOrbitAttrib = new RenderingAttributes();
 //        relOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
 //        relOrbitAttrib.setVisible(bShowRelOrbits);
         linkAttrib = new RenderingAttributes();
         linkAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-        linkAttrib.setVisible(controller.bShowLinks);
+        linkAttrib.setVisible(ItemMovementsApp.bShowLinks);
 
-        space.addObjectAndOrbit(itemGraphics, tgMain, orbitAttrib, linkAttrib);
+        space.addObjectAndOrbit(itemGraphics, tgMain, linkAttrib);
         tgMain.addChild(oneAxis(1, 1e13, Color.red));
         tgMain.addChild(oneAxis(2, 1e13, Color.blue));
         tgMain.addChild(oneAxis(3, 1e13, Color.lightGray));

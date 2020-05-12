@@ -144,6 +144,11 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
     }
 
     @Override
+    public void setPathVisible(boolean visible) {
+        itemGraphic.get().setPathVisible(visible);
+    }
+
+    @Override
     public void setSelected(Boolean sel) {
         bVisible = sel;
         setVisible(bVisible);
@@ -932,10 +937,10 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     ItemGraphic itemG;
 
-    public ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception {
+    public ItemGraphic createItemGraphic(Group grp) throws Exception {
 //        ItemGraphic itemG = new ItemGraphic(this);
         itemG = new ItemGraphic(this);
-        if (itemG.addObjectAndOrbit(grp, orbitAtrib)) {
+        if (itemG.addObjectAndOrbit(grp)) {
             itemGraphic = new WeakReference<ItemGraphic>(itemG);
             itemGraphic.get().updateAngularPosition(status.angularPos);
         } else

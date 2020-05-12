@@ -2,6 +2,7 @@ package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
+import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
 import collection.RelOrbitGroup;
@@ -23,6 +24,8 @@ import java.util.LinkedList;
 public class ItemGraphic {
     RenderingAttributes itemAttrib;
     RenderingAttributes itemRelOrbitAttrib;
+    RenderingAttributes itemPathAttrib;
+
     TransformGroup positionTrGrp;
     Transform3D positionTransform = new Transform3D();
     TransformGroup tgPlanet;
@@ -49,16 +52,23 @@ public class ItemGraphic {
 
     public void setVisible(boolean visible) {
         itemAttrib.setVisible(visible);
-        itemRelOrbitAttrib.setVisible(visible);
+        setRelOrbitVisible(visible);
+        setPathVisible(visible);
     }
 
     public void setRelOrbitVisible(boolean visible) {
-        itemRelOrbitAttrib.setVisible(visible & itemAttrib.getVisible());
+        itemRelOrbitAttrib.setVisible(visible  & ItemMovementsApp.bShowRelOrbits &
+                itemAttrib.getVisible());
     }
 
-    public boolean addObjectAndOrbit(Group grp, RenderingAttributes orbitAtrib) throws Exception{
+    public void setPathVisible(boolean visible) {
+        itemPathAttrib.setVisible(visible  & ItemMovementsApp.bShowPaths &
+                itemAttrib.getVisible());
+    }
+
+    public boolean addObjectAndOrbit(Group grp) throws Exception{
         boolean retVal = false;
-        if (createSphereAndOrbitPath(orbitAtrib)) {
+        if (createSphereAndOrbitPath()) {
             for (PathShape os : orbitShapes)
                 grp.addChild(os);
             grp.addChild(positionTrGrp);
@@ -100,7 +110,7 @@ public class ItemGraphic {
 
     ItemDisplay planet;
 
-    private boolean createSphereAndOrbitPath(RenderingAttributes orbitAtrib) throws Exception {
+    private boolean createSphereAndOrbitPath() throws Exception {
         boolean retVal = false;
         planet = new ItemDisplay(item);
         if (planet.valid) {
@@ -108,6 +118,8 @@ public class ItemGraphic {
             itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
             itemRelOrbitAttrib = new RenderingAttributes();
             itemRelOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
+            itemPathAttrib = new RenderingAttributes();
+            itemPathAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
             setVisible(true);
             planet.setRenderingAttribute(itemAttrib);
             positionTrGrp = new TransformGroup();
@@ -149,7 +161,7 @@ public class ItemGraphic {
             for (int os = 0; os < orbitShapes.length; os++) {
                 onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1)) ? 1 : onceIn), GeometryArray.COORDINATES | GeometryArray.COLOR_3, color3f);
                 onePtArr.noteNextArray(lastOne);
-                orbitShapes[os] = new PathShape(planet, onePtArr, orbitAtrib);
+                orbitShapes[os] = new PathShape(planet, onePtArr, itemPathAttrib);
                 lastOne = onePtArr;
                 if (os == (orbitShapes.length - 1))
                     ptArr = onePtArr;

@@ -107,6 +107,8 @@ public interface ItemInterface {
 
     void setRelOrbitVisible(boolean visible);
 
+    void setPathVisible(boolean visible);
+
     ItemType getItemType();
 
     String getVrmlFile();
@@ -318,7 +320,7 @@ public interface ItemInterface {
 
     void setSpin(AxisAngle4d spinAxis, double spinPeriod);
 
-    ItemGraphic createItemGraphic(Group grp, RenderingAttributes orbitAtrib) throws Exception;
+    ItemGraphic createItemGraphic(Group grp) throws Exception;
 
 //    void setItemDisplayAttribute(RenderingAttributes itemAttribute);
 
