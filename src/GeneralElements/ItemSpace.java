@@ -58,7 +58,7 @@ public class ItemSpace {
     public void clearSpace() {
         allItems = new LinkedList<ItemInterface>();
         allItemLinks = new LinkedList<ItemLink>();
-        allGravityLinks = new LinkedList<Gravity>();
+//        allGravityLinks = new LinkedList<Gravity>();
         allGlobalActions = new AllGlobalActions(this);
         bConsiderTimeDilation = false;
         bConsiderGravityVelocity = false;
@@ -158,6 +158,7 @@ public class ItemSpace {
 
 
     public void setGlobalLinksAndActions() {
+        allGravityLinks = new LinkedList<>();
         ItemLink link;
         for (int il = 0; il < allItemLinks.size();il++ ) {
             link = allItemLinks.get(il);
