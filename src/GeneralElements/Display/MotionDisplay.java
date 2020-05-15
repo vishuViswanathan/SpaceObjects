@@ -22,8 +22,6 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
 
 import javax.media.j3d.*;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2i;
 import javax.vecmath.Point3d;
@@ -34,13 +32,13 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Vector;
 
 /**
  * Created by M Viswanathan on 23 May 2014
  */
-public class MotionDisplay  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class MotionDisplay  extends JFrame
+        implements MouseListener, MouseMotionListener, MouseWheelListener {
     enum ViewDirection {XMinus, YMinus, ZMinus}
     public ItemSpace space;
     Transform3D defVPFTransform = new Transform3D();
@@ -68,7 +66,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
      SimpleUniverse univ;
 
      void jbInit() throws Exception {
-        itemGraphics = new Vector<ItemGraphic>();
+        itemGraphics = new Vector<>();
         this.setSize(1100, 700);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -99,17 +97,10 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         mainViewPlatform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         mainViewPlatform.setNominalViewingTransform();
         Viewer viewer = new Viewer( mainCanvas );
-//        setViewAll(new Vector3d(0, 0, -1), viewer);
         TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
-//        vTg.getTransform(defVPFTransform);
         addMouseAction(vTg);
         univ = new SimpleUniverse(mainViewPlatform, viewer );
         setViewAll(ViewDirection.ZMinus);
-//        setViewAll(ViewDirection.XMinus);
-//        setViewAll(ViewDirection.YMinus);
-//        TransformGroup vTgFinal = mainViewPlatform.getViewPlatformTransform();
-//        vTgFinal.getTransform(defVPFTransform);
-//        addMouseAction(vTg);
         addMouseAction(mainViewPlatform, mainCanvas);  //.getViewPlatformTransform());
         BranchGroup scene;
         scene = createSceneGraph();
@@ -128,11 +119,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     void setViewAll(ViewDirection direction) {
         ThreeDSize spaceSize = space.getSize();
         Point3d volumeCenter = spaceSize.midPoint();
-        debug("MotionDisplay.123: Volume Center " + volumeCenter);
+//        debug("MotionDisplay.123: Volume Center " + volumeCenter);
         Vector3d volumeRange = spaceSize.range();
-//        int canvasXsize = mainCanvas.getWidth();
-//        int canvasYsize = mainCanvas.getHeight();
-//        double xByY = (double)canvasXsize / (double)canvasYsize;
         double xByY = 1.3;
         // assuming xByY is > 1
 
@@ -245,9 +233,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JScrollBar sbUpdateSpeed;
     NumberLabel lUpdateSpeed;
     NumberLabel lSpeedSet;
-    //    NumberLabel lCalculStep;
     JButton jbShowItems;
-//    JCheckBox chkBShowItems;
     JCheckBox chkBshowPaths;
     JCheckBox chkBshowLinks;
     JCheckBox chkBrealTime;
@@ -264,76 +250,64 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         outerGbc.gridy = 0;
 
         ArrayList itemList = new ArrayList(space.getAlItems());
-        Collections.sort(itemList, new Comparator<Object>(){
-            @Override
-            public int compare(Object o1, Object o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
+//        Collections.sort(itemList, new Comparator<Object>(){
+//            @Override
+//            public int compare(Object o1, Object o2) {
+//                return o1.toString().compareTo(o2.toString());
+//            }
+//        });
+//        The above with lamda for Comparator as modified below
+
+        Collections.sort(itemList,
+                (o1, o2) -> o1.toString().compareTo(o2.toString()));
 
         cbItems = new JComboBox(itemList.toArray());
         jbShowSelected = new JButton("Show");
-        ActionListener l = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Object src = e.getSource();
-               block:
-               {
-                   if (src == saveViewB) {
-                       saveView();
-                       break block;
-                   }
-                   if (src == resetViewB) {
-                       resetView();
-                       break block;
-                   }
-                   if (src == viewAllXY) {
-                       setViewAll(ViewDirection.ZMinus);
-                       break block;
-                   }
-                   if (src == viewAllYZ) {
-                       setViewAll(ViewDirection.XMinus);
-                       break block;
-                   }
-                   if (src == viewAllZX) {
-                       setViewAll(ViewDirection.YMinus);
-                       break block;
-                   }
-//                   if (src == cbItems) {
-//                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem(),
-//                               (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
-//                               relOrbitAttrib);
-//                       localViewFrame.setVisible(true);
-//                       break block;
-//                   }
-
-                   if (src == jbShowSelected) {
-                       showLocalView((ItemInterface) cbItems.getSelectedItem());
-//                       localViewFrame.showLocalView((ItemInterface) cbItems.getSelectedItem(),
-//                               (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL),
-//                               relOrbitAttrib);
-//                       localViewFrame.setVisible(true);
-                       break block;
-                   }
-
-                   if (src == stopB) {
-                       if (isStopButtInContinue()) {
-                           controller.oneMoreTime();
-                           tuneStopButt(false);
-                       } else {
-                           controller.stopIt();
-                           tuneStopButt(true);
-                       }
-                       break block;
-                   }
-                   if (src == resultsB) {
-                       controller.writeCurrentVectorsToFile();
-                       break block;
-                   }
+        ActionListener l = e -> {
+            Object src = e.getSource();
+           block:
+           {
+               if (src == saveViewB) {
+                   saveView();
+                   break block;
                }
-            }
+               if (src == resetViewB) {
+                   resetView();
+                   break block;
+               }
+               if (src == viewAllXY) {
+                   setViewAll(ViewDirection.ZMinus);
+                   break block;
+               }
+               if (src == viewAllYZ) {
+                   setViewAll(ViewDirection.XMinus);
+                   break block;
+               }
+               if (src == viewAllZX) {
+                   setViewAll(ViewDirection.YMinus);
+                   break block;
+               }
+
+               if (src == jbShowSelected) {
+                   showLocalView((ItemInterface) cbItems.getSelectedItem());
+                   break block;
+               }
+               if (src == stopB) {
+                   if (isStopButtInContinue()) {
+                       controller.oneMoreTime();
+                       tuneStopButt(false);
+                   } else {
+                       controller.stopIt();
+                       tuneStopButt(true);
+                   }
+                   break block;
+               }
+               if (src == resultsB) {
+                   controller.writeCurrentVectorsToFile();
+                   break block;
+               }
+           }
         };
-//        cbItems.addActionListener(l);
         jbShowSelected.addActionListener(l);
         JPanel selP = new JPanel();
         selP.add(cbItems);
@@ -348,9 +322,6 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         outerGbc.gridy++;
         viewAllZX.addActionListener(l);
         outerP.add(viewAllZX, outerGbc);
-//        outerGbc.gridy++;
-//        saveViewB.addActionListener(l);
-//        outerP.add(saveViewB, outerGbc);
         outerGbc.gridy++;
         resetViewB.addActionListener(l);
         outerP.add(resetViewB, outerGbc);
@@ -401,16 +372,13 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         gbc.insets = new Insets(5, 0, 0, 0);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        ActionListener l = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Object src = e.getSource();
-                if (src == pauseRunB) {
-                    if (isPauseInResume())
-                        unPauseIt();
-                    else
-                        pauseIt();
-                }
+        ActionListener l = e -> {
+            Object src = e.getSource();
+            if (src == pauseRunB) {
+                if (isPauseInResume())
+                    unPauseIt();
+                else
+                    pauseIt();
             }
         };
         FramedPanel nowTp = new FramedPanel();
@@ -516,14 +484,11 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         lUpdateSpeed.setSize(new Dimension(80, 20));
         lSpeedSet = new NumberLabel(nowInterval, 80, "#,###.00000000");
         lSpeedSet.setSize(new Dimension(80, 20));
-        sbUpdateSpeed.addAdjustmentListener(new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                int val = sbUpdateSpeed.getValue();
-                    nowInterval = getIntervalFromScrBar(val); // h
-                    controller.setRefreshInterval(nowInterval);
-                    lSpeedSet.setData(nowInterval);
-            }
+        sbUpdateSpeed.addAdjustmentListener(e -> {
+            int val = sbUpdateSpeed.getValue();
+                nowInterval = getIntervalFromScrBar(val); // h
+                controller.setRefreshInterval(nowInterval);
+                lSpeedSet.setData(nowInterval);
         });
         JPanel jp = new FramedPanel();
         jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
@@ -541,27 +506,19 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JCheckBox showOrbitCB() {
         chkBshowPaths = new JCheckBox("Show Path", ItemMovementsApp.bShowPaths);
 //        chkBshowPaths.setSelected(controller.bShowPaths);
-         chkBshowPaths.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                ItemMovementsApp.bShowPaths = chkBshowPaths.isSelected();
-                setPathsVisible(ItemMovementsApp.bShowPaths);
-//                orbitAttrib.setVisible(chkBshowPaths.isSelected());
-//                controller.log.debug("chkBshowPaths.isSelected()" + chkBshowPaths.isSelected());
-            }
-        });
+         chkBshowPaths.addChangeListener(e -> {
+             ItemMovementsApp.bShowPaths = chkBshowPaths.isSelected();
+             setPathsVisible(ItemMovementsApp.bShowPaths);
+         });
         return chkBshowPaths;
     }
 
     JCheckBox showLinksCB() {
         chkBshowLinks = new JCheckBox("Show Links", true);
         chkBshowLinks.setSelected(ItemMovementsApp.bShowLinks);
-        chkBshowLinks.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                ItemMovementsApp.bShowLinks = chkBshowLinks.isSelected();
-                linkAttrib.setVisible(ItemMovementsApp.bShowLinks);
-            }
+        chkBshowLinks.addChangeListener(e -> {
+            ItemMovementsApp.bShowLinks = chkBshowLinks.isSelected();
+            linkAttrib.setVisible(ItemMovementsApp.bShowLinks);
         });
         return chkBshowLinks;
     }
@@ -576,25 +533,8 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
 
     JComponent showItemsCB() {
          jbShowItems = new JButton("Set Items to Display");
-         jbShowItems.addActionListener(new ActionListener() {
-             @Override
-             public void actionPerformed(ActionEvent e) {
-                 SelectItemsToShow();
-             }
-         });
+         jbShowItems.addActionListener(e -> SelectItemsToShow());
          return jbShowItems;
-
-//        chkBShowItems = new JCheckBox("Show Items", true);
-//        chkBShowItems.setSelected(controller.bShowItems);
-//        chkBShowItems.addChangeListener(new ChangeListener() {
-//            @Override
-//            public void stateChanged(ChangeEvent e) {
-//                boolean bSel = chkBShowItems.isSelected();
-//                setItemsVisible(bSel);
-////                itemAttrib.setVisible(bSel);
-//            }
-//        });
-//        return chkBShowItems;
     }
 
     void setRelOrbitsVisible(boolean visible) {
@@ -610,25 +550,16 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JCheckBox showRealTimeCB() {
         chkBrealTime = new JCheckBox("Real Time", true);
         chkBrealTime.setSelected(controller.bRealTime);
-        chkBrealTime.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                controller.bRealTime = chkBrealTime.isSelected();
-            }
-        });
+        chkBrealTime.addChangeListener(e -> controller.bRealTime = chkBrealTime.isSelected());
         return chkBrealTime;
     }
 
     JCheckBox showRelOrbitCB() {
         chkShowRelOrbits = new JCheckBox("Show Rel Orbits", ItemMovementsApp.bShowRelOrbits);
         chkShowRelOrbits.setSelected(ItemMovementsApp.bShowRelOrbits);
-        chkShowRelOrbits.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                ItemMovementsApp.bShowRelOrbits = chkShowRelOrbits.isSelected();
-                setRelOrbitsVisible(ItemMovementsApp.bShowRelOrbits);
-//                relOrbitAttrib.setVisible(bShowRelOrbits);
-            }
+        chkShowRelOrbits.addChangeListener(e -> {
+            ItemMovementsApp.bShowRelOrbits = chkShowRelOrbits.isSelected();
+            setRelOrbitsVisible(ItemMovementsApp.bShowRelOrbits);
         });
         return chkShowRelOrbits;
     }
@@ -639,18 +570,15 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     JPanel getPlanetSizeBar() {
         planetSizeBar = new JScrollBar(JScrollBar.HORIZONTAL, 1, 20, 1, 500);
         planetSizeBar.setPreferredSize(new Dimension(100, 25));
-        planetSizeBar.addAdjustmentListener(new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                int val = planetSizeBar.getValue();
-                nlPlanetScale.setData(val);
-                if (val > 1)
-                    nlPlanetScale.setBackground(Color.red);
-                else
-                    nlPlanetScale.setBackground(Color.cyan);
-                for (int i = 0; i < space.nItems(); i++)
-                    space.getOneItem(i).setScale(val);
-            }
+        planetSizeBar.addAdjustmentListener(e -> {
+            int val = planetSizeBar.getValue();
+            nlPlanetScale.setData(val);
+            if (val > 1)
+                nlPlanetScale.setBackground(Color.red);
+            else
+                nlPlanetScale.setBackground(Color.cyan);
+            for (int i = 0; i < space.nItems(); i++)
+                space.getOneItem(i).setScale(val);
         });
         JPanel jp = new FramedPanel();
         jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
@@ -682,24 +610,12 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
         vpTransBehavior.setFactor(maxOnOneSide / 100);
     }
 
-    RenderingAttributes orbitAttrib;
-//    RenderingAttributes relOrbitAttrib;
     RenderingAttributes linkAttrib;
-//    RenderingAttributes itemAttrib;
 
     BranchGroup createSceneGraph() throws Exception{
         BranchGroup brGrpMain = new BranchGroup();
         tgMain = null;
         tgMain = new TransformGroup();
-//        itemAttrib = new RenderingAttributes();
-//        itemAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-//        itemAttrib.setVisible(controller.bShowItems);
-        orbitAttrib = new RenderingAttributes();
-        orbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-        orbitAttrib.setVisible(ItemMovementsApp.bShowPaths);
-//        relOrbitAttrib = new RenderingAttributes();
-//        relOrbitAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
-//        relOrbitAttrib.setVisible(bShowRelOrbits);
         linkAttrib = new RenderingAttributes();
         linkAttrib.setCapability(RenderingAttributes.ALLOW_VISIBLE_WRITE);
         linkAttrib.setVisible(ItemMovementsApp.bShowLinks);
@@ -925,11 +841,7 @@ public class MotionDisplay  extends JFrame implements MouseListener, MouseMotion
     Color colSimulation = Color.gray;
     public void updateDisplay(double nowT, DateAndJDN viewTime, double hrsPerSec, boolean bLive) {
         nowDate.setText(sdf.format(viewTime.getTime()));
-//        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-//        if (controller.bShowDateTime)
-//            nowTime.setText(sdf.format(viewTime.getTime()));
-//        else
-            nowTime.setText(nowTfmt.format(nowT)); // / 3600));
+        nowTime.setText(nowTfmt.format(nowT)); // / 3600));
         if (bLive) {
             nowTime.setForeground(colRealTime);
         }

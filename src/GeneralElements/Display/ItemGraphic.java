@@ -2,7 +2,6 @@ package GeneralElements.Display;
 
 import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
-import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
 import collection.RelOrbitGroup;
@@ -82,7 +81,6 @@ public class ItemGraphic {
     }
 
     public void setScale (double scale) {
-//        Transform3D scaleTransform = new Transform3D();
         tgPlanet.getTransform(scaleTransform);
         scaleTransform.setScale(scale);
         tgPlanet.setTransform(scaleTransform);
@@ -238,9 +236,6 @@ public class ItemGraphic {
         positionTrGrp.removeChild(relOrbitGroup);
     }
 
-    public void setItemDisplayAttribute(RenderingAttributes attribute) {
-        planet.setRenderingAttribute(attribute);
-    }
 
     PointArrayFIFO onePointArray(int vertexCount, int onceIn, int vertexFormat, Color3f color) {
         PointArrayFIFO onePtArr = new PointArrayFIFO(vertexCount, onceIn, vertexFormat, color);
@@ -267,7 +262,6 @@ public class ItemGraphic {
         Point3d pos = item.getPos();
         ptArr.addCoordinate(pos);
         if (relPtArr != null) {
-//            System.out.print(item.getName() + " ");
             relPtArr.addRelativeCoordinate(pos);
         }
         updateObjectPosition();
@@ -292,7 +286,6 @@ public class ItemGraphic {
 
     void updateSpin(double spinIncrement) {
         if (spinIncrement != 0) {
-//            rotTransform = new Transform3D();
             trgRotation.getTransform(rotTransform);
             Transform3D rotZ = new Transform3D();
             rotZ.rotZ(spinIncrement);

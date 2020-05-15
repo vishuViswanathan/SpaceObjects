@@ -127,12 +127,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.eCompression = eCompression;
     }
 
-    public void addGravityLink(Gravity oneGravityLink) {
-        gravityLinks.add(oneGravityLink);
-        gravityON = true;
-    }
-
-    public void touchedBy(double nowT, DarkMatter it) {};
+    public void touchedBy(double nowT, DarkMatter it) {}
 
     public double getPositionX() {
         return status.pos.getX();
@@ -177,36 +172,11 @@ public class DarkMatter implements InputControl, EvalOnce {
         return projectedArea;
     }
 
-    public boolean canStick() {
-        return canStick;
-    }
-
-    public double getCollisionLossFactor() {
-        return collisionLossFactor;
-    }
-
     public Vector3d getNormal() {return null;}
 
     public void setStickingPressure(double stickingPressure) {
         this.stickingPressure = stickingPressure;
         canStick = (stickingPressure > 0);
-    }
-
-    /**
-     * Contact area with a flat surface a flatFaceDistance from item center of sphere
-     * @param flatFaceDistance
-     * @return
-     */
-    public double getStickingArea(double flatFaceDistance) {
-        double stickingArea = 0;
-        if (flatFaceDistance < radius)
-            if (flatFaceDistance > 0)
-                stickingArea = 2 * Math.PI * (radius- flatFaceDistance) * (dia - flatFaceDistance);
-        return stickingArea;
-    }
-
-    public double getStickingForce(double onArea) {
-        return stickingPressure * onArea;
     }
 
     public void setSpace(ItemSpace space) {
@@ -218,7 +188,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public float getDiaFloat() {
-        return new Float(dia);
+        return (float)dia;
     }
 
     public double getDia() {
@@ -284,20 +254,14 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public synchronized void addToAngularVel(Vector3d angularVel) {
-
     }
 
     public synchronized void subtractFromTorque(Vector3d angularAcceleratioon)  {
     }
 
     public synchronized void subtractFromVel(Vector3d angularVel) {
-
     }
-    /**
-     * This is generally overridden in the subclass
-     * @param fromPoint
-     * @return
-     */
+
     public Vector3d distanceVector(Point3d fromPoint) {
         Vector3d distance = new Vector3d(status.pos);
         distance.sub(fromPoint);
@@ -323,7 +287,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public boolean updatePAndVforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = false;
+        boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
@@ -339,6 +303,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                     considerLocalGlobalBounce(nowT, deltaT, true);
                     break;
                 default:
+                    changed = false;
                     break;
             }
         }
@@ -347,8 +312,6 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     boolean considerLocalGlobalBounce(double nowT, double deltaT, boolean bFinal) {
         lastAcc = status.acc;
-//        lastVelocity = status.velocity;
-//        lastPosition = status.pos;
         effectiveForce.add(localForce, globalForce);
         nowAcc.scale(oneByMass, effectiveForce);
         effectiveAcc.setMean(nowAcc, lastAcc);
@@ -371,7 +334,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public boolean updatePAndVforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = false;
+        boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
@@ -387,6 +350,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                     considerGravityJetBounce(nowT, deltaT, true);
                     break;
                 default:
+                    changed = false;
                     break;
             }
         }
@@ -425,7 +389,7 @@ public class DarkMatter implements InputControl, EvalOnce {
 
     // CHECK 202020402 for Bounce Jet and Global, all are without repeat
     public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = false;
+        boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
@@ -441,6 +405,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                     considerBounceJetGlobal(nowT, deltaT, true);
                     break;
                 default:
+                    changed = false;
                     break;
             }
         }
@@ -471,7 +436,7 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = false;
+        boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
@@ -487,6 +452,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                     considerAddVelocityOnly(nowT, deltaT,true);
                     break;
                 default:
+                    changed = false;
                     break;
             }
         }
@@ -503,158 +469,6 @@ public class DarkMatter implements InputControl, EvalOnce {
             status.time = nowT + deltaT;
         }
         return true;
-    }
-
-    TwoVectors pvBase;
-    TwoVectors pv1, pv2, pv3, pv4;
-    TwoVectors k1, k2, k3, k4;
-
-    public Tuple3d getPosition(ItemInterface.UpdateStep updateStep) {
-        Tuple3d pos = status.pos;
-        switch(updateStep) {
-            case K2:
-                pos = pv1.v1;
-                break;
-            case K3:
-                pos = pv2.v1;
-                break;
-            case K4:
-                pos = pv3.v1;
-                break;
-        }
-        return pos;
-    }
-
-//    boolean considerGravityEffect(double deltaT, ItemInterface.UpdateStep updateStep) {
-//        boolean changed = true;
-//        double deltaTBy2 = deltaT / 2;
-//        double deltaTBy6 = deltaT / 6;
-//        TwoVectors pv;
-//        // WARNING ONLY FINAL IS corrected
-//        switch (updateStep) {
-//            case K1:
-//                pvBase = new TwoVectors(status.pos, status.velocity);
-//                k1 = new TwoVectors(pvBase, updateStep);
-//                pv1 = new TwoVectors(pvBase, deltaTBy2, k1);
-//                break;
-//            case K2:
-////                pv1 = new TwoVectors(pvBase, deltaTBy2, k1);
-//                k2 = new TwoVectors(pv1, updateStep);
-//                pv2 = new TwoVectors(pvBase, deltaTBy2, k2);
-//                break;
-//            case K3:
-////                pv2 = new TwoVectors(pvBase, deltaTBy2, k2);
-//                k3 = new TwoVectors(pv2, updateStep);
-//                pv3 = new TwoVectors(pvBase, deltaT, k3);
-//                break;
-//            case K4:
-////                pv3 = new TwoVectors(pvBase, deltaTBy2, k3);
-//                k4 = new TwoVectors(pv3, updateStep);
-//                break;
-//            case EuFwd:
-//                pvBase.scaleAndAdd(deltaT, k1);
-//                status.pos.set(pvBase.v1);
-//                status.velocity.set(pvBase.v2);
-//                break;
-//            case RK4:
-//                k1.scaleAndAdd(2, k2);
-//                k1.scaleAndAdd(2, k3);
-//                k1.add(k4);
-//
-//                pvBase.scaleAndAdd(deltaTBy6, k1);
-//                status.pos.set(pvBase.v1);
-//                status.velocity.set(pvBase.v2);
-//                break;
-//            case FINAL:
-//                changed = considerGravityEffectEuModified(deltaT);
-//                break;
-//            default:
-//                changed = false;
-//                break;
-//        }
-//        return changed;
-//    }
-
-//    public boolean considerGravityEffectEuModified(double deltaT) {
-//        boolean changed = false;
-//        double deltaTBy2 = deltaT / 2;
-//        double deltaTBy6 = deltaT / 6;
-//        TwoVectors pvBase = new TwoVectors(status.pos, effectiveLastVelocity);
-//
-//        TwoVectors pv = pvBase;
-//        TwoVectors pv1 = new TwoVectors(pv);
-//        // pv1 is original velocity  and net acc due to gravity
-//
-//        pv = new TwoVectors(pvBase, deltaT, pv1);
-//        // pv is new pos(original pos +  velocity * deltaT) and
-//        // new delta Velocity (original velocity + acc * deltaT)
-//
-//        TwoVectors pv2 = new TwoVectors(pv);
-//        // pv2 original velocity  and net acc due to gravity
-//
-//        pv1.makeMeanWith(pv2);
-//        // return mean Velocity and acc
-//        pvBase.scaleAndAdd(deltaT, pv1);
-//        status.pos.set(pvBase.v1);
-//        status.velocity.set(pvBase.v2);
-//
-////            status.time = nowT + deltaT;
-//        changed = true;
-//        return changed;
-//    }
-
-    class TwoVectors {
-        Vector3dMV v1 = new Vector3dMV();
-        Vector3dMV v2;
-        TwoVectors(Tuple3d v1, Tuple3d v2) {
-            this.v1 = new Vector3dMV(v1);
-            this.v2 = new Vector3dMV(v2);
-        }
-
-        TwoVectors(TwoVectors base, double scale, TwoVectors scaleThis) {
-            this(base.v1, base.v2);
-            scaleAndAdd(scale, scaleThis);
-        }
-
-        TwoVectors scaleAndAdd(double factor, TwoVectors scaleThis) {
-            v1.scaleAndAdd(scaleThis.v1, factor);
-            v2.scaleAndAdd(scaleThis.v2, factor);
-            return this;
-        }
-
-        TwoVectors(TwoVectors pAndV) {
-            v1.set(pAndV.v2);
-            v2 = new Vector3dMV();
-            for (Gravity oneG : gravityLinks) {
-                v2.add(oneG.accDueToG(pAndV.v1));
-                if (jetForce.lengthSquared() > 0) {
-                    Vector3dMV addAcc = new Vector3dMV(oneByMass, jetForce);
-                    v2.add(addAcc);
-                }
-            }
-        }
-
-        TwoVectors(TwoVectors pAndV, ItemInterface.UpdateStep updateStep) {
-//            this(pAndV);
-            v1.set(pAndV.v2);
-            v2 = new Vector3dMV();
-            for (Gravity oneG : gravityLinks) {
-                v2.add(oneG.accDueToG(pAndV.v1, updateStep));
-            }
-        }
-
-        void makeMeanWith(TwoVectors withThis) {
-            v1.scale(0.5);
-            v1.scaleAndAdd(withThis.v1, 0.5);
-            v2.scale(0.5);
-            v2.scaleAndAdd(withThis.v2, 0.5);
-        }
-
-        void add(TwoVectors addThis) {
-            v1.add(addThis.v1);
-            v2.add(addThis.v2);
-        }
-
     }
 
     public void showError(String msg) {

@@ -254,7 +254,7 @@ public class SpaceEvaluator implements Runnable {
     }
 
     public void run() {
-        callerApp.debug("SpaceEvaluator started" +
+        callerApp.debug("SpaceEvaluator.#257: started" +
                 ((useAllCPUs) ? " with " + numberOfCPUsToUse + " CPUs" : " One CPU"));
         if (useAllCPUs)
             callerApp.doCalculationPARELLEL(fresh);
@@ -263,7 +263,7 @@ public class SpaceEvaluator implements Runnable {
     }
 
     public void start() {
-        System.out.println("Starting " +  threadName );
+//        System.out.println("Starting " +  threadName );
         t = new Thread (this, threadName);
         t.start ();
     }

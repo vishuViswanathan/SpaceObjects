@@ -31,8 +31,8 @@ import java.util.Vector;
 /**
  * Created by M Viswanathan on 23 May 2014
  */
-public class ItemMovementsApp extends JApplet implements InputControl {
-    static public enum SpaceSize {
+public class ItemMovementsApp extends Panel implements InputControl {
+    public enum SpaceSize {
         BLANK("Blank Set as Daily Objects"),
         BLANKSPACE("Blank Set as Space Objects"),
         ASTRONOMICAL("Astronomical (km)"),
@@ -87,7 +87,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     ItemMovementsApp mainApp;
     boolean useAllCPUs = false;
     public SpaceSize spSize;
-    JComboBox cbSpaceSize = new JComboBox(SpaceSize.values());
+    JComboBox<SpaceSize> cbSpaceSize = new JComboBox(SpaceSize.values());
     ItemSpace space;
     boolean asApp = false;
     static JFrame mainF;
@@ -103,11 +103,9 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     double duration = 2000; // in h
     public double calculationStep =2; //in seconds
-//    public double initialSmallerStep = 2;
     public int repeats = 5; // number of times each step is repeated for position-force accuracy
     static public boolean bShowPaths = false;
     static public boolean bShowLinks = false;
-//    static public boolean bShowItems = true;
     static public boolean bShowRelOrbits = false;
 
     boolean xmlHistory = false;
@@ -143,7 +141,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         mainF.add(cbSpaceSize);
         duration = 200;
         calculationStep = 0.0002; // was 0.000002;
-//        initialSmallerStep = calculationStep;
         refreshInterval = 200 * calculationStep; // was 20000
         proceedToItemList(false);
         space.enableItemGravity(false);
@@ -151,7 +148,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         bShowPaths = false;
         bShowLinks = true;
         bRealTime = true;
-//        bShowItems = true;
         setSpaceSize(SpaceSize.DAILY);
         mainF.pack();
         mainF.setVisible(true);
@@ -165,7 +161,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     void setTimingValues(double calculationStep, double refreshInterval, double duration, boolean bEnableItemGravity,
                          boolean bShowLinks, boolean bShowOrbit, boolean bRealTime)  {
         this.calculationStep = calculationStep;
-//        initialSmallerStep = calculationStep;
         this.refreshInterval = refreshInterval;
         this.duration = duration;
         ntfDuration.setData(duration);
@@ -179,7 +174,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
 
     class TimingValuesDlg extends JDialog {
         NumberTextField ntCalculStep;
-//        NumberTextField ntInitialSmallerStep;
         NumberTextField ntUpdate; // multiplier on calculation step;
         NumberTextField ntRepeats;
         JCheckBox chBTimeDilation;
@@ -187,7 +181,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         JCheckBox cbHistoryToFile;
         NumberTextField ntFileHistoryInterval;
         JButton jbHistoryFilePath;
-        JLabel lHistoryFilePath;
         JTextField tfHistoryFilePath;
 
         JButton jbOk = new JButton("Ok");
@@ -195,24 +188,14 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         double upDateMultiplier;
         TimingValuesDlg() {
             setModal(true);
-            jbOk.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (noteValues())
-                        setVisible(false);
-                }
-            });
-            jbCancel.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+            jbOk.addActionListener(e -> {
+                if (noteValues())
                     setVisible(false);
-                }
             });
+            jbCancel.addActionListener(e -> setVisible(false));
             upDateMultiplier = refreshInterval / calculationStep;
             ntCalculStep = new NumberTextField(mainApp, calculationStep, 6, false, 0.0000001, 10000, "0.000E00",
                     "Calculation step in seconds");
-//            ntInitialSmallerStep = new NumberTextField(mainApp, initialSmallerStep, 6, false, 0.0000001, 10000, "0.000E00",
-//                    "Calculation step in seconds");
             ntUpdate = new NumberTextField(mainApp, upDateMultiplier, 6, false, 1, 10000, "#,###",
                     "Update once in this many steps");
             ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 0, 10, "#0",
@@ -221,7 +204,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             chBTimeDilation.setEnabled(false);
             chBGravityPropagationTime = new JCheckBox("Consider Gravity propagation time", space.bConsiderGravityVelocity);
             chBGravityPropagationTime.setEnabled(false);
- //           lHistoryFilePath = new JLabel(historyFilePath);
             tfHistoryFilePath = new JTextField(20);
             tfHistoryFilePath.setText(historyFilePath);
             tfHistoryFilePath.setToolTipText(historyFilePath);
@@ -230,7 +212,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 String path = getHistoryFilePath();
                 if (path.length() > 0) {
                     historyFilePath = path;
-//                    lHistoryFilePath.setText(path);
                     tfHistoryFilePath.setText(path);
                     tfHistoryFilePath.setToolTipText(historyFilePath);
                 }
@@ -245,14 +226,12 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             setHistoryFields();
             MultiPairColPanel jp = new MultiPairColPanel("Calculation Timings");
             jp.addItemPair(ntCalculStep);
-//            jp.addItemPair(ntInitialSmallerStep);
             jp.addItemPair(ntUpdate);
             jp.addBlank();
             jp.addItemPair(ntRepeats);
             jp.addBlank();
             jp.addItem(cbHistoryToFile);
             jp.addItemPair(ntFileHistoryInterval);
-//            jp.addItemPair(jbHistoryFilePath, lHistoryFilePath);
             jp.addItemPair(jbHistoryFilePath, tfHistoryFilePath);
             jp.addItem(chBTimeDilation);
             jp.addItem(chBGravityPropagationTime);
@@ -266,9 +245,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             boolean retVal = false;
             if (dataOK()) {
                 calculationStep = ntCalculStep.getData();
-//                initialSmallerStep = ntInitialSmallerStep.getData();
-//                if (initialSmallerStep > calculationStep)
-//                    initialSmallerStep = calculationStep;
                 refreshInterval = calculationStep * ntUpdate.getData();
                 repeats = (int)ntRepeats.getData();
                 space.bConsiderTimeDilation = chBTimeDilation.isSelected();
@@ -300,11 +276,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     JMenuItem mISaveData =new JMenuItem("Save Data to File");
     JMenuItem mIClearData = new JMenuItem("Start with Clean Slate");
     JMenuItem mIExit = new JMenuItem("Exit");
-
-    JMenuItem mIDaily = new JMenuItem("Daily objects (m)");
-    JMenuItem mIEarth = new JMenuItem("Earth and Environment (m)");
-    JMenuItem mIAstronomical = new JMenuItem("Astronomical (km)");
-    JMenuItem mIMolecular = new JMenuItem("Molecular (micrometer)");
 
     JRadioButtonMenuItem rIDaily = new JRadioButtonMenuItem("Daily objects (m)");
     JRadioButtonMenuItem rIEarth = new JRadioButtonMenuItem("Earth and Environment (m)");
@@ -368,23 +339,20 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     Vector<DefaultScheme> defaultSchemes;
 
     void loadDefaultSchemes() {
-        defaultSchemes = new Vector<DefaultScheme>();
+        defaultSchemes = new Vector<>();
         try {
             for (String schemeName: schemesList)
-                defaultSchemes.add((DefaultScheme)Class.forName("schemes." + schemeName).newInstance());
+//                defaultSchemes.add((DefaultScheme)Class.forName("schemes." + schemeName).newInstance());
+                defaultSchemes.add((DefaultScheme)Class.forName("schemes." + schemeName).
+                        getDeclaredConstructor().newInstance());
             cbSchemes = new JComboBox(defaultSchemes);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     void selectScheme() {
         SchemeSelector selector = new SchemeSelector();
-//        selector.sersetLocation(300, 300);
         selector.setLocationRelativeTo(mainF);
         selector.setVisible(true);
         int selIndex = cbSchemes.getSelectedIndex();
@@ -408,12 +376,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     setVisible(false);
                 }
             });
-            jbCancel.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    setVisible(false);
-                }
-            });
+            jbCancel.addActionListener(e -> setVisible(false));
             MultiPairColPanel jp = new MultiPairColPanel(150, 150);
             jp.addItemPair("Select Scheme", cbSchemes);
             jp.addBlank();
@@ -542,7 +505,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public double refreshInterval = 60; // sec
 
     public void setRefreshInterval(double interval) {
-//        log.info("refreshInterval changed from "  + refreshInterval + " to " + interval);
         refreshInterval = interval;
         nextRefresh = nowT + refreshInterval;
         for (int i = 0; i < space.nItems(); i++)
@@ -571,9 +533,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         double step = calculationStep;
         double hrsPerSec = 0;
         double nextHistorySave = 0;
-//        continueIt = true;
         double endT;
-        debug("in doCalculationSERIAL");
+//        debug("in doCalculationSERIAL");
         if (fresh) {
             space.initAllItemConnections();
             space.setGlobalLinksAndActions();
@@ -584,7 +545,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             endT = ntfDuration.getData() * 3600;
             lastTnano = System.nanoTime(); // new Date()).getTime();
             nowDate = new DateAndJDN(dateAndJDN);
-//            continueIt = true;
         }
         else {
             endT = nowT + ntfDuration.getData() * 3600;
@@ -602,7 +562,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        debug("before runIt && nowT < endT and continueIt " + runIt + ", " + nowT + ", " + endT + ", " + continueIt);
+//        debug("ItemMovementsApp.#565:before runIt && nowT < endT and continueIt " + runIt + ", " + nowT + ", " + endT + ", " + continueIt);
         boolean firstTime = true;
         while (runIt && nowT < endT) {
             if (firstTime || !continueIt) {
@@ -611,10 +571,8 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-//                debug("continueIt: " + continueIt);
                 firstTime = false;
             }
-//            debug("");
             if (continueIt) {
                 if (bHistoryToFileON && nowT >= nextHistorySave) {
                     updateHistoryFile(nowT);
@@ -627,18 +585,14 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         showError("Error in one step at " + nowT + "\nSuggest restart program");
                         break;
                     }
-//                    step = calculationStep;
                     nowT += step;
-//                    debug("nowT " + nowT);
                     if (nowT > nextRefresh) {
-//                        debug("nowT > nextRefresh");
                         space.updateLinkDisplay();
                         showNow = false;
                         nowTnano = System.nanoTime(); //new Date().getTime();
                         double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
                         hrsPerSec = (refreshInterval / 3600) / deltaT;
                         if (bRealTime && deltaT <= refreshInterval) {
-//                            debug("Real time " + nowT);
                             try {
                                 Thread.sleep((long)((refreshInterval - deltaT) * 1000));
                                 bLive = true;
@@ -651,7 +605,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         nowDate = new DateAndJDN(dateAndJDN);
                         nowDate.add(Calendar.SECOND, (int)nowT);
                         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-//                        bLive = false;
                         lastRefresh = nowT;
                         nextRefresh += refreshInterval;
                         lastTnano = System.nanoTime(); //nowTnano;
@@ -684,7 +637,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         enableButtons(false);
         double step = calculationStep;
         double hrsPerSec = 0;
-//        continueIt = true;
         double endT;
         if (fresh) {
             space.initAllItemConnections();
@@ -695,7 +647,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             endT = ntfDuration.getData() * 3600;
             lastTnano = System.nanoTime(); // new Date()).getTime();
             nowDate = new DateAndJDN(dateAndJDN);
-//            continueIt = true;
         }
         else {
             endT = nowT + ntfDuration.getData() * 3600;
@@ -721,7 +672,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                         double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
                         hrsPerSec = (refreshInterval / 3600) / deltaT;
                         if (bRealTime && deltaT <= refreshInterval) {
-//                            debug("Real time " + nowT);
                             try {
                                 Thread.sleep((long)((refreshInterval - deltaT) * 1000));
                                 bLive = true;
@@ -733,7 +683,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                             bLive = false;
                         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
                         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-//                        bLive = false;
                         lastRefresh = nowT;
                         nextRefresh += refreshInterval;
                         lastTnano = System.nanoTime(); //nowTnano;
@@ -747,17 +696,13 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         evaluator.stopTasks();
         nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-//        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
-//        SpaceEvaluator.closePool();
         enableButtons(true);
     }
 
     boolean doOneStepPARELLEL(double deltaT, double nowT) throws Exception {
         return space.doCalculation(evaluator, deltaT, nowT);
     }
-
-    long sleepTime = 100; // ms
 
     MotionDisplay orbitDisplay;
 
@@ -767,7 +712,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             orbitDisplay.dispose();
         }
         try {
-//            orbitDisplay = new MotionDisplay(space, refreshInterval, duration, this);
             orbitDisplay = new MotionDisplay(space, refreshInterval, duration, this);
             orbitDisplay.addWindowListener(new WindowAdapter() {
                 @Override
@@ -789,8 +733,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     public boolean writeCurrentVectorsToFile() {
         boolean bRetVal = false;
         String filePath = "results\\statusVectors.csv";
-//        double posFactor = 1 / Constants.oneAuInkm / 1000;
-//        double velFactor = posFactor * Constants.secsPerDay;
         double posFactor = 1.0;
         double velFactor = 1.0;
         try {
@@ -799,9 +741,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             int nObj = space.nItems();
 
             try {
-//                String header = "JDN " + nowDate.getJdN() + "\n" +
-//                        "Position Vector in AU - x, y, z\n" +
-//                        "Velocity Vector in AU/day - Vx, vY, vZ\n\n";
                 String header = "JDN " + nowDate.getJdN() + "\n" +
                         "Name, HorizonID, GM\n" +
                         "Position Vector in m, x, y, z\n" +
@@ -871,7 +810,7 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     data.append(XMLmv.putTag("obj",
                             space.getOneItem(o).statusStringForHistory(posFactor, velFactor)));
                 }
-                String toFile = new String(XMLmv.putTag("set", data));
+                String toFile = XMLmv.putTag("set", data);
                 historyFileStream.write(toFile.getBytes());
             }
             else {
@@ -913,7 +852,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     void saveDataToFile() {
-//        boolean proceed = true;
         space.noteItemData();
         space.saveInfluenceList();
         String xmlData = baseDatainXML() +
@@ -1008,8 +946,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
         vp = XMLmv.getTag(xmlStr, "baseData", 0);
         String basicData = vp.val;
         if (basicData.length() > 20) {
-//            space = new ItemSpace(this);
-//            orbitDisplay = null;
             try {
                 vp = XMLmv.getTag(basicData, "calculationStep", 0);
                 calculationStep = Double.valueOf(vp.val);
@@ -1059,7 +995,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     public static void showError(String msg, Component caller) {
-//        log.info(msg);
         JOptionPane.showMessageDialog(caller, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
         mainF.toFront();
     }
@@ -1178,24 +1113,17 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                 if (src == rIAstronomical) {
                     setSpaceSize(SpaceSize.ASTRONOMICAL);
                     showMessage("Astronomical Selected");
-//                    setTimingValues(10, 10 * 200, 200000, true, false, true, false);
-//                    spSize = SpaceSize.ASTRONOMICAL;
                     break bBlock;
                 }
                 if (src == rIDaily) {
                     setSpaceSize(SpaceSize.DAILY);
                     showMessage("Daily Selected");
-//                    setTimingValues(0.002, 0.002 * 200, 200, false, true, false, true);
-//                    spSize = SpaceSize.DAILY;
                     break bBlock;
                 }
                 if (src == mITuning) {
                     getTimingValues();
                     break bBlock;
                 }
-//                if (src == ckAllCPU) {
-//                    useAllCPUs = ckAllCPU.getState();
-//                }
             }
         }
     }
@@ -1212,9 +1140,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
             case ASTRONOMICAL:
                 setTimingValues(10, 10 * 100, 200000, true, false, true, false);
                 repeats = 0;
-//                space.bConsiderTimeDilation = true;
-//                space.bConsiderGravityVelocity = true;
-//                showMessage("Gravity effects on Time and Gravity propagation time are not considered");
                 rIAstronomical.setSelected(true);
                 rbEndTime.setEnabled(true);
                 break;
@@ -1234,24 +1159,18 @@ public class ItemMovementsApp extends JApplet implements InputControl {
                     public void propertyChange(final PropertyChangeEvent e) {
 
                         if (e.getOldValue() instanceof JTextField) {
-                            SwingUtilities.invokeLater(new Runnable() {
-
-                                public void run() {
-                                    JTextField oldTextField = (JTextField) e.getOldValue();
-                                    oldTextField.setSelectionStart(0);
-                                    oldTextField.setSelectionEnd(0);
-                                }
+                            SwingUtilities.invokeLater(() -> {
+                                JTextField oldTextField = (JTextField) e.getOldValue();
+                                oldTextField.setSelectionStart(0);
+                                oldTextField.setSelectionEnd(0);
                             });
 
                         }
 
                         if (e.getNewValue() instanceof JTextField) {
-                            SwingUtilities.invokeLater(new Runnable() {
-
-                                public void run() {
-                                    JTextField textField = (JTextField) e.getNewValue();
-                                    textField.selectAll();
-                                }
+                            SwingUtilities.invokeLater(() -> {
+                                JTextField textField = (JTextField) e.getNewValue();
+                                textField.selectAll();
                             });
 
                         }
@@ -1260,7 +1179,6 @@ public class ItemMovementsApp extends JApplet implements InputControl {
     }
 
     static public void debug(String msg) {
-//        log.debug(msg);
         System.out.println("DEBUG: " + msg);
     }
 
