@@ -610,7 +610,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
                         lastTnano = System.nanoTime(); //nowTnano;
                     }
                 } catch (Exception e) {
-                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
+                    showError("ItemMoementsApp.#613: Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
                     runIt = false;
                 }
             }
