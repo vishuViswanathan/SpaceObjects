@@ -121,6 +121,7 @@ public class OneJetPlan {
 
     public void removeOneStep(int stepN) {
         theSteps.remove(stepN);
+        planSize = theSteps.size();
     }
 
     public void initConnections(ItemSpace space) {
