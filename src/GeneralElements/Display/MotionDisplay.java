@@ -28,6 +28,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -221,8 +222,8 @@ public class MotionDisplay  extends JFrame
     String continueStr = "Continue";
     String stopItStr = "Stop Action";
     JButton pauseRunB = new JButton(pauseStr);
-    JButton saveViewB = new JButton("Save View");
-    JButton resetViewB = new JButton("Show Saved View");
+    JCheckBox cBSelStatus;
+    boolean bSelStatus = false;
     JButton viewAllZX = new JButton("View All in ZX plane");
     JButton viewAllXY = new JButton("View All in XY plane");
     JButton viewAllYZ = new JButton("View All in YZ plane");
@@ -262,19 +263,19 @@ public class MotionDisplay  extends JFrame
                 (o1, o2) -> o1.toString().compareTo(o2.toString()));
 
         cbItems = new JComboBox(itemList.toArray());
-        jbShowSelected = new JButton("Show");
+        jbShowSelected = new JButton("Local View");
+        outerGbc.gridy++;
+        cBSelStatus = new JCheckBox("Select Status", bSelStatus);
+        cBSelStatus.addActionListener(e-> {
+            bSelStatus = cBSelStatus.isSelected();
+        });
+        outerP.add(cBSelStatus, outerGbc);
+        outerGbc.gridy++;
+
         ActionListener l = e -> {
             Object src = e.getSource();
            block:
            {
-               if (src == saveViewB) {
-                   saveView();
-                   break block;
-               }
-               if (src == resetViewB) {
-                   resetView();
-                   break block;
-               }
                if (src == viewAllXY) {
                    setViewAll(ViewDirection.ZMinus);
                    break block;
@@ -322,9 +323,6 @@ public class MotionDisplay  extends JFrame
         outerGbc.gridy++;
         viewAllZX.addActionListener(l);
         outerP.add(viewAllZX, outerGbc);
-        outerGbc.gridy++;
-        resetViewB.addActionListener(l);
-        outerP.add(resetViewB, outerGbc);
         outerGbc.gridy++;
         commonMenuPanelHolder = new JPanel();
         commonMenuPanelHolder.add(commonMenuPanel());
@@ -383,6 +381,8 @@ public class MotionDisplay  extends JFrame
         };
         FramedPanel nowTp = new FramedPanel();
         nowTp.setLayout(new BoxLayout(nowTp, BoxLayout.Y_AXIS));
+        menuP.add(showItemsCB(), gbc);
+        gbc.gridy++;
         if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
             timeLabel = new JLabel("Time of Display ");
         else
@@ -396,8 +396,8 @@ public class MotionDisplay  extends JFrame
         gbc.gridy++;
         menuP.add(getPlanetSizeBar(), gbc);
         gbc.gridy++;
-        menuP.add(showItemsCB(), gbc);
-        gbc.gridy++;
+//        menuP.add(showItemsCB(), gbc);
+//        gbc.gridy++;
         menuP.add(getSpeedSelector(), gbc);
         gbc.gridy++;
 //        if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
@@ -600,12 +600,6 @@ public class MotionDisplay  extends JFrame
         }
     }
 
-    void saveView() {
-        TransformGroup vTgLast = mainViewPlatform.getViewPlatformTransform();
-        vTgLast.getTransform(defVPFTransform);
-        bViewSaved = true;
-    }
-
     void setDefaultPan() {
         vpTransBehavior.setFactor(maxOnOneSide / 100);
     }
@@ -716,6 +710,9 @@ public class MotionDisplay  extends JFrame
         vpTransBehavior.setFactor(distance / 100);
     }
 
+
+
+
     boolean inMouseClick = false;
 
     @Override
@@ -726,17 +723,23 @@ public class MotionDisplay  extends JFrame
             pickCanvas.setShapeLocation(e);
             PickResult result = pickCanvas.pickClosest();
             Point3d pt = new Point3d();
+            PickIntersection intersection;
             int button = e.getButton();
             if (result != null) {
-                result.getClosestIntersection(pt);
+                intersection = result.getClosestIntersection(pt);
                 boolean done = false;
                 Object s = result.getNode(PickResult.SHAPE3D);
                 if (s != null) {
                     if (s instanceof PathShape) {
                         ItemInterface ii = ((PathShape) s).planet.getItem();
                         if (button == MouseEvent.BUTTON1) {
-                            showLocalView(ii);
-                            debug("Selected via Path " + ii.getName());
+                            if (bSelStatus) {
+                                showPoint(ii.getName(), intersection.getClosestVertexCoordinatesVW());
+                            }
+                            else {
+                                showLocalView(ii);
+                                debug("Selected via Path " + ii.getName());
+                            }
                         }
                         else
                             cbItems.setSelectedItem(ii);
@@ -760,6 +763,13 @@ public class MotionDisplay  extends JFrame
         }
         else
             debug("already in inMouseClick");
+    }
+
+    DecimalFormat posFmt = new DecimalFormat("#,###");
+    void showPoint(String name, Point3d pt) {
+       String msg = "X: " + posFmt.format(pt.x) + ", Y: " +
+               posFmt.format(pt.y) + ", Z: " + posFmt.format(pt.z);
+       ItemMovementsApp.showMessage("Position of " + name, msg, this);
     }
 
     @Override

@@ -1008,6 +1008,14 @@ public class ItemMovementsApp extends Panel implements InputControl {
         mainF.toFront();
     }
 
+    public static void showMessage(String title, String msg, Window caller) {
+        JOptionPane.showMessageDialog(caller, msg, title, JOptionPane.INFORMATION_MESSAGE);
+        if (caller != null)
+            caller.toFront();
+        else
+            mainF.toFront();
+    }
+
     public static void showMessage(String msg) {
         showMessage(msg, mainF);
     }
