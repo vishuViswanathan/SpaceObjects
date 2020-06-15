@@ -29,7 +29,11 @@ public class OneTimeStep {
         ALIGNCOUNTERTOVELOCITY("Align Counter To Velocity"),
         ALIGNTOANOBJECT("Align To An Object"),
         TURNBYANGLE("Turn by this angle"),
-        FIREJET("Fire Jet");
+        FIREJET("Fire Jet"),
+        FIREATNEXTPERIAPSIS("Fire At Next Periapsis"),
+        FIREATNEXTAPOIAPSIS("Fire At Next Apoapsis"),
+        FIREWHENATDISTANCEPLUS("Fire At Distance (Increasing)"),
+        FIREWHENATDISTANCEMINUS("Fire At Distance (Decreasing)");
 
         private final String typeName;
 
@@ -105,6 +109,7 @@ public class OneTimeStep {
     public boolean isON = false;
     boolean repeat = false;
 
+
     public OneTimeStep(JetsAndSeekers element, String xmlStr) {
         this.forElement = element;
         stepAction = element.actions()[0];
@@ -139,6 +144,59 @@ public class OneTimeStep {
             alignToObject = space.getItem(alignToName);
 
     }
+
+    double nowDistance = -1;
+    double lastDistance = -1;
+    boolean inOjectRelatedAction = false;
+    double distanceLimit = 1e100;
+    double minDistance = distanceLimit;
+    boolean distanceDecreasing = false;
+    double maxDistance = -1;
+    boolean distanceIncreasing = false;
+
+    public boolean isTimeForAction(double nowT) {
+        boolean retVal = false;
+        if (inOjectRelatedAction)
+            retVal = true;
+        else {
+            nowDistance = forElement.getParentItem().getPos().distance(alignToObject.getPos());
+            if (!inOjectRelatedAction) {
+                switch (stepAction) {
+                    case FIREATNEXTPERIAPSIS:
+                        if (nowDistance < minDistance) {
+                            distanceDecreasing =  minDistance < distanceLimit;
+                            // it has nudged out of starting value
+                            minDistance = nowDistance;
+                        }
+                        // check if minimum is crossed
+                        if (distanceDecreasing && nowDistance > minDistance) {
+                            startTime = nowT;
+                            endTime = nowT + duration;
+                            inOjectRelatedAction = true;
+                            retVal = true;
+                        }
+                        break;
+                    case FIREATNEXTAPOIAPSIS:
+                        if (nowDistance > maxDistance) {
+                            distanceIncreasing = (maxDistance >= 0);
+                            // it has nudged out of starting value
+                            maxDistance = nowDistance;
+                        }
+                        // check if maximum is crossed
+                        if (distanceIncreasing && nowDistance < maxDistance) {
+                            startTime = nowT;
+                            endTime = nowT + duration;
+                            inOjectRelatedAction = true;
+                            retVal = true;
+                        }
+                        break;
+                }
+            }
+            lastDistance = nowDistance;
+        }
+        return retVal;
+    }
+
 
     public static String[] getColHeader() {
         TimeStepColType[] values = TimeStepColType.values();
@@ -239,7 +297,11 @@ public class OneTimeStep {
             cbStepAction.addActionListener(e -> {
                 StepAction action = (StepAction)cbStepAction.getSelectedItem();
                 if (action == StepAction.ALIGNTOANOBJECT || action == StepAction.ALIGNTOVELOCITY ||
-                        action == StepAction.ALIGNCOUNTERTOVELOCITY)
+                        action == StepAction.ALIGNCOUNTERTOVELOCITY ||
+                        action == StepAction.FIREATNEXTPERIAPSIS ||
+                        action == StepAction.FIREATNEXTAPOIAPSIS ||
+                        action == StepAction.FIREWHENATDISTANCEMINUS ||
+                        action == StepAction.FIREWHENATDISTANCEPLUS)
                     cbAlignToObject.setEnabled(true);
                 else
                     cbAlignToObject.setEnabled(false);
@@ -250,8 +312,8 @@ public class OneTimeStep {
             JPanel outerP = new JPanel(new BorderLayout());
             MultiPairColPanel jpBasic = new MultiPairColPanel("Time Plan Step Details");
             jpBasic.addItemPair("Select Action", cbStepAction);
-            jpBasic.addItemPair("Object", cbAlignToObject);
-            jpBasic.addItem("(Applicable for Object and Vel selection)");
+            jpBasic.addItemPair("Related Object", cbAlignToObject);
+            jpBasic.addItem("(for Object, Vel, Apsis, Distance selections)");
             jpBasic.addItemPair(ntStartTime);
             jpBasic.addItemPair(ntDuration);
             jpBasic.addBlank();
@@ -332,7 +394,11 @@ public class OneTimeStep {
         if (vp.val.length() > 0)
             stepAction = StepAction.getEnum(vp.val);
         if (stepAction == StepAction.ALIGNTOANOBJECT || stepAction == StepAction.ALIGNTOVELOCITY ||
-                stepAction == StepAction.ALIGNCOUNTERTOVELOCITY) {
+                stepAction == StepAction.ALIGNCOUNTERTOVELOCITY ||
+                stepAction == StepAction.FIREATNEXTPERIAPSIS ||
+                stepAction == StepAction.FIREATNEXTAPOIAPSIS ||
+                stepAction == StepAction.FIREWHENATDISTANCEMINUS ||
+                stepAction == StepAction.FIREWHENATDISTANCEPLUS) {
             vp = XMLmv.getTag(xmlStr, "alignToName", vp.endPos);
             alignToName = vp.val;
         }

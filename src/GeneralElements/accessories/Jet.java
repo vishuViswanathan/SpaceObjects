@@ -74,6 +74,25 @@ public class Jet extends JetsAndSeekers {
         }
     }
 
+    public boolean completeThisStep(OneTimeStep theStep, double nowT, double deltaT) {
+        boolean done = false;
+        if (nowT >= theStep.startTime) {
+//            System.out.println("Jets.#80: " + name + ": " + nowT);
+            switch(theStep.stepAction) {
+                case FIREJET:
+                    done = super.completeThisStep(theStep, nowT, deltaT);
+                    break;
+                default:
+                    if (theStep.isTimeForAction(nowT)) {
+                        done = super.completeThisStep(theStep, nowT, deltaT);
+                    }
+                    break;
+             }
+        }
+        return done;
+    }
+
+
     protected String detailsString() {
         return forceSource.dataAsString();
     }
@@ -110,7 +129,12 @@ public class Jet extends JetsAndSeekers {
     }
 
     public OneTimeStep.StepAction[] actions() {
-        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.FIREJET};
+//        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.FIREJET};
+        return new OneTimeStep.StepAction[] {OneTimeStep.StepAction.FIREJET,
+                OneTimeStep.StepAction.FIREATNEXTPERIAPSIS,
+                OneTimeStep.StepAction.FIREATNEXTAPOIAPSIS,
+                OneTimeStep.StepAction.FIREWHENATDISTANCEMINUS,
+                OneTimeStep.StepAction.FIREWHENATDISTANCEPLUS};
     }
 
     public Item.EditResponse editData(InputControl inpC, Component c) {

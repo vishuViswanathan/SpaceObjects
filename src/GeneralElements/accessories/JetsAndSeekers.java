@@ -146,6 +146,9 @@ public abstract class JetsAndSeekers {
         thePlan.initConnections(space);
     }
 
+    public ItemInterface getParentItem() {return item;}
+
+
     public static DataWithStatus<JetsAndSeekers> getJetsAndSeekers(ItemInterface item, String xmlStr) {
         DataWithStatus<JetsAndSeekers> retVal = new DataWithStatus<>();
         ValAndPos vp;
@@ -216,7 +219,7 @@ public abstract class JetsAndSeekers {
     public boolean completeThisStep(OneTimeStep theStep, double nowT, double deltaT) {
         boolean done = false;
         if (nowT >= theStep.startTime) {
-            System.out.println("JetsAndSeekers.#219: " + name + ": " + nowT);
+//            System.out.println("JetsAndSeekers.#219: " + name + ": " + nowT);
             boolean activate = false;
             if (nowT < theStep.endTime)
                 activate = true;
