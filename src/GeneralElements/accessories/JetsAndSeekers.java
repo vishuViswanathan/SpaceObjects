@@ -223,8 +223,10 @@ public abstract class JetsAndSeekers {
             boolean activate = false;
             if (nowT < theStep.endTime)
                 activate = true;
-            else
+            else {
                 done = true;
+                theStep.markItOn(false);
+            }
             setActive(activate, theStep, deltaT);
         }
         return done;

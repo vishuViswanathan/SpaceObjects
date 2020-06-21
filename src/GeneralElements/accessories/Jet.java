@@ -69,7 +69,7 @@ public class Jet extends JetsAndSeekers {
     public void addEffect() {
         if (active) {
             item.addTojetForce(jetData.getForce());
-            System.out.println("Jet.#72: " + name + ": " + jetData.getForce().length());
+//            System.out.println("Jet.#72: " + name + ": " + jetData.getForce().length());
             item.addToJetTorque(jetData.getTorque());
         }
     }
@@ -202,6 +202,10 @@ public class Jet extends JetsAndSeekers {
             JPanel buttPanel = new JPanel(new BorderLayout());
             buttPanel.add(delete, BorderLayout.WEST);
             buttPanel.add(cancel, BorderLayout.CENTER);
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+            cancel.setEnabled(false);
+
             buttPanel.add(ok, BorderLayout.EAST);
             jpBasic.addItem(buttPanel);
             outerP.add(jpBasic);

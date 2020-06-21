@@ -1,25 +1,20 @@
 package GeneralElements;
 
 import GeneralElements.Display.ItemGraphic;
-import GeneralElements.Display.PathShape;
 import collection.RelOrbitGroup;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 import mvUtils.display.InputControl;
 import mvUtils.display.MultiPairColPanel;
-import mvUtils.display.Selectable;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
-import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
-import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -34,7 +29,7 @@ public interface ItemInterface {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
         LIVE("Live"),
-        VMRL("from VMRL file");
+        VRML("from VMRL file");
 
         private final String typeName;
 
@@ -101,6 +96,8 @@ public interface ItemInterface {
         }
     }
 
+    double getRadius();
+
     void initConnections();
 
     void setVisible(boolean visible);
@@ -145,7 +142,7 @@ public interface ItemInterface {
                 case SURFACE:
                     theItem = new Surface(theParent, theName);
                     break;
-                case VMRL:
+                case VRML:
                     theItem = new Item(theName, 10000, "VRML\\rocket.wrl", theParent);
                     break;
                 case SPHERE:
@@ -213,7 +210,7 @@ public interface ItemInterface {
                         theItem = new Surface(xmlStr, parent);
                         done = true;
                         break;
-                    case VMRL:
+                    case VRML:
                     case SPHERE:
                         theItem = new Item(xmlStr, parent);
                         done = true;

@@ -1,6 +1,5 @@
 package GeneralElements.Display;
 
-import GeneralElements.Item;
 import GeneralElements.ItemInterface;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.vrml97.VrmlLoader;
@@ -8,7 +7,6 @@ import com.sun.j3d.loaders.vrml97.VrmlLoader;
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -33,7 +31,7 @@ public class ItemDisplay extends Group {
                     valid = true;
                 }
                 break;
-            case VMRL:
+            case VRML:
 //                BranchGroup grp = loadVrmlFile(theItem.vrmlFile);
                 BranchGroup grp = new ItemVRML(theItem);
                 addChild(grp);

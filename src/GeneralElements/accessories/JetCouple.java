@@ -148,6 +148,10 @@ public class JetCouple extends Jet {
             JPanel buttPanel = new JPanel(new BorderLayout());
             buttPanel.add(delete, BorderLayout.WEST);
             buttPanel.add(cancel, BorderLayout.CENTER);
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+            cancel.setEnabled(false);
+
             buttPanel.add(ok, BorderLayout.EAST);
             jpBasic.addItem(buttPanel);
             outerP.add(jpBasic);

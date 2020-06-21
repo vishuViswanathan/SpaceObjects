@@ -106,6 +106,7 @@ public class OneTimeStep {
     public double startTime;
     public double duration;
     public double endTime;
+    double distanceFromObject;
     public boolean isON = false;
     boolean repeat = false;
 
@@ -147,7 +148,7 @@ public class OneTimeStep {
 
     double nowDistance = -1;
     double lastDistance = -1;
-    boolean inOjectRelatedAction = false;
+    boolean inObjectRelatedAction = false;
     double distanceLimit = 1e100;
     double minDistance = distanceLimit;
     boolean distanceDecreasing = false;
@@ -156,11 +157,11 @@ public class OneTimeStep {
 
     public boolean isTimeForAction(double nowT) {
         boolean retVal = false;
-        if (inOjectRelatedAction)
+        if (inObjectRelatedAction)
             retVal = true;
         else {
             nowDistance = forElement.getParentItem().getPos().distance(alignToObject.getPos());
-            if (!inOjectRelatedAction) {
+            if (!inObjectRelatedAction) {
                 switch (stepAction) {
                     case FIREATNEXTPERIAPSIS:
                         if (nowDistance < minDistance) {
@@ -172,7 +173,7 @@ public class OneTimeStep {
                         if (distanceDecreasing && nowDistance > minDistance) {
                             startTime = nowT;
                             endTime = nowT + duration;
-                            inOjectRelatedAction = true;
+                            inObjectRelatedAction = true;
                             retVal = true;
                         }
                         break;
@@ -186,8 +187,28 @@ public class OneTimeStep {
                         if (distanceIncreasing && nowDistance < maxDistance) {
                             startTime = nowT;
                             endTime = nowT + duration;
-                            inOjectRelatedAction = true;
+                            inObjectRelatedAction = true;
                             retVal = true;
+                        }
+                        break;
+                    case FIREWHENATDISTANCEMINUS:
+                        if (lastDistance > distanceFromObject ) {
+                            if (nowDistance < distanceFromObject) {
+                                startTime = nowT;
+                                endTime = nowT + duration;
+                                inObjectRelatedAction = true;
+                                retVal = true;
+                            }
+                        }
+                        break;
+                    case FIREWHENATDISTANCEPLUS:
+                        if ((lastDistance > 0)&& lastDistance < distanceFromObject ) {
+                            if (nowDistance > distanceFromObject) {
+                                startTime = nowT;
+                                endTime = nowT + duration;
+                                inObjectRelatedAction = true;
+                                retVal = true;
+                            }
                         }
                         break;
                 }
@@ -272,6 +293,7 @@ public class OneTimeStep {
         Item.EditResponse response;
         JComboBox<StepAction> cbStepAction;
         JComboBox<ItemInterface> cbAlignToObject;
+        NumberTextField ntDistanceFromObject;
         NumberTextField ntStartTime;
         NumberTextField ntDuration;
         JButton ok = new JButton("OK");
@@ -294,17 +316,21 @@ public class OneTimeStep {
             if (alignToObject != null)
                 cbAlignToObject.setSelectedItem(alignToObject);
             cbAlignToObject.setEnabled(false);
+            ntDistanceFromObject = new NumberTextField(inpC, distanceFromObject, 6, false,
+                    0, Double.MAX_VALUE, "#,###E00", "Distance From Object in m");
+            ntDistanceFromObject.setEnabled(false);
             cbStepAction.addActionListener(e -> {
                 StepAction action = (StepAction)cbStepAction.getSelectedItem();
-                if (action == StepAction.ALIGNTOANOBJECT || action == StepAction.ALIGNTOVELOCITY ||
-                        action == StepAction.ALIGNCOUNTERTOVELOCITY ||
-                        action == StepAction.FIREATNEXTPERIAPSIS ||
-                        action == StepAction.FIREATNEXTAPOIAPSIS ||
-                        action == StepAction.FIREWHENATDISTANCEMINUS ||
-                        action == StepAction.FIREWHENATDISTANCEPLUS)
+                if (requiresReferenceObject(action))
                     cbAlignToObject.setEnabled(true);
                 else
                     cbAlignToObject.setEnabled(false);
+                if (requiresDistance(action))
+                    ntDistanceFromObject.setEnabled(true);
+                else {
+                    ntDistanceFromObject.setEnabled(false);
+                    ntDistanceFromObject.setData(0);
+                }
             });
             cbStepAction.setSelectedItem(stepAction);
             ntStartTime = new NumberTextField(inpC, startTime, 6, false, 0, Double.MAX_VALUE, "#,##0.000", "Start Time (s)");
@@ -312,7 +338,9 @@ public class OneTimeStep {
             JPanel outerP = new JPanel(new BorderLayout());
             MultiPairColPanel jpBasic = new MultiPairColPanel("Time Plan Step Details");
             jpBasic.addItemPair("Select Action", cbStepAction);
+            jpBasic.addItem("(Velocity is relative to Object below)");
             jpBasic.addItemPair("Related Object", cbAlignToObject);
+            jpBasic.addItemPair(ntDistanceFromObject);
             jpBasic.addItem("(for Object, Vel, Apsis, Distance selections)");
             jpBasic.addItemPair(ntStartTime);
             jpBasic.addItemPair(ntDuration);
@@ -320,6 +348,10 @@ public class OneTimeStep {
             JPanel buttPanel = new JPanel(new BorderLayout());
             buttPanel.add(delete, BorderLayout.WEST);
             buttPanel.add(cancel, BorderLayout.CENTER);
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+            cancel.setEnabled(false);
+
             buttPanel.add(ok, BorderLayout.EAST);
             jpBasic.addItem(buttPanel);
             outerP.add(jpBasic);
@@ -361,15 +393,29 @@ public class OneTimeStep {
                     if (ntStartTime.dataOK()) {
                         stepAction = (StepAction)cbStepAction.getSelectedItem();
                         if (stepAction == StepAction.TURNBYANGLE) {
-                            ItemMovementsApp.showMessage("NOT ready for " + StepAction.TURNBYANGLE + " yet!");
+                            ItemMovementsApp.showError("NOT ready for " + StepAction.TURNBYANGLE + " yet!",
+                                    cbStepAction);
                         }
                         else {
                             startTime = ntStartTime.getData();
                             endTime = startTime + duration;
                             alignToObject = (Item)cbAlignToObject.getSelectedItem();
-                            if (alignToObject != null)
-                                alignToName = alignToObject.getName();
                             retVal = true;
+                            if (alignToObject != null) {
+                                alignToName = alignToObject.getName();
+                                if (requiresDistance(stepAction)) {
+                                    distanceFromObject = ntDistanceFromObject.getData();
+                                    double minDistance =
+                                            alignToObject.getRadius() + forElement.getParentItem().getRadius();
+                                    if (distanceFromObject < minDistance) {
+                                        ItemMovementsApp.showError("Distance too small considering Object sizes!",
+                                                StepDetails.this);
+                                        retVal = false;
+                                    }
+                                }
+                                else
+                                    distanceFromObject = 0;
+                            }
                         }
                     }
                 }
@@ -384,8 +430,9 @@ public class OneTimeStep {
     public StringBuilder dataInXML() {
         return (new StringBuilder(XMLmv.putTag("stepAction", stepAction.toString())).
                 append(XMLmv.putTag("alignToName", alignToName)).
-                append(XMLmv.putTag("startTime", startTime))).
-                append(XMLmv.putTag("duration", (endTime - startTime)));
+                append(XMLmv.putTag("distanceFromObject", distanceFromObject)).
+                append(XMLmv.putTag("startTime", startTime)).
+                append(XMLmv.putTag("duration", (endTime - startTime))));
     }
 
     private boolean takeFromXML(String xmlStr) {
@@ -393,17 +440,18 @@ public class OneTimeStep {
         vp = XMLmv.getTag(xmlStr, "stepAction", 0);
         if (vp.val.length() > 0)
             stepAction = StepAction.getEnum(vp.val);
-        if (stepAction == StepAction.ALIGNTOANOBJECT || stepAction == StepAction.ALIGNTOVELOCITY ||
-                stepAction == StepAction.ALIGNCOUNTERTOVELOCITY ||
-                stepAction == StepAction.FIREATNEXTPERIAPSIS ||
-                stepAction == StepAction.FIREATNEXTAPOIAPSIS ||
-                stepAction == StepAction.FIREWHENATDISTANCEMINUS ||
-                stepAction == StepAction.FIREWHENATDISTANCEPLUS) {
+        if (requiresReferenceObject(stepAction)) {
             vp = XMLmv.getTag(xmlStr, "alignToName", vp.endPos);
             alignToName = vp.val;
         }
         else
             alignToName = "";
+        if (requiresDistance(stepAction)) {
+            vp = XMLmv.getTag(xmlStr, "distanceFromObject", vp.endPos);
+            distanceFromObject = Double.valueOf(vp.val);
+        }
+        else
+            distanceFromObject = 0;
         vp = XMLmv.getTag(xmlStr, "startTime", vp.endPos);
         double stTime = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "duration", vp.endPos);
@@ -418,6 +466,35 @@ public class OneTimeStep {
         isON = on;
         if (bulb != null)
             bulb.switchIt(on);
+        if (!on)
+            resetStep();
+    }
+
+    void resetStep() {
+        nowDistance = -1;
+        lastDistance = -1;
+        inObjectRelatedAction = false;
+        distanceLimit = Double.MAX_VALUE;
+        minDistance = distanceLimit;
+        distanceDecreasing = false;
+        maxDistance = -1;
+        distanceIncreasing = false;
+    }
+
+    boolean requiresReferenceObject(StepAction action) {
+        return ((action == StepAction.ALIGNTOANOBJECT)||
+                (action == StepAction.ALIGNTOVELOCITY) ||
+                (action == StepAction.ALIGNCOUNTERTOVELOCITY) ||
+                (action == StepAction.FIREWHENATDISTANCEMINUS) ||
+                (action == StepAction.FIREWHENATDISTANCEPLUS) ||
+                (action == StepAction.FIREATNEXTPERIAPSIS) ||
+                (action == StepAction.FIREATNEXTAPOIAPSIS));
+    }
+
+    boolean requiresDistance(StepAction action) {
+        return ((action == StepAction.FIREWHENATDISTANCEMINUS)||
+                (action == StepAction.FIREWHENATDISTANCEPLUS));
+
     }
 
     public JPanel controlPanel(String jetName, Component parent, InputControl inpC, ItemInterface[] otherItems, ActionListener activationListener) {
@@ -438,7 +515,7 @@ public class OneTimeStep {
         chBRepeat.addActionListener(e -> {repeat = chBRepeat.isSelected();});
         cbStepAction.addActionListener(e -> {
             StepAction action = (StepAction)cbStepAction.getSelectedItem();
-            if (action == StepAction.ALIGNTOANOBJECT)
+            if (requiresReferenceObject(action))
                 cbAlignToObject.setEnabled(true);
             else
                 cbAlignToObject.setEnabled(false);
@@ -450,7 +527,7 @@ public class OneTimeStep {
         JButton onButton = new JButton("Activate");
         onButton.addActionListener(e -> {
             stepAction = (StepAction)cbStepAction.getSelectedItem();
-            if (stepAction == StepAction.ALIGNTOANOBJECT)
+            if (requiresReferenceObject(stepAction))
                 alignToObject = (Item)cbAlignToObject.getSelectedItem();
             else if (stepAction == StepAction.TURNBYANGLE)
                 turnByAngle.set(tpTurnByAngle.getTuple3d());

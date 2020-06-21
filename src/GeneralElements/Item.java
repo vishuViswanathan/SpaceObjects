@@ -17,7 +17,6 @@ import mvUtils.physics.Vector3dMV;
 import time.timePlan.JetTimeController;
 
 import javax.media.j3d.Group;
-import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
 import javax.swing.*;
 import javax.vecmath.AxisAngle4d;
@@ -84,7 +83,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     public Item(String name, double mass, String vrmlFile, Window parent) {
         super(name, mass, 1, Color.green, parent);
-        itemType = ItemType.VMRL;
+        itemType = ItemType.VRML;
         this.vrmlFile = vrmlFile;
         jetController = new JetTimeController(this);
         setRadioButtons();
@@ -126,6 +125,11 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     public Vector3d getVelocity() {
         return status.velocity;
+    }
+
+    @Override
+    public double getRadius() {
+        return radius;
     }
 
     public void initConnections() {
@@ -247,7 +251,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
                 case SURFACE:
                     theItem = new Surface(theParent, theName);
                     break;
-                case VMRL:
+                case VRML:
                     theItem = new Item(theName, 10000, "VRML\\rocket.wrl", theParent);
                     break;
                 case SPHERE:
@@ -315,7 +319,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
                         theItem = new Surface(xmlStr, parent);
                         done = true;
                         break;
-                    case VMRL:
+                    case VRML:
                     case SPHERE:
                         theItem = new Item(xmlStr, parent);
                         done = true;
@@ -540,7 +544,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
             MultiPairColPanel jp = new MultiPairColPanel("Data of Item");
             tfItemName = new JTextField(name, 10);
             jp.addItemPair("Object Name", tfItemName);
-            if (itemType == ItemType.VMRL) {
+            if (itemType == ItemType.VRML) {
                 tfVRMLflePath = new JTextField(vrmlFile, 30);
                 jp.addItemPair("VRML File Path", tfVRMLflePath);
             } else {
@@ -570,11 +574,11 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
             }
             ntItemDia = new NumberTextField(inpC, dia, 6, false, 1e-20, 1e20, "##0.#####E00", "Dia in m");
             jp.addItemPair(ntItemDia);
-            if (itemType == ItemType.VMRL)
+            if (itemType == ItemType.VRML)
                 jp.addItem("(Dia is for collision check)");
             ntItemMass = new NumberTextField(inpC, mass, 8, false, 1e-30, 1e40, "##0.#####E00", "Mass in kg");
             jp.addItemPair(ntItemMass);
-            if (itemType == ItemType.VMRL) {
+            if (itemType == ItemType.VRML) {
                 tpMI = new TuplePanel(inpC, new Vector3d(mI), 6, 1e-20, 1e20, "#,###.000", "Mass Moment of Inertia (kg.m2)");
                 jp.addItemPair(tpMI.getTitle(), tpMI);
             }
@@ -614,8 +618,10 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
             itemVelTuplePan = new TuplePanel(inpC, status.velocity, 8, -1e20, 1e20, "##0.#####E00", "Velocity im m/s");
             jpVel.add(itemVelTuplePan, BorderLayout.CENTER);
             jp.addItemPair("Velocity in m/s", jpVel);
-            jp.addBlank();
-            jp.addItemPair("Jets", jbManageJets);
+            if (itemType == ItemType.VRML) {
+                jp.addBlank();
+                jp.addItemPair("Jets", jbManageJets);
+            }
             itemRelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -710,7 +716,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
                             setMomentsOfInertia(commonMI);
                         }
                         dia = ntItemDia.getData();
-                        if (itemType == ItemType.VMRL) {
+                        if (itemType == ItemType.VRML) {
                             vrmlFile = tfVRMLflePath.getText().trim();
                             Vector3d mIxyz = new Vector3d(tpMI.getTuple3d());
                             setMomentsOfInertia(mIxyz.x, mIxyz.y, mIxyz.z);
@@ -1144,7 +1150,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = defaultDataInXML();
-        if (itemType == ItemType.VMRL)
+        if (itemType == ItemType.VRML)
             xmlStr.append(XMLmv.putTag("vrmlFile", vrmlFile));
         else if (itemType == ItemType.SPHERE)
             xmlStr.append(XMLmv.putTag("imageName", imageName));
@@ -1174,7 +1180,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         vp = XMLmv.getTag(xmlStr, "itemType", vp.endPos);
         if (vp.val.length() > 0)
             itemType = ItemType.getEnum(vp.val);
-        if (itemType == ItemType.VMRL) {
+        if (itemType == ItemType.VRML) {
             vp = XMLmv.getTag(xmlStr, "vrmlFile", vp.endPos);
             vrmlFile = vp.val;
         }
