@@ -48,7 +48,11 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     JButton jbItemData;
     JButton jbItemEdit;
     JComboBox<Item> cbItems;
-
+    View theView;
+    double defaultFieldOfView = Math.PI / 4;
+    double maxFieldOfView = defaultFieldOfView * 1.8;
+    double minFieldOfView = 3.0 / 180 * Math.PI;
+    double fieldOFViewStep = 1.0 / 180 * Math.PI;
 
     LocalViewFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
                    MotionDisplay motionDisplay) {
@@ -97,23 +101,6 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         Dimension minSize = new Dimension(300, 200);
         setMinimumSize(minSize);
-//        addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowClosing(WindowEvent e) {
-//                if (controlPanel != null)
-//                    controlPanel.setVisible(false);
-//            }
-//            @Override
-//            public void windowIconified(WindowEvent e) {
-////                System.out.println("Iconified");
-//                super.windowIconified(e);
-//                lastItemWithLocalPlatform.detachPlatform();
-//                System.out.println("Iconified and plartform is detatched ");
-////                bIconified = true;
-//            }
-//        });
-
-//        this.setSize(1100, 600);
     }
 
     public void showCommonMenu(boolean show) {
@@ -124,6 +111,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         pack();
     }
 
+    boolean firsTime = true;
+
     public void addLocalViewingPlatform() {
         // create a Viewer and attach to its canvas
         // a Canvas3D can only be attached to a single Viewer
@@ -131,6 +120,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localViewCanvas = new Canvas3D(config);
         localViewCanvas.addMouseWheelListener(this);
         localViewCanvas.addMouseListener(this);
+//        localViewCanvas.addKeyListener(new KeyboardListener());
         Viewer viewer = new Viewer(localViewCanvas);
         if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
             viewer.getView().setBackClipDistance(10000);
@@ -163,6 +153,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localViewPanel.add(jlItemName, BorderLayout.NORTH);
         localViewPanel.add(localViewCanvas, BorderLayout.CENTER);
         localViewPanel.add(jpViewDistance, BorderLayout.SOUTH);
+        theView = localViewCanvas.getView();
         localViewPanel.updateUI();
     }
 
@@ -186,6 +177,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         defaultTr.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
         localVp.getViewPlatformTransform().setTransform(defaultTr);
 
+        theView.setFieldOfView(defaultFieldOfView);
         updateViewDistanceUI(1.0);
         setTitle(item.getName());
     }
@@ -250,6 +242,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localVp.getViewPlatformTransform().setTransform(localVpt);
         updateViewDistanceUI(1.0);
         setTitle(item.getName());
+        theView.setFieldOfView(defaultFieldOfView);
+//        canvas.addKeyListener(new KeyboardListener());
 //        showLocalViewFrame(item.name);
     }
 
@@ -421,14 +415,37 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int movement = e.getUnitsToScroll();
-        double factor = (movement > 0) ? 1.1: 1/1.1;
-        Transform3D vpTr = new Transform3D();
-        localVp.getViewPlatformTransform().getTransform(vpTr);
-        Vector3d trans = new Vector3d();
-        vpTr.get(trans);
-        trans.scale(factor);
-        vpTr.setTranslation(trans);
-        localVp.getViewPlatformTransform().setTransform(vpTr);
-        updateViewDistanceUI(factor);
-     }
+        if (e.isShiftDown()) {
+            double newFieldOfView = theView.getFieldOfView();
+            if (movement > 0) {
+                newFieldOfView += fieldOFViewStep;
+                if (newFieldOfView > maxFieldOfView)
+                    newFieldOfView = maxFieldOfView;
+//                debug("newFieldOfView " + newFieldOfView + " fieldOFViewStep " + fieldOFViewStep);
+            }
+            else {
+                newFieldOfView -= fieldOFViewStep;
+                if (newFieldOfView < minFieldOfView)
+                    newFieldOfView = minFieldOfView;
+            }
+            theView.setFieldOfView(newFieldOfView);
+//            debug("fieldOfView " + theView.getFieldOfView());
+        }
+        else {
+            double factor = (movement > 0) ? 1.2 : 1 / 1.2;
+            Transform3D vpTr = new Transform3D();
+            localVp.getViewPlatformTransform().getTransform(vpTr);
+            Vector3d trans = new Vector3d();
+            vpTr.get(trans);
+            trans.scale(factor);
+            vpTr.setTranslation(trans);
+            localVp.getViewPlatformTransform().setTransform(vpTr);
+            updateViewDistanceUI(factor);
+        }
+
+    }
+
+    void debug(String msg) {
+        ItemMovementsApp.debug("LocalViewFrame: " + msg);
+    }
 }

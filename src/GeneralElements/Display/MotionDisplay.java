@@ -52,6 +52,11 @@ public class MotionDisplay  extends JFrame
     ItemMovementsApp controller;
     Vector<ItemGraphic> itemGraphics;
     RelOrbitGroup relOrbitGroup;
+//    View theView;
+//    double defaultFieldOfView = Math.PI / 4;
+//    double maxFieldOfView = defaultFieldOfView * 1.8;
+//    double minFieldOfView = 3.0 / 180 * Math.PI;
+//    double fieldOFViewStep = 1.0 / 180 * Math.PI;
 
 
     public MotionDisplay(ItemSpace space, double interval, double duration, ItemMovementsApp controller) throws Exception {
@@ -64,9 +69,9 @@ public class MotionDisplay  extends JFrame
         jbInit();
     }
 
-     SimpleUniverse univ;
+    SimpleUniverse univ;
 
-     void jbInit() throws Exception {
+    void jbInit() throws Exception {
         itemGraphics = new Vector<>();
         this.setSize(1100, 700);
         addWindowListener(new WindowAdapter() {
@@ -110,10 +115,12 @@ public class MotionDisplay  extends JFrame
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
         relOrbitGroup = new RelOrbitGroup();
-         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
-         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
-         relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
-     }
+        relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+        relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+        relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
+//        theView.setFieldOfView(defaultFieldOfView);
+//        theView = mainCanvas.getView();
+    }
 
     ViewDirection lastViewDirection = ViewDirection.ZMinus;
 
