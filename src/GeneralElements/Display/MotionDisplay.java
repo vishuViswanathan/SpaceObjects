@@ -52,11 +52,11 @@ public class MotionDisplay  extends JFrame
     ItemMovementsApp controller;
     Vector<ItemGraphic> itemGraphics;
     RelOrbitGroup relOrbitGroup;
-//    View theView;
-//    double defaultFieldOfView = Math.PI / 4;
-//    double maxFieldOfView = defaultFieldOfView * 1.8;
-//    double minFieldOfView = 3.0 / 180 * Math.PI;
-//    double fieldOFViewStep = 1.0 / 180 * Math.PI;
+    View theView;
+    double defaultFieldOfView = Math.PI / 4;
+    double maxFieldOfView = defaultFieldOfView * 1.8;
+    double minFieldOfView = 3.0 / 180 * Math.PI;
+    double fieldOFViewStep = 1.0 / 180 * Math.PI;
 
 
     public MotionDisplay(ItemSpace space, double interval, double duration, ItemMovementsApp controller) throws Exception {
@@ -106,6 +106,7 @@ public class MotionDisplay  extends JFrame
         TransformGroup vTg = mainViewPlatform.getViewPlatformTransform();
         addMouseAction(vTg);
         univ = new SimpleUniverse(mainViewPlatform, viewer );
+        theView = mainCanvas.getView();
         setViewAll(ViewDirection.ZMinus);
         addMouseAction(mainViewPlatform, mainCanvas);  //.getViewPlatformTransform());
         BranchGroup scene;
@@ -118,8 +119,7 @@ public class MotionDisplay  extends JFrame
         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
         relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
-//        theView.setFieldOfView(defaultFieldOfView);
-//        theView = mainCanvas.getView();
+        theView.setFieldOfView(defaultFieldOfView);
     }
 
     ViewDirection lastViewDirection = ViewDirection.ZMinus;
@@ -174,6 +174,7 @@ public class MotionDisplay  extends JFrame
         // TODO to adjust bounds for Orbit behaviour and Rotate Behaviour
 //        defVPFTransform.set(t3);
         lastViewDirection = direction;
+        theView.setFieldOfView(defaultFieldOfView);
     }
 
     void showCommonMenu(boolean show) {
@@ -200,6 +201,7 @@ public class MotionDisplay  extends JFrame
         mainVpOrbitBehavior = new OrbitBehavior(canvas);
         mainVpOrbitBehavior.setSchedulingBounds(bounds);
         vP.setViewPlatformBehavior(mainVpOrbitBehavior);
+//        mainVpOrbitBehavior.setRotationCenter(new Point3d(0, 0, 0));
     }
 
     void addMouseAction(TransformGroup tg) {
@@ -819,13 +821,31 @@ public class MotionDisplay  extends JFrame
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int movement = e.getUnitsToScroll();
-        double factor = (movement > 0) ? 1.2 : 1 / 1.2;
-        pickCanvas.setShapeLocation(e);
-        PickResult result = pickCanvas.pickClosest();
-        if (result != null) {
-//            debug("pick result = "+ result);
-            PickIntersection pInter = result.getIntersection(0);
-            zoom(factor, pInter.getPointCoordinatesVW());
+        if (e.isShiftDown()) {
+            double newFieldOfView = theView.getFieldOfView();
+            if (movement > 0) {
+                newFieldOfView += fieldOFViewStep;
+                if (newFieldOfView > maxFieldOfView)
+                    newFieldOfView = maxFieldOfView;
+//                debug("newFieldOfView " + newFieldOfView + " fieldOFViewStep " + fieldOFViewStep);
+            }
+            else {
+                newFieldOfView -= fieldOFViewStep;
+                if (newFieldOfView < minFieldOfView)
+                    newFieldOfView = minFieldOfView;
+            }
+            theView.setFieldOfView(newFieldOfView);
+//            debug("fieldOfView " + theView.getFieldOfView());
+        }
+        else {
+            double factor = (movement > 0) ? 1.2 : 1 / 1.2;
+            pickCanvas.setShapeLocation(e);
+            PickResult result = pickCanvas.pickClosest();
+            if (result != null) {
+                //            debug("pick result = "+ result);
+                PickIntersection pInter = result.getIntersection(0);
+                zoom(factor, pInter.getPointCoordinatesVW());
+            }
         }
     }
 
