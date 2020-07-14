@@ -1135,7 +1135,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
     }
 
     public StringBuilder statusStringForHistory(double posFactor, double velFactor) {
-        StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + mass + "," + gm + ",");
+        StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + mass + "," + gm + "," + dia + ",");
         csvStr.append(status.positionStringForCSV(posFactor) + ",");
         csvStr.append(status.velocityStringForCSV(velFactor) + ",");
         csvStr.append(status.accelerationStringForCSV(velFactor)); //.append("\n");
