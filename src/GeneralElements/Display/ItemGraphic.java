@@ -6,6 +6,7 @@ import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
 import collection.RelOrbitGroup;
 import collection.RelativePointArrayFIFO;
+import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
 import javax.media.j3d.*;
@@ -154,10 +155,20 @@ public class ItemGraphic {
             trgAxis.addChild(trgRotation);
             positionTrGrp.addChild(trgAxis);
             color3f = new Color3f(((DarkMatter)item).color);
+
+            PointArray pA = new PointArray(1, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
+            pA.setColor(0, color3f);
+            Appearance a = new Appearance();
+            a.setRenderingAttributes(itemAttrib);
+            Shape3D s = new Shape3D(pA, a);
+
+            positionTrGrp.addChild(s);
+
             PointArrayFIFO onePtArr, lastOne = null;
             orbitShapes = new PathShape[nShapeSets];
             for (int os = 0; os < orbitShapes.length; os++) {
-                onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1)) ? 1 : onceIn), GeometryArray.COORDINATES | GeometryArray.COLOR_3, color3f);
+                onePtArr = onePointArray(nPos, ((os == (orbitShapes.length - 1)) ? 1 : onceIn),
+                        GeometryArray.COORDINATES | GeometryArray.COLOR_3, color3f);
                 onePtArr.noteNextArray(lastOne);
                 orbitShapes[os] = new PathShape(planet, onePtArr, itemPathAttrib);
                 lastOne = onePtArr;

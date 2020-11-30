@@ -22,8 +22,8 @@ import java.util.Random;
 public class ContactSpreadWithChoice implements DefaultScheme {
     int boxXmin = -5, boxXmax = 5;
     int boxYmin = -5 , boxYmax = 5;
-    int boxZmin = 0, boxZmax = 0;
-    int nMoving = 50, nNotMoving = 0, nAffected = 1;
+    int boxZmin = -2, boxZmax = 2;
+    int nMoving = 50, nNotMoving = 0, nAffected = 10;
     double movingSpeedMin = 1, movingSpeedMax = 5;
     double affectedSpeedMin = 2, affectedSpeedMax = 2;
     double mass = 0.05;

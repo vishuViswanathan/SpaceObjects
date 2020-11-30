@@ -27,7 +27,8 @@ import java.util.Comparator;
 /**
  * Created by M Viswanathan on 04 Oct 2014
  */
-public class LocalViewFrame  extends JDialog implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class LocalViewFrame  extends JDialog implements MouseListener, MouseMotionListener,
+        MouseWheelListener, KeyListener {
     JPanel commonMenuPanel;
     MotionDisplay motionDisplay;
     ItemInterface itemInView;
@@ -35,6 +36,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     ViewingPlatform mainViewPlatform;
     JPanel localViewPanel;
     Canvas3D localViewCanvas;
+    Viewer viewer;
     ViewingPlatform localVp;
     OrbitBehavior localVpOrbitBehavior;
     ItemInterface lastItemWithLocalPlatform = null;
@@ -131,7 +133,9 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localViewCanvas = new Canvas3D(config);
         localViewCanvas.addMouseWheelListener(this);
         localViewCanvas.addMouseListener(this);
-        Viewer viewer = new Viewer(localViewCanvas);
+        localViewCanvas.addKeyListener(this);
+//        Viewer viewer = new Viewer(localViewCanvas);
+        viewer = new Viewer(localViewCanvas);
         if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
             viewer.getView().setBackClipDistance(10000);
             viewer.getView().setFrontClipDistance(0.00001);
@@ -199,14 +203,14 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         Point3d objPos = itemInView.getPos();
         Vector3dMV vec = new Vector3dMV(eye);
         vec.sub(objPos);
-        vec.normalize();
-        vec.scale(viewPosFromPlanet);
+//        vec.normalize();
+//        vec.scale(viewPosFromPlanet);
         Transform3D lookAt = new Transform3D();
         lookAt.lookAt(eye, objPos, new Vector3d(0, 0, 1));
         lookAt.invert();
         lookAt.setTranslation(vec);
         localVp.getViewPlatformTransform().setTransform(lookAt);
-//        viewPosFromPlanet = vec.length();
+        viewPosFromPlanet = vec.length();
         updateViewDistanceUI(1.0);
         setTitle(itemInView.getName() + " from " + viewFrom);
     }
@@ -418,17 +422,50 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
 
     }
 
+    boolean shiftKeyPressed = false;
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int movement = e.getUnitsToScroll();
-        double factor = (movement > 0) ? 1.1: 1/1.1;
-        Transform3D vpTr = new Transform3D();
-        localVp.getViewPlatformTransform().getTransform(vpTr);
-        Vector3d trans = new Vector3d();
-        vpTr.get(trans);
-        trans.scale(factor);
-        vpTr.setTranslation(trans);
-        localVp.getViewPlatformTransform().setTransform(vpTr);
-        updateViewDistanceUI(factor);
-     }
+        double factor = (movement > 0) ? 1.1 : 1 / 1.1;
+        if (shiftKeyPressed) {
+            View v = viewer.getView();
+            double fieldOfView = v.getFieldOfView();
+//            System.out.println("fieldOfView start: " + fieldOfView);
+            fieldOfView *= factor;
+            fieldOfView = Math.min(Math.max(fieldOfView, Math.PI/20), Math.PI/4);
+            v.setFieldOfView(fieldOfView);
+//            System.out.println("mouse wheel action with ShiftKey, fow: " + fieldOfView);
+        } else {
+            Transform3D vpTr = new Transform3D();
+            localVp.getViewPlatformTransform().getTransform(vpTr);
+            Vector3d trans = new Vector3d();
+            vpTr.get(trans);
+            trans.scale(factor);
+            vpTr.setTranslation(trans);
+            localVp.getViewPlatformTransform().setTransform(vpTr);
+            updateViewDistanceUI(factor);
+//            System.out.println("mouse wheel action");
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SHIFT && !shiftKeyPressed) {
+            shiftKeyPressed = true;
+            System.out.println("Shift Key down");
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+            shiftKeyPressed = false;
+            System.out.println("Shift Key released");
+        }
+    }
 }

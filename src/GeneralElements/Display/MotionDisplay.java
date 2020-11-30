@@ -110,10 +110,10 @@ public class MotionDisplay  extends JFrame
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
         relOrbitGroup = new RelOrbitGroup();
-         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
-         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
-         relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
-     }
+        relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+        relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+        relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
+    }
 
     ViewDirection lastViewDirection = ViewDirection.ZMinus;
 
@@ -632,7 +632,7 @@ public class MotionDisplay  extends JFrame
         pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
         pickCanvas.setTolerance(4.0f);
         canvas.addMouseListener(this);
-        canvas.addMouseWheelListener(this);
+//        canvas.addMouseWheelListener(this);
     }
 
     Shape3D oneAxis(int axis, double length, Color color) {
@@ -709,9 +709,6 @@ public class MotionDisplay  extends JFrame
         double distance = dist.length();
         vpTransBehavior.setFactor(distance / 100);
     }
-
-
-
 
     boolean inMouseClick = false;
 
