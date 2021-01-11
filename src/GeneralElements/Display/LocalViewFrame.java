@@ -41,7 +41,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     OrbitBehavior localVpOrbitBehavior;
     ItemInterface lastItemWithLocalPlatform = null;
     NumberLabel nlViewDistance;
-    JPanel jpViewDistance;
+    NumberLabel nlFieldOfView;
+    JPanel jpDistanceAndFOW;
     JLabel jlItemName;
     double viewPosFromPlanet;
     boolean bPlatformWasAttached = false;
@@ -159,14 +160,22 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localVp.setViewPlatformBehavior(localVpOrbitBehavior);
 
         localVpOrbitBehavior.setRotationCenter(new Point3d(0, 0, 0));  //-viewPosFromPlanet));
-        nlViewDistance = new NumberLabel(0, 150, "#,###");
-        jpViewDistance = new JPanel();
-        jpViewDistance.add(new JLabel("View Distance (km):"));
-        jpViewDistance.add(nlViewDistance);
+        nlViewDistance = new NumberLabel(0, 100, "#,###");
+        nlFieldOfView = new NumberLabel(0, 60, "###");
+        jpDistanceAndFOW = new JPanel(new GridLayout());
+        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+            jpDistanceAndFOW.add(new JLabel("View Distance(km):"));
+        else
+            jpDistanceAndFOW.add(new JLabel("View Distance(m):"));
+        jpDistanceAndFOW.add(nlViewDistance);
+        jpDistanceAndFOW.add(new JLabel());
+        jpDistanceAndFOW.add(new JLabel());
+        jpDistanceAndFOW.add(new JLabel("Field of View(deg):"));
+        jpDistanceAndFOW.add(nlFieldOfView);
         jlItemName = new JLabel("Selected Item");
         localViewPanel.add(jlItemName, BorderLayout.NORTH);
         localViewPanel.add(localViewCanvas, BorderLayout.CENTER);
-        localViewPanel.add(jpViewDistance, BorderLayout.SOUTH);
+        localViewPanel.add(jpDistanceAndFOW, BorderLayout.SOUTH);
         localViewPanel.updateUI();
     }
 
@@ -191,6 +200,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localVp.getViewPlatformTransform().setTransform(defaultTr);
 
         updateViewDistanceUI(1.0);
+        resetFieldOfView();
         setTitle(item.getName());
     }
 
@@ -212,6 +222,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localVp.getViewPlatformTransform().setTransform(lookAt);
         viewPosFromPlanet = vec.length();
         updateViewDistanceUI(1.0);
+        resetFieldOfView();
         setTitle(itemInView.getName() + " from " + viewFrom);
     }
 
@@ -274,7 +285,29 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
 
     void updateViewDistanceUI(double factor) {
         viewPosFromPlanet *= factor;
-        nlViewDistance.setData(viewPosFromPlanet / 1000);
+        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
+            nlViewDistance.setData(viewPosFromPlanet / 1000);
+        else
+            nlViewDistance.setData(viewPosFromPlanet);
+    }
+
+    void resetFieldOfView() {
+        setFieldOfView(0);
+    }
+
+    void setFieldOfView(double factor) {
+        double fow = fieldOfViewMax;
+        if (factor > 0) {
+            fow = viewer.getView().getFieldOfView();
+            fow *= factor;
+            fow = Math.min(Math.max(fow, fieldOfViewMin), fieldOfViewMax);
+        }
+        viewer.getView().setFieldOfView(fow);
+        updateFieldOfViewUI(fow);
+    }
+
+    void updateFieldOfViewUI(double fieldOfView) {
+        nlFieldOfView.setData(Math.toDegrees(fieldOfView));
     }
 
     JPanel menuPanel() {
@@ -423,18 +456,15 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     }
 
     boolean shiftKeyPressed = false;
+    double fieldOfViewMin = Math.PI/180;
+    double fieldOfViewMax = Math.PI/4;
+
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int movement = e.getUnitsToScroll();
         double factor = (movement > 0) ? 1.1 : 1 / 1.1;
         if (shiftKeyPressed) {
-            View v = viewer.getView();
-            double fieldOfView = v.getFieldOfView();
-//            System.out.println("fieldOfView start: " + fieldOfView);
-            fieldOfView *= factor;
-            fieldOfView = Math.min(Math.max(fieldOfView, Math.PI/20), Math.PI/4);
-            v.setFieldOfView(fieldOfView);
-//            System.out.println("mouse wheel action with ShiftKey, fow: " + fieldOfView);
+            setFieldOfView(factor);
         } else {
             Transform3D vpTr = new Transform3D();
             localVp.getViewPlatformTransform().getTransform(vpTr);
