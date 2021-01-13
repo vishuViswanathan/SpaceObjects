@@ -19,6 +19,7 @@ import static javax.media.j3d.Material.ALLOW_COMPONENT_WRITE;
  */
 public class ItemSphere extends Sphere implements AttributeSetter {
     public ItemInterface planet;
+    Material blueMat;
     Appearance ap;
     public boolean valid = true;
     public ItemSphere(ItemInterface object) {
@@ -43,17 +44,18 @@ public class ItemSphere extends Sphere implements AttributeSetter {
             }
 
 //            Color3f emissC = new Color3f(planet.color);
-            Color3f emissC = new Color3f(((DarkMatter)planet).color); //0.5f, 0.5f, 0.5f);
+//            Color3f emissC = new Color3f(((DarkMatter)planet).color); //0.5f, 0.5f, 0.5f);
+            Color3f emissC = new Color3f(0.4f, 0.4f, 0.4f);
 //            Color3f diffuse = new Color3f(1.0f, 1.0f, 1.0f);
             Color3f diffuse = new Color3f(((DarkMatter)planet).color);
 //            Color3f ambient = new Color3f(1.0f, 1.0f, 1.0f);
-            Color3f ambient = new Color3f(0.001f, 0.00f, 0.00f);
+            Color3f ambient = new Color3f(0.2f, 0.2f, 0.2f);
             Color3f specular = new Color3f(0.9f, 0.9f, 0.9f);
 
-            Material blueMat = new Material(ambient, emissC, diffuse, specular, 1f);
+            blueMat = new Material(ambient, emissC, diffuse, specular, 0.5f);
             // sets ambient, emissive, diffuse, specular, shininess
             blueMat.setLightingEnable(true);
-
+            // if not set emissC high
             //           Appearance blueApp = new Appearance();
             blueMat.setCapability(ALLOW_COMPONENT_WRITE);
             ap.setMaterial(blueMat);
@@ -62,6 +64,14 @@ public class ItemSphere extends Sphere implements AttributeSetter {
         } catch (Exception e) {
             valid = false;
         }
+    }
+
+    public void setEnableLight(boolean ena) {
+        blueMat.setLightingEnable(ena);
+        if (ena)
+            blueMat.setEmissiveColor(new Color3f(0.4f, 0.4f, 0.4f));
+        else
+            blueMat.setEmissiveColor(new Color3f(1.0f, 1.0f, 1.0f));
     }
 
     public ItemInterface getItem() {

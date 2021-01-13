@@ -259,7 +259,7 @@ public class ItemGraphic {
     public PointLight getLightIfEnabled() {
         PointLight light = null;
         if (item.isLightSrc()) {
-            light = new PointLight(true, new Color3f(1.0f, 1.0f, 1.0f), new Point3f(0, 0, 0), new Point3f(1, 0, 0));
+            light = new PointLight(true, new Color3f(0.5f, 0.5f, 0.5f), new Point3f(0, 0, 0), new Point3f(1, 0, 0));
             light.setCapability(PointLight.ALLOW_POSITION_WRITE);
 //            light.setAttenuation(1f, 1e-15f, 0f);
             BoundingSphere bounds =
@@ -337,5 +337,9 @@ public class ItemGraphic {
 
     public void updateColor() {
         planet.updateColor();
+    }
+
+    public void setEnableLight(boolean ena) {
+        planet.setEnableLight(ena);
     }
 }

@@ -241,7 +241,9 @@ public class ItemSpace {
     JToggleButton cloneItem;
     JButton buttAddLink;
     JRadioButton rbInterItemCollision;
+    JRadioButton rbEnableLight;
     public boolean bInterItemCollisionOn = false;
+    public boolean bEnableLight = false;
     ButtonListener bl;
     ItemTable itemTable;
     LinkTable linkTable;
@@ -259,7 +261,9 @@ public class ItemSpace {
         if (bl == null)
             bl = new ButtonListener();
         buttAddItem.addActionListener(bl);
-        rbInterItemCollision = new JRadioButton("Collision Enabled");
+        rbEnableLight = new JRadioButton("Enable Light");
+        rbEnableLight.addActionListener(bl);
+        rbInterItemCollision = new JRadioButton("Enable Collisions");
         rbInterItemCollision.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
@@ -279,6 +283,8 @@ public class ItemSpace {
         JPanel buttPan = new JPanel(new GridLayout(1, 2));
         buttPan.add(buttAddItem);
         buttPan.add(cloneItem);
+        buttPan.add(new JPanel()); // a spacer
+        buttPan.add(rbEnableLight);
         buttPan.add(rbInterItemCollision);
         return buttPan;
     }
@@ -339,6 +345,11 @@ public class ItemSpace {
         rbInterItemCollision.setSelected(ena);
     }
 
+    public void setEnableLight() {
+        for (ItemInterface i: allItems)
+            i.setEnableLight(bEnableLight);
+    }
+
 
     public void enableButtons(boolean ena) {
 //        buttSaveInf.setEnabled(ena);
@@ -353,7 +364,7 @@ public class ItemSpace {
     JComponent influenceListPanel() {
         fillTempInfList();
         buttAddLink = new JButton("Add New Link");
-        rbItemGravity = new JRadioButton("Inter-Item Gravity Enabled");
+        rbItemGravity = new JRadioButton("Enable Inter-Item Gravity");
         rbItemGravity.setSelected(bItemGravityOn);
         if (bl == null)
             bl = new ButtonListener();
@@ -432,6 +443,10 @@ public class ItemSpace {
             }
             else if (src == rbInterItemCollision) {
                 bInterItemCollisionOn = rbInterItemCollision.isSelected();
+            }
+            else if (src == rbEnableLight) {
+                bEnableLight = rbEnableLight.isSelected();
+                setEnableLight();
             }
         }
     }

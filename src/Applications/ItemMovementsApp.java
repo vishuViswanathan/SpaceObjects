@@ -476,6 +476,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
         continueIt = false;
         if (space.noteItemData()) {
             if (showOrbitMap()) {
+                space.setEnableLight();
                 runIt = true;
                 SpaceEvaluator.closePool();
                 evaluator = SpaceEvaluator.getSpaceEvaluator(this, true);

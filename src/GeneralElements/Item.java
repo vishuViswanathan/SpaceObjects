@@ -954,6 +954,12 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         return itemG;
     }
 
+    @Override
+    public void setEnableLight(boolean ena) {
+        if (itemG != null)
+            itemG.setEnableLight(ena);
+    }
+
 //    public void setItemDisplayAttribute(RenderingAttributes itemAttribute) {
 //        itemGraphic.get().setItemDisplayAttribute(itemAttribute);
 //    }

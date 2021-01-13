@@ -42,6 +42,11 @@ public class ItemDisplay extends Group {
         }
     }
 
+    public void setEnableLight(boolean ena) {
+        if (theDisplay != null)
+            theDisplay.setEnableLight(ena);
+    }
+
     public ItemInterface getItem() {
         return theItem;
     }

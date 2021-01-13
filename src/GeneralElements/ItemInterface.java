@@ -118,6 +118,8 @@ public interface ItemInterface {
 
     Vector3d getOneByMI();
 
+    void setEnableLight(boolean ena);
+
     void setJetController(JetTimeController jetController);
 
     void setMomentsOfInertia(double mIxx, double mIyy, double mIzz) throws Exception;
