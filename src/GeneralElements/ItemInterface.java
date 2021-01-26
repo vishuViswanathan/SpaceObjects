@@ -112,6 +112,12 @@ public interface ItemInterface {
 
     AxisAngle4d getSpinAxis();
 
+    Vector3dMV getDefaultAxisVector();
+
+    void setAxisAnd0e0N();
+
+    Vector3dMV getZeroLongiVector();
+
     boolean isLightSrc();
 
     Vector3d getMiAsVector();
@@ -318,6 +324,8 @@ public interface ItemInterface {
     void initAngularPosEtc(Vector3d angularPos, Vector3d angularVelocity);
 
     void setSpin(AxisAngle4d spinAxis, double spinPeriod);
+
+    void updateZeroEZeroNDirectionVector();
 
     ItemGraphic createItemGraphic(Group grp) throws Exception;
 

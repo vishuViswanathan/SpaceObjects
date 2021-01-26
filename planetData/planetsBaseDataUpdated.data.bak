@@ -63,7 +63,7 @@
 <imageName>earth.jpg</imageName>
 <GM>398600435436096.0</GM>
 <mass>5.973698900068729e+24</mass>
-<rotationPeriod>0.0</rotationPeriod>
+<rotationPeriod>23.4</rotationPeriod>
 <axisInclination>23.93</axisInclination>
 <isLightSrc>0</isLightSrc>
 <gmUpdated>1</gmUpdated>
@@ -195,8 +195,8 @@
 <imageName>moon.jpg</imageName>
 <GM>4902800066163.796</GM>
 <mass>7.347671692946511e+22</mass>
-<rotationPeriod>655.73</rotationPeriod>
-<axisInclination>6.68</axisInclination>
+<rotationPeriod>0</rotationPeriod>
+<axisInclination>0</axisInclination>
 <isLightSrc>0</isLightSrc>
 <gmUpdated>1</gmUpdated>
 </item17>

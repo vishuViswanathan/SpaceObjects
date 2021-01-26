@@ -6,14 +6,15 @@ import GeneralElements.ItemInterface;
 import collection.PointArrayFIFO;
 import collection.RelOrbitGroup;
 import collection.RelativePointArrayFIFO;
-import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.universe.ViewingPlatform;
+import mvUtils.physics.Vector3dMV;
 
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
+import java.awt.*;
 import java.util.LinkedList;
 
 /**
@@ -142,6 +143,22 @@ public class ItemGraphic {
                 axisTransform.set(item.getSpinAxis());
                 trgAxis.setTransform(axisTransform);
             }
+
+//            setAxisAnd0e0N(trgAxis);
+
+//            Vector3dMV defaultAxisVector = item.getDefaultAxisVector();
+//            defaultAxisVector.normalize();
+//            trgAxis.getTransform(axisTransform);
+//            double thetaY = Math.asin(defaultAxisVector.x);
+//            double thetaX = - Math.asin(defaultAxisVector.y / Math.cos(thetaY));
+//            Transform3D rotX = new Transform3D();
+//            rotX.rotX(thetaX);
+//            axisTransform.mul(rotX);
+//            Transform3D rotY = new Transform3D();
+//            rotY.rotY(thetaY);
+//            axisTransform.mul(rotY);
+//            trgAxis.setTransform(axisTransform);
+
             trgRotation = new TransformGroup();
             trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
             trgRotation.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -153,9 +170,12 @@ public class ItemGraphic {
                 trgRotation.addChild(l);
 
             trgAxis.addChild(trgRotation);
+            trgAxis.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
             positionTrGrp.addChild(trgAxis);
-            color3f = new Color3f(((DarkMatter)item).color);
 
+            trgRotation.addChild(getZeroEZeroNpointTrg());
+
+            color3f = new Color3f(((DarkMatter)item).color);
             PointArray pA = new PointArray(1, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
             pA.setColor(0, color3f);
             Appearance a = new Appearance();
@@ -181,6 +201,97 @@ public class ItemGraphic {
             ItemMovementsApp.showError("ItemGraphic.212: Facing some problem in creating graphics for '" + item.getName() + "'");
         return retVal;
     }
+
+    public void setAxisAnd0e0N() {
+        // see notes dated 20210114
+        Vector3dMV defaultAxisVector = new Vector3dMV(item.getDefaultAxisVector());
+        if (defaultAxisVector.lengthSquared() > 0) {
+//            debug(item.getName() + " zeroEzeroNPointUnitVector-Before :" + zeroEzeroNPointUnitVector());
+            defaultAxisVector.normalize();
+            Transform3D nowAxisTransform = new Transform3D();
+            trgAxis.getTransform(nowAxisTransform);
+            double thetaY = Math.asin(defaultAxisVector.x);
+            double thetaX = -Math.asin(defaultAxisVector.y / Math.cos(thetaY));
+            Transform3D rotX = new Transform3D();
+            rotX.rotX(thetaX);
+            nowAxisTransform.mul(rotX);
+            Transform3D rotY = new Transform3D();
+            rotY.rotY(thetaY);
+            nowAxisTransform.mul(rotY);
+            trgAxis.setTransform(nowAxisTransform);
+
+            // position zeroEZeroNPoint
+            Vector3dMV v1 = defaultAxisVector;
+            Vector3dMV v2 = new Vector3dMV(item.getZeroLongiVector());
+            if (v2.lengthSquared() > 0) {
+//                debug(item.getName() + " zeroEzeroNPointUnitVector-After1 :" + zeroEzeroNPointUnitVector());
+                v2.normalize(); // v2
+                Vector3dMV v3 = getGlobalCoordsOfZeroEzeroNPoint();
+                v3.sub(item.getPos());
+                v3.normalize();
+                Vector3dMV v4 = new Vector3dMV();
+                v4.cross(v1, v2);
+                v4.normalize();
+                if (v4.lengthSquared() > 0) {
+//                    debug("len v4:" + v4.length());
+                    double theta1 = Math.acos(v3.dot(v4));
+                    Vector3d v3crossv4 = new Vector3d();
+                    v3crossv4.cross(v3, v4);
+                    double theta2 = 0;
+                    if (v3crossv4.dot(v1) > 0)  // case I or II
+                        theta2 = theta1 - Math.PI / 2;
+                    else
+                        theta2 = -(theta1 + Math.PI / 2);
+//                    debug("theta1:" + theta1 + ", theta2:" + theta2);
+                    // need to rotate by theta2 about z axis
+                    Transform3D rotZ = new Transform3D();
+                    rotZ.rotZ(theta2);
+                    trgAxis.getTransform(nowAxisTransform);
+                    nowAxisTransform.mul(rotZ);
+                    trgAxis.setTransform(nowAxisTransform);
+                }
+//                debug(item.getName() +" - zeroEzeroNPointUnitVector-After2 :" + zeroEzeroNPointUnitVector());
+            }
+        }
+    }
+
+//    Vector3d zeroEzeroNPointUnitVector() {
+//        Vector3d vect = getGlobalCoordsOfZeroEzeroNPoint();
+//        vect.sub(item.getPos());
+//        vect.normalize();
+//        return vect;
+//    }
+
+    Shape3D zeroEzeroNPoint;
+
+    TransformGroup getZeroEZeroNpointTrg() {
+        TransformGroup trg = new TransformGroup();
+        Transform3D transform = new Transform3D();
+        Vector3d translation = new Vector3d(0, -item.getRadius(), 0);
+        transform.setTranslation(translation);
+        trg.setTransform(transform);
+        PointArray pA = new PointArray(1, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
+
+        pA.setColor(0, new Color3f(Color.yellow));
+        Appearance a = new Appearance();
+        a.setRenderingAttributes(itemAttrib);
+        zeroEzeroNPoint = new Shape3D(pA, a);
+        trg.addChild(zeroEzeroNPoint);
+        return trg;
+    }
+
+    public Vector3dMV getGlobalCoordsOfZeroEzeroNPoint() {
+        Transform3D transform = new Transform3D();
+        zeroEzeroNPoint.getLocalToVworld(transform);
+        Vector3dMV pos = new Vector3dMV();
+        transform.get(pos);
+        return pos;
+    }
+
+//    public void showZeroEzeroNPointPosition(String msg) {
+//        debug(msg + ": position of zeroEzeroNPoint: " +
+//                getGlobalCoordsOfZeroEzeroNPoint());
+//    }
 
     RelativePointArrayFIFO relativeOnePointArray(PointArrayFIFO onePointArray, ItemInterface itemRelativeTo) {
         PointArrayFIFO  fifoRelativeTo = itemRelativeTo.getItemGraphic().getPtArray();
@@ -341,5 +452,17 @@ public class ItemGraphic {
 
     public void setEnableLight(boolean ena) {
         planet.setEnableLight(ena);
+    }
+
+    void trace(String msg) {
+        ItemMovementsApp.log.trace(msg);
+    }
+
+    void debug(String msg) {
+        ItemMovementsApp.debug(msg);
+    }
+
+    void error(String msg) {
+        ItemMovementsApp.showError(msg);
     }
 }

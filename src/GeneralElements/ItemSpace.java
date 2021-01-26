@@ -262,6 +262,7 @@ public class ItemSpace {
             bl = new ButtonListener();
         buttAddItem.addActionListener(bl);
         rbEnableLight = new JRadioButton("Enable Light");
+        rbEnableLight.setSelected(bEnableLight);
         rbEnableLight.addActionListener(bl);
         rbInterItemCollision = new JRadioButton("Enable Collisions");
         rbInterItemCollision.addActionListener(bl);
@@ -343,6 +344,11 @@ public class ItemSpace {
     public void enableItemCollision(boolean ena) {
         bInterItemCollisionOn = ena;
         rbInterItemCollision.setSelected(ena);
+    }
+
+    public void enableLight(boolean ena) {
+        bEnableLight = ena;
+        rbEnableLight.setSelected(ena);
     }
 
     public void setEnableLight() {
@@ -479,6 +485,12 @@ public class ItemSpace {
         }
     }
 
+    public void setAxisAnd0e0NForItems() {
+        for (ItemInterface i:allItems)
+            i.setAxisAnd0e0N();
+    }
+
+
     public void initForces() {
         for (ItemInterface i: allItems)
             i.setLocalForces();
@@ -491,6 +503,18 @@ public class ItemSpace {
             i.setStartConditions(duration, nowT);
         for (ItemLink link:allItemLinks)
             link.setStartConditions(duration, nowT);
+    }
+
+    public boolean updateEndGraphic() {
+        boolean retVal = true;
+        try {
+            for (ItemInterface i : allItems)
+                i.updateOrbitAndPos();
+        }
+        catch (Exception e) {
+            retVal = false;
+        }
+        return retVal;
     }
 
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {

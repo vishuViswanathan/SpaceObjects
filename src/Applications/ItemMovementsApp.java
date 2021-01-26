@@ -145,6 +145,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
         proceedToItemList(false);
         space.enableItemGravity(false);
         space.enableItemCollision(false);
+        space.enableLight(false);
         bShowPaths = false;
         bShowLinks = true;
         bRealTime = true;
@@ -154,9 +155,9 @@ public class ItemMovementsApp extends Panel implements InputControl {
 
     }
 
-    public boolean useAllCPUs() {
-        return useAllCPUs;
-    }
+//    public boolean useAllCPUs() {
+//        return useAllCPUs;
+//    }
 
     void setTimingValues(double calculationStep, double refreshInterval, double duration, boolean bEnableItemGravity,
                          boolean bShowLinks, boolean bShowOrbit, boolean bRealTime)  {
@@ -391,6 +392,9 @@ public class ItemMovementsApp extends Panel implements InputControl {
     JComponent jcAstroDate;
     JComponent dataEntryPanel;
 
+    JComponent jcJDN;
+    JComponent jcDateTime;
+
     void proceedToItemList(boolean reDo) {
         // reDo can ber removed    REMOVE
         if (reDo) {
@@ -403,8 +407,8 @@ public class ItemMovementsApp extends Panel implements InputControl {
             mainF.remove(cbSpaceSize);
         if (spSize == SpaceSize.ASTRONOMICAL) {
             JPanel dateP = new JPanel(new BorderLayout());
-            dateP.add(dateAndJDN.panWithJDN(), BorderLayout.WEST);
-            dateP.add(dateAndJDN.panWithDateTime(), BorderLayout.EAST);
+            dateP.add((jcJDN = dateAndJDN.panWithJDN()), BorderLayout.WEST);
+            dateP.add((jcDateTime= dateAndJDN.panWithDateTime()), BorderLayout.EAST);
             jcAstroDate = dateP;
             mainF.add(jcAstroDate, BorderLayout.NORTH);
         }
@@ -417,12 +421,33 @@ public class ItemMovementsApp extends Panel implements InputControl {
         mainF.setVisible(true);
     }
 
+    void updateJCastroDate() {
+        if (spSize == SpaceSize.ASTRONOMICAL && nowDate != null) {
+            dateAndJDN = new DateAndJDN(nowDate.getJdN());
+            if (jcAstroDate != null) {
+                jcAstroDate.remove(jcJDN);
+                jcAstroDate.remove(jcDateTime);
+                jcAstroDate.add((jcJDN = dateAndJDN.panWithJDN()), BorderLayout.WEST);
+                jcAstroDate.add((jcDateTime = dateAndJDN.panWithDateTime()), BorderLayout.EAST);
+                jcAstroDate.updateUI();
+            }
+
+//                mainF.remove(jcAstroDate);
+//            JPanel dateP = new JPanel(new BorderLayout());
+//            dateP.add(dateAndJDN.panWithJDN(), BorderLayout.WEST);
+//            dateP.add(dateAndJDN.panWithDateTime(), BorderLayout.EAST);
+//            jcAstroDate = dateP;
+//            mainF.add(jcAstroDate, BorderLayout.NORTH);
+//            mainF.pack();
+        }
+    }
+
     JPanel buttonPanel() {
         rbDuration = new JRadioButton("Set Duration", !bEndTime);
         ntfDuration = new NumberTextField(this, duration, 8, false, 0.0001, 1e10, "#,###.######", "Duration");
         ntfDuration.setEditable(!bEndTime);
 
-        rbEndTime = new JRadioButton("Set End Time(LOCAL)", bEndTime);
+        rbEndTime = new JRadioButton("Set End Time(GMT)", bEndTime);
         rbEndTime.setEnabled(spSize == SpaceSize.ASTRONOMICAL);
         tfEndTime = new TextField(endDate);
         tfEndTime.setEnabled(bEndTime);
@@ -443,6 +468,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
         JPanel endDatePanel = new JPanel();
         endDatePanel.add(rbEndTime);
         endDatePanel.add(tfEndTime);
+        endDatePanel.add(new JLabel("  enter all"));
 
         FramedPanel jp = new FramedPanel();
         jp.setLayout(new BoxLayout(jp, BoxLayout.X_AXIS));
@@ -494,6 +520,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
 
     boolean continueIt = true;
     boolean runIt = true;
+    boolean itsON = false;
 
     public void continueOrbit(boolean bContinue) {
         continueIt = bContinue;
@@ -501,6 +528,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
 
     public void stopIt() {
         runIt = false;
+//        updateJCastroDate();
     }
 
     public double refreshInterval = 60; // sec
@@ -535,6 +563,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
         double hrsPerSec = 0;
         double nextHistorySave = 0;
         double endT;
+        boolean wasInContinue = false;
 //        debug("in doCalculationSERIAL");
         if (fresh) {
             space.initAllItemConnections();
@@ -566,9 +595,11 @@ public class ItemMovementsApp extends Panel implements InputControl {
 //        debug("ItemMovementsApp.#565:before runIt && nowT < endT and continueIt " + runIt + ", " + nowT + ", " + endT + ", " + continueIt);
         boolean firstTime = true;
         while (runIt && nowT < endT) {
+            itsON = true;
             if (firstTime || !continueIt) {
                 try { // why is this required ????
                     Thread.sleep(2);
+//                    debug("nowT = " + nowT);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -614,9 +645,18 @@ public class ItemMovementsApp extends Panel implements InputControl {
                     showError("ItemMoementsApp.#613: Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
                     runIt = false;
                 }
+                wasInContinue = true;
+            }
+            else {
+                if (wasInContinue)
+                    space.updateEndGraphic();
+                wasInContinue = false;
             }
         }
         continueIt = false;
+
+        space.updateEndGraphic();
+
         nowDate = new DateAndJDN(dateAndJDN);
         nowDate.add(Calendar.SECOND, (int)nowT);
         orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
@@ -628,82 +668,87 @@ public class ItemMovementsApp extends Panel implements InputControl {
 //        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
         orbitDisplay.resultsReady();
         enableButtons(true);
+        itsON = false;
+        updateJCastroDate();
     }
 
     boolean doOneStep(double deltaT, double nowT) throws Exception {
         return space.doCalculation(deltaT, nowT);
     }
 
-    void doCalculationPARELLEL(boolean fresh)   {
-        enableButtons(false);
-        double step = calculationStep;
-        double hrsPerSec = 0;
-        double endT;
-        if (fresh) {
-            space.initAllItemConnections();
-            space.setGlobalLinksAndActions();
-            nowT = 0;
-            setRefreshInterval(refreshInterval);
-            nextRefresh = 0;
-            endT = ntfDuration.getData() * 3600;
-            lastTnano = System.nanoTime(); // new Date()).getTime();
-            nowDate = new DateAndJDN(dateAndJDN);
-        }
-        else {
-            endT = nowT + ntfDuration.getData() * 3600;
-        }
-        boolean bLive = false;
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive); //.format(nowDate.getTime()));
-
-        runIt = true;
-        evaluator.startTasks();
-        while (runIt && nowT < endT) {
-            if (continueIt) {
-                try {
-                    if (!doOneStepPARELLEL(step, nowT)) {
-                        showError("Error in doOneStepPARELLEL one step at " + nowT + "\nSuggest restart program");
-                        break;
-                    }
-                    step = calculationStep;
-                    nowT += step;
-                    if (nowT > nextRefresh) {
-                        space.updateLinkDisplay();
-                        showNow = false;
-                        nowTnano = System.nanoTime(); //new Date().getTime();
-                        double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
-                        hrsPerSec = (refreshInterval / 3600) / deltaT;
-                        if (bRealTime && deltaT <= refreshInterval) {
-                            try {
-                                Thread.sleep((long)((refreshInterval - deltaT) * 1000));
-                                bLive = true;
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        else
-                            bLive = false;
-                        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
-                        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-                        lastRefresh = nowT;
-                        nextRefresh += refreshInterval;
-                        lastTnano = System.nanoTime(); //nowTnano;
-                    }
-                } catch (Exception e) {
-                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
-                    runIt = false;
-                }
-            }
-        }
-        evaluator.stopTasks();
-        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
-        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
-        orbitDisplay.resultsReady();
-        enableButtons(true);
-    }
-
-    boolean doOneStepPARELLEL(double deltaT, double nowT) throws Exception {
-        return space.doCalculation(evaluator, deltaT, nowT);
-    }
+//    void doCalculationPARELLEL(boolean fresh)   {
+//        enableButtons(false);
+//        double step = calculationStep;
+//        double hrsPerSec = 0;
+//        double endT;
+//        if (fresh) {
+//            space.initAllItemConnections();
+//            space.setGlobalLinksAndActions();
+//            nowT = 0;
+//            setRefreshInterval(refreshInterval);
+//            nextRefresh = 0;
+//            endT = ntfDuration.getData() * 3600;
+//            lastTnano = System.nanoTime(); // new Date()).getTime();
+//            nowDate = new DateAndJDN(dateAndJDN);
+//        }
+//        else {
+//            endT = nowT + ntfDuration.getData() * 3600;
+//        }
+//        boolean bLive = false;
+//        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive); //.format(nowDate.getTime()));
+//
+//        runIt = true;
+//        evaluator.startTasks();
+//        while (runIt && nowT < endT) {
+//            itsON = true;
+//            if (continueIt) {
+//                try {
+//                    if (!doOneStepPARELLEL(step, nowT)) {
+//                        showError("Error in doOneStepPARELLEL one step at " + nowT + "\nSuggest restart program");
+//                        break;
+//                    }
+//                    step = calculationStep;
+//                    nowT += step;
+//                    if (nowT > nextRefresh) {
+//                        space.updateLinkDisplay();
+//                        showNow = false;
+//                        nowTnano = System.nanoTime(); //new Date().getTime();
+//                        double deltaT = ((double)(nowTnano - lastTnano))/ 1e9;
+//                        hrsPerSec = (refreshInterval / 3600) / deltaT;
+//                        if (bRealTime && deltaT <= refreshInterval) {
+//                            try {
+//                                Thread.sleep((long)((refreshInterval - deltaT) * 1000));
+//                                bLive = true;
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                        else
+//                            bLive = false;
+//                        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
+//                        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
+//                        lastRefresh = nowT;
+//                        nextRefresh += refreshInterval;
+//                        lastTnano = System.nanoTime(); //nowTnano;
+//                    }
+//                } catch (Exception e) {
+//                    showError("Aborting in 'doCalculation' at nowT = " + nowT + " due to :" + e.getMessage());
+//                    runIt = false;
+//                }
+//            }
+//        }
+//        evaluator.stopTasks();
+//        nowDate.add(Calendar.SECOND, (int) (nowT - lastRefresh));
+//        orbitDisplay.updateDisplay(nowT, nowDate, hrsPerSec, bLive);
+//        orbitDisplay.resultsReady();
+//        enableButtons(true);
+//        itsON = false;
+//        updateJCastroDate();
+//    }
+//
+//    boolean doOneStepPARELLEL(double deltaT, double nowT) throws Exception {
+//        return space.doCalculation(evaluator, deltaT, nowT);
+//    }
 
     MotionDisplay orbitDisplay;
 
@@ -929,7 +974,9 @@ public class ItemMovementsApp extends Panel implements InputControl {
     }
 
     String baseDatainXML() {
-
+        if (spSize == SpaceSize.ASTRONOMICAL)
+            if (nowDate == null)
+                nowDate = new DateAndJDN(dateAndJDN);
         return XMLmv.putTag("baseData" , XMLmv.putTag("calculationStep", calculationStep) +
                 XMLmv.putTag("refreshInterval", refreshInterval) +
                 XMLmv.putTag("bRealTime", bRealTime) +
@@ -938,7 +985,9 @@ public class ItemMovementsApp extends Panel implements InputControl {
                 XMLmv.putTag("bShowLinks", bShowLinks) +
                 XMLmv.putTag("spSize", spSize.toString()) +
                 XMLmv.putTag("bConsiderTimeDilation", space.bConsiderTimeDilation) +
-                XMLmv.putTag("bConsiderGravityVelocity", space.bConsiderGravityVelocity));
+                XMLmv.putTag("bConsiderGravityVelocity", space.bConsiderGravityVelocity) +
+                ((spSize == SpaceSize.ASTRONOMICAL)  ?
+                        (XMLmv.putTag("dateAndJDN", dateAndJDN.getJdN())): ""));
     }
 
     boolean getBaseDataFromXML(String xmlStr) {
@@ -961,7 +1010,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
                 vp = XMLmv.getTag(basicData, "bShowLinks", 0);
                 bShowLinks = vp.val.equals("1");
                 vp = XMLmv.getTag(basicData, "spSize", 0);
-                spSize = SpaceSize.getEnum(vp.val);
+                setSpaceSize(SpaceSize.getEnum(vp.val));
                 vp = XMLmv.getTag(basicData, "bConsiderTimeDilation", 0);
                 space.bConsiderTimeDilation = vp.val.equals("1");
                 if (space.bConsiderTimeDilation)
@@ -969,7 +1018,18 @@ public class ItemMovementsApp extends Panel implements InputControl {
                 vp = XMLmv.getTag(basicData, "Warning: bConsiderGravityVelocity", 0);
                 space.bConsiderGravityVelocity = vp.val.equals("1");
                 if (space.bConsiderGravityVelocity)
-                    showMessage("Warning: bConsiderGravityVelocity is et ON!");
+                    showMessage("Warning: bConsiderGravityVelocity is set ON!");
+                if (spSize == SpaceSize.ASTRONOMICAL) {
+                    vp = XMLmv.getTag(basicData, "dateAndJDN", 0);
+                    if (vp.val.length() > 0)
+                        dateAndJDN = new DateAndJDN(Double.valueOf(vp.val));
+                    else {
+                        showMessage("The planet data does not contain Date-Time\n" +
+                                "taking NOW time");
+                        dateAndJDN = new DateAndJDN();
+                    }
+                }
+
             } catch (NumberFormatException e) {
                 showError("Some problem in reading Basic Data :" + e.getMessage());
                 retVal = false;

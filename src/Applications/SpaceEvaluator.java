@@ -11,7 +11,7 @@ import java.util.concurrent.*;
  * Created by M Viswanathan on 10 Aug 2014
  */
 public class SpaceEvaluator implements Runnable {
-    boolean useAllCPUs = true;
+//    boolean useAllCPUs = true;
     int numberOfCPUs;
     int numberOfCPUsToUse;
     private volatile static SpaceEvaluator theEvaluator;
@@ -30,7 +30,7 @@ public class SpaceEvaluator implements Runnable {
         numberOfCPUs = Runtime.getRuntime().availableProcessors();
         numberOfCPUsToUse = numberOfCPUs;
         this.callerApp = callerApp;
-        useAllCPUs = callerApp.useAllCPUs();
+//        useAllCPUs = callerApp.useAllCPUs();
         initiateService();
         linkCallables = new Vector<CallableGroup>();
         itemCallables = new Vector<CallableItemGroup>();
@@ -254,12 +254,12 @@ public class SpaceEvaluator implements Runnable {
     }
 
     public void run() {
-        callerApp.debug("SpaceEvaluator.#257: started" +
-                ((useAllCPUs) ? " with " + numberOfCPUsToUse + " CPUs" : " One CPU"));
-        if (useAllCPUs)
-            callerApp.doCalculationPARELLEL(fresh);
-        else
-            callerApp.doCalculationSERIAL(fresh);
+//        callerApp.debug("SpaceEvaluator.#257: started" +
+//                ((useAllCPUs) ? " with " + numberOfCPUsToUse + " CPUs" : " One CPU"));
+//        if (useAllCPUs)
+//            callerApp.doCalculationPARELLEL(fresh);
+//        else
+        callerApp.doCalculationSERIAL(fresh);
     }
 
     public void start() {

@@ -113,6 +113,7 @@ public class MotionDisplay  extends JFrame
         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
         relOrbitGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
         relOrbitGroup.setCapability(BranchGroup.ALLOW_DETACH);
+        space.setAxisAnd0e0NForItems();
     }
 
     ViewDirection lastViewDirection = ViewDirection.ZMinus;
@@ -632,7 +633,7 @@ public class MotionDisplay  extends JFrame
         pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
         pickCanvas.setTolerance(4.0f);
         canvas.addMouseListener(this);
-//        canvas.addMouseWheelListener(this);
+        canvas.addMouseWheelListener(this);
     }
 
     Shape3D oneAxis(int axis, double length, Color color) {

@@ -38,14 +38,17 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
     JRadioButton rbFixedAccOn;
     double xMax, yMax, zMax;
     double xMin, yMin, zMin;
+    public Vector3dMV defaultAxisVector = new Vector3dMV(0, 0, 1); // oriientation of z axis (global)
+    public double defaultSpinRate; // rad/s about local z axis
+    public Vector3dMV default0E0NVector = new Vector3dMV(0, 0, 0); // Orientation of 0Long0Lat
     private AxisAngle4d spinAxis; // absolute
     double spinPeriod; // in hours
     String imageName = "";
     private boolean isLightSrc = false;
     JRadioButton rbFixedPos;
     Item thisItem;
-    private double reportInterval = 0; // sec?  144000;
-    double nextReport; // sec
+    private double refrshInterval = 0; // sec?  144000;
+    double nextReresh; // sec
     Vector<ForceElement> forceElements = new Vector<ForceElement>();
     Point3d centerOfMass = new Point3d(0, 0, 0);
     double[] mI = {1.0, 1.0, 1.0}; // about xx, yy and zz
@@ -398,8 +401,8 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
     }
 
     public void setRefreshInterval(double interval, double nextRefresh) {
-        reportInterval = interval;
-        nextReport = nextRefresh;
+        refrshInterval = interval;
+        nextReresh = nextRefresh;
     }
 
     RelativeDlg relDlg;
@@ -498,6 +501,9 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         NumberTextField ntCommonMI;
         NumberTextField ntElasticity;
         TuplePanel itemPosTuplePan;
+        TuplePanel tpItemAxisVector;
+        NumberTextField ntItemSpinRate;
+        TuplePanel tp0E0NVector;
         TuplePanel angularPosTuplePan;
         TuplePanel angularVelTuplePan;
         JRadioButton rbItemFixedPos;
@@ -590,6 +596,22 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
             ntElasticity = new NumberTextField(inpC, eCompression, 6, false, -1, 1e20, "##0.####E00", "Elasticity N/100% ('-1' is sticky)");
             jp.addItemPair(ntElasticity);
             jp.addItem("<html><font color='red'>WARNING: <font color='black'> Sticky is still in trial stage</html>");
+            jp.addBlank();
+
+            tpItemAxisVector = new TuplePanel(inpC, defaultAxisVector, 8, -1.0E12, 1.0E12, "##0.####", "Z axis Direction Vector (global)");
+            JPanel jpAxisVector = new JPanel(new BorderLayout());
+            jpAxisVector.add(tpItemAxisVector, BorderLayout.CENTER);
+            ntItemSpinRate = new NumberTextField(inpC, defaultSpinRate, 6, false, -1000, 1000, "##0.####E00", "Spin rate in rad/s");
+            jp.addItemPair("Global Direction-Vector of Z axis", jpAxisVector);
+            jp.addItemPair(ntItemSpinRate);
+            jp.addBlank();
+
+            tp0E0NVector = new TuplePanel(inpC, default0E0NVector, 8, -1.0E12, 1.0E12, "##0.####", "Z axis Direction Vector (global)");
+            JPanel jp0E0NVector = new JPanel(new BorderLayout());
+            jp0E0NVector.add(tp0E0NVector, BorderLayout.CENTER);
+            jp.addItemPair("Global Direction-Vector of 0long-0Lat", jp0E0NVector);
+            jp.addBlank();
+
             JPanel jpAngularPos = new JPanel(new BorderLayout());
             angularPosTuplePan = new TuplePanel(inpC, status.angularPos, 8, -10, +10, "##0.####", "Angular Orientation (on local axis) rad");
             jpAngularPos.add(angularPosTuplePan, BorderLayout.CENTER);
@@ -723,6 +745,11 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
                         }
                         eCompression = ntElasticity.getData();
                         status.pos.set(itemPosTuplePan.getTuple3d());
+                        defaultAxisVector.set(tpItemAxisVector.getTuple3d());
+                        defaultSpinRate = ntItemSpinRate.getData();
+//                        radPerSec += defaultSpinRate;
+//                        radPerSec = defaultSpinRate;
+                        default0E0NVector.set(tp0E0NVector.getTuple3d());
                         status.angularPos.set(angularPosTuplePan.getTuple3d());
                         status.velocity.set(itemVelTuplePan.getTuple3d());
                         status.angularVelocity.set(angularVelTuplePan.getTuple3d());
@@ -752,7 +779,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         calculateAreas();
         resetLimits();
         status.time = 0;
-        nextReport = 0;
+        nextReresh = 0;
         initNetForce();
     }
 
@@ -914,7 +941,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     public void initPosEtc(Point3d pos, Vector3d velocity) {
         super.initPosEtc(pos, velocity);
-        nextReport = reportInterval;
+        nextReresh = refrshInterval;
     }
 
     @Override
@@ -926,14 +953,34 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         status.initAngularPos(angularPos, angularVelocity);
     }
 
-    public void setSpin(AxisAngle4d spinAxis, double spinPeriod) {
-        this.spinAxis = spinAxis;
-        this.spinPeriod = spinPeriod;
-        if (spinPeriod > 0)
-            radPerSec = Math.PI * 2 / spinPeriod;
+    @Override
+    public Vector3dMV getDefaultAxisVector() {
+        return defaultAxisVector;
     }
 
-    // The new methods with ItemGraphic
+    @Override
+    public Vector3dMV getZeroLongiVector() {
+        return default0E0NVector;
+    }
+
+    // spinPeriod in h
+    public void setSpin(AxisAngle4d spinAxis, double spinPeriod) {
+        this.spinAxis = spinAxis;
+//        this.spinPeriod = spinPeriod;
+        if (spinPeriod != 0)
+            defaultSpinRate = Math.PI * 2 / spinPeriod;
+    }
+
+    @Override
+    public void updateZeroEZeroNDirectionVector() {
+        if (defaultSpinRate != 0) {
+            Vector3dMV v3 = itemG.getGlobalCoordsOfZeroEzeroNPoint();
+            v3.sub(getPos());
+            default0E0NVector.set(v3);
+        }
+    }
+
+// The new methods with ItemGraphic
 
     WeakReference<ItemGraphic> itemGraphic;
 
@@ -941,7 +988,7 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         return itemGraphic.get();
     }
 
-    ItemGraphic itemG;
+    public ItemGraphic itemG;
 
     public ItemGraphic createItemGraphic(Group grp) throws Exception {
 //        ItemGraphic itemG = new ItemGraphic(this);
@@ -963,6 +1010,13 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 //    public void setItemDisplayAttribute(RenderingAttributes itemAttribute) {
 //        itemGraphic.get().setItemDisplayAttribute(itemAttribute);
 //    }
+
+
+    @Override
+    public void setAxisAnd0e0N() {
+        if (itemG != null)
+            itemG.setAxisAnd0e0N();
+    }
 
     public void attachPlatform(ViewingPlatform platform, boolean bShowRelOrbit,
                                RelOrbitGroup relOrbitGroup) {
@@ -993,7 +1047,10 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     public void updateOrbitAndPos() throws Exception {
         try {
-            itemGraphic.get().updateOrbitAndPos(getSpinIncrement());
+            if (itemG != null) {
+                itemGraphic.get().updateOrbitAndPos(getSpinIncrement());
+                updateZeroEZeroNDirectionVector();
+            }
         } catch (NullPointerException e) {
             showError("ERROR in updateOrbitAndPos an item " + name + ":" + e.getMessage());
         }
@@ -1010,9 +1067,9 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
         updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
-        if (nowT > nextReport) {
+        if (nowT > nextReresh) {
             updateOrbitAndPos();
-            nextReport += reportInterval;
+            nextReresh += refrshInterval;
         }
 
         return true;
@@ -1023,9 +1080,9 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
         updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
-        if (nowT > nextReport) {
+        if (nowT > nextReresh) {
             updateOrbitAndPos();
-            nextReport += reportInterval;
+            nextReresh += refrshInterval;
         }
 
         return true;
@@ -1036,9 +1093,9 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
         updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
         evalMaxMinPos();
-        if (nowT > nextReport) {
+        if (nowT > nextReresh) {
             updateOrbitAndPos();
-            nextReport += reportInterval;
+            nextReresh += refrshInterval;
         }
 
         return true;
@@ -1049,9 +1106,9 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
         updatePAndVforBounce(deltaT, nowT, updateStep);
         evalMaxMinPos();
-        if (nowT > nextReport) {
+        if (nowT > nextReresh) {
             updateOrbitAndPos();
-            nextReport += reportInterval;
+            nextReresh += refrshInterval;
         }
 
         return true;
@@ -1117,14 +1174,14 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
     }
 
     double lastTime = 0;
-    double radPerSec = 0;
+//    double radPerSec = 0;
 
     double getSpinIncrement() {
         double spinIncrement = 0;
-        if (radPerSec > 0) {
+        if (defaultSpinRate != 0) {
             double nowTime = status.time;
             double interval = (nowTime - lastTime);
-            spinIncrement = interval * radPerSec;
+            spinIncrement = interval * defaultSpinRate;
             lastTime = nowTime;
         }
         return spinIncrement;
@@ -1164,6 +1221,10 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         xmlStr.append(XMLmv.putTag("mI", Vector3dMV.dataInCSV(mI)));
         xmlStr.append(XMLmv.putTag("eCompression", eCompression));
         xmlStr.append(XMLmv.putTag("color", ("" + color.getRGB())));
+        xmlStr.append(XMLmv.putTag("isLightSrc", isLightSrc));
+        xmlStr.append(XMLmv.putTag("defaultAxisVector", defaultAxisVector.dataInCSV()));
+        xmlStr.append(XMLmv.putTag("defaultSpinRate", defaultSpinRate));
+        xmlStr.append(XMLmv.putTag("default0E0NVector",  default0E0NVector.dataInCSV()));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
         xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation));
         xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
@@ -1206,6 +1267,19 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
             eCompression = Double.valueOf(vp.val);
         else
             eCompression = 0;
+        vp = XMLmv.getTag(xmlStr, "isLightSrc", 0);
+        isLightSrc =  (vp.val.equals("1"));
+        vp = XMLmv.getTag(xmlStr, "defaultAxisVector", 0);
+        if (vp.val.length() > 1)
+            defaultAxisVector.set(vp.val);
+        vp = XMLmv.getTag(xmlStr, "defaultSpinRate", 0);
+        if (vp.val.length() > 1)
+            defaultSpinRate = Double.valueOf(vp.val);
+//        radPerSec = defaultSpinRate;
+        vp = XMLmv.getTag(xmlStr, "default0E0NVector", 0);
+        if (vp.val.length() > 1)
+            default0E0NVector.set(vp.val);
+
         vp = XMLmv.getTag(xmlStr, "bFixedLocation", 0);
         bFixedLocation = (vp.val.equals("1"));
         vp = XMLmv.getTag(xmlStr, "color", 0);
