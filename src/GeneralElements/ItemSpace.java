@@ -126,11 +126,11 @@ public class ItemSpace {
 
     public void initAllItemConnections() {
         bSomeGlobalActions = false;
-        for (ItemInterface it: allItems) {
-            it.initConnections();
-            if (it.anyLocalAction())
-                bSomeLocalActions = true;
-        }
+//        for (ItemInterface it: allItems) {
+//            it.initConnections();
+//            if (it.anyLocalAction())
+//                bSomeLocalActions = true;
+//        }
     }
 
     public void setActiveActions() {

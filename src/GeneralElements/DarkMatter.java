@@ -71,7 +71,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.parentW = parent;
         gravityLinks = new Vector<>();
         gravityON = false;
-        localActions = new Vector<>();
+//        localActions = new Vector<>();
     }
 
     public DarkMatter(String name, double mass, double dia, Color color, Window parent) {
@@ -154,10 +154,10 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.projectedArea = projectedArea;
     }
 
-    public void addLocalAction(LocalAction action) {
-        action.setItem(this);
-        localActions.add(action);
-    }
+//    public void addLocalAction(LocalAction action) {
+//        action.setItem(this);
+//        localActions.add(action);
+//    }
 
     public void clearGravityLinks() {
         gravityLinks.clear();
@@ -224,8 +224,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     public void setMatterLocalForces() {
         localForce.set(0, 0, 0);
         globalForce.set(0, 0, 0);
-        for (LocalAction action : localActions)
-            localForce.add(action.getForce());
+//        for (LocalAction action : localActions)
+//            localForce.add(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
             globalForce.add(gAction.getForce(this));
     }
@@ -379,7 +379,7 @@ public class DarkMatter implements InputControl, EvalOnce {
                 newVelocity.add(addVelocity);
                 status.velocity.set(newVelocity);
                 status.acc.set(thisAcc);
-                status.time = nowT;
+                status.time = nowT + deltaT;
 //                if (bFlightPlan)
 //                    mass += flightPlan.massChange(deltaT);
             }

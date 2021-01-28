@@ -29,7 +29,7 @@ public class LinkWithMass extends InfluenceDef  {
     Vector<ItemLink> allLinks;
     Window parent;
     ItemSpace space;
-    Vector<LocalAction> localActions;
+//    Vector<LocalAction> localActions;
     boolean elementsSet = false;
 
     static int defElements = 50;
@@ -56,12 +56,12 @@ public class LinkWithMass extends InfluenceDef  {
         this.nElements = (nElements / 2) * 2; // make it even
         this.parent = item1.parentW;
         this.space = item1.space;
-        localActions = new Vector<LocalAction>();
+//        localActions = new Vector<LocalAction>();
     }
 
-    public void addLocalAction(LocalAction action) {
-        localActions.add(action);
-    }
+//    public void addLocalAction(LocalAction action) {
+//        localActions.add(action);
+//    }
 
     public void setStartConditions(double duration, double nowT) {
         for (DarkMatter mat:massElements)
@@ -201,8 +201,8 @@ public class LinkWithMass extends InfluenceDef  {
                 oneElem.initPosEtc(point, new Vector3d(0, 0, 0));
                 oneElem.setProjectedArea(uProjectedArea);
                 oneElem.setSurfaceArea(uSurfaceArea);
-                for (LocalAction action : localActions)
-                    oneElem.addLocalAction(action);
+//                for (LocalAction action : localActions)
+//                    oneElem.addLocalAction(action);
                 massElements.add(oneElem);
             }
             // create rods between the points
@@ -214,7 +214,7 @@ public class LinkWithMass extends InfluenceDef  {
             }
             allLinks.add(new ItemLink(lastItem, item2, new Rod(lastItem, item2,
                     initialLenF, eExpansion), space));
-            assignLocalActions();
+//            assignLocalActions();
         }
         else {
 //            showMessage("Free Length " + freeLen + " is less than distance " + distance + "\nLink is NOT created!");
@@ -225,11 +225,11 @@ public class LinkWithMass extends InfluenceDef  {
         return retVal;
     }
 
-    void assignLocalActions() {
-        for (LocalAction la: localActions)
-            for (DarkMatter m: massElements)
-                m.addLocalAction((LocalAction)la.clone());
-    }
+//    void assignLocalActions() {
+//        for (LocalAction la: localActions)
+//            for (DarkMatter m: massElements)
+//                m.addLocalAction((LocalAction)la.clone());
+//    }
 
     // numerator and denominator for tan of the angle (for anticlockwise rotation
     double rotAngle(double numerator, double denominator) {
@@ -294,12 +294,12 @@ public class LinkWithMass extends InfluenceDef  {
     public StringBuilder dataInXML() {
         StringBuilder xmlStr = super.dataInXML();
         xmlStr.append(XMLmv.putTag("massPerM", massPerM)).append(XMLmv.putTag("nElements", nElements));
-        xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
-        int a = 0;
-        for (LocalAction action: localActions) {
-            xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
-            a++;
-        }
+//        xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
+//        int a = 0;
+//        for (LocalAction action: localActions) {
+//            xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
+//            a++;
+//        }
         return xmlStr;
     }
 
@@ -311,20 +311,20 @@ public class LinkWithMass extends InfluenceDef  {
         massPerM = Double.valueOf(vp.val);
         vp = XMLmv.getTag(xmlStr, "nElements", 0);
         nElements = Integer.valueOf(vp.val);
-        vp = XMLmv.getTag(xmlStr, "nLocalActions", vp.endPos);
-        if (vp.val.length() > 0) {
-            int nActions = Integer.valueOf(vp.val);
-            DarkMatter dummyItem = item1;
-            try {
-                for (int a = 0; a < nActions; a++) {
-                    vp = XMLmv.getTag(xmlStr, "a#" + ("" + a).trim(), vp.endPos);
-                    addLocalAction(LocalAction.getLocalAction(dummyItem, vp.val));
-                }
-            } catch (Exception e) {
-                retVal = false;
-                e.printStackTrace();
-            }
-        }
+//        vp = XMLmv.getTag(xmlStr, "nLocalActions", vp.endPos);
+//        if (vp.val.length() > 0) {
+//            int nActions = Integer.valueOf(vp.val);
+//            DarkMatter dummyItem = item1;
+//            try {
+//                for (int a = 0; a < nActions; a++) {
+//                    vp = XMLmv.getTag(xmlStr, "a#" + ("" + a).trim(), vp.endPos);
+//                    addLocalAction(LocalAction.getLocalAction(dummyItem, vp.val));
+//                }
+//            } catch (Exception e) {
+//                retVal = false;
+//                e.printStackTrace();
+//            }
+//        }
         elementsSet = false;
         return retVal;
     }

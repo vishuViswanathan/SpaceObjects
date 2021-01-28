@@ -1227,12 +1227,12 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         xmlStr.append(XMLmv.putTag("default0E0NVector",  default0E0NVector.dataInCSV()));
         xmlStr.append(XMLmv.putTag("status", ("" + status.dataInXML())));
         xmlStr.append(XMLmv.putTag("bFixedLocation", bFixedLocation));
-        xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
-        int a = 0;
-        for (LocalAction action : localActions) {
-            xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
-            a++;
-        }
+//        xmlStr.append(XMLmv.putTag("nLocalActions", localActions.size()));
+//        int a = 0;
+//        for (LocalAction action : localActions) {
+//            xmlStr.append(XMLmv.putTag("a#" + ("" + a).trim(), action.dataInXML().toString()));
+//            a++;
+//        }
         if (jetController != null)
             xmlStr.append(XMLmv.putTag("jetController", jetController.dataInXML()));
         return xmlStr;
@@ -1293,19 +1293,19 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         } catch (NumberFormatException e) {
             throw new NumberFormatException("Status data of " + name + " :" + e.getMessage());
         }
-        vp = XMLmv.getTag(xmlStr, "nLocalActions", vp.endPos);
-        if (vp.val.length() > 0) {
-            int nActions = Integer.valueOf(vp.val);
-            try {
-                for (int a = 0; a < nActions; a++) {
-                    vp = XMLmv.getTag(xmlStr, "a#" + ("" + a).trim(), vp.endPos);
-                    addLocalAction(LocalAction.getLocalAction(this, vp.val));
-                }
-            } catch (Exception e) {
-                retVal = false;
-                e.printStackTrace();
-            }
-        }
+//        vp = XMLmv.getTag(xmlStr, "nLocalActions", vp.endPos);
+//        if (vp.val.length() > 0) {
+//            int nActions = Integer.valueOf(vp.val);
+//            try {
+//                for (int a = 0; a < nActions; a++) {
+//                    vp = XMLmv.getTag(xmlStr, "a#" + ("" + a).trim(), vp.endPos);
+//                    addLocalAction(LocalAction.getLocalAction(this, vp.val));
+//                }
+//            } catch (Exception e) {
+//                retVal = false;
+//                e.printStackTrace();
+//            }
+//        }
         vp = XMLmv.getTag(xmlStr, "jetController", vp.endPos);
         if (vp.val.length() > 2)
             jetController = new JetTimeController(this, vp.val);
