@@ -4,7 +4,6 @@ import Applications.ItemMovementsApp;
 import GeneralElements.DarkMatter;
 import GeneralElements.ItemInterface;
 import GeneralElements.ItemSpace;
-import GeneralElements.localActions.LocalAction;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 
@@ -91,28 +90,28 @@ public class LinkWithMass extends InfluenceDef  {
 //    }
 
     @Override
-    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforContactJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (DarkMatter mat : massElements)
-            mat.updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
+            mat.updatePAndVforContactJetGlobal(deltaT, nowT, updateStep);
     }
 
     @Override
-    public void updatePosAndVelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforGravityJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         for (DarkMatter mat : massElements)
-            mat.updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
+            mat.updatePAndVforGravityJetGlobal(deltaT, nowT, updateStep);
     }
 
-    @Override
-    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        for (DarkMatter mat : massElements)
-            mat.updatePAndVforBounce(deltaT, nowT, updateStep);
-    }
+//    @Override
+//    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//        for (DarkMatter mat : massElements)
+//            mat.updatePAndVforBounce(deltaT, nowT, updateStep);
+//    }
 
-    @Override
-    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        for (DarkMatter mat : massElements)
-            mat.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
-    }
+//    @Override
+//    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//        for (DarkMatter mat : massElements)
+//            mat.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
+//    }
 
     public boolean setAllElements() {
         int pairs = nElements / 2;

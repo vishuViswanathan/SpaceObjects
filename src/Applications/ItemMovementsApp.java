@@ -103,7 +103,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
 
     double duration = 2000; // in h
     public double calculationStep =2; //in seconds
-    public int repeats = 5; // number of times each step is repeated for position-force accuracy
+    public int repeats = 1; // number of times each step is repeated for position-force accuracy
     static public boolean bShowPaths = false;
     static public boolean bShowLinks = false;
     static public boolean bShowRelOrbits = false;
@@ -201,6 +201,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
                     "Update once in this many steps");
             ntRepeats = new NumberTextField(mainApp, repeats, 6, false, 0, 10, "#0",
                     "Step repeats for Position/Force accuracy");
+            ntRepeats.setEditable(false);
             chBTimeDilation = new JCheckBox("Consider Time Dilation due to Gravity", space.bConsiderTimeDilation);
             chBTimeDilation.setEnabled(false);
             chBGravityPropagationTime = new JCheckBox("Consider Gravity propagation time", space.bConsiderGravityVelocity);
@@ -1201,14 +1202,14 @@ public class ItemMovementsApp extends Panel implements InputControl {
         switch(size) {
             case DAILY:
                 setTimingValues(0.0002, 0.02, 200, false, true, false, true);
-                repeats = 5;
+                repeats = 1;
                 rIDaily.setSelected(true);
                 rbDuration.setSelected(true);
                 rbEndTime.setEnabled(false);
                 break;
             case ASTRONOMICAL:
                 setTimingValues(10, 10 * 100, 200000, true, false, true, false);
-                repeats = 0;
+                repeats = 2;
                 rIAstronomical.setSelected(true);
                 rbEndTime.setEnabled(true);
                 break;

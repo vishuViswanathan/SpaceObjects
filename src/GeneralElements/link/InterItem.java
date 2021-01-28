@@ -123,7 +123,6 @@ public class InterItem extends Influence {
 
         if (compression > 0) {
             if (elasticityON) {
-
                 double force;
                 nowForce.set(distVect);
                 if (equalE) {

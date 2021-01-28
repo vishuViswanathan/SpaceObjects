@@ -4,7 +4,6 @@ import Applications.ItemMovementsApp;
 import GeneralElements.Display.ItemGraphic;
 import GeneralElements.Display.TuplePanel;
 import GeneralElements.accessories.JetsAndSeekers;
-import GeneralElements.localActions.LocalAction;
 import collection.RelOrbitGroup;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 // import jdk.nashorn.internal.scripts.JD;
@@ -791,10 +790,6 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         return (jetController != null);
     }
 
-    public boolean anyLocalAction() {
-        return (localActions.size() > 0 || (jetController != null));
-    }
-
     public Window showControlPanel(InputControl inpC, Component parent) {
         ControlPanelDialog dlg = null;
         if (jetController != null) {
@@ -1062,10 +1057,10 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
 
     //    =========================== calculations ======================
 
-    public boolean updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelforContactJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
+        updatePAndVforContactJetGlobal(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReresh) {
             updateOrbitAndPos();
@@ -1075,10 +1070,10 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         return true;
     }
 
-    public boolean updatePosAndelforGravityJetBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+    public boolean updatePosAndVelforGraviyJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
 
         updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
+        updatePAndVforGravityJetGlobal(deltaT, nowT, updateStep);
         evalMaxMinPos();
         if (nowT > nextReresh) {
             updateOrbitAndPos();
@@ -1088,31 +1083,31 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         return true;
     }
 
-    public boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
-
-        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
-        evalMaxMinPos();
-        if (nowT > nextReresh) {
-            updateOrbitAndPos();
-            nextReresh += refrshInterval;
-        }
-
-        return true;
-    }
-
-    public boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
-
-        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
-        updatePAndVforBounce(deltaT, nowT, updateStep);
-        evalMaxMinPos();
-        if (nowT > nextReresh) {
-            updateOrbitAndPos();
-            nextReresh += refrshInterval;
-        }
-
-        return true;
-    }
+//    public boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+//
+//        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+//        updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
+//        evalMaxMinPos();
+//        if (nowT > nextReresh) {
+//            updateOrbitAndPos();
+//            nextReresh += refrshInterval;
+//        }
+//
+//        return true;
+//    }
+//
+//    public boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception {
+//
+//        updateAngularPosAndVelocity(deltaT, nowT, updateStep);
+//        updatePAndVforBounce(deltaT, nowT, updateStep);
+//        evalMaxMinPos();
+//        if (nowT > nextReresh) {
+//            updateOrbitAndPos();
+//            nextReresh += refrshInterval;
+//        }
+//
+//        return true;
+//    }
 
 
     void noteAngularStatus() {
