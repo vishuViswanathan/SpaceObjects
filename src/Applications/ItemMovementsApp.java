@@ -75,6 +75,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
                             "BoundedBalls",
                             "ContactSpread",
                             "ContactSpreadWithChoice",
+                            "TwoTypesOfBallsInContainer",
                             "BungeeJumping",
                             "BungeeJumpingWithRope",
                             "ChainWithBall",
@@ -821,7 +822,7 @@ public class ItemMovementsApp extends Panel implements InputControl {
                 }
                 else {
                     historyFileStream.write(("# History path: " + historyFilePath + "\n\n").getBytes());
-                    historyFileStream.write("JDN,DateAndTime,NowT,ObjectName,HorizonID,mass,gm,x,y,z,Vx,Vy,Vz,V,Ax,Ay,Az,A,Infected,Cured\n".getBytes());
+                    historyFileStream.write("JDN,DateAndTime,NowT,ObjectName,HorizonID,mass,gm,dia,x,y,z,Vx,Vy,Vz,V,Ax,Ay,Az,A,Infected,Cured\n".getBytes());
                 }
 
             } catch (IOException e) {

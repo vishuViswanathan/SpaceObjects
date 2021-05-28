@@ -27,8 +27,7 @@ import java.util.Comparator;
 /**
  * Created by M Viswanathan on 04 Oct 2014
  */
-public class LocalViewFrame  extends JDialog implements MouseListener, MouseMotionListener,
-        MouseWheelListener, KeyListener {
+public class LocalViewFrame  extends JDialog implements MouseListener, MouseMotionListener, MouseWheelListener {
     JPanel commonMenuPanel;
     MotionDisplay motionDisplay;
     ItemInterface itemInView;
@@ -36,13 +35,11 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     ViewingPlatform mainViewPlatform;
     JPanel localViewPanel;
     Canvas3D localViewCanvas;
-    Viewer viewer;
     ViewingPlatform localVp;
     OrbitBehavior localVpOrbitBehavior;
     ItemInterface lastItemWithLocalPlatform = null;
     NumberLabel nlViewDistance;
-    NumberLabel nlFieldOfView;
-    JPanel jpDistanceAndFOW;
+    JPanel jpViewDistance;
     JLabel jlItemName;
     double viewPosFromPlanet;
     boolean bPlatformWasAttached = false;
@@ -51,7 +48,11 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     JButton jbItemData;
     JButton jbItemEdit;
     JComboBox<Item> cbItems;
-
+    View theView;
+    double defaultFieldOfView = Math.PI / 4;
+    double maxFieldOfView = defaultFieldOfView * 1.8;
+    double minFieldOfView = 3.0 / 180 * Math.PI;
+    double fieldOFViewStep = 1.0 / 180 * Math.PI;
 
     LocalViewFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
                    MotionDisplay motionDisplay) {
@@ -100,23 +101,6 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         Dimension minSize = new Dimension(300, 200);
         setMinimumSize(minSize);
-//        addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowClosing(WindowEvent e) {
-//                if (controlPanel != null)
-//                    controlPanel.setVisible(false);
-//            }
-//            @Override
-//            public void windowIconified(WindowEvent e) {
-////                System.out.println("Iconified");
-//                super.windowIconified(e);
-//                lastItemWithLocalPlatform.detachPlatform();
-//                System.out.println("Iconified and plartform is detatched ");
-////                bIconified = true;
-//            }
-//        });
-
-//        this.setSize(1100, 600);
     }
 
     public void showCommonMenu(boolean show) {
@@ -127,6 +111,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         pack();
     }
 
+    boolean firsTime = true;
+
     public void addLocalViewingPlatform() {
         // create a Viewer and attach to its canvas
         // a Canvas3D can only be attached to a single Viewer
@@ -134,9 +120,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localViewCanvas = new Canvas3D(config);
         localViewCanvas.addMouseWheelListener(this);
         localViewCanvas.addMouseListener(this);
-        localViewCanvas.addKeyListener(this);
-//        Viewer viewer = new Viewer(localViewCanvas);
-        viewer = new Viewer(localViewCanvas);
+//        localViewCanvas.addKeyListener(new KeyboardListener());
+        Viewer viewer = new Viewer(localViewCanvas);
         if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
             viewer.getView().setBackClipDistance(10000);
             viewer.getView().setFrontClipDistance(0.00001);
@@ -160,22 +145,15 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localVp.setViewPlatformBehavior(localVpOrbitBehavior);
 
         localVpOrbitBehavior.setRotationCenter(new Point3d(0, 0, 0));  //-viewPosFromPlanet));
-        nlViewDistance = new NumberLabel(0, 100, "#,###");
-        nlFieldOfView = new NumberLabel(0, 60, "###");
-        jpDistanceAndFOW = new JPanel(new GridLayout());
-        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            jpDistanceAndFOW.add(new JLabel("View Distance(km):"));
-        else
-            jpDistanceAndFOW.add(new JLabel("View Distance(m):"));
-        jpDistanceAndFOW.add(nlViewDistance);
-        jpDistanceAndFOW.add(new JLabel());
-        jpDistanceAndFOW.add(new JLabel());
-        jpDistanceAndFOW.add(new JLabel("Field of View(deg):"));
-        jpDistanceAndFOW.add(nlFieldOfView);
+        nlViewDistance = new NumberLabel(0, 150, "#,###");
+        jpViewDistance = new JPanel();
+        jpViewDistance.add(new JLabel("View Distance (km):"));
+        jpViewDistance.add(nlViewDistance);
         jlItemName = new JLabel("Selected Item");
         localViewPanel.add(jlItemName, BorderLayout.NORTH);
         localViewPanel.add(localViewCanvas, BorderLayout.CENTER);
-        localViewPanel.add(jpDistanceAndFOW, BorderLayout.SOUTH);
+        localViewPanel.add(jpViewDistance, BorderLayout.SOUTH);
+        theView = localViewCanvas.getView();
         localViewPanel.updateUI();
     }
 
@@ -199,8 +177,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         defaultTr.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
         localVp.getViewPlatformTransform().setTransform(defaultTr);
 
+        theView.setFieldOfView(defaultFieldOfView);
         updateViewDistanceUI(1.0);
-        resetFieldOfView();
         setTitle(item.getName());
     }
 
@@ -213,16 +191,15 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         Point3d objPos = itemInView.getPos();
         Vector3dMV vec = new Vector3dMV(eye);
         vec.sub(objPos);
-//        vec.normalize();
-//        vec.scale(viewPosFromPlanet);
+        vec.normalize();
+        vec.scale(viewPosFromPlanet);
         Transform3D lookAt = new Transform3D();
         lookAt.lookAt(eye, objPos, new Vector3d(0, 0, 1));
         lookAt.invert();
         lookAt.setTranslation(vec);
         localVp.getViewPlatformTransform().setTransform(lookAt);
-        viewPosFromPlanet = vec.length();
+//        viewPosFromPlanet = vec.length();
         updateViewDistanceUI(1.0);
-        resetFieldOfView();
         setTitle(itemInView.getName() + " from " + viewFrom);
     }
 
@@ -265,6 +242,8 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         localVp.getViewPlatformTransform().setTransform(localVpt);
         updateViewDistanceUI(1.0);
         setTitle(item.getName());
+        theView.setFieldOfView(defaultFieldOfView);
+//        canvas.addKeyListener(new KeyboardListener());
 //        showLocalViewFrame(item.name);
     }
 
@@ -285,29 +264,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
 
     void updateViewDistanceUI(double factor) {
         viewPosFromPlanet *= factor;
-        if (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL)
-            nlViewDistance.setData(viewPosFromPlanet / 1000);
-        else
-            nlViewDistance.setData(viewPosFromPlanet);
-    }
-
-    void resetFieldOfView() {
-        setFieldOfView(0);
-    }
-
-    void setFieldOfView(double factor) {
-        double fow = fieldOfViewMax;
-        if (factor > 0) {
-            fow = viewer.getView().getFieldOfView();
-            fow *= factor;
-            fow = Math.min(Math.max(fow, fieldOfViewMin), fieldOfViewMax);
-        }
-        viewer.getView().setFieldOfView(fow);
-        updateFieldOfViewUI(fow);
-    }
-
-    void updateFieldOfViewUI(double fieldOfView) {
-        nlFieldOfView.setData(Math.toDegrees(fieldOfView));
+        nlViewDistance.setData(viewPosFromPlanet / 1000);
     }
 
     JPanel menuPanel() {
@@ -455,17 +412,27 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
 
     }
 
-    boolean shiftKeyPressed = false;
-    double fieldOfViewMin = Math.PI/180;
-    double fieldOfViewMax = Math.PI/4;
-
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int movement = e.getUnitsToScroll();
-        double factor = (movement > 0) ? 1.1 : 1 / 1.1;
-        if (shiftKeyPressed) {
-            setFieldOfView(factor);
-        } else {
+        if (e.isShiftDown()) {
+            double newFieldOfView = theView.getFieldOfView();
+            if (movement > 0) {
+                newFieldOfView += fieldOFViewStep;
+                if (newFieldOfView > maxFieldOfView)
+                    newFieldOfView = maxFieldOfView;
+//                debug("newFieldOfView " + newFieldOfView + " fieldOFViewStep " + fieldOFViewStep);
+            }
+            else {
+                newFieldOfView -= fieldOFViewStep;
+                if (newFieldOfView < minFieldOfView)
+                    newFieldOfView = minFieldOfView;
+            }
+            theView.setFieldOfView(newFieldOfView);
+//            debug("fieldOfView " + theView.getFieldOfView());
+        }
+        else {
+            double factor = (movement > 0) ? 1.2 : 1 / 1.2;
             Transform3D vpTr = new Transform3D();
             localVp.getViewPlatformTransform().getTransform(vpTr);
             Vector3d trans = new Vector3d();
@@ -474,28 +441,11 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
             vpTr.setTranslation(trans);
             localVp.getViewPlatformTransform().setTransform(vpTr);
             updateViewDistanceUI(factor);
-//            System.out.println("mouse wheel action");
         }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
 
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SHIFT && !shiftKeyPressed) {
-            shiftKeyPressed = true;
-            System.out.println("Shift Key down");
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-            shiftKeyPressed = false;
-            System.out.println("Shift Key released");
-        }
+    void debug(String msg) {
+        ItemMovementsApp.debug("LocalViewFrame: " + msg);
     }
 }
