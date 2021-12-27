@@ -15,6 +15,7 @@ import mvUtils.display.InputControl;
 import mvUtils.math.DoubleMaxMin;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
+import mvUtils.physics.Vector3dMV;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -133,6 +134,24 @@ public class ItemSpace {
         }
     }
 
+    BaryCenter baryCenter;
+
+    public void addBaryCenter() {
+        boolean alreadyAdded = false;
+        for (ItemInterface it: allItems) {
+            if (it.getItemType() == ItemInterface.ItemType.BARY) {
+                alreadyAdded= true;
+                break;
+            }
+        }
+        if (!alreadyAdded) {
+            Window parent = mainApp.parent();
+            baryCenter = new BaryCenter(parent);
+            baryCenter.setSpace(this);
+            allItems.add(baryCenter);
+        }
+    }
+
     public void setActiveActions() {
         bSomeLocalActions = false;
         // exclude InterItems
@@ -226,6 +245,7 @@ public class ItemSpace {
                 n++;
             }
             initLinks();
+            addBaryCenter();
             return true;
         }
         else
@@ -478,6 +498,19 @@ public class ItemSpace {
             link.setStartConditions(duration, nowT);
     }
 
+    Vector3dMV centerOfMass() {
+        Vector3dMV massPos = new Vector3dMV();
+        double totMass = 0;
+        double mass;
+        for (ItemInterface i: allItems) {
+            mass = i.getMass();
+            massPos.scaleAndAdd(i.getPos(), mass);
+            totMass += mass;
+        }
+        massPos.scale(1 / totMass);
+        return massPos;
+    }
+
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         switch(activeActions) {
             case LOCAL_GLOBAL_BOUNCE:
@@ -562,6 +595,7 @@ public class ItemSpace {
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K4);
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.RK4);
 ////                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.EuFwd);
+                baryCenter.setPosition(centerOfMass());
             }
         }
         return ok;

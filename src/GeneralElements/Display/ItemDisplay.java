@@ -24,6 +24,7 @@ public class ItemDisplay extends Group {
         itemType = theItem.getItemType();
         switch (itemType) {
             case SPHERE:
+            case BARY:
                 theDisplay = new ItemSphere(theItem);
                 if (theDisplay.valid) {
                     addChild(theDisplay);

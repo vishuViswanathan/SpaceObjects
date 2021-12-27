@@ -29,7 +29,8 @@ public interface ItemInterface {
         SPHERE("Sphere"), // default spherical object
         SURFACE("Surface"),
         LIVE("Live"),
-        VRML("from VMRL file");
+        VRML("from VMRL file"),
+        BARY("Bary Center");
 
         private final String typeName;
 
@@ -125,6 +126,10 @@ public interface ItemInterface {
     boolean takeBasicFrom(DarkMatter fromItem);
 
     double getGM();
+
+    double getMass();
+
+    Vector3dMV massPosition();
 
     void noteTotalGM(double totalGM);
 

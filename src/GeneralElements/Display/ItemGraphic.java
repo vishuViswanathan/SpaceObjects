@@ -167,7 +167,7 @@ public class ItemGraphic {
             updateOrbitAndPos(0);
             retVal = true;
         } else
-            ItemMovementsApp.showError("ItemGraphic.212: Facing some problem in creating graphics for '" + item.getName() + "'");
+            ItemMovementsApp.showError("ItemGraphic.170: Facing some problem in creating graphics for '" + item.getName() + "'");
         return retVal;
     }
 

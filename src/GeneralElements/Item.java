@@ -118,6 +118,14 @@ public class Item extends DarkMatter implements ItemInterface, Selectable {
         return gm;
     }
 
+    public Vector3dMV massPosition() {
+        return new Vector3dMV(mass, status.pos);
+    }
+
+    public double getMass() {
+        return mass;
+    }
+
     @Override
     public String getImageName() {
         return imageName;
