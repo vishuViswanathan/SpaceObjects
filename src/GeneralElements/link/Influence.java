@@ -76,17 +76,17 @@ public class Influence {
 
     public boolean evalForce(double nowT, double deltaT, boolean bFinal) {return false;}
 
-    public void updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforContactJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
     }
 
-    public void updatePosAndVelforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public void updatePosAndVelforGravityJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
     }
 
-    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-    }
+//    public void updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//    }
 
-    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-    }
+//    public void updatePosAndVelforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//    }
 
 //    public void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
 //    }

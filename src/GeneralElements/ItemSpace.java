@@ -8,14 +8,12 @@ import GeneralElements.Display.LinkTable;
 import GeneralElements.globalActions.AllGlobalActions;
 import GeneralElements.globalActions.GlobalAction;
 import GeneralElements.link.Gravity;
-import GeneralElements.link.InterItem;
 import GeneralElements.link.ItemLink;
 import GeneralElements.utils.ThreeDSize;
 import mvUtils.display.InputControl;
 import mvUtils.math.DoubleMaxMin;
 import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
-import mvUtils.physics.Vector3dMV;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.RenderingAttributes;
@@ -25,7 +23,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 
-import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL_BOUNCE;
 
 //import Applications.SpaceEvaluator;
 
@@ -35,7 +32,7 @@ import static GeneralElements.ItemSpace.ActiveActions.LOCAL_GLOBAL_BOUNCE;
 public class ItemSpace {
 //    public enum ActiveActions {ALL, ONLYNETFORCE, ONLYGRAVITY, ONLY_BOUNCE};
     public enum ActiveActions {
-    LOCAL_GLOBAL_BOUNCE, GRAVITY_JET_BOUNCE, BOUNCE_JET_GLOBAL, ONLY_BOUNCE
+    CONTACT_JET_GLOBAL, GRAVITY_JET_GLOBAL, BOUNCE_JET_GLOBAL, ONLY_BOUNCE
     };
     LinkedList<ItemInterface> allItems;
     Item[] itemsArray;
@@ -127,52 +124,22 @@ public class ItemSpace {
 
     public void initAllItemConnections() {
         bSomeGlobalActions = false;
-        for (ItemInterface it: allItems) {
-            it.initConnections();
-            if (it.anyLocalAction())
-                bSomeLocalActions = true;
-        }
-    }
-
-    BaryCenter baryCenter;
-
-    public void addBaryCenter() {
-        boolean alreadyAdded = false;
-        for (ItemInterface it: allItems) {
-            if (it.getItemType() == ItemInterface.ItemType.BARY) {
-                alreadyAdded= true;
-                break;
-            }
-        }
-        if (!alreadyAdded) {
-            Window parent = mainApp.parent();
-            baryCenter = new BaryCenter(parent);
-            baryCenter.setSpace(this);
-            allItems.add(baryCenter);
-        }
+//        for (ItemInterface it: allItems) {
+//            it.initConnections();
+//            if (it.anyLocalAction())
+//                bSomeLocalActions = true;
+//        }
     }
 
     public void setActiveActions() {
-        bSomeLocalActions = false;
-        // exclude InterItems
-        for (ItemLink l: allItemLinks) {
-            if (!(l.getInfluence() instanceof InterItem)) {
-                bSomeLocalActions = true;
-                break;
-            }
-         }
-        activeActions = ActiveActions.ONLY_BOUNCE;
-        mainApp.repeats = 0;
         if (bItemGravityOn) {
-            activeActions = ActiveActions.GRAVITY_JET_BOUNCE;
+            activeActions = ActiveActions.GRAVITY_JET_GLOBAL;
+            mainApp.repeats = 2;
+        }
+        else {
+            activeActions = ActiveActions.CONTACT_JET_GLOBAL;
             mainApp.repeats = 1;
         }
-        else if (bSomeLocalActions) {
-            activeActions = LOCAL_GLOBAL_BOUNCE;
-            mainApp.repeats = 1;
-        }
-        else if (bSomeGlobalActions)
-            activeActions = ActiveActions.BOUNCE_JET_GLOBAL;
     }
 
 
@@ -245,7 +212,6 @@ public class ItemSpace {
                 n++;
             }
             initLinks();
-            addBaryCenter();
             return true;
         }
         else
@@ -261,7 +227,9 @@ public class ItemSpace {
     JToggleButton cloneItem;
     JButton buttAddLink;
     JRadioButton rbInterItemCollision;
+    JRadioButton rbEnableLight;
     public boolean bInterItemCollisionOn = false;
+    public boolean bEnableLight = false;
     ButtonListener bl;
     ItemTable itemTable;
     LinkTable linkTable;
@@ -279,7 +247,10 @@ public class ItemSpace {
         if (bl == null)
             bl = new ButtonListener();
         buttAddItem.addActionListener(bl);
-        rbInterItemCollision = new JRadioButton("Collision Enabled");
+        rbEnableLight = new JRadioButton("Enable Light");
+        rbEnableLight.setSelected(bEnableLight);
+        rbEnableLight.addActionListener(bl);
+        rbInterItemCollision = new JRadioButton("Enable Collisions");
         rbInterItemCollision.addActionListener(bl);
         JPanel outerP = new JPanel(new BorderLayout());
         JScrollPane sP = new JScrollPane();
@@ -299,6 +270,8 @@ public class ItemSpace {
         JPanel buttPan = new JPanel(new GridLayout(1, 2));
         buttPan.add(buttAddItem);
         buttPan.add(cloneItem);
+        buttPan.add(new JPanel()); // a spacer
+        buttPan.add(rbEnableLight);
         buttPan.add(rbInterItemCollision);
         return buttPan;
     }
@@ -359,6 +332,16 @@ public class ItemSpace {
         rbInterItemCollision.setSelected(ena);
     }
 
+    public void enableLight(boolean ena) {
+        bEnableLight = ena;
+        rbEnableLight.setSelected(ena);
+    }
+
+    public void setEnableLight() {
+        for (ItemInterface i: allItems)
+            i.setEnableLight(bEnableLight);
+    }
+
 
     public void enableButtons(boolean ena) {
 //        buttSaveInf.setEnabled(ena);
@@ -373,7 +356,7 @@ public class ItemSpace {
     JComponent influenceListPanel() {
         fillTempInfList();
         buttAddLink = new JButton("Add New Link");
-        rbItemGravity = new JRadioButton("Inter-Item Gravity Enabled");
+        rbItemGravity = new JRadioButton("Enable Inter-Item Gravity");
         rbItemGravity.setSelected(bItemGravityOn);
         if (bl == null)
             bl = new ButtonListener();
@@ -453,6 +436,10 @@ public class ItemSpace {
             else if (src == rbInterItemCollision) {
                 bInterItemCollisionOn = rbInterItemCollision.isSelected();
             }
+            else if (src == rbEnableLight) {
+                bEnableLight = rbEnableLight.isSelected();
+                setEnableLight();
+            }
         }
     }
 
@@ -484,6 +471,12 @@ public class ItemSpace {
         }
     }
 
+    public void setAxisAnd0e0NForItems() {
+        for (ItemInterface i:allItems)
+            i.setAxisAnd0e0N();
+    }
+
+
     public void initForces() {
         for (ItemInterface i: allItems)
             i.setLocalForces();
@@ -498,45 +491,45 @@ public class ItemSpace {
             link.setStartConditions(duration, nowT);
     }
 
-    Vector3dMV centerOfMass() {
-        Vector3dMV massPos = new Vector3dMV();
-        double totMass = 0;
-        double mass;
-        for (ItemInterface i: allItems) {
-            mass = i.getMass();
-            massPos.scaleAndAdd(i.getPos(), mass);
-            totMass += mass;
+    public boolean updateEndGraphic() {
+        boolean retVal = true;
+        try {
+            for (ItemInterface i : allItems)
+                i.updateOrbitAndPos();
         }
-        massPos.scale(1 / totMass);
-        return massPos;
+        catch (Exception e) {
+            retVal = false;
+        }
+        return retVal;
     }
 
     void updatePosAndVel(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         switch(activeActions) {
-            case LOCAL_GLOBAL_BOUNCE:
+            case GRAVITY_JET_GLOBAL:
                 for (ItemInterface i: allItems)
-                    i.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
+                    i.updatePosAndVelforGraviyJetGlobal(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelforLocalGlobalBounce(deltaT, nowT, updateStep);
+                    link.updatePosAndelforGravityJetGlobal(deltaT, nowT, updateStep);
                 break;
-            case GRAVITY_JET_BOUNCE:
+            case CONTACT_JET_GLOBAL:
                 for (ItemInterface i: allItems)
-                    i.updatePosAndelforGravityJetBounce(deltaT, nowT, updateStep);
+                    i.updatePosAndVelforContactJetGlobal(deltaT, nowT, updateStep);
                 for (ItemLink link:allItemLinks)
-                    link.updatePosAndelforGravityJetBounce(deltaT, nowT, updateStep);
+                    link.updatePosAndVelforContactJetGlobal(deltaT, nowT, updateStep);
                 break;
-            case BOUNCE_JET_GLOBAL:
-                for (ItemInterface i: allItems)
-                    i.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
-                for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
-                break;
-            case ONLY_BOUNCE:
-                for (ItemInterface i: allItems)
-                    i.updatePosAndVelforBounce(deltaT, nowT, updateStep);
-                for (ItemLink link:allItemLinks)
-                    link.updatePosAndVelforBounce(deltaT, nowT, updateStep);
-                break;
+
+//            case BOUNCE_JET_GLOBAL:
+//                for (ItemInterface i: allItems)
+//                    i.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
+//                for (ItemLink link:allItemLinks)
+//                    link.updatePosAndVelforBounceJetGlobal(deltaT, nowT, updateStep);
+//                break;
+//            case ONLY_BOUNCE:
+//                for (ItemInterface i: allItems)
+//                    i.updatePosAndVelforBounce(deltaT, nowT, updateStep);
+//                for (ItemLink link:allItemLinks)
+//                    link.updatePosAndVelforBounce(deltaT, nowT, updateStep);
+//                break;
             default:
                 debug("Unknown activeAction itemSpace.#491");
                 break;
@@ -595,7 +588,6 @@ public class ItemSpace {
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.K4);
 //                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.RK4);
 ////                updatePosAndVel(deltaT, nowT, ItemInterface.UpdateStep.EuFwd);
-                baryCenter.setPosition(centerOfMass());
             }
         }
         return ok;

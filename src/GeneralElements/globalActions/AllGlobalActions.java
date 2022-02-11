@@ -75,6 +75,8 @@ public class AllGlobalActions {
             }
             vp = XMLmv.getTag(xmlStr, "bItemGravityOn", vp.endPos);
             theSpace.bItemGravityOn = vp.val.equals("1");
+            vp = XMLmv.getTag(xmlStr, "bEnableLight", vp.endPos);
+            theSpace.bEnableLight = (vp.val.equals("1"));
         } catch (Exception e) {
             retVal = false;
         }
@@ -87,6 +89,7 @@ public class AllGlobalActions {
         for (GlobalAction gA: allActions.values())
             xmlStr.append(XMLmv.putTag("gA#" + ("" + i++).trim(), gA.dataInXML().toString()));
         xmlStr.append(XMLmv.putTag("bItemGravityOn", theSpace.bItemGravityOn));
+        xmlStr.append(XMLmv.putTag("bEnableLight", theSpace.bEnableLight));
         return xmlStr;
     }
 }

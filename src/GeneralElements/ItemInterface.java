@@ -113,11 +113,19 @@ public interface ItemInterface {
 
     AxisAngle4d getSpinAxis();
 
+    Vector3dMV getDefaultAxisVector();
+
+    void setAxisAnd0e0N();
+
+    Vector3dMV getZeroLongiVector();
+
     boolean isLightSrc();
 
     Vector3d getMiAsVector();
 
     Vector3d getOneByMI();
+
+    void setEnableLight(boolean ena);
 
     void setJetController(JetTimeController jetController);
 
@@ -286,8 +294,6 @@ public interface ItemInterface {
 
     boolean hasAnyAccessories();
 
-    boolean anyLocalAction();
-
     Window showControlPanel(InputControl inpC, Component parent);
 
     void setLocalForces();
@@ -322,6 +328,8 @@ public interface ItemInterface {
 
     void setSpin(AxisAngle4d spinAxis, double spinPeriod);
 
+    void updateZeroEZeroNDirectionVector();
+
     ItemGraphic createItemGraphic(Group grp) throws Exception;
 
 //    void setItemDisplayAttribute(RenderingAttributes itemAttribute);
@@ -343,13 +351,13 @@ public interface ItemInterface {
     //    =========================== calculations ======================
 
 
-    boolean updatePosAndVelforLocalGlobalBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndVelforContactJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
-    boolean updatePosAndelforGravityJetBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+    boolean updatePosAndVelforGraviyJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
-    boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+//    boolean updatePosAndVelforBounceJetGlobal(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
-    boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
+//    boolean updatePosAndVelforBounce(double deltaT, double nowT, UpdateStep updateStep) throws Exception;
 
     void updateAngularPosition(Vector3dMV deltaAngle);
 

@@ -11,7 +11,6 @@ import mvUtils.physics.Vector3dMV;
 
 import javax.swing.*;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.util.Vector;
@@ -71,7 +70,7 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.parentW = parent;
         gravityLinks = new Vector<>();
         gravityON = false;
-        localActions = new Vector<>();
+//        localActions = new Vector<>();
     }
 
     public DarkMatter(String name, double mass, double dia, Color color, Window parent) {
@@ -154,10 +153,10 @@ public class DarkMatter implements InputControl, EvalOnce {
         this.projectedArea = projectedArea;
     }
 
-    public void addLocalAction(LocalAction action) {
-        action.setItem(this);
-        localActions.add(action);
-    }
+//    public void addLocalAction(LocalAction action) {
+//        action.setItem(this);
+//        localActions.add(action);
+//    }
 
     public void clearGravityLinks() {
         gravityLinks.clear();
@@ -224,8 +223,8 @@ public class DarkMatter implements InputControl, EvalOnce {
     public void setMatterLocalForces() {
         localForce.set(0, 0, 0);
         globalForce.set(0, 0, 0);
-        for (LocalAction action : localActions)
-            localForce.add(action.getForce());
+//        for (LocalAction action : localActions)
+//            localForce.add(action.getForce());
         for (GlobalAction gAction : space.getActiveGlobalActions())
             globalForce.add(gAction.getForce(this));
     }
@@ -286,21 +285,21 @@ public class DarkMatter implements InputControl, EvalOnce {
 //        }
     }
 
-    public boolean updatePAndVforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforContactJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
             switch (updateStep) {
                 case INTERMEDIATE:
-                    considerLocalGlobalBounce(nowT, deltaT, false);
+                    considerContactJetGlobal(nowT, deltaT, false);
                     break;
                 case FINAL:
                 case EuFwd:
                 case EUMod:
                 case RK2:
                 case RK4:
-                    considerLocalGlobalBounce(nowT, deltaT, true);
+                    considerContactJetGlobal(nowT, deltaT, true);
                     break;
                 default:
                     changed = false;
@@ -310,9 +309,10 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-    boolean considerLocalGlobalBounce(double nowT, double deltaT, boolean bFinal) {
+    boolean considerContactJetGlobal(double nowT, double deltaT, boolean bFinal) {
         lastAcc = status.acc;
         effectiveForce.add(localForce, globalForce);
+        effectiveForce.add(jetForce);
         nowAcc.scale(oneByMass, effectiveForce);
         effectiveAcc.setMean(nowAcc, lastAcc);
         deltaV.scale(deltaT, effectiveAcc);
@@ -324,30 +324,26 @@ public class DarkMatter implements InputControl, EvalOnce {
         if (bFinal) {
             status.velocity.set(newVelocity);
             status.acc.set(nowAcc);
-        }
-    // CHECK 20200402 check if this is required
-        if (bFinal) {
-            status.velocity.add(addVelocity);
             status.time = nowT + deltaT;
         }
         return true;
     }
 
-    public boolean updatePAndVforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforGravityJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
             switch (updateStep) {
                 case INTERMEDIATE:
-                    considerGravityJetBounce(nowT, deltaT, false);
+                    considerGravityJetGlobal(nowT, deltaT, false);
                     break;
                 case FINAL:
                 case EuFwd:
                 case EUMod:
                 case RK2:
                 case RK4:
-                    considerGravityJetBounce(nowT, deltaT, true);
+                    considerGravityJetGlobal(nowT, deltaT, true);
                     break;
                 default:
                     changed = false;
@@ -357,14 +353,15 @@ public class DarkMatter implements InputControl, EvalOnce {
         return changed;
     }
 
-    boolean considerGravityJetBounce(double nowT, double deltaT, boolean bFinal) {
+    boolean considerGravityJetGlobal(double nowT, double deltaT, boolean bFinal) {
         boolean changed = true;
         if (bFixedLocation)
             changed = false;
         else {
-//            effectiveForce.add(gravityForce, jetForce);
+            // add mean gravity force, jet force and global force
             effectiveForce.setMean(gravityForce, lastGravityforce);
             effectiveForce.add(jetForce);
+            effectiveForce.add(globalForce);
             thisAcc.scale(oneByMass, effectiveForce);
             // calculate from netForce
             deltaV.scale(deltaT, thisAcc);
@@ -376,10 +373,9 @@ public class DarkMatter implements InputControl, EvalOnce {
             newPos.add(lastPosition, deltaPos);
             status.pos.set(newPos); // only position is updated here
             if (bFinal) {
-                newVelocity.add(addVelocity);
                 status.velocity.set(newVelocity);
                 status.acc.set(thisAcc);
-                status.time = nowT;
+                status.time = nowT + deltaT;
 //                if (bFlightPlan)
 //                    mass += flightPlan.massChange(deltaT);
             }
@@ -388,88 +384,88 @@ public class DarkMatter implements InputControl, EvalOnce {
     }
 
     // CHECK 202020402 for Bounce Jet and Global, all are without repeat
-    public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = true;
-        if (bFixedLocation)
-            changed = false;
-        else {
-            switch (updateStep) {
-                case INTERMEDIATE:
-                    considerBounceJetGlobal(nowT, deltaT, false);
-                    break;
-                case FINAL:
-                case EuFwd:
-                case EUMod:
-                case RK2:
-                case RK4:
-                    considerBounceJetGlobal(nowT, deltaT, true);
-                    break;
-                default:
-                    changed = false;
-                    break;
-            }
-        }
-        return changed;
-    }
-
-    // CHECK 202020402 for Bounce Jet and Global, all are without repeat
-    boolean considerBounceJetGlobal(double nowT, double deltaT, boolean bFinal) {
-        if (bFinal){
-            lastAcc = status.acc;
-//            lastVelocity = status.velocity;
+//    public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//        boolean changed = true;
+//        if (bFixedLocation)
+//            changed = false;
+//        else {
+//            switch (updateStep) {
+//                case INTERMEDIATE:
+//                    considerBounceJetGlobal(nowT, deltaT, false);
+//                    break;
+//                case FINAL:
+//                case EuFwd:
+//                case EUMod:
+//                case RK2:
+//                case RK4:
+//                    considerBounceJetGlobal(nowT, deltaT, true);
+//                    break;
+//                default:
+//                    changed = false;
+//                    break;
+//            }
+//        }
+//        return changed;
+//    }
+//
+//    // CHECK 202020402 for Bounce Jet and Global, all are without repeat
+//    boolean considerBounceJetGlobal(double nowT, double deltaT, boolean bFinal) {
+//        if (bFinal){
+//            lastAcc = status.acc;
+////            lastVelocity = status.velocity;
+////            lastPosition = status.pos;
+//            effectiveForce.add(globalForce, jetForce);
+//            nowAcc.scale(oneByMass, effectiveForce);
+//            effectiveAcc.setMean(nowAcc, lastAcc);
+//            deltaV.scale(deltaT, effectiveAcc);
+//            lastVelocity.add(addVelocity);
+//            newVelocity.add(lastVelocity, deltaV);
+//            averageV.setMean(lastVelocity, newVelocity);
+//            deltaPos.scale(deltaT, averageV);
+//            newPos.add(lastPosition, deltaPos);
+//            status.pos.set(newPos);
+//            status.velocity.set(newVelocity);
+//            status.acc.set(nowAcc);
+//            status.time = nowT + deltaT;
+//        }
+//        return true;
+//    }
+//
+//    public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//        boolean changed = true;
+//        if (bFixedLocation)
+//            changed = false;
+//        else {
+//            switch (updateStep) {
+//                case INTERMEDIATE:
+//                    considerAddVelocityOnly(nowT, deltaT,false);
+//                    break;
+//                case FINAL:
+//                case EuFwd:
+//                case EUMod:
+//                case RK2:
+//                case RK4:
+//                    considerAddVelocityOnly(nowT, deltaT,true);
+//                    break;
+//                default:
+//                    changed = false;
+//                    break;
+//            }
+//        }
+//        return changed;
+//    }
+//
+//    boolean considerAddVelocityOnly(double nowT, double deltaT, boolean bFinal) {
+//        if (bFinal) {
 //            lastPosition = status.pos;
-            effectiveForce.add(globalForce, jetForce);
-            nowAcc.scale(oneByMass, effectiveForce);
-            effectiveAcc.setMean(nowAcc, lastAcc);
-            deltaV.scale(deltaT, effectiveAcc);
-            lastVelocity.add(addVelocity);
-            newVelocity.add(lastVelocity, deltaV);
-            averageV.setMean(lastVelocity, newVelocity);
-            deltaPos.scale(deltaT, averageV);
-            newPos.add(lastPosition, deltaPos);
-            status.pos.set(newPos);
-            status.velocity.set(newVelocity);
-            status.acc.set(nowAcc);
-            status.time = nowT + deltaT;
-        }
-        return true;
-    }
-
-    public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        boolean changed = true;
-        if (bFixedLocation)
-            changed = false;
-        else {
-            switch (updateStep) {
-                case INTERMEDIATE:
-                    considerAddVelocityOnly(nowT, deltaT,false);
-                    break;
-                case FINAL:
-                case EuFwd:
-                case EUMod:
-                case RK2:
-                case RK4:
-                    considerAddVelocityOnly(nowT, deltaT,true);
-                    break;
-                default:
-                    changed = false;
-                    break;
-            }
-        }
-        return changed;
-    }
-
-    boolean considerAddVelocityOnly(double nowT, double deltaT, boolean bFinal) {
-        if (bFinal) {
-            lastPosition = status.pos;
-            status.velocity.add(addVelocity);
-            deltaPos.scale(deltaT, status.velocity);
-            newPos.add(lastPosition, deltaPos);
-            status.pos.set(newPos);
-            status.time = nowT + deltaT;
-        }
-        return true;
-    }
+//            status.velocity.add(addVelocity);
+//            deltaPos.scale(deltaT, status.velocity);
+//            newPos.add(lastPosition, deltaPos);
+//            status.pos.set(newPos);
+//            status.time = nowT + deltaT;
+//        }
+//        return true;
+//    }
 
     public void showError(String msg) {
         JOptionPane.showMessageDialog(parentW, name + " has some problem at " + status.time + " \n " + msg, "ERROR", JOptionPane.ERROR_MESSAGE);

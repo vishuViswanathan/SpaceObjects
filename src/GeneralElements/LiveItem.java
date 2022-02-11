@@ -69,29 +69,29 @@ public class LiveItem extends Item {
         nContacts++;
     }
 
-    public boolean updatePAndVforLocalGlobalBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforContactJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         if (updateStep == UpdateStep.FINAL)
             noteIfCured(nowT);
-        return super.updatePAndVforLocalGlobalBounce(deltaT, nowT, updateStep);
+        return super.updatePAndVforContactJetGlobal(deltaT, nowT, updateStep);
     }
 
-    public boolean updatePAndVforGravityJetBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+    public boolean updatePAndVforGravityJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
         if (updateStep == UpdateStep.FINAL)
             noteIfCured(nowT);
-        return super.updatePAndVforGravityJetBounce(deltaT, nowT, updateStep);
+        return super.updatePAndVforGravityJetGlobal(deltaT, nowT, updateStep);
     }
 
-    public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        if (updateStep == UpdateStep.FINAL)
-            noteIfCured(nowT);
-        return super.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
-    }
-
-    public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
-        if (updateStep == UpdateStep.FINAL)
-            noteIfCured(nowT);
-        return super.updatePAndVforBounce(deltaT, nowT, updateStep);
-    }
+//    public boolean updatePAndVforBounceJetGlobal(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//        if (updateStep == UpdateStep.FINAL)
+//            noteIfCured(nowT);
+//        return super.updatePAndVforBounceJetGlobal(deltaT, nowT, updateStep);
+//    }
+//
+//    public boolean updatePAndVforBounce(double deltaT, double nowT, ItemInterface.UpdateStep updateStep) throws Exception {
+//        if (updateStep == UpdateStep.FINAL)
+//            noteIfCured(nowT);
+//        return super.updatePAndVforBounce(deltaT, nowT, updateStep);
+//    }
 
     public StringBuilder statusStringForCSV(double posFactor, double velFactor) {
         StringBuilder csvStr = new StringBuilder(name + "," + gmID + "," + gm + "\n");
