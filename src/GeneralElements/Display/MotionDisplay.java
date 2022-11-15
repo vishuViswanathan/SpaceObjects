@@ -28,7 +28,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,6 +76,7 @@ public class MotionDisplay  extends JFrame
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 localViewFrame.setVisible(false);
+                viewFromFrame.setVisible(false);
                 controller.stopIt();
             }
         });
@@ -112,6 +112,7 @@ public class MotionDisplay  extends JFrame
         BranchGroup scene;
         scene = createSceneGraph();
         localViewFrame = new LocalViewFrame(commonMenuPanel, mainViewPlatform, "Local View", controller, this);
+        viewFromFrame = new ViewFromFrame(commonMenuPanel, mainViewPlatform, "Local View", controller, this);
         univ.addBranchGraph(scene);
         setPick(mainCanvas, scene);
         pauseRunB.doClick();
@@ -238,6 +239,9 @@ public class MotionDisplay  extends JFrame
     JButton viewAllYZ = new JButton("View All in YZ plane");
     JComboBox<Item> cbItems;
     JButton jbShowSelected;
+    JRadioButton jrbViewFrom;
+    JRadioButton jrbViewAt;
+    ButtonGroup bgViewFromAt;
     JButton stopB = new JButton(stopItStr);
     JButton resultsB = new JButton("Save Vectors");
     JScrollBar sbUpdateSpeed;
@@ -271,10 +275,16 @@ public class MotionDisplay  extends JFrame
         Collections.sort(itemList,
                 (o1, o2) -> o1.toString().compareTo(o2.toString()));
 
+        jrbViewFrom = new JRadioButton("View From");
+        jrbViewAt = new JRadioButton("View At");
+        jrbViewAt.setSelected(true);
         cbItems = new JComboBox(itemList.toArray());
+        bgViewFromAt = new ButtonGroup();
+        bgViewFromAt.add(jrbViewFrom);
+        bgViewFromAt.add(jrbViewAt);
         jbShowSelected = new JButton("Local View");
         outerGbc.gridy++;
-        cBSelStatus = new JCheckBox("Select Status", bSelStatus);
+        cBSelStatus = new JCheckBox("Select Status (click on path)", bSelStatus);
         cBSelStatus.addActionListener(e-> {
             bSelStatus = cBSelStatus.isSelected();
         });
@@ -299,7 +309,10 @@ public class MotionDisplay  extends JFrame
                }
 
                if (src == jbShowSelected) {
-                   showLocalView((ItemInterface) cbItems.getSelectedItem());
+                   if (jrbViewFrom.isSelected())
+                       showLocalFromToView((ItemInterface) cbItems.getSelectedItem());
+                   else
+                        showLocalView((ItemInterface) cbItems.getSelectedItem());
                    break block;
                }
                if (src == stopB) {
@@ -319,10 +332,26 @@ public class MotionDisplay  extends JFrame
            }
         };
         jbShowSelected.addActionListener(l);
+        JPanel viewFtomAtP = new JPanel();
+        viewFtomAtP.add(jrbViewFrom);
+        viewFtomAtP.add(jrbViewAt);
+        outerP.add(viewFtomAtP, outerGbc);
+        outerGbc.gridy++;
         JPanel selP = new JPanel();
         selP.add(cbItems);
         selP.add(jbShowSelected);
-        outerP.add(selP, outerGbc);
+
+        FramedPanel selViewP = new FramedPanel();
+        selViewP.setLayout(new GridBagLayout());
+        GridBagConstraints selViewGbc = new GridBagConstraints();
+        selViewGbc.insets = new Insets(0, 0, 0, 0);
+        selViewGbc.gridx = 0;
+        selViewGbc.gridy = 0;
+        selViewP.add(viewFtomAtP, selViewGbc);
+        selViewGbc.gridy++;
+        selViewP.add(selP, selViewGbc);
+        outerP.add(selViewP, outerGbc);
+
         outerGbc.gridy++;
         viewAllXY.addActionListener(l);
         outerP.add(viewAllXY, outerGbc);
@@ -719,14 +748,12 @@ public class MotionDisplay  extends JFrame
         vpTransBehavior.setFactor(distance / 100);
     }
 
-
-
-
     boolean inMouseClick = false;
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if (!inMouseClick) {
+            debug("MouseClicked #723" );
             inMouseClick = true;
             mainVpOrbitBehavior.setEnable(true);
             pickCanvas.setShapeLocation(e);
@@ -852,10 +879,18 @@ public class MotionDisplay  extends JFrame
 //    Transferred from ItemGraphics ========================
 
     LocalViewFrame localViewFrame;
+    ViewFromFrame viewFromFrame;
 
     void showLocalViewFrame(String showWhat) {
-        localViewFrame.setTitle("Local View of " + showWhat);
+        localViewFrame.setTitle("View of " + showWhat);
         localViewFrame.setVisible(true);
+    }
+
+    public void showLocalFromToView(ItemInterface item) {
+        viewFromFrame.setViewFrom(item,
+                (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL));
+        viewFromFrame.setTitle("View from " + item.getName());
+        viewFromFrame.setVisible(true);
     }
 
     public void showLocalView(ItemInterface item) {
@@ -865,7 +900,7 @@ public class MotionDisplay  extends JFrame
     }
 
     public void showLocalView(ItemInterface item, int atX, int atY) {
-        localViewFrame.showLocalView(item, atX, atY,
+        localViewFrame.setLocalView(item, atX, atY,
                 (controller.spSize == ItemMovementsApp.SpaceSize.ASTRONOMICAL));
         showLocalViewFrame(item.getName());
     }
@@ -885,6 +920,7 @@ public class MotionDisplay  extends JFrame
         else
             nowTime.setForeground(colSimulation);
         lUpdateSpeed.setData(hrsPerSec);
+        viewFromFrame.updateViewAt();
     }
 
     void debug(String msg) {

@@ -25,20 +25,22 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * Created by M Viswanathan on 04 Oct 2014
+ * Created by M Viswanathan on 11 November 2022
  */
-public class LocalViewFrame  extends JDialog implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class ViewFromFrame  extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener {
     JPanel commonMenuPanel;
     MotionDisplay motionDisplay;
-    ItemInterface itemInView;
+    ItemInterface itemViewFrom;
     ItemMovementsApp controller;
     ViewingPlatform mainViewPlatform;
-    JPanel localViewPanel;
+    JPanel viewFromPanel;
     Canvas3D localViewCanvas;
     ViewingPlatform localVp;
     OrbitBehavior localVpOrbitBehavior;
     ItemInterface lastItemWithLocalPlatform = null;
     NumberLabel nlViewDistance;
+    NumberLabel nlZoffset;
+    NumberLabel nlFieldOfView;
     JPanel jpViewDistance;
     JLabel jlItemName;
     double viewPosFromPlanet;
@@ -48,13 +50,20 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     JButton jbItemData;
     JButton jbItemEdit;
     JComboBox<Item> cbItems;
+    JComboBox<Item> cbWhereToLook;
     View theView;
     double defaultFieldOfView = Math.PI / 4;
+//    double nowFOV = defaultFieldOfView;
     double maxFieldOfView = defaultFieldOfView * 1.8;
-    double minFieldOfView = 0.5 / 180 * Math.PI;
+    double minFieldOfView = 0.1 / 180 * Math.PI;
     double fieldOfViewFactor = 1.1;
+    double viewFromZPos = 0;
+    double viewFromZstepFactor = 0.02; // on dia of ViewFromItem
+    double viewFromZstep = 500000;  // in m
+    Item origin = new Item(this, "Origin");
+    ItemInterface itemViewAt = origin;
 
-    LocalViewFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
+    ViewFromFrame(JPanel commonMenuPanel, ViewingPlatform mainViewPlatform, String name, ItemMovementsApp controller,
                    MotionDisplay motionDisplay) {
         super();
         setLayout(new BorderLayout());
@@ -68,7 +77,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     JPanel commonMenuPanelHolder;
 
     void jbInit() {
-        prepareLocalViewPanel();
+        prepareViewFromPanel();
         addWindowFocusListener(new WindowAdapter() {
             @Override
             public void windowGainedFocus(WindowEvent e) {
@@ -83,13 +92,13 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
             }
         });
 
-        add(localViewPanel, BorderLayout.CENTER);
+        add(viewFromPanel, BorderLayout.CENTER);
         JPanel menuP = new JPanel(new GridBagLayout());
         GridBagConstraints outerGbc = new GridBagConstraints();
         outerGbc.insets = new Insets(5, 0, 5, 0);
         outerGbc.gridx = 0;
         outerGbc.gridy = 0;
-        menuP.add(viewFromCB(), outerGbc);
+        menuP.add(viewTowardsCB(), outerGbc);
         outerGbc.gridy++;
         commonMenuPanelHolder = new JPanel();
         commonMenuPanelHolder.add(commonMenuPanel);
@@ -111,15 +120,13 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         pack();
     }
 
-    boolean firsTime = true;
-
-    public void addLocalViewingPlatform() {
+    public void addViewFromPlatform() {
         // create a Viewer and attach to its canvas
         // a Canvas3D can only be attached to a single Viewer
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
         localViewCanvas = new Canvas3D(config);
         localViewCanvas.addMouseWheelListener(this);
-        localViewCanvas.addMouseListener(this);
+//        localViewCanvas.addMouseListener(this);
 //        localViewCanvas.addKeyListener(new KeyboardListener());
         Viewer viewer = new Viewer(localViewCanvas);
         if (controller.spSize != ItemMovementsApp.SpaceSize.ASTRONOMICAL) {
@@ -140,30 +147,39 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         BoundingSphere bounds =
                 new BoundingSphere(new Point3d(), 1e22);
         // with left button pressed
-        localVpOrbitBehavior = new OrbitBehavior(localViewCanvas, OrbitBehavior.REVERSE_ROTATE);
+        localVpOrbitBehavior = new OrbitBehavior(localViewCanvas); //, OrbitBehavior.REVERSE_ROTATE);
+        double rotXFactor = localVpOrbitBehavior.getRotXFactor();
+        double rotYFactor = localVpOrbitBehavior.getRotYFactor();
+        debug("rotXFactor = " + rotXFactor + "  rotYFactor = " + rotYFactor);
         localVpOrbitBehavior.setSchedulingBounds(bounds);
         localVp.setViewPlatformBehavior(localVpOrbitBehavior);
 
         localVpOrbitBehavior.setRotationCenter(new Point3d(0, 0, 0));  //-viewPosFromPlanet));
-        nlViewDistance = new NumberLabel(0, 150, "#,###");
+        nlViewDistance = new NumberLabel(0, 130, "#,### km");
+        nlFieldOfView = new NumberLabel(defaultFieldOfView * 180 / Math.PI, 70, "#.000 deg");
+        nlZoffset = new NumberLabel(viewFromZPos / 1000, 70, "#,### km");
         jpViewDistance = new JPanel();
-        jpViewDistance.add(new JLabel("View Distance (km):"));
-        jpViewDistance.add(nlViewDistance);
+//        jpViewDistance.add(new JLabel("View Distance:"));
+//        jpViewDistance.add(nlViewDistance);
+        jpViewDistance.add(new JLabel("             Field Of View:"));
+        jpViewDistance.add(nlFieldOfView);
+        jpViewDistance.add(new JLabel("             Z offset :"));
+        jpViewDistance.add(nlZoffset);
         jlItemName = new JLabel("Selected Item");
-        localViewPanel.add(jlItemName, BorderLayout.NORTH);
-        localViewPanel.add(localViewCanvas, BorderLayout.CENTER);
-        localViewPanel.add(jpViewDistance, BorderLayout.SOUTH);
+        viewFromPanel.add(jlItemName, BorderLayout.NORTH);
+        viewFromPanel.add(localViewCanvas, BorderLayout.CENTER);
+        viewFromPanel.add(jpViewDistance, BorderLayout.SOUTH);
         theView = localViewCanvas.getView();
-        localViewPanel.updateUI();
+        viewFromPanel.updateUI();
     }
 
-    void prepareLocalViewPanel() {
-        localViewPanel = new FramedPanel(new BorderLayout());
-        localViewPanel.setPreferredSize(new Dimension(700, 600));
-        addLocalViewingPlatform();
+    void prepareViewFromPanel() {
+        viewFromPanel = new FramedPanel(new BorderLayout());
+        viewFromPanel.setPreferredSize(new Dimension(700, 600));
+        addViewFromPlatform();
     }
 
-    public void showLocalView(ItemInterface item, boolean bShowRelOrbits) {
+    public void setViewFrom(ItemInterface item, boolean bShowRelOrbits) {
 //        if (getState() == Frame.ICONIFIED ) {
 //            System.out.println("was ICONIFIED");
 //            setState(Frame.NORMAL);
@@ -172,96 +188,82 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         attachPlatformToItem(item, bShowRelOrbits);
         viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
         localVp.setNominalViewingTransform();
-        Transform3D defaultTr = new Transform3D();
-        localVp.getViewPlatformTransform().getTransform(defaultTr);
-        defaultTr.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
-        localVp.getViewPlatformTransform().setTransform(defaultTr);
-
-        theView.setFieldOfView(defaultFieldOfView);
+//        Transform3D defaultTr = new Transform3D();
+//        localVp.getViewPlatformTransform().getTransform(defaultTr);
+//        defaultTr.setTranslation(new Vector3d(0, 0, viewPosFromPlanet));
+//        localVp.getViewPlatformTransform().setTransform(defaultTr);
+        itemViewAt = origin;
+        setViewDirection(itemViewAt); // setViewAtDirection(new Point3d(0, 0, 0));
+        setFOV(defaultFieldOfView);
+//        theView.setFieldOfView(nowFOV);
         updateViewDistanceUI(1.0);
+//        updateFOVUI(nowFOV);
         setTitle(item.getName());
+        viewFromZstep = ((DarkMatter) item).dia * viewFromZstepFactor;
     }
 
-    public void setViewDirection(ItemInterface viewFrom) {
+    public void setViewDirection(ItemInterface viewAt) {
+        setFOV(defaultFieldOfView);
+//        nowFOV = defaultFieldOfView;
+//        theView.setFieldOfView(nowFOV);
+        itemViewAt = viewAt;
+        setViewAtDirection(viewAt.getPos());
+    }
+
+    public void updateViewAt() {
+        if (itemViewAt != origin)
+            setViewAtDirection(itemViewAt.getPos());
+    }
+
+    public void setViewAtDirection(Point3d itemPos) {
         localVp.setNominalViewingTransform();
         Transform3D defaultTr = new Transform3D();
         localVp.getViewPlatformTransform().getTransform(defaultTr);
 
-        Point3d eye = new Point3d(viewFrom.getPos());
-        Point3d objPos = itemInView.getPos();
-        Vector3dMV vec = new Vector3dMV(eye);
-        vec.sub(objPos);
+        Point3d eye = new Point3d(itemViewFrom.getPos());
+        Vector3dMV vec = new Vector3dMV(itemPos);
+        vec.sub(eye);
 //        vec.normalize();
 //        vec.scale(viewPosFromPlanet);
         Transform3D lookAt = new Transform3D();
-        lookAt.lookAt(eye, objPos, new Vector3d(0, 0, 1));
+        lookAt.lookAt(eye, itemPos, new Vector3d(0, 0, 1));
         lookAt.invert();
-        lookAt.setTranslation(vec);
+        lookAt.setTranslation(new Vector3d());
         localVp.getViewPlatformTransform().setTransform(lookAt);
         viewPosFromPlanet = vec.length();
         updateViewDistanceUI(1.0);
-        setTitle(itemInView.getName() + " from " + viewFrom);
+        updateViewDistanceUI(1.0);
+        setTitle("View From" + itemViewFrom + " towards " + itemPos);
     }
 
-    public void setLocalView(ItemInterface item, int atX, int atY, boolean bShowRelOrbits) {
-        jlItemName.setText(item.getName());
-        attachPlatformToItem(item, bShowRelOrbits);
-        viewPosFromPlanet = 4 * ((DarkMatter)item).dia;
-        Transform3D mainVTr = new Transform3D();
-        mainViewPlatform.getViewPlatformTransform().getTransform(mainVTr);
-
-        Point3d eyePosINViewPlate= new Point3d();
-        Viewer[] viewers = mainViewPlatform.getViewers();
-        Canvas3D canvas = viewers[0].getCanvas3D();
-        canvas.getCenterEyeInImagePlate(eyePosINViewPlate);
-        double midX = eyePosINViewPlate.x;
-        double midY = eyePosINViewPlate.y;
-
-        Point3d planetPosOnPlate = new Point3d();
-        canvas.getPixelLocationInImagePlate(atX, atY, planetPosOnPlate);
-
-        double angleY = Math.atan2((midX - planetPosOnPlate.x), eyePosINViewPlate.z);
-        double angleX = Math.atan2((midY - planetPosOnPlate.y), eyePosINViewPlate.z);
-        Transform3D rotX = new Transform3D();
-        rotX.rotX(-angleX);
-        Transform3D rotY = new Transform3D();
-        rotY.rotY(angleY);
-        mainVTr.mul(rotY);
-        mainVTr.mul(rotX);
-
-        Vector3d eye = new Vector3d();
-        mainVTr.get(eye);
-
-        Vector3d diff = new Vector3d(eye);
-        diff.sub(item.getPos());
-        double planetFromEye = diff.length();
-        double factor = viewPosFromPlanet / planetFromEye;
-        diff.scale(factor);
-        Transform3D localVpt = new Transform3D(mainVTr);
-        localVpt.setTranslation(diff);
-        localVp.getViewPlatformTransform().setTransform(localVpt);
-        updateViewDistanceUI(1.0);
-        setTitle(item.getName());
-        theView.setFieldOfView(defaultFieldOfView);
-//        canvas.addKeyListener(new KeyboardListener());
-//        showLocalViewFrame(item.name);
+    void moveZlocalVp(double deltaZ) {
+        viewFromZPos += deltaZ;
+        Transform3D tr = new Transform3D();
+        localVp.getViewPlatformTransform().getTransform(tr);
+        tr.setTranslation(new Vector3d(0, 0, viewFromZPos));
+        localVp.getViewPlatformTransform().setTransform(tr);
+        nlZoffset.setData(viewFromZPos / 1000);
     }
 
     private void attachPlatformToItem(ItemInterface item, boolean showRelOrbits) {
         if (bPlatformWasAttached) {
             lastItemWithLocalPlatform.detachPlatform();
-            System.out.println("Local Platform detached");
+            System.out.println("The earlier View-From Platform detached");
         }
-        item.attachPlatform(localVp, showRelOrbits,motionDisplay.relOrbitGroup);
+        item.attachPlatform(localVp, showRelOrbits, motionDisplay.relOrbitGroup);
         lastItemWithLocalPlatform = item;
         bPlatformWasAttached = true;
-        this.itemInView = item;
-        jbControlPanel.setEnabled(itemInView.hasAnyAccessories());
+        this.itemViewFrom = item;
+        jbControlPanel.setEnabled(itemViewFrom.hasAnyAccessories());
     }
 
     void updateViewDistanceUI(double factor) {
         viewPosFromPlanet *= factor;
         nlViewDistance.setData(viewPosFromPlanet / 1000);
+    }
+
+    void updateFOVUI(double fov) {
+        nlFieldOfView.setData(fov * 180 / Math.PI);
     }
 
     JPanel menuPanel() {
@@ -304,7 +306,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     JComponent createControlPanelButton() {
         jbControlPanel = new JButton("Control Panel");
         jbControlPanel.addActionListener(e -> {
-            controlPanel = itemInView.showControlPanel(controller, jbControlPanel);
+            controlPanel = itemViewFrom.showControlPanel(controller, jbControlPanel);
         });
         return jbControlPanel;
     }
@@ -316,7 +318,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
             public void actionPerformed(ActionEvent e) {
                 if (bPlatformWasAttached) {
                     boolean iPassedIt = motionDisplay.pauseIfRunning();
-                    itemInView.showItem(((iPassedIt) ?  "Paused (" + motionDisplay.nowTime() + ")" :""), controller, jbItemData);
+                    itemViewFrom.showItem(((iPassedIt) ?  "Paused (" + motionDisplay.nowTime() + ")" :""), controller, jbItemData);
                     if (iPassedIt)
                         motionDisplay.unPauseIt();
                 }
@@ -325,10 +327,10 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
         return jbItemData;
     }
 
-    JComponent viewFromCB() {
+    JComponent viewTowardsCB() {
         FramedPanel p = new FramedPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.add(new JLabel("View direction from"));
+        p.add(new JLabel("View direction to"));
 
         ArrayList itemList = new ArrayList(motionDisplay.space.getAlItems());
         Collections.sort(itemList, new Comparator<Object>(){
@@ -338,18 +340,25 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
             }
         });
 
-        cbItems = new JComboBox(itemList.toArray());
+//        cbItems = new JComboBox(itemList.toArray());
+//        Item origin = new Item(this, "Origin");
+        cbWhereToLook = new JComboBox<>();
+        cbWhereToLook.addItem(origin);
+        for (Object i: itemList){
+            cbWhereToLook.addItem((Item)i);
+        }
+        cbItems = cbWhereToLook;
 
 //        cbItems = new JComboBox(motionDisplay.space.getAlItems().toArray());
         cbItems.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ItemInterface iFrom = (ItemInterface)cbItems.getSelectedItem();
-                if (iFrom == itemInView) {
+                ItemInterface itemTowards = (ItemInterface)cbItems.getSelectedItem();
+                if (itemTowards == itemViewFrom) {
 
                 }
                 else {
-                    setViewDirection(iFrom);
+                    setViewDirection(itemTowards);
                 }
             }
         });
@@ -364,7 +373,7 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
             public void actionPerformed(ActionEvent e) {
                 if (bPlatformWasAttached) {
                     boolean iPassedIt = motionDisplay.pauseIfRunning();
-                    itemInView.editItemKeepingPosition(((iPassedIt) ? "Paused (" + motionDisplay.nowTime() + ")" :""),
+                    itemViewFrom.editItemKeepingPosition(((iPassedIt) ? "Paused (" + motionDisplay.nowTime() + ")" :""),
                             controller, jbItemData);
                     if (iPassedIt)
                         motionDisplay.unPauseIt();
@@ -419,38 +428,55 @@ public class LocalViewFrame  extends JDialog implements MouseListener, MouseMoti
     public void mouseWheelMoved(MouseWheelEvent e) {
         int movement = e.getUnitsToScroll();
         if (e.isShiftDown()) {
-            double newFieldOfView = theView.getFieldOfView();
+            double nowFOV = theView.getFieldOfView();
             if (movement > 0) {
-//                newFieldOfView += fieldOFViewStep;
-                newFieldOfView *= fieldOfViewFactor;
-                if (newFieldOfView > maxFieldOfView)
-                    newFieldOfView = maxFieldOfView;
-//                debug("newFieldOfView " + newFieldOfView + " fieldOFViewStep " + fieldOFViewStep);
+                nowFOV *= fieldOfViewFactor;
+                if (nowFOV > maxFieldOfView)
+                    nowFOV = maxFieldOfView;
             }
             else {
-//                newFieldOfView -= fieldOFViewStep;
-                newFieldOfView /= fieldOfViewFactor;
-                if (newFieldOfView < minFieldOfView)
-                    newFieldOfView = minFieldOfView;
+                nowFOV /= fieldOfViewFactor;
+                if (nowFOV < minFieldOfView)
+                    nowFOV = minFieldOfView;
             }
-            theView.setFieldOfView(newFieldOfView);
+//            theView.setFieldOfView(nowFOV);
+            setFOV(nowFOV);
+//            updateFOVUI(nowFOV);
+
 //            debug("fieldOfView " + theView.getFieldOfView());
         }
-        else {
-            double factor = (movement > 0) ? 1.2 : 1 / 1.2;
-            Transform3D vpTr = new Transform3D();
-            localVp.getViewPlatformTransform().getTransform(vpTr);
-            Vector3d trans = new Vector3d();
-            vpTr.get(trans);
-            trans.scale(factor);
-            vpTr.setTranslation(trans);
-            localVp.getViewPlatformTransform().setTransform(vpTr);
-            updateViewDistanceUI(factor);
-        }
+        else if (e.isAltDown()) {
+                if (movement > 0)
+                    moveZlocalVp(-viewFromZstep);
 
+                else
+                    moveZlocalVp(viewFromZstep);
+            }
+
+//        else {
+//            double factor = (movement > 0) ? 1.2 : 1 / 1.2;
+//            Transform3D vpTr = new Transform3D();
+//            localVp.getViewPlatformTransform().getTransform(vpTr);
+//            Vector3d trans = new Vector3d();
+//            vpTr.get(trans);
+//            trans.scale(factor);
+//            vpTr.setTranslation(trans);
+//            localVp.getViewPlatformTransform().setTransform(vpTr);
+//            updateViewDistanceUI(factor);
+//        }
+
+    }
+
+    void setFOV(double fov) {
+//        nowFOV = fov;
+        theView.setFieldOfView(fov);
+        updateFOVUI(fov);
+        double factor = fov / defaultFieldOfView * 0.15;
+        localVpOrbitBehavior.setRotFactors(factor, factor);
     }
 
     void debug(String msg) {
         ItemMovementsApp.debug("LocalViewFrame: " + msg);
     }
 }
+

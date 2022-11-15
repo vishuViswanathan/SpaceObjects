@@ -14,7 +14,6 @@ import mvUtils.mvXML.ValAndPos;
 import mvUtils.mvXML.XMLmv;
 import org.apache.log4j.Logger;
 import schemes.DefaultScheme;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -1247,6 +1246,10 @@ public class ItemMovementsApp extends Panel implements InputControl {
                         }
                     }
                 });
+    }
+
+    public boolean isItInMotion() {
+        return continueIt;
     }
 
     static public void debug(String msg) {
